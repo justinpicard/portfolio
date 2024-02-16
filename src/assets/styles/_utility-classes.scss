@@ -1,0 +1,27 @@
+.m-0 {
+	margin: 0;
+}
+
+.mt-0 {
+	margin-top: 0;
+}
+
+.mb-0 {
+	margin-bottom: 0;
+}
+
+.container {
+	margin: 0 auto;
+	max-width: 100em;
+	padding-left: var(--container-padding);
+	padding-right: var(--container-padding);
+}
+
+.overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+}

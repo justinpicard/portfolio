@@ -1,0 +1,27 @@
+:root {
+	font-family: "Satoshi", system-ui, Avenir, Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	font-weight: $font-weight-regular;
+	font-size: 1rem;
+
+	color-scheme: light dark;
+	color: $white;
+	background-color: #242424;
+
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	--container-padding: clamp(2.5em, 4vw, 4em);
+}
+
+#app {
+
+	main {
+		width: 100vw;
+
+		.main-wrap {
+			width: 100vw;
+		}
+	}
+}
