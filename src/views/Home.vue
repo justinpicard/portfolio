@@ -1,11 +1,19 @@
 <template>
 	<section class="home-header">
+    <div class="marquee">
+      <span>Justin Picard&nbsp;✦&nbsp;Digital Product Designer</span>
+      <span>Justin Picard&nbsp;✦&nbsp;Digital Product Designer</span>
+      <span>Justin Picard&nbsp;✦&nbsp;Digital Product Designer</span>
+      <span>Justin Picard&nbsp;✦&nbsp;Digital Product Designer</span>
+    </div>
 		<div class="container">
 			<h2>Hi 👋🏼 my name is Justin Picard and I'm a digital product designer. I love designing applications, platforms and websites that look great and are easy to use. For the last 10 years I have spent my time developing my design- and coding skills at <a href="#">a bunch of digital agencies</a>.</h2>
 			<p class="text">no 🐂💩</p>
 		</div>
 		<div class="personal-image">
-			<img :src="getImageUrl('justin-picard','jpg')" alt="">
+      <div class="container">
+			  <img :src="getImageUrl('justin-picard','jpg')" alt="">
+      </div>
 		</div>
 	</section>
 	<section class="bio">

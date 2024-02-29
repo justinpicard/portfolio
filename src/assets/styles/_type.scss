@@ -12,3 +12,21 @@ h3 {
 	text-transform: uppercase;
 	font-size: 1.5rem;
 }
+
+.marquee{
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	overflow: hidden;
+
+	span{
+		text-transform: uppercase;
+		will-change: transform;
+		transform: translateX(0);
+		white-space: nowrap;
+		animation: marquee 20s linear infinite;
+
+		// Extra Styling
+		font-size: 200px;
+	}
+}

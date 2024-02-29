@@ -4,12 +4,18 @@ const routes = [
     {
         path: "/",
         name: "home",
-        meta: { title: 'Justin Picard' },
+        meta: { title: 'Justin Picard ✦ Digital Product Designer' },
         component: () => import('./views/Home.vue')
     },
     {
         path: "/home",
         redirect: "/"
+    },
+    {
+        path: "/cv",
+        name: "cv",
+        meta: { title: 'CV' },
+        component: () => import('./views/Cv.vue')
     },
     {
         path: "/:catchall(.*)*",
