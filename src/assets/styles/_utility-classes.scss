@@ -16,7 +16,9 @@
 	padding-left: var(--container-padding);
 	padding-right: var(--container-padding);
 }
-
+.rounded-pill {
+	border-radius: 50rem !important;
+}
 .overlay {
 	position: absolute;
 	top: 0;

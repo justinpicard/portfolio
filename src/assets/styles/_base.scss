@@ -1,12 +1,15 @@
 :root {
-	font-family: "Satoshi", system-ui, Avenir, Helvetica, Arial, sans-serif;
+	font-family: "Bricolage Grotesque","Stara", "Satoshi", system-ui, Avenir, Helvetica, Arial, sans-serif;
 	line-height: 1.5;
 	font-weight: $font-weight-regular;
 	font-size: 1rem;
 
 	color-scheme: light dark;
 	color: $white;
-	background-color: #242424;
+	background-color: #0a15df;
+	background-position: 50%;
+	background-image: url('../images/dot2.png');
+	background-attachment: fixed;
 
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
@@ -24,4 +27,9 @@
 			width: 100vw;
 		}
 	}
+}
+
+img {
+	width: 100%;
+	height: auto;
 }
