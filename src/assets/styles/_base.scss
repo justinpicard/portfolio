@@ -1,5 +1,5 @@
 :root {
-	font-family: "Bricolage Grotesque","Stara", "Satoshi", system-ui, Avenir, Helvetica, Arial, sans-serif;
+	font-family: "Bricolage Grotesque", system-ui, Avenir, Helvetica, Arial, sans-serif;
 	line-height: 1.5;
 	font-weight: $font-weight-regular;
 	font-size: 1rem;
@@ -24,6 +24,7 @@
 		width: 100vw;
 
 		.main-wrap {
+			//padding-top: 7.75em;
 			width: 100vw;
 		}
 	}
@@ -32,4 +33,8 @@
 img {
 	width: 100%;
 	height: auto;
+}
+
+.page-title {
+	padding-top: 15rem;
 }
