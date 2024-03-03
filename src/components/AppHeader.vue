@@ -1,7 +1,7 @@
 <template>
 	<header class="site-header fixed-nav">
 		<div class="header-left">
-			<a href="/" class="logo">
+			<a href="/" class="site-logo">
 				<figure class="avatar">
 					<img :src="getImageUrl('justin-picard-avatar','jpg')" alt="">
 				</figure>

@@ -38,3 +38,12 @@ h3 {
 		}
 	}
 }
+
+.line {
+	position: relative;
+	overflow: hidden;
+
+	& > * {
+		position: absolute;
+	}
+}

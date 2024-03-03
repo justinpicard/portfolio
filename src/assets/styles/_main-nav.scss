@@ -1,0 +1,62 @@
+.main-nav {
+	z-index: 999;
+
+	& * {
+		font-weight: $font-weight-semibold;
+	}
+
+	a {
+		text-decoration: none;
+		color: $white;
+	}
+
+	.site-logo {
+		display: flex;
+		align-items: center;
+
+		h1,
+		h2 {
+			font-size: $font-size-base;
+			line-height: 1.1;
+		}
+
+		h1 {
+			margin-top: 0;
+		}
+
+		h2 {
+			margin-top: 0.25rem;
+		}
+
+		.avatar {
+			max-width: 3.75rem;
+			border-radius: 30px;
+			overflow: hidden;
+			margin: 0 1rem 0 0;
+		}
+	}
+
+	.nav-link {
+		font-size: calc(#{$font-size-base} * 2);
+		font-weight: $font-weight-medium;
+	}
+
+	&::before,
+	&::after {
+		content: '';
+		@include scrimGradient($primary, 'to bottom');
+		height: 7.75rem;
+		width: 100%;
+		position: fixed;
+		top: 0;
+		left: 0;
+		z-index: -1;
+	}
+
+	&::after {
+		@include scrimGradient($primary, 'to top');
+		top: initial;
+		bottom: 0;
+		height: 8rem;
+	}
+}

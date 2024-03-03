@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "class-variance-authority": "^0.7.0",
     "dayjs": "^1.11.10",
     "gsap": "^3.12.5",
     "pinia": "^2.1.7",

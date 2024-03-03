@@ -1,12 +1,13 @@
 <script setup>
 import AppHeader from "./components/AppHeader.vue";
 import AppFooter from "./components/AppFooter.vue";
+import MainNav from "./components/MainNav.vue";
 </script>
 
 <template>
 	<main class="main">
-		<AppHeader/>
-		<div class="main-wrap">
+		<MainNav/>
+		<div class="main-wrap" v-bind:class="{classA: scrollPosition < 100, classB: scrollPosition > 100}">
 			<router-view/>
 		</div>
 		<AppFooter/>

@@ -1,12 +1,14 @@
 import { createApp } from 'vue'
 import "./assets/styles/main.scss"
-//import './style.css'
+import "./assets/scripts/script.js"
 import App from './App.vue'
 import router from './router'
+import Button from "./components/buttons/Button.vue"
 
 // 1. Assign app to a variable
 let app = createApp(App)
 
 // 3. Use router and mount app
 app.use(router)
-    .mount('#app')
+app.mount('#app')
+app.component('Button', Button)

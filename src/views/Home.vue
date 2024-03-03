@@ -1,7 +1,7 @@
 <template>
 	<section class="home-header">
     <div class="marquee-container">
-      <div class="marquee name">
+      <div class="marquee name line">
         <h2>Justin Picard<span class="star">✦</span></h2>
         <h2>Justin Picard<span class="star">✦</span></h2>
         <h2>Justin Picard<span class="star">✦</span></h2>
@@ -26,14 +26,40 @@
       <p class="text">no 🐂💩</p>
     </div>
 		<div class="">
+
 			<h3>A little bit more about me</h3>
 
 		</div>
 	</section>
 </template>
 
-<script setup>
+<script>
+import gsap from 'gsap'
+import SplitText from "gsap/SplitText";
 
+gsap.registerPlugin(SplitText);
+gsap.defaults({
+  duration: 1,
+  ease: "power3.inOut",
+});
+
+const tl = gsap.timeline();
+
+export default {
+  mounted() {
+    tl.from(".line span", 1.8, {
+      y: 100,
+      ease: "power4.out",
+      delay: 1,
+      skewY: 7,
+      stagger: {
+        amount: 0.3
+      }
+    })
+  }
+}
+
+<script setup>
 function getImageUrl(name, ext) {
 	return new URL(`../assets/images/${name}.${ext}`, import.meta.url).href
 }
