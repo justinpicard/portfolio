@@ -12,7 +12,7 @@
       </a>
 		</div>
 		<div class="position-fixed top-0 right-0 mr-2 mt-2">
-      <a class="btn btn-outlined btn-light btn-md work-status" href="#">
+      <a  href="mailto:hallo@justinpicard.com" class="btn btn-outlined btn-light btn-md work-status">
 				<span class="btn-text-container">
 					<span class="btn-text-wrapper">Open for work</span>
 					<span class="btn-text-wrapper">Contact me</span>
@@ -21,13 +21,34 @@
       </a>
 		</div>
 		<div class="position-fixed bottom-0 left-0 ml-2 mb-1">
-      <a href="#" class="nav-link">About</a>
+      <router-link :to="{ name: 'about' }" class="nav-link">
+        <div class="slot-machine-text">
+          <div class="slot-machine-text-container">
+            <span class="slot-machine-text-wrapper">About</span>
+            <span class="slot-machine-text-wrapper">About</span>
+          </div>
+        </div>
+      </router-link>
 		</div>
     <div class="position-fixed bottom-0 horizontal-center mb-1">
-      <a href="#" class="nav-link">My work</a>
+      <a href="#section-projects" class="nav-link">
+        <div class="slot-machine-text">
+          <div class="slot-machine-text-container">
+            <span class="slot-machine-text-wrapper">My work</span>
+            <span class="slot-machine-text-wrapper">My work</span>
+          </div>
+        </div>
+      </a>
     </div>
 		<div class="position-fixed bottom-0 right-0 mr-2 mb-1">
-      <a href="#"class="nav-link">Contact</a>
+      <a href="mailto:hallo@justinpicard.com" class="nav-link">
+        <div class="slot-machine-text">
+          <div class="slot-machine-text-container">
+            <span class="slot-machine-text-wrapper">Contact</span>
+            <span class="slot-machine-text-wrapper">Contact</span>
+          </div>
+        </div>
+      </a>
 		</div>
 	</div>
 </template>

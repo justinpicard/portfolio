@@ -11,11 +11,15 @@
 	background-image: url('../images/dot2.png');
 	background-attachment: fixed;
 
+	// Font rendering
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	--container-padding: clamp(2.5em, 4vw, 4em);
+
+	// Margins & paddings
+	--section-padding: clamp(5em, 21vh, 12em);
 }
 
 #app {
@@ -30,6 +34,13 @@
 	}
 }
 
+.section {
+	display: block;
+	padding-top: var(--section-padding);
+	padding-bottom: var(--section-padding);
+	position: relative;
+}
+
 img {
 	width: 100%;
 	height: auto;
@@ -38,3 +49,7 @@ img {
 .page-title {
 	padding-top: 15rem;
 }
+
+//.page-intro {
+//	max-width: 32ch;
+//}

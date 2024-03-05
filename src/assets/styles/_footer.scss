@@ -1,0 +1,16 @@
+.site-footer {
+	display: flex;
+	justify-content: space-between;
+	padding-bottom: 8rem;
+
+	.social {
+
+		.star {
+			margin: 0 1rem;
+		}
+
+		//& > *:not(:last-child) {
+		//	margin-right: 1rem;
+		//}
+	}
+}

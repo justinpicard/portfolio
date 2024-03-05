@@ -13,12 +13,27 @@ h3 {
 	font-size: 1.5rem;
 }
 
+a {
+	color: currentColor;
+	text-decoration-color: currentcolor;
+	transition: all .3s cubic-bezier(.165,.84,.44,1);
+
+	&:hover {
+		text-decoration-color: transparent;
+	}
+}
+
+p {
+	font-size: 1.25rem;
+}
+
 .marquee {
 	position: relative;
 	display: flex;
 	align-items: center;
 	justify-content: flex-start;
 	overflow: hidden;
+	clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
 
 	& > * {
 		display: flex;
@@ -31,6 +46,7 @@ h3 {
 
 		// Extra Styling
 		font-size: 12.5rem;
+		line-height: 1;
 
 		.star {
 			margin: 0 4rem;
@@ -46,4 +62,44 @@ h3 {
 	& > * {
 		position: absolute;
 	}
+}
+
+.slot-machine-text {
+	z-index: 10;
+	flex-direction: column;
+	flex: none;
+	justify-content: flex-start;
+	align-items: stretch;
+	display: flex;
+	position: relative;
+	overflow: hidden;
+
+	.slot-machine-text-wrapper {
+		grid-column-gap: 8px;
+		justify-content: center;
+		align-items: center;
+		transition: transform .3s cubic-bezier(.165,.84,.44,1);
+		display: flex;
+		width: 100%;
+		transform: translate(0);
+
+		&:not(:first-child) {
+			position: absolute;
+			top: 100%;
+		}
+	}
+
+	@media (hover: hover) {
+
+		&:hover {
+
+			.slot-machine-text-wrapper {
+				transform: translateY(-100%);
+			}
+		}
+	}
+}
+
+.text-lg {
+	font-size: 1.75rem;
 }

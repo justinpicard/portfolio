@@ -1,7 +1,11 @@
 <template>
-	<footer class="site-footer pt-2 pb-2">
+	<footer class="site-footer section">
     <div class="container">
-		  <div class="credits">&copy; {{ new Date().getFullYear() }} Justin Picard.</div>
+      <div class="social">
+        <span class="credits">&copy; {{ new Date().getFullYear() }} Justin Picard</span><span class="star">✦</span>
+        <a href="https://www.linkedin.com/in/picardjustin/" target="_blank" rel="noopener">LinkedIn</a><span class="star">✦</span>
+        <a href="mailto:hallo@justinpicard.com">hallo@justinpicard.com</a>
+      </div>
     </div>
 	</footer>
 </template>

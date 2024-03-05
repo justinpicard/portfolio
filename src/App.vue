@@ -7,7 +7,7 @@ import MainNav from "./components/MainNav.vue";
 <template>
 	<main class="main">
 		<MainNav/>
-		<div class="main-wrap" v-bind:class="{classA: scrollPosition < 100, classB: scrollPosition > 100}">
+		<div class="main-wrap">
 			<router-view/>
 		</div>
 		<AppFooter/>
