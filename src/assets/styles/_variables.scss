@@ -5,10 +5,14 @@ $font-weight-semibold:	600;
 $font-weight-bold:		700;
 $font-weight-black:		900;
 
-$font-size-md:			1rem;
+$font-size-sm:          1rem;
+$font-size-md:			1.25rem;
+$font-size-lg:          1.75rem;
+$font-size-xl:          4rem;
 
-$font-size-base: $font-size-md;
+$font-size-base:        $font-size-md;
 
 $primary:				#0a15df;
+$secondary:             #40e8bf;
 $white:					#ffffff;
 $black:                 #000000;

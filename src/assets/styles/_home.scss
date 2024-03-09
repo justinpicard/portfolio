@@ -3,11 +3,16 @@
 	align-items: center;
 	width: 100vw;
 	//min-height: calc(100vh - 7.75em);
-	min-height: 100vh;
-	overflow: hidden;
+	min-height: 150vh;
+	//overflow: hidden;
 	//padding-top: clamp(10em, 20vw, 15em);
 
 	.marquee-container {
+		//position: sticky;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 100%;
+		overflow: hidden;
 
 		.marquee {
 
@@ -49,54 +54,15 @@
 	}
 }
 
-.projects {
-
-	.project-grid {
-		align-content: flex-start;
-		align-items: flex-start;
-		display: flex;
-		flex: 1 0 0;
-		flex-direction: row;
-		flex-wrap: nowrap;
-		gap: 40px;
-		height: auto;
-		justify-content: flex-start;
-		overflow: hidden;
-		padding: 0;
-		position: relative;
-		width: 1px;
-
-		.project-grid-col {
-			align-content: center;
-			align-items: center;
-			align-self: stretch;
-			display: flex;
-			flex: 1 0 0px;
-			flex-direction: column;
-			flex-wrap: nowrap;
-			gap: 40px;
-			height: auto;
-			justify-content: flex-start;
-			overflow: hidden;
-			padding: 0;
-			position: relative;
-			width: 1px;
-
-			.project-thumb {
-				aspect-ratio: 1.6216216216216217 / 1;
-				flex: none;
-				height: var(--framer-aspect-ratio-supported, 128px);
-				overflow: hidden;
-				position: relative;
-				width: 100%;
-			}
-		}
-	}
+section.about {
+	padding-top: calc(var(--section-padding)* .66);
+	padding-bottom: calc(var(--section-padding)* .66);
 }
 
-.bio {
-
-	h2 {
-		font-size: 4rem;
-	}
+.wave {
+	animation-name: wave-animation;
+	animation-duration: 2.5s;
+	animation-iteration-count: infinite;
+	transform-origin: 70% 70%;
+	display: inline-block;
 }

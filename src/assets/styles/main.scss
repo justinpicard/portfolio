@@ -4,13 +4,18 @@
 @import "variables";
 @import "mixins";
 @import "keyframes";
+@import "locomotive";
 
 @import "base";
 @import "color-scheme-light";
 @import "grid";
 @import "type";
 @import "buttons";
+@import "loading-screen";
 @import "site-header";
+@import "page-header";
 @import "main-nav";
 @import "footer";
 @import "home";
+@import "projects";
+@import "resume";

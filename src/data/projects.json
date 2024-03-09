@@ -1,0 +1,20 @@
+[
+  {
+    "id": "1",
+    "name": "HZ University",
+    "image": "hz-university",
+    "link": "https://test.nl"
+  },
+  {
+    "id": "2",
+    "name": "Groep De Hoop",
+    "image": "dehoop",
+    "link": "https://foobar.nl"
+  },
+  {
+    "id": "3",
+    "name": "SFVonline",
+    "image": "sfvonline",
+    "link": "https://foobar.nl"
+  }
+]

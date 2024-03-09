@@ -37,7 +37,7 @@
 
 		h1,
 		h2 {
-			font-size: $font-size-base;
+			font-size: $font-size-sm;
 			line-height: 1.1;
 		}
 
@@ -58,7 +58,7 @@
 	}
 
 	.nav-link {
-		font-size: calc(#{$font-size-base} * 2);
+		font-size: $font-size-lg;
 		font-weight: $font-weight-medium;
 	}
 

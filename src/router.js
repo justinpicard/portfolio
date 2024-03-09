@@ -14,18 +14,19 @@ const routes = [
     {
         path: "/about",
         name: "about",
-        meta: { title: 'About' },
+        meta: { title: 'Digital Product Designer' },
         component: () => import('./views/About.vue')
     },
     {
-        path: "/cv",
-        name: "cv",
-        meta: { title: 'CV' },
-        component: () => import('./views/Cv.vue')
+        path: "/resume",
+        name: "resume",
+        meta: { title: 'Resumé' },
+        component: () => import('./views/Resume.vue')
     },
     {
         path: "/:catchall(.*)*",
         name: "404notfound",
+        meta: { title: '404 — Page not found' },
         component: () => import('./views/404.vue')
     }
 ];
@@ -33,6 +34,10 @@ const routes = [
 const router = createRouter({
     history: createWebHistory(import.meta.env.Base_URL),
     routes,
+    scrollBehavior(to, from, savedPosition) {
+        // always scroll to top
+        return { top: 0 }
+    },
 });
 
 export default router;

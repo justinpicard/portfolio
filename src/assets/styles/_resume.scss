@@ -1,0 +1,20 @@
+.resume-list {
+
+	.resume-list-item {
+		display: flex;
+		flex-direction: column;
+
+		&:not(:last-of-type) {
+			margin-bottom: 2rem;
+		}
+
+		.industry {
+			margin-top: 0.25rem;
+			font-size: $font-size-sm;
+		}
+
+		.period {
+			color: $secondary;
+		}
+	}
+}

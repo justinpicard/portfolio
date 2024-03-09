@@ -1,7 +1,7 @@
 <template>
 	<div class="main-nav position-relative">
 		<div class="position-fixed top-0 left-0 ml-2 mt-2">
-      <a href="/" class="site-logo">
+      <router-link :to="{ name: 'home' }" class="site-logo">
         <figure class="avatar">
           <img :src="getImageUrl('justin-picard-avatar','jpg')" alt="">
         </figure>
@@ -9,7 +9,7 @@
 					<h1>Justin Picard</h1>
 					<h2>Digital Product Designer</h2>
 				</span>
-      </a>
+      </router-link>
 		</div>
 		<div class="position-fixed top-0 right-0 mr-2 mt-2">
       <a  href="mailto:hallo@justinpicard.com" class="btn btn-outlined btn-light btn-md work-status">

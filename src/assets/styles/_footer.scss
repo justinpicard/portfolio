@@ -4,13 +4,15 @@
 	padding-bottom: 8rem;
 
 	.social {
+		font-size: $font-size-sm;
+
+		a {
+			color: currentColor;
+			text-decoration: none;
+		}
 
 		.star {
 			margin: 0 1rem;
 		}
-
-		//& > *:not(:last-child) {
-		//	margin-right: 1rem;
-		//}
 	}
 }

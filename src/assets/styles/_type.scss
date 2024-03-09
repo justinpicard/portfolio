@@ -1,20 +1,40 @@
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, .h1,
+h2, .h2,
+h3, .h3,
+h4, .h4,
+h5, .h5,
+h6, .h6 {
 	margin-top: 0;
 	font-weight: $font-weight-medium;
 }
 
 h3 {
+	font-size: 1.75rem;
+}
+
+.lead-block {
+	//
+}
+
+.lead-heading {
+	font-family: 'Space Mono', system-ui, Avenir, Helvetica, Arial, sans-serif;
 	text-transform: uppercase;
-	font-size: 1.5rem;
+	font-size: 1.125rem;
+	font-weight: $font-weight-bold;
+	letter-spacing: 0;
+	margin-right: 8em;
+	line-height: 1;
+	display: inline-block;
+	//color: $secondary;
+}
+
+.lead-paragraph {
+	display: inline;
+	font-size: 4rem;
 }
 
 a {
-	color: currentColor;
+	color: $secondary;
 	text-decoration-color: currentcolor;
 	transition: all .3s cubic-bezier(.165,.84,.44,1);
 
@@ -25,6 +45,11 @@ a {
 
 p {
 	font-size: 1.25rem;
+	margin-top: 0;
+
+	& + p {
+		margin-top: 1em;
+	}
 }
 
 .marquee {
@@ -100,6 +125,18 @@ p {
 	}
 }
 
+.text-sm {
+	font-size: $font-size-sm;
+}
+.text-md {
+	font-size: $font-size-md;
+}
+
 .text-lg {
-	font-size: 1.75rem;
+	font-size: $font-size-lg;
+}
+
+.text-xl {
+	font-size: $font-size-xl;
+	line-height: 1.33;
 }
