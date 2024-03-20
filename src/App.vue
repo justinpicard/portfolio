@@ -8,23 +8,25 @@
 	</main>
 </template>
 
-<!--<script>-->
-<!--import LocomotiveScroll from "locomotive-scroll";-->
-
-<!--export default {-->
-<!--  methods: {-->
-<!--    setLocomotiveScroll() {-->
-<!--      new LocomotiveScroll({-->
-<!--        el: this.$refs.loco,-->
-<!--        smooth: true,-->
-<!--      });-->
-<!--    },-->
-<!--  },-->
-<!--  mounted() {-->
-<!--    this.setLocomotiveScroll();-->
-<!--  },-->
-<!--};-->
-<!--</script>-->
+<script>
+// import LocomotiveScroll from "locomotive-scroll";
+//
+// export default {
+//   methods: {
+//     setLocomotiveScroll() {
+//       new LocomotiveScroll({
+//         el: this.$refs.loco,
+//         smooth: true,
+//       });
+//     },
+//   },
+//   mounted() {
+//    setTimeout( ()=> {
+//       this.setLocomotiveScroll();
+//     }, 5000 );
+//   },
+// };
+</script>
 
 <script setup>
 import AppFooter from "./components/AppFooter.vue";

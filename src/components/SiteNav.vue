@@ -12,9 +12,16 @@
       </router-link>
 		</div>
 		<div class="position-fixed top-0 right-0 mr-2 mt-2">
-      <a  href="mailto:hallo@justinpicard.com" class="btn btn-outlined btn-light btn-md work-status">
+      <a href="#" class="btn btn-outlined btn-light btn-md btn-round language-selector mr-1">
+        <span class="btn-text-container">
+          <IconGlobe/>
+        </span>
+        <div class="btn-bg rounded-pill"></div>
+      </a>
+      <a @click="copy" class="btn btn-outlined btn-light btn-md work-status">
+        <span class="d-none">{{ text }}</span>
 				<span class="btn-text-container">
-					<span class="btn-text-wrapper">Open for work</span>
+					<span class="btn-text-wrapper"><div class="work-indicator"><span class="pulse"></span></div> Open for work</span>
 					<span class="btn-text-wrapper">Contact me</span>
 				</span>
         <div class="btn-bg rounded-pill"></div>
@@ -54,7 +61,31 @@
 </template>
 
 <script setup>
+import IconGlobe from "./icons/IconGlobe.vue";
+
 function getImageUrl(name, ext) {
   return new URL(`../assets/images/${name}.${ext}`, import.meta.url).href
+}
+</script>
+<script>
+
+export default {
+  //el: '#container',
+  data() {
+    return {
+      text: 'hallo@justinpicard.nl',
+    }
+  },
+  methods: {
+    copy() {
+      try {
+        navigator.clipboard.writeText(this.text)
+        console.log('Copied ' + this.text)
+      } catch (e) {
+        throw e
+        console.log('Failed to copy ' + this.text)
+      }
+    }
+  },
 }
 </script>

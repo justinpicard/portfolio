@@ -1,20 +1,38 @@
 [
   {
     "id": "1",
-    "name": "HZ University",
-    "image": "hz-university",
-    "link": "https://test.nl"
+    "name": "Recranet Booking",
+    "image": "recranet",
+    "link": "https://recranet.com",
+    "job": "Recranet",
+    "type": "SaaS concept design",
+    "year": "2023"
   },
   {
     "id": "2",
-    "name": "Groep De Hoop",
-    "image": "dehoop",
-    "link": "https://foobar.nl"
+    "name": "HZ University",
+    "image": "hz-university-2",
+    "link": "https://test.nl",
+    "job": "Elloro",
+    "type": "Corporate & recruitment website",
+    "year": "2023"
   },
   {
     "id": "3",
+    "name": "Vodatent",
+    "image": "vodatent",
+    "link": "https://foobar.nl",
+    "job": "Recranet",
+    "type": "Website",
+    "year": "2023"
+  },
+  {
+    "id": "4",
     "name": "SFVonline",
     "image": "sfvonline",
-    "link": "https://foobar.nl"
+    "link": "https://foobar.nl",
+    "job": "Dondr ⚡ Web & design",
+    "type": "SaaS application",
+    "year": "2020"
   }
 ]

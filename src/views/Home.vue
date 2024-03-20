@@ -1,25 +1,5 @@
 <template>
-	<section class="home-header" data-scroll-speed="2" data-scroll-section>
-    <div class="marquee-container">
-      <div class="marquee name">
-        <h2>Justin Picard<span class="star">✦</span></h2>
-        <h2>Justin Picard<span class="star">✦</span></h2>
-        <h2>Justin Picard<span class="star">✦</span></h2>
-        <h2>Justin Picard<span class="star">✦</span></h2>
-      </div>
-      <div class="marquee job-title">
-        <h2>Digital Product Designer<span class="star">✦</span></h2>
-        <h2>Digital Product Designer<span class="star">✦</span></h2>
-        <h2>Digital Product Designer<span class="star">✦</span></h2>
-        <h2>Digital Product Designer<span class="star">✦</span></h2>
-      </div>
-    </div>
-    <div class="personal-image">
-      <figure>
-        <img :src="getImageUrl('justin-picard','jpg')" alt="">
-      </figure>
-    </div>
-	</section>
+	<SectionHomeHeader/>
   <SectionHomeAbout/>
   <SectionHomeProjects/>
 </template>
@@ -30,10 +10,7 @@ import SplitType from 'split-type'
 import { onMounted } from "vue";
 import SectionHomeProjects from "../components/SectionHomeProjects.vue";
 import SectionHomeAbout from "../components/SectionHomeAbout.vue";
-
-function getImageUrl(name, ext) {
-	return new URL(`../assets/images/${name}.${ext}`, import.meta.url).href
-}
+import SectionHomeHeader from "../components/SectionHomeHeader.vue";
 
 // onMounted(() => {
 //   const ourText = new SplitType( '.marquee', { types: 'chars' })

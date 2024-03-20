@@ -67,6 +67,10 @@
 
 	&.btn-md {
 		padding: 1rem 2rem;
+
+		&.btn-round {
+			padding: 1rem;
+		}
 	}
 
 	@media (hover: hover) {

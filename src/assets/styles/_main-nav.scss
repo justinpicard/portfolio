@@ -13,20 +13,42 @@
 
 			.btn-text-container {
 
-				.btn-text-wrapper:first-of-type {
+				.work-indicator {
+					display: inline-block;
+					width: 8px;
+					height: 8px;
+					background-color: rgb(28 219 28);
+					border-radius: 10px;
+					margin-right: 0.5rem;
+					margin-left: 0.5rem;
+					box-shadow: 0 0 10px rgb(28 219 28);
 
-					&::before {
-						content: '';
-						display: inline-block;
+					.pulse {
+						display: block;
 						width: 8px;
 						height: 8px;
-						background-color: rgb(28 219 28);
 						border-radius: 10px;
-						margin-right: 0.5rem;
-						margin-left: 0.5rem;
-						box-shadow: 0 0 10px rgb(28 219 28);
+						animation: pulse 2s ease infinite;
+						background-color: rgb(28 219 28);
 					}
 				}
+
+				//.btn-text-wrapper:first-of-type {
+				//
+				//	&::before {
+				//		content: '';
+				//		display: inline-block;
+				//		width: 8px;
+				//		height: 8px;
+				//		background-color: rgb(28 219 28);
+				//		border-radius: 10px;
+				//		margin-right: 0.5rem;
+				//		margin-left: 0.5rem;
+				//		box-shadow: 0 0 10px rgb(28 219 28);
+				//		transform: scale(1);
+				//		animation: pulse 2s infinite;
+				//	}
+				//}
 			}
 		}
 	}

@@ -26,6 +26,7 @@ $columns: 12;
 
 @for $width from 1 through $columns {
 	.col-#{$width} {
+		//display: flex;
 		flex-basis: $width / $columns * 100%;
 		padding-left: 2rem;
 		padding-right: 2rem;
