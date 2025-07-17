@@ -1,0 +1,26 @@
+{
+  "name": "justinpicard",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.0",
+    "dayjs": "^1.11.10",
+    "gsap": "^3.12.5",
+    "locomotive-scroll": "^4.1.4",
+    "pinia": "^2.1.7",
+    "split-type": "^0.3.4",
+    "vue": "^3.4.15",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.3",
+    "sass": "^1.70.0",
+    "vite": "^5.1.0"
+  }
+}

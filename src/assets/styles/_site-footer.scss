@@ -1,0 +1,35 @@
+.site-footer {
+	display: flex;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	justify-content: space-between;
+	padding: 2rem 0;
+
+	.credits,
+	.social-links {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex: 1 1 auto;
+
+		a {
+			color: currentColor;
+			text-decoration: none;
+		}
+
+		.star {
+			margin: 0 1rem;
+		}
+	}
+
+	.credits {
+		font-size: $font-size-xs;
+
+		@media (min-width: 576px) {
+			font-size: $font-size-sm;
+			flex-direction: row;
+		}
+	}
+}
