@@ -1,22 +1,56 @@
 .home-hero {
 	position: relative;
-	//display: flex;
-	//align-items: center;
 	width: 100vw;
 	height: 100vh;
-	//overflow: hidden;
+
+	.marquee-container {
+		position: absolute;
+		top: 50%;
+		line-height: 1.33;
+	}
+	
+	.wrapperRollingText,
+	.wrapperRollingText02 {
+		white-space: nowrap;
+	}
+	.text {
+	  font-size: 14vw;
+	  display: inline-block;
+	  font-family: var(--heading-font);
+	  line-height: 1.2;
+	}
+	.text > span {
+	  padding-left: 3rem;
+	}
+
+	.text.rollingText02 {
+		transform: translateX(-25%)
+	}
+
+	.limits {
+	  position: fixed;
+	  top: 20vh;
+	  height: 10vh;
+	  width: 1px;
+	}
+	.half {
+	  position: fixed;
+	  top: 10vh;
+	  width: 1px;
+	}
 
 	.personal-image {
 		position: absolute;
 		top: 50%;
 		left: 50%;
-		transform: translate(-50%, -50%);
+		transform: translate(-50%, 0);
 		aspect-ratio: 9/11;
 		height: 50vh;
 		z-index: 1;
+		box-shadow: 0 40px 80px rgba(0, 0, 0, 0.3);
 
 		@media (min-width: 576px) {
-			height: 65vh;
+			height: 70vh;
 		}
 
 		figure {
@@ -47,6 +81,10 @@
 section.about {
 	padding-top: calc(var(--section-padding)* .66);
 	padding-bottom: calc(var(--section-padding)* .66);
+
+	.obviously {
+		font-size: $font-size-lg;
+	}
 }
 
 .wave {

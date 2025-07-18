@@ -11,6 +11,12 @@ const routes = [
         path: "/home",
         redirect: "/"
     },
+	{
+        path: "/about",
+		name: "about",
+        meta: { title: 'Justin Picard ✦ Digital Product Designer' },
+        component: () => import('./views/About.vue')
+    },
     {
         path: "/:catchall(.*)*",
         name: "404notfound",

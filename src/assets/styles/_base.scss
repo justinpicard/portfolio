@@ -1,5 +1,5 @@
 :root {
-	font-family: "Bricolage Grotesque", system-ui, Avenir, Helvetica, Arial, sans-serif;
+	//font-family: "Bricolage Grotesque", system-ui, Avenir, Helvetica, Arial, sans-serif;
 	line-height: 1.5;
 	font-weight: $font-weight-regular;
 	font-size: 1rem;
@@ -10,8 +10,8 @@
 	background-position: 50%;
 	background-image: url('../images/dot3.png');
 	background-attachment: fixed;
-	--body-font: "TTFirsNeue-Regular", system-ui, Avenir, Helvetica, Arial, sans-serif;
-	--heading-font: "TTFirsNeue-Medium", system-ui, Avenir, Helvetica, Arial, sans-serif;
+	--body-font: "FunnelSans-Regular", "TTFirsNeue-Regular", system-ui, Avenir, Helvetica, Arial, sans-serif;
+	--heading-font: "FunnelDisplay-Regular", system-ui, Avenir, Helvetica, Arial, sans-serif;
 	// Font rendering
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
