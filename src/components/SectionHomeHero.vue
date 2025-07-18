@@ -5,16 +5,15 @@
     <div class="marquee-container">
       <div class="wrapperRollingText">
         <div class="rollingText text">
-          <span>• Justin Picard</span>
-          <span>• Justin Picard</span>
-          <span>• Justin Picard</span>
+          <span class=""><span class="star">✦</span> Justin Picard</span>
+          <span><span class="star">✦</span> Justin Picard</span>
         </div>
       </div>
 
       <div class="wrapperRollingText02"l>
         <div class="rollingText02 text">
-          <span>• Digital product designer</span>
-          <span>• Vibe coder</span>
+          <span><span class="star">✦</span> Digital product designer</span>
+          <span><span class="star">✦</span> Vibe coder</span>
         </div>
       </div>
     </div>
@@ -36,7 +35,7 @@ onMounted(() => {
   let direction = 1
 
   const roll1 = roll('.rollingText', { duration: 20 })
-  const roll2 = roll('.rollingText02', { duration: 17 }, true)
+  const roll2 = roll('.rollingText02', { duration: 18 }, true)
 
   ScrollTrigger.create({
     onUpdate(self) {
@@ -109,8 +108,8 @@ onMounted(() => {
   font-size: 16vw;
   display: inline-block;
 }
-.rollingText span,
-.rollingText02 span {
+.rollingText > span,
+.rollingText02 > span {
   padding-left: 3rem;
 }
 

@@ -1,4 +1,5 @@
 <template>
+	<LoadingScreen />
 	<SectionHomeHero/>
 	<p>Expedita ipsam necessitatibus libero quos veniam et illum officiis. Quam harum ex incidunt aperiam non a autem voluptas eaque quod incidunt. Atque tenetur deserunt ut saepe. Ab in molestias molestiae in est amet molestiae odit aut et sit qui harum. Et enim tenetur et enim amet quam laudantium et voluptatem explicabo ut aut nihil.</p>
   <p>Expedita ipsam necessitatibus libero quos veniam et illum officiis. Quam harum ex incidunt aperiam non a autem voluptas eaque quod incidunt. Atque tenetur deserunt ut saepe. Ab in molestias molestiae in est amet molestiae odit aut et sit qui harum. Et enim tenetur et enim amet quam laudantium et voluptatem explicabo ut aut nihil.</p>
@@ -18,5 +19,6 @@
 </template>
 
 <script setup>
+import LoadingScreen from "../components/LoadingScreen.vue";
 import SectionHomeHero from "../components/SectionHomeHero.vue";
 </script>
