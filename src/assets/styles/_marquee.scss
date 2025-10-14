@@ -1,0 +1,33 @@
+.marquee-container {
+	line-height: 1.2;
+	left: 0;
+	width: 100%;
+}
+
+.wrapperRollingText,
+.wrapperRollingText02 {
+	white-space: nowrap;
+}
+.text {
+	font-size: 14vw;
+	display: inline-block;
+	font-family: var(--heading-font);
+	line-height: 1.2;
+	overflow: hidden;
+	position: relative;
+}
+.text > span {
+  padding-left: 3rem;
+}
+
+.limits {
+  position: fixed;
+  top: 20vh;
+  height: 10vh;
+  width: 1px;
+}
+.half {
+  position: fixed;
+  top: 10vh;
+  width: 1px;
+}

@@ -13,6 +13,6 @@
 </template>
 
 <script setup>
-import PageTitle from "../components/PageTitle.vue";
+import PageTitle from "../components/PageHeader.vue";
 import AppHeader from "../components/AppHeader.vue";
 </script>

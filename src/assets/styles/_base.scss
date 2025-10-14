@@ -20,6 +20,7 @@
 	--container-padding: 1.5rem;
 
 	// Margins & paddings
+	--section-padding-sm: clamp(5em, 12vh, 12em);
 	--section-padding: clamp(5em, 21vh, 12em);
 }
 
@@ -34,18 +35,36 @@ body {
 	// min-height: 100vh;
 
 	main {
-		// height: inherit;
-		// min-height: 100vh;
 
-		.marquee-container {
-			position: absolute;
-			top: 50%;
-			left: 0;
-			transform: translateY(-50%);
+		&::before,
+		&::after {
+			content: '';
+			height: 8rem;
 			width: 100%;
-			//overflow: hidden;
-			//mix-blend-mode:difference;
-			z-index: 2;
+			position: fixed;
+			left: 0;
+			z-index: 998;
+			transition: opacity .3s cubic-bezier(.165,.84,.44,1);
+		}
+
+		&::before {
+			@include scrimGradient($primary, 'to bottom');
+			top: 0;
+			opacity: 0;
+		}
+
+		&::after {
+			@include scrimGradient($primary, 'to top');
+			top: initial;
+			bottom: 0;
+			
+		}
+
+		&.scrolled {
+
+			&::before {
+				opacity: 1;
+			}
 		}
 	}
 }
@@ -64,6 +83,10 @@ img {
 
 .page-title {
 	padding-top: 15rem;
+}
+
+.page-content {
+	padding-bottom: var(--section-padding);
 }
 
 .divider {

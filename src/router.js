@@ -14,8 +14,14 @@ const routes = [
 	{
         path: "/about",
 		name: "about",
-        meta: { title: 'Justin Picard ✦ Digital Product Designer' },
+        meta: { title: 'About' },
         component: () => import('./views/About.vue')
+    },
+	{
+        path: "/work",
+		name: "work",
+        meta: { title: 'My work' },
+        component: () => import('./views/Work.vue')
     },
     {
         path: "/:catchall(.*)*",

@@ -7,13 +7,11 @@
         <div class="rollingText text">
           <span><span class="star">✦</span> Justin Picard</span>
 		  <span><span class="star">✦</span> Justin Picard</span>
-		  <span><span class="star">✦</span> Justin Picard</span>
-		  <span><span class="star">✦</span> Justin Picard</span>
         </div>
       </div>
 
       <div class="wrapperRollingText02">
-        <div class="rollingText02 text" style="">
+        <div class="rollingText02 text">
           <span><span class="star">✦</span> Digital product designer</span>
           <span><span class="star">✦</span> Vibe coder</span>
 		  <span><span class="star">✦</span> Digital product designer</span>
@@ -34,12 +32,9 @@ import { onMounted, ref } from 'vue'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import SplitType from 'split-type'
+import { getImageUrl} from '../utils/image.ts'
 
 const personalImage = ref(null)
-
-function getImageUrl(name, ext) {
-  return new URL(`../assets/images/${name}.${ext}`, import.meta.url).href
-}
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -47,7 +42,7 @@ onMounted(() => {
   document.fonts.ready.then(() => {
     let direction = 1
 
-    const roll1 = roll('.rollingText', { duration: 40 })
+    const roll1 = roll('.rollingText', { duration: 20 })
     const roll2 = roll('.rollingText02', { duration: 39 }, true)
 
     requestAnimationFrame(() => {
@@ -60,7 +55,7 @@ onMounted(() => {
         stagger: 0.015,
         duration: 0.7,
         ease: 'power2.out',
-		delay: 2.4
+		delay: 2.5
       })
 
       gsap.from('.rollingText02:not(.is-clone) .char', {
@@ -69,7 +64,7 @@ onMounted(() => {
         stagger: 0.015,
         duration: 0.7,
         ease: 'power2.out',
-		delay: 2.4
+		delay: 2.5
       })
     })
 
@@ -98,7 +93,7 @@ onMounted(() => {
 
     ScrollTrigger.create({
       onUpdate: (self) => {
-        let skew = clamp(self.getVelocity() / -300)
+        let skew = clamp(self.getVelocity() / 600)
         if (Math.abs(skew) > Math.abs(proxy.skew)) {
           proxy.skew = skew
           gsap.to(proxy, {
@@ -175,11 +170,15 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.text {
-  overflow: hidden;
-  display: inline-block;
-  position: relative;
-  /*mask-image: linear-gradient(to top, black 60%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to top, black 60%, transparent 100%);*/
+.marquee-container {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	overflow: hidden;
+	/*mix-blend-mode:difference;*/
+	z-index: 2;
+}
+.text.rollingText02 {
+	transform: translateX(-25%)
 }
 </style>

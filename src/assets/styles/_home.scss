@@ -3,42 +3,6 @@
 	width: 100vw;
 	height: 100vh;
 
-	.marquee-container {
-		position: absolute;
-		top: 50%;
-		line-height: 1.33;
-	}
-	
-	.wrapperRollingText,
-	.wrapperRollingText02 {
-		white-space: nowrap;
-	}
-	.text {
-	  font-size: 14vw;
-	  display: inline-block;
-	  font-family: var(--heading-font);
-	  line-height: 1.2;
-	}
-	.text > span {
-	  padding-left: 3rem;
-	}
-
-	.text.rollingText02 {
-		transform: translateX(-25%)
-	}
-
-	.limits {
-	  position: fixed;
-	  top: 20vh;
-	  height: 10vh;
-	  width: 1px;
-	}
-	.half {
-	  position: fixed;
-	  top: 10vh;
-	  width: 1px;
-	}
-
 	.personal-image {
 		position: absolute;
 		top: 50%;
@@ -79,12 +43,27 @@
 }
 
 section.about {
+	z-index: 1;
 	padding-top: calc(var(--section-padding)* .66);
 	padding-bottom: calc(var(--section-padding)* .66);
 
 	.obviously {
+		position: relative;
 		font-size: $font-size-lg;
+		mix-blend-mode: difference;
+		user-select: none;
+		z-index: 1;
+		text-decoration: underline;
 	}
+
+	.duh-gif {
+		position: fixed;
+		width: 300px;
+		height: auto;
+		display: none;
+		pointer-events: none;
+		z-index: -1;
+	  }
 }
 
 .wave {

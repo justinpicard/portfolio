@@ -8,7 +8,11 @@
 	.nav-links {
 
 		.nav-link {
-			font-family: var(--heading-font);
+			//font-family: var(--heading-font);
+
+			.bottom-text {
+				color: $secondary;
+			}
 		}
 		span.star {
 			margin: 0 1.5rem;
@@ -98,22 +102,37 @@
 	//	font-weight: $font-weight-medium;
 	//}
 
-	&::before,
-	&::after {
-		content: '';
-		@include scrimGradient($primary, 'to bottom');
-		height: 7.75rem;
-		width: 100%;
-		position: fixed;
-		top: 0;
-		left: 0;
-		z-index: -1;
-	}
+	//&::before,
+	//&::after {
+	//	content: '';
+	//	@include scrimGradient($primary, 'to bottom');
+	//	height: 7.75rem;
+	//	width: 100%;
+	//	position: fixed;
+	//	top: 0;
+	//	left: 0;
+	//	z-index: -1;
+	//}
 
-	&::after {
-		@include scrimGradient($primary, 'to top');
-		top: initial;
-		bottom: 0;
-		height: 8rem;
-	}
+	//&::before {
+	//	opacity: 0;
+	//}
+
+	//&::after {
+	//	opacity: 1;
+	//}
+
+	//&.scrolled {
+
+	//	&::before {
+	//		opacity: 1;
+	//	}
+	//}
+
+	//&::after {
+	//	@include scrimGradient($primary, 'to top');
+	//	top: initial;
+	//	bottom: 0;
+	//	height: 8rem;
+	//}
 }

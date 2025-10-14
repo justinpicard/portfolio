@@ -38,9 +38,10 @@
 			width: 100%;
 			transform: translate(0);
 
-			&:not(:first-child) {
+			&.bottom-text {
 				position: absolute;
 				top: 100%;
+				color: $secondary;
 			}
 		}
 	}
@@ -89,7 +90,7 @@
 
 			.btn-bg {
 				transform: scale3d(0.95, 0.95, 0.95);
-				border: 1px solid $white;
+				border: 1px solid $secondary;
 			}
 		}
 	}

@@ -1,3 +1,10 @@
 .page-header {
-	padding-bottom: var(--section-padding);
+	padding-top: var(--section-padding);
+	padding-bottom: var(--section-padding-sm);
+
+	.page-title-container__title {
+		line-height: 1;
+		font-size: 30vw;
+		text-align: center;
+	}
 }
