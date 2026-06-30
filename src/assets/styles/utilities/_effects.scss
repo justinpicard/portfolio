@@ -1,0 +1,41 @@
+@use "../abstracts" as *;
+
+@each $name, $value in $shadows {
+	$selector: "shadow-#{$name}";
+
+	@if $name == default {
+		$selector: "shadow";
+	}
+
+	@include utility($selector) {
+		box-shadow: $value !important;
+	}
+}
+
+.transition {
+	transition: all 0.3s cubic-bezier(.165, .84, .44, 1) !important;
+}
+
+$cursor-values: (
+	pointer: pointer,
+	default: default,
+	not-allowed: not-allowed
+);
+
+@each $name, $value in $cursor-values {
+	@include utility("cursor-#{$name}") {
+		cursor: $value !important;
+	}
+}
+
+.select-none {
+	user-select: none !important;
+}
+
+.pointer-events-none {
+	pointer-events: none !important;
+}
+
+.pointer-events-auto {
+	pointer-events: auto !important;
+}

@@ -1,5 +1,5 @@
 <template>
-  <div class="marquee-container">
+  <div class="marquee-container" ref="container">
     <div class="loop-wrap">
       <ul class="loop loop--left">
         <li>Justin Picard</li>
@@ -21,18 +21,19 @@
 </template>
 
 <script setup>
-import { onMounted, nextTick } from 'vue'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { onMounted, onUnmounted, nextTick, ref } from 'vue'
+import { gsap, ScrollTrigger, registerGsapPlugins } from '../utils/animations/gsap'
+import { animationEases } from '../utils/animations/presets'
 
-gsap.registerPlugin(ScrollTrigger)
+const container = ref(null)
+let ctx
+let cleanupClones = () => {}
 
 function seamlessLoop(items, config = {}) {
   let tl = gsap.timeline({ repeat: -1, paused: true }),
       duration = config.duration || 1,
       totalItems = items.length,
-      clones = [],
-      position = 0
+      clones = []
 
   items.forEach((item, i) => {
     let clone = item.cloneNode(true)
@@ -47,34 +48,48 @@ function seamlessLoop(items, config = {}) {
     tl.to(item, {
       xPercent: `-=${100 * totalItems}`,
       duration: duration * totalItems,
-      ease: 'none'
+      ease: animationEases.none
     }, 0)
   })
 
-  return tl
+  return { tl, clones }
 }
 
 onMounted(async () => {
   await nextTick()
+  registerGsapPlugins()
 
-  const loopLeftEls = document.querySelectorAll('.loop--left li')
-  const loopRightEls = document.querySelectorAll('.loop--right li')
+  ctx = gsap.context(() => {
+    const root = container.value
+    const loopLeftEls = root.querySelectorAll('.loop--left li')
+    const loopRightEls = root.querySelectorAll('.loop--right li')
 
-  const loop1 = seamlessLoop([...loopLeftEls], { duration: 1 })
-  const loop2 = seamlessLoop([...loopRightEls], { duration: 1 })
+    const loop1 = seamlessLoop([...loopLeftEls], { duration: 1 })
+    const loop2 = seamlessLoop([...loopRightEls], { duration: 1 })
 
-  ScrollTrigger.create({
-  trigger: ".marquee-container", // of een ID als je wilt
-  start: "top top",
-  end: "bottom+=10000 top",
-  scrub: true,
-    onUpdate: (self) => {
-      const velocity = self.getVelocity()
-      const clamped = gsap.utils.clamp(-3, 3, velocity / 300)
-      loop1.timeScale(clamped)
-      loop2.timeScale(-clamped)
+    cleanupClones = () => {
+      loop1.clones.forEach(clone => clone.remove())
+      loop2.clones.forEach(clone => clone.remove())
     }
-  })
+
+    ScrollTrigger.create({
+      trigger: root,
+      start: "top top",
+      end: "bottom+=10000 top",
+      scrub: true,
+      onUpdate: (self) => {
+        const velocity = self.getVelocity()
+        const clamped = gsap.utils.clamp(-3, 3, velocity / 300)
+        loop1.tl.timeScale(clamped)
+        loop2.tl.timeScale(-clamped)
+      }
+    })
+  }, container.value)
+})
+
+onUnmounted(() => {
+  ctx?.revert()
+  cleanupClones()
 })
 </script>
 

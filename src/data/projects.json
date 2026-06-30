@@ -1,38 +1,29 @@
 [
-  {
-    "id": "1",
-    "name": "Recranet Booking",
-    "image": "recranet",
-    "link": "https://recranet.com",
-    "job": "Recranet",
-    "type": "SaaS concept design",
-    "year": "2023"
-  },
-  {
-    "id": "2",
-    "name": "HZ University",
-    "image": "hz-university-2",
-    "link": "https://test.nl",
-    "job": "Elloro",
-    "type": "Corporate & recruitment website",
-    "year": "2023"
-  },
-  {
-    "id": "3",
-    "name": "Vodatent",
-    "image": "vodatent",
-    "link": "https://foobar.nl",
-    "job": "Recranet",
-    "type": "Website",
-    "year": "2023"
-  },
-  {
-    "id": "4",
-    "name": "SFVonline",
-    "image": "sfvonline",
-    "link": "https://foobar.nl",
-    "job": "Dondr ⚡ Web & design",
-    "type": "SaaS application",
-    "year": "2020"
-  }
+	{
+		"id": "1",
+		"name": "MuziMatch",
+		"image": "hz-university-2",
+		"link": "https://muzimatch.nl",
+		"job": "Sideproject",
+		"type": "Musicians classifieds platform",
+		"year": "2026"
+	},
+	{
+		"id": "2",
+		"name": "Recranet Booking",
+		"image": "recranet",
+		"link": "https://recranet.com",
+		"job": "Recranet",
+		"type": "Design system & SaaS product design",
+		"year": "2023"
+	},
+	{
+		"id": "3",
+		"name": "SFVonline",
+		"image": "sfvonline",
+		"link": "https://sfvonline.nl",
+		"job": "Dondr ⚡ Web & design",
+		"type": "SaaS application",
+		"year": "2020"
+	}
 ]

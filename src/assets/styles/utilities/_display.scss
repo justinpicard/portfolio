@@ -1,0 +1,26 @@
+@use "../abstracts" as *;
+
+// Display utilities.
+$display-values: (
+	none: none,
+	block: block,
+	inline: inline,
+	inline-block: inline-block,
+	flex: flex,
+	inline-flex: inline-flex,
+	grid: grid,
+	contents: contents
+);
+
+@each $name, $value in $display-values {
+	@include utility("d-#{$name}") {
+		display: $value !important;
+	}
+}
+
+// Legacy Bootstrap-like max-width helper kept for compatibility.
+.d-sm-none {
+	@media (max-width: 36rem) {
+		display: none !important;
+	}
+}

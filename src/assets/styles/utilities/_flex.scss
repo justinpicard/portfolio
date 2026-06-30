@@ -1,0 +1,96 @@
+@use "../abstracts" as *;
+
+// Flex direction and wrapping.
+$flex-utilities: (
+	flex-row: (flex-direction: row),
+	flex-column: (flex-direction: column),
+	flex-wrap: (flex-wrap: wrap),
+	flex-nowrap: (flex-wrap: nowrap),
+	flex-1: (flex: 1 1 0%),
+	flex-auto: (flex: 1 1 auto),
+	flex-none: (flex: none),
+	grow: (flex-grow: 1),
+	grow-0: (flex-grow: 0),
+	shrink: (flex-shrink: 1),
+	shrink-0: (flex-shrink: 0)
+);
+
+@each $selector, $rules in $flex-utilities {
+	@include utility($selector) {
+		@each $property, $value in $rules {
+			#{$property}: $value !important;
+		}
+	}
+}
+
+// Alignment utilities.
+$justify-values: (
+	start: flex-start,
+	center: center,
+	end: flex-end,
+	between: space-between,
+	around: space-around,
+	evenly: space-evenly
+);
+
+@each $name, $value in $justify-values {
+	@include utility("justify-#{$name}") {
+		justify-content: $value !important;
+	}
+}
+
+$align-values: (
+	start: flex-start,
+	center: center,
+	end: flex-end,
+	stretch: stretch,
+	baseline: baseline
+);
+
+@each $name, $value in $align-values {
+	@include utility("items-#{$name}") {
+		align-items: $value !important;
+	}
+}
+
+$content-values: (
+	start: flex-start,
+	center: center,
+	end: flex-end,
+	between: space-between,
+	around: space-around
+);
+
+@each $name, $value in $content-values {
+	@include utility("content-#{$name}") {
+		align-content: $value !important;
+	}
+}
+
+$self-values: (
+	start: flex-start,
+	center: center,
+	end: flex-end,
+	stretch: stretch
+);
+
+@each $name, $value in $self-values {
+	@include utility("self-#{$name}") {
+		align-self: $value !important;
+	}
+}
+
+// Gap utilities share the spacing scale.
+@each $key, $value in $spacing {
+	@include utility("gap-#{$key}") {
+		gap: var(--space-#{$key}) !important;
+	}
+
+	@include utility("gap-x-#{$key}") {
+		column-gap: var(--space-#{$key}) !important;
+	}
+
+	@include utility("gap-y-#{$key}") {
+		row-gap: var(--space-#{$key}) !important;
+	}
+}

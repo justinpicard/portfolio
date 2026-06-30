@@ -1,0 +1,7 @@
+@use "../abstracts" as *;
+
+@each $name, $value in $z-indexes {
+	@include utility("z-#{$name}") {
+		z-index: $value !important;
+	}
+}

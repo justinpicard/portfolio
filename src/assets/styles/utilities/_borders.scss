@@ -1,0 +1,38 @@
+@use "../abstracts" as *;
+
+// Border width and side utilities.
+.border {
+	border: 1px solid currentcolor !important;
+}
+
+.border-0 {
+	border: 0 !important;
+}
+
+.border-top {
+	border-top: 1px solid currentcolor !important;
+}
+
+.border-bottom {
+	border-bottom: 1px solid currentcolor !important;
+}
+
+.border-left {
+	border-left: 1px solid currentcolor !important;
+}
+
+.border-right {
+	border-right: 1px solid currentcolor !important;
+}
+
+.border-primary {
+	border-color: var(--color-primary) !important;
+}
+
+.border-secondary {
+	border-color: var(--color-secondary) !important;
+}
+
+.border-muted {
+	border-color: var(--color-muted) !important;
+}

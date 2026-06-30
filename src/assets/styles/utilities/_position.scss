@@ -1,0 +1,53 @@
+@use "../abstracts" as *;
+
+// Position mode utilities.
+$position-values: (
+	relative: relative,
+	absolute: absolute,
+	fixed: fixed,
+	sticky: sticky,
+	static: static
+);
+
+@each $name, $value in $position-values {
+	@include utility($name) {
+		position: $value !important;
+	}
+}
+
+// Legacy aliases used in existing components.
+.position-relative {
+	position: relative !important;
+}
+
+.position-fixed {
+	position: fixed !important;
+}
+
+.position-sticky {
+	position: sticky !important;
+}
+
+// Offset utilities support spacing values plus 50% and 100%.
+$offset-properties: (top, right, bottom, left, inset);
+
+@each $key, $value in $position-offsets {
+	@each $property in $offset-properties {
+		@include utility("#{$property}-#{$key}") {
+			#{$property}: $value !important;
+		}
+	}
+}
+
+.inset-x-0 {
+	inset-inline: 0 !important;
+}
+
+.inset-y-0 {
+	inset-block: 0 !important;
+}
+
+.horizontal-center {
+	left: 50% !important;
+	transform: translateX(-50%) !important;
+}

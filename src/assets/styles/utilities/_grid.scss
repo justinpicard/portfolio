@@ -1,0 +1,30 @@
+@use "../abstracts" as *;
+
+// CSS Grid helpers. The project layout grid remains in layout/_grid.scss.
+$grid-utilities: (
+	grid-flow-row: (grid-auto-flow: row),
+	grid-flow-col: (grid-auto-flow: column),
+	place-items-start: (place-items: start),
+	place-items-center: (place-items: center),
+	place-items-end: (place-items: end)
+);
+
+@each $selector, $rules in $grid-utilities {
+	@include utility($selector) {
+		@each $property, $value in $rules {
+			#{$property}: $value !important;
+		}
+	}
+}
+
+$grid-columns: (1, 2, 3, 4, 6, 12);
+
+@each $count in $grid-columns {
+	@include utility("grid-cols-#{$count}") {
+		grid-template-columns: repeat(#{$count}, minmax(0, 1fr)) !important;
+	}
+
+	@include utility("col-span-#{$count}") {
+		grid-column: span #{$count} / span #{$count} !important;
+	}
+}

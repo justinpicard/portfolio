@@ -5,7 +5,7 @@ const routes = [
         path: "/",
         name: "home",
         meta: { title: 'Justin Picard ✦ Digital Product Designer' },
-        component: () => import('./views/Home.vue')
+        component: () => import('./views/Index.vue')
     },
     {
         path: "/home",
@@ -32,7 +32,7 @@ const routes = [
 ];
 
 const router = createRouter({
-    history: createWebHistory(import.meta.env.Base_URL),
+    history: createWebHistory(import.meta.env.BASE_URL),
     routes,
     scrollBehavior(to, from, savedPosition) {
         // always scroll to top

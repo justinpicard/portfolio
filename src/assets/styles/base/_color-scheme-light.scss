@@ -1,0 +1,16 @@
+@use "../abstracts" as *;
+
+@media (prefers-color-scheme: light) {
+	:root {
+		color: var(--color-white);
+		background-color: var(--color-primary);
+	}
+
+	a:hover {
+		color: #747bff;
+	}
+
+	button {
+		background-color: #f9f9f9;
+	}
+}

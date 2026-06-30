@@ -9,10 +9,6 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import AppHeader from "./components/AppHeader.vue"
 import AppFooter from "./components/AppFooter.vue"
-import gsap from 'gsap'
-import ScrollTrigger from 'gsap/ScrollTrigger'
-
-gsap.registerPlugin(ScrollTrigger)
 
 const hasScrolled = ref(false)
 

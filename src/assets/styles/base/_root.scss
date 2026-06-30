@@ -1,0 +1,52 @@
+@use "../abstracts" as *;
+
+:root {
+	@include root-custom-properties;
+
+	line-height: 1.5;
+	font-weight: $font-weight-regular;
+	font-size: 1rem;
+	color-scheme: light dark;
+	color: var(--color-white);
+	background-color: var(--color-primary);
+	background-position: 50%;
+	background-image: url("../images/dot3.png");
+	background-attachment: fixed;
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+	main {
+		&::before,
+		&::after {
+			content: "";
+			height: 8rem;
+			width: 100%;
+			position: fixed;
+			left: 0;
+			z-index: 998;
+			transition: opacity .3s cubic-bezier(.165,.84,.44,1);
+		}
+
+		&::before {
+			@include scrimGradient($primary, "to bottom");
+			top: 0;
+			opacity: 0;
+		}
+
+		&::after {
+			@include scrimGradient($primary, "to top");
+			top: initial;
+			bottom: 0;
+		}
+
+		&.scrolled {
+			&::before {
+				opacity: 1;
+			}
+		}
+	}
+}

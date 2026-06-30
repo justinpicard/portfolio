@@ -1,0 +1,15 @@
+@use "../abstracts" as *;
+
+$opacity-scale: (
+	0: 0,
+	25: 0.25,
+	50: 0.5,
+	75: 0.75,
+	100: 1
+);
+
+@each $name, $value in $opacity-scale {
+	@include utility("opacity-#{$name}") {
+		opacity: $value !important;
+	}
+}

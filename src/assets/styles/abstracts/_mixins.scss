@@ -1,0 +1,61 @@
+/*
+A simple little SCSS mixin for creating scrim gradients
+Inspired by Andreas Larson - https://github.com/larsenwork
+https://css-tricks.com/easing-linear-gradients/
+*/
+
+@use "sass:color";
+@use "sass:list";
+@use "sass:math";
+@use "sass:string";
+@use "breakpoints" as *;
+@use "variables" as *;
+
+@mixin scrimGradient($startColor: $black, $direction: 'to bottom') {
+
+	$scrimCoordinates: (
+			0: 1,
+			19: 0.738,
+			34: 0.541,
+			47: 0.382,
+			56.5: 0.278,
+			65: 0.194,
+			73: 0.126,
+			80.2: 0.075,
+			86.1: 0.042,
+			91: 0.021,
+			95.2: 0.008,
+			98.2: 0.002,
+			100: 0
+	);
+
+	$stops: ();
+
+	@each $colorStop, $alphaValue in $scrimCoordinates {
+		$stop: color.change($startColor, $alpha: $alphaValue) math.percentage(math.div($colorStop, 100));
+		$stops: list.append($stops, $stop, comma);
+	}
+
+	background: linear-gradient(string.unquote($direction), $stops);
+
+}
+
+@mixin utility($selector) {
+	.#{$selector} {
+		@content;
+	}
+
+	@each $breakpoint, $width in $breakpoints {
+		@media (min-width: #{$width}) {
+			$prefix: $breakpoint;
+
+			@if $breakpoint == 2xl {
+				$prefix: "\\32xl";
+			}
+
+			.#{$prefix}\:#{$selector} {
+				@content;
+			}
+		}
+	}
+}

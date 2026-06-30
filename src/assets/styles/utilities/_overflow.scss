@@ -1,0 +1,30 @@
+@use "../abstracts" as *;
+
+$overflow-values: (
+	hidden: hidden,
+	auto: auto,
+	scroll: scroll,
+	visible: visible
+);
+
+@each $name, $value in $overflow-values {
+	@include utility("overflow-#{$name}") {
+		overflow: $value !important;
+	}
+}
+
+.overflow-x-hidden {
+	overflow-x: hidden !important;
+}
+
+.overflow-x-auto {
+	overflow-x: auto !important;
+}
+
+.overflow-y-hidden {
+	overflow-y: hidden !important;
+}
+
+.overflow-y-auto {
+	overflow-y: auto !important;
+}

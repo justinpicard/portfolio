@@ -1,0 +1,7 @@
+@use "../abstracts" as *;
+
+@each $name, $value in $colors {
+	@include utility("bg-#{$name}") {
+		background-color: $value !important;
+	}
+}

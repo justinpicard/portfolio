@@ -1,0 +1,18 @@
+@use "../abstracts" as *;
+
+@include utility("w-auto") { width: auto !important; }
+@include utility("w-full") { width: 100% !important; }
+@include utility("w-screen") { width: 100vw !important; }
+@include utility("h-auto") { height: auto !important; }
+@include utility("h-full") { height: 100% !important; }
+@include utility("h-screen") { height: 100vh !important; }
+@include utility("min-w-0") { min-width: 0 !important; }
+@include utility("min-w-full") { min-width: 100% !important; }
+@include utility("max-w-full") { max-width: 100% !important; }
+@include utility("min-h-0") { min-height: 0 !important; }
+@include utility("min-h-full") { min-height: 100% !important; }
+@include utility("max-h-full") { max-height: 100% !important; }
+
+.min-h-screen {
+	min-height: 100vh !important;
+}

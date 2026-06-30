@@ -1,0 +1,32 @@
+@use "sass:math";
+@use "../abstracts" as *;
+
+$columns: 12;
+
+/* Base column and offset classes (mobile first) */
+@for $width from 1 through $columns {
+	.col-#{$width} {
+		flex-basis: math.div($width, $columns) * 100%;
+		padding-inline: var(--container-padding);
+	}
+
+	.offset-#{$width} {
+		margin-inline-start: math.div($width, $columns) * 100%;
+	}
+}
+
+/* Responsive column and offset utilities */
+@each $name, $size in $breakpoints {
+	@include respond($name) {
+		@for $width from 1 through $columns {
+			.col-#{$name}-#{$width} {
+				flex-basis: math.div($width, $columns) * 100%;
+				padding-inline: var(--container-padding);
+			}
+
+			.offset-#{$name}-#{$width} {
+				margin-inline-start: math.div($width, $columns) * 100%;
+			}
+		}
+	}
+}

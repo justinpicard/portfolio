@@ -1,0 +1,139 @@
+@use "../abstracts" as *;
+
+.main-nav {
+	z-index: 999;
+
+	& * {
+		//font-weight: $font-weight-semibold;
+	}
+
+	.nav-links {
+
+		.nav-link {
+			//font-family: var(--heading-font);
+
+			.bottom-text {
+				color: $secondary;
+			}
+		}
+		span.star {
+			margin: 0 1.5rem;
+		}
+	}
+
+	.slot-machine-text {
+		display: inline-flex;
+	}
+
+	a {
+		text-decoration: none;
+		color: var(--color-white);
+
+		&.work-status {
+
+			.btn-text-container {
+
+				.work-indicator {
+					display: inline-block;
+					width: 8px;
+					height: 8px;
+					background-color: rgb(28 219 28);
+					border-radius: 10px;
+					margin-inline: var(--space-2);
+					box-shadow: 0 0 10px rgb(28 219 28);
+
+					.pulse {
+						display: block;
+						width: 8px;
+						height: 8px;
+						border-radius: 10px;
+						animation: pulse 2s ease infinite;
+						background-color: rgb(28 219 28);
+					}
+				}
+
+				//.btn-text-wrapper:first-of-type {
+				//
+				//	&::before {
+				//		content: '';
+				//		display: inline-block;
+				//		width: 8px;
+				//		height: 8px;
+				//		background-color: rgb(28 219 28);
+				//		border-radius: 10px;
+				//		margin-right: 0.5rem;
+				//		margin-left: 0.5rem;
+				//		box-shadow: 0 0 10px rgb(28 219 28);
+				//		transform: scale(1);
+				//		animation: pulse 2s infinite;
+				//	}
+				//}
+			}
+		}
+	}
+
+	.site-logo {
+		display: flex;
+		align-items: center;
+
+		h1,
+		h2 {
+			font-size: $font-size-md;
+			line-height: 1.1;
+		}
+
+		h1 {
+			margin-block-start: 0;
+		}
+
+		h2 {
+			margin-block-start: var(--space-1);
+		}
+
+		.avatar {
+			max-width: 3.75rem;
+			border-radius: 30px;
+			overflow: hidden;
+			margin: 0 1rem 0 0;
+		}
+	}
+
+	//.nav-link {
+	//	font-size: $font-size-lg;
+	//	font-weight: $font-weight-medium;
+	//}
+
+	//&::before,
+	//&::after {
+	//	content: '';
+	//	@include scrimGradient($primary, 'to bottom');
+	//	height: 7.75rem;
+	//	width: 100%;
+	//	position: fixed;
+	//	top: 0;
+	//	left: 0;
+	//	z-index: -1;
+	//}
+
+	//&::before {
+	//	opacity: 0;
+	//}
+
+	//&::after {
+	//	opacity: 1;
+	//}
+
+	//&.scrolled {
+
+	//	&::before {
+	//		opacity: 1;
+	//	}
+	//}
+
+	//&::after {
+	//	@include scrimGradient($primary, 'to top');
+	//	top: initial;
+	//	bottom: 0;
+	//	height: 8rem;
+	//}
+}

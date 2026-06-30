@@ -1,0 +1,33 @@
+@use "../abstracts" as *;
+
+.site-footer {
+	display: flex;
+	justify-content: space-between;
+	padding-block: var(--space-8) var(--section-padding-sm);
+
+	.credits,
+	.social-links {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex: 1 1 auto;
+
+		a {
+			color: currentColor;
+			text-decoration: none;
+		}
+
+		.star {
+			margin-inline: var(--space-4);
+		}
+	}
+
+	.credits {
+		font-size: $font-size-xs;
+
+		@include respond(sm) {
+			font-size: $font-size-sm;
+			flex-direction: row;
+		}
+	}
+}

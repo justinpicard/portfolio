@@ -1,0 +1,12 @@
+@use "sass:map";
+@use "tokens" as *;
+
+@function space($key) {
+	$value: map.get($spacing, $key);
+
+	@if $value == null {
+		@error "Unknown spacing token `#{$key}`.";
+	}
+
+	@return $value;
+}

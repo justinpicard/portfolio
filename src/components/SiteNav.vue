@@ -1,36 +1,18 @@
 <template>
 	<div class="main-nav position-relative">
-		<div class="position-fixed top-0 left-0 ml-2 mt-2">
+		<div class="position-fixed top-0 left-0 ml-8 mt-8">
 			<router-link :to="{ name: 'home' }" class="site-logo">
 				<figure class="avatar">
 					<img :src="getImageUrl('justin-picard-avatar','jpg')" alt="">
 				</figure>
 				<span class="site-title">
-					<span class="name">Justin Picard</span>
-					<span class="jobtitle">Digital Product Designer</span>
+					<span class="name heading-font bold">Justin Picard</span>
+					<span class="jobtitle body-font">Digital Product Designer</span>
 				</span>
 			</router-link>
 		</div>
-		<div class="position-fixed top-0 right-0 mr-2 mt-3">
+		<div class="position-fixed top-0 right-0 mr-8 mt-12">
 			<div class="nav-links">
-				<!--<router-link :to="{ name: 'work' }" class="nav-link" @mouseenter="onEnter('work')" @mouseleave="onLeave('work')">
-					<div class="slot-machine-text">
-						<div class="slot-machine-text-container">
-							<span ref="textTopWork">{{ workTitle }}</span>
-							<span class="bottom-text" ref="textBottomWork">{{ workTitle }}</span>
-						</div>
-					</div>
-				</router-link>
-				<span class="star">✦</span>
-				<router-link :to="{ name: 'about' }" class="nav-link" @mouseenter="onEnter('about')" @mouseleave="onLeave('about')">
-					<div class="slot-machine-text">
-						<div class="slot-machine-text-container">
-							<span ref="textTopAbout">{{ aboutTitle }}</span>
-							<span class="bottom-text" ref="textBottomAbout">{{ aboutTitle }}</span>
-						</div>
-					</div>
-				</router-link>
-				<span class="star">✦</span>-->
 				<a href="mailto:hallo@justinpicard.nl" class="nav-link" @mouseenter="onEnter('mail')" @mouseleave="onLeave('mail')" @click.prevent="copy">
 					<div class="slot-machine-text">
 						<div class="slot-machine-text-container">
@@ -45,11 +27,10 @@
 </template>
 
 <script>
-import { ref, onMounted, getCurrentInstance, computed } from 'vue'
+import { ref, onMounted, onUnmounted, getCurrentInstance, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { getImageUrl} from '../utils/image.ts'
-import { SplitText } from 'gsap/SplitText'
-import gsap from 'gsap'
+import { gsap, SplitText, registerGsapPlugins } from '../utils/animations/gsap'
 
 export default {
   methods: {
@@ -65,6 +46,7 @@ export default {
           onComplete: () => {
             this.textBottomMail.innerHTML = '<span>Copied ✨</span>'
             const copiedSplit = new SplitText(this.textBottomMail.querySelector('span'), { type: 'chars', charsClass: 'chars' })
+            this.splitInstances.push(copiedSplit)
             gsap.fromTo(copiedSplit.chars,
               { y: 10, opacity: 0 },
               {
@@ -82,13 +64,15 @@ export default {
           }
         })
 
-        setTimeout(() => {
+        clearTimeout(this.copyResetTimeout)
+        this.copyResetTimeout = setTimeout(() => {
           gsap.to(this.textBottomMail, {
             opacity: 0,
             duration: 0.2,
             onComplete: () => {
               this.textBottomMail.innerHTML = '<span>' + originalText + '</span>'
               const resetSplit = new SplitText(this.textBottomMail.querySelector('span'), { type: 'chars', charsClass: 'chars' })
+              this.splitInstances.push(resetSplit)
               
               // Nieuwe timeline aanmaken
               const newTimeline = gsap.timeline({ paused: true })
@@ -135,9 +119,11 @@ export default {
     }
   },
   data() {
-    return {
+      return {
       text: 'hallo@justinpicard.nl',
       timelines: {},
+      splitInstances: [],
+      copyResetTimeout: null,
     }
   },
   setup() {
@@ -162,16 +148,19 @@ export default {
     const textBottomMail = ref(null)
 
     onMounted(() => {
+      registerGsapPlugins()
+
       document.fonts.ready.then(() => {
         const entries = [
           { key: 'work', top: textTopWork.value, bottom: textBottomWork.value },
           { key: 'about', top: textTopAbout.value, bottom: textBottomAbout.value },
           { key: 'mail', top: textTopMail.value, bottom: textBottomMail.value },
-        ]
+        ].filter(({ top, bottom }) => top && bottom)
 
         entries.forEach(({ key, top, bottom }) => {
           const topSplit = new SplitText(top, { type: 'chars', charsClass: 'chars' })
           const bottomSplit = new SplitText(bottom, { type: 'chars', charsClass: 'chars' })
+          vm?.splitInstances.push(topSplit, bottomSplit)
 
           const timeline = gsap.timeline({ paused: true })
           timeline
@@ -201,6 +190,17 @@ export default {
           }
         })
       })
+    })
+
+    onUnmounted(() => {
+      if (!vm) {
+        return
+      }
+
+      clearTimeout(vm.copyResetTimeout)
+      Object.values(vm.timelines).forEach((timeline) => timeline.kill())
+      vm.splitInstances.forEach((split) => split.revert())
+      vm.splitInstances = []
     })
 
     return {

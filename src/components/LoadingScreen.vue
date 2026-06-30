@@ -8,66 +8,81 @@
 </template>
 
 <script setup>
-import { onMounted, ref, nextTick } from 'vue'
-import { gsap } from 'gsap'
-import SplitText from 'gsap/SplitText'
-
-gsap.registerPlugin(SplitText)
+import { onMounted, onUnmounted, ref, nextTick } from 'vue'
+import { gsap, SplitText, prefersReducedMotion, registerGsapPlugins } from '../utils/animations/gsap'
+import { animationDurations, animationEases, animationStaggers } from '../utils/animations/presets'
 
 const intro = ref(null)
 const message = ref(null)
+let tl
+let split
+let ctx
 
 onMounted(async () => {
 	await nextTick()
+	registerGsapPlugins()
 
 	document.fonts.ready.then(() => {
-		const split = new SplitText(message.value, { type: 'chars' })
-		const chars = split.chars
+		ctx = gsap.context(() => {
+			split = new SplitText(message.value, { type: 'chars' })
+			const chars = split.chars
 
-		// Wrap each char in a mask span
-		chars.forEach(char => {
-			const wrapper = document.createElement('span')
-			wrapper.classList.add('char-mask')
-			char.classList.add('masked-char')
-			char.parentNode.insertBefore(wrapper, char)
-			wrapper.appendChild(char)
-		})
+			// Wrap each char in a mask span
+			chars.forEach(char => {
+				const wrapper = document.createElement('span')
+				wrapper.classList.add('char-mask')
+				char.classList.add('masked-char')
+				char.parentNode.insertBefore(wrapper, char)
+				wrapper.appendChild(char)
+			})
 
-		const tl = gsap.timeline()
-
-		// Animate letters coming in from below, one by one
-		tl.fromTo(
-			chars,
-			{ y: '100%' },
-			{
-				y: '0%',
-				duration: 0.5,
-				stagger: 0.015,
-				ease: 'power2.out'
+			if (prefersReducedMotion()) {
+				gsap.set(intro.value, { yPercent: -100 })
+				return
 			}
-		)
 
-		// Animate letters and wave emoji exiting by moving upward simultaneously
-		tl.to(
-			chars,
-			{
-				y: '-100%',
-				duration: 0.4,
-				ease: 'power2.inOut'
-			},
-			'+=1.4' // start after a brief pause
-		)
+			tl = gsap.timeline()
 
-		tl.to(
-			intro.value, 
-			{ 
-				yPercent: -100,
-				duration: 1,
-				ease: 'power4.inOut'
-			}, 
-			"-=0.4"
-		)
+			// Animate letters coming in from below, one by one
+			tl.fromTo(
+				chars,
+				{ y: '100%' },
+				{
+					y: '0%',
+					duration: 0.5,
+					stagger: animationStaggers.chars,
+					ease: animationEases.out
+				}
+			)
+
+			// Animate letters and wave emoji exiting by moving upward simultaneously
+			tl.to(
+				chars,
+				{
+					y: '-100%',
+					duration: 0.4,
+					ease: animationEases.inOut
+				},
+				'+=1.4'
+			)
+
+			tl.to(
+				intro.value, 
+				{ 
+					yPercent: -100,
+					duration: animationDurations.intro,
+					ease: 'power4.inOut'
+				}, 
+				"-=0.4"
+			)
+		}, intro.value)
 	})
+})
+
+onUnmounted(() => {
+	ctx?.revert()
+	tl?.kill()
+	split?.revert()
 })
 </script>
 

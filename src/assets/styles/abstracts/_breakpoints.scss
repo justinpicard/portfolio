@@ -1,0 +1,21 @@
+@use "sass:map";
+
+$breakpoints: (
+	sm: 36rem,
+	md: 48rem,
+	lg: 64rem,
+	xl: 80rem,
+	2xl: 96rem
+);
+
+@mixin respond($breakpoint) {
+	$width: map.get($breakpoints, $breakpoint);
+
+	@if $width == null {
+		@error "Unknown breakpoint `#{$breakpoint}`.";
+	}
+
+	@media (min-width: #{$width}) {
+		@content;
+	}
+}

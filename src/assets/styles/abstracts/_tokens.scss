@@ -1,0 +1,141 @@
+@use "sass:map";
+@use "variables" as *;
+
+$spacing: (
+	0: 0,
+	1: 0.25rem,
+	2: 0.5rem,
+	3: 0.75rem,
+	4: 1rem,
+	5: 1.25rem,
+	6: 1.5rem,
+	8: 2rem,
+	10: 2.5rem,
+	12: 3rem,
+	16: 4rem,
+	20: 5rem,
+	24: 6rem,
+	32: 8rem
+);
+
+$position-offsets: map.merge($spacing, (
+	50: 50%,
+	100: 100%
+));
+
+$colors: (
+	primary: var(--color-primary),
+	secondary: var(--color-secondary),
+	white: var(--color-white),
+	black: var(--color-black),
+	body: currentcolor,
+	muted: var(--color-muted),
+	light: var(--color-light),
+	dark: var(--color-dark)
+);
+
+$font-sizes: (
+	xs: var(--font-size-xs),
+	sm: var(--font-size-sm),
+	base: var(--font-size-base),
+	md: var(--font-size-md),
+	lg: var(--font-size-lg),
+	xl: var(--font-size-xl),
+	2xl: var(--font-size-2xl)
+);
+
+$font-weights: (
+	light: var(--font-weight-light),
+	normal: var(--font-weight-normal),
+	medium: var(--font-weight-medium),
+	semibold: var(--font-weight-semibold),
+	bold: var(--font-weight-bold)
+);
+
+$line-heights: (
+	none: 1,
+	tight: 1.15,
+	normal: 1.5,
+	relaxed: 1.75
+);
+
+$letter-spacing: (
+	tight: -0.01em,
+	normal: 0,
+	wide: 0.025em
+);
+
+$radii: (
+	none: 0,
+	sm: var(--radius-sm),
+	default: var(--radius),
+	md: var(--radius-md),
+	lg: var(--radius-lg),
+	xl: var(--radius-xl),
+	2xl: var(--radius-2xl),
+	full: var(--radius-full)
+);
+
+$z-indexes: (
+	0: 0,
+	10: 10,
+	20: 20,
+	30: 30,
+	40: 40,
+	50: 50
+);
+
+$shadows: (
+	sm: var(--shadow-sm),
+	default: var(--shadow),
+	lg: var(--shadow-lg)
+);
+
+@mixin root-custom-properties {
+	--color-primary: #{$primary};
+	--color-secondary: #{$secondary};
+	--color-white: #{$white};
+	--color-black: #{$black};
+	--color-muted: color-mix(in srgb, currentcolor 65%, transparent);
+	--color-light: #{$white};
+	--color-dark: #{$black};
+
+	--font-body: "FunnelSans-Regular", "TTFirsNeue-Regular", system-ui, Avenir, Helvetica, Arial, sans-serif;
+	--font-heading: "Egiane", system-ui, Avenir, Helvetica, Arial, sans-serif;
+	--body-font: var(--font-body);
+	--heading-font: var(--font-heading);
+
+	--font-weight-light: #{$font-weight-light};
+	--font-weight-normal: #{$font-weight-regular};
+	--font-weight-medium: #{$font-weight-medium};
+	--font-weight-semibold: #{$font-weight-semibold};
+	--font-weight-bold: #{$font-weight-bold};
+
+	--font-size-xs: #{$font-size-xs};
+	--font-size-sm: #{$font-size-sm};
+	--font-size-base: #{$font-size-base};
+	--font-size-md: #{$font-size-md};
+	--font-size-lg: #{$font-size-lg};
+	--font-size-xl: #{$font-size-xl};
+	--font-size-2xl: clamp(4rem, 12vw, 8rem);
+
+	--container-padding: 1.5rem;
+	--section-padding-sm: clamp(5em, 12vh, 12em);
+	--section-padding: clamp(5em, 21vh, 12em);
+
+	--radius-sm: 0.125rem;
+	--radius: 0.25rem;
+	--radius-md: 0.375rem;
+	--radius-lg: 0.5rem;
+	--radius-xl: 0.75rem;
+	--radius-2xl: 1rem;
+	--radius-full: 9999px;
+
+	--shadow-sm: 0 0.125rem 0.375rem color-mix(in srgb, var(--color-black) 12%, transparent);
+	--shadow: 0 0.5rem 1.5rem color-mix(in srgb, var(--color-black) 16%, transparent);
+	--shadow-lg: 0 1rem 3rem color-mix(in srgb, var(--color-black) 22%, transparent);
+
+	@each $key, $value in $spacing {
+		--space-#{$key}: #{$value};
+	}
+}

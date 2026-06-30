@@ -1,0 +1,44 @@
+@use "../abstracts" as *;
+
+// Margin and padding utilities generated from the 4px spacing scale.
+$spacing-properties: (
+	m: margin,
+	mt: margin-top,
+	mr: margin-right,
+	mb: margin-bottom,
+	ml: margin-left,
+	p: padding,
+	pt: padding-top,
+	pr: padding-right,
+	pb: padding-bottom,
+	pl: padding-left
+);
+
+@each $key, $value in $spacing {
+	@each $prefix, $property in $spacing-properties {
+		@include utility("#{$prefix}-#{$key}") {
+			#{$property}: var(--space-#{$key}) !important;
+		}
+	}
+
+	@include utility("mx-#{$key}") {
+		margin-inline: var(--space-#{$key}) !important;
+	}
+
+	@include utility("my-#{$key}") {
+		margin-block: var(--space-#{$key}) !important;
+	}
+
+	@include utility("px-#{$key}") {
+		padding-inline: var(--space-#{$key}) !important;
+	}
+
+	@include utility("py-#{$key}") {
+		padding-block: var(--space-#{$key}) !important;
+	}
+}
+
+// Backward-compatible legacy class currently used by LoadingScreen.vue.
+.ml-0_5 {
+	margin-inline-start: var(--space-2) !important;
+}

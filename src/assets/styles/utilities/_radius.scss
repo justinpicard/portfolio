@@ -1,0 +1,17 @@
+@use "../abstracts" as *;
+
+@each $name, $value in $radii {
+	$selector: "rounded-#{$name}";
+
+	@if $name == default {
+		$selector: "rounded";
+	}
+
+	@include utility($selector) {
+		border-radius: $value !important;
+	}
+}
+
+.rounded-pill {
+	border-radius: var(--radius-full) !important;
+}
