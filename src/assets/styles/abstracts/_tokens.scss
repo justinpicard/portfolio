@@ -34,36 +34,52 @@ $colors: (
 	dark: var(--color-dark)
 );
 
-$font-sizes: (
-	xs: var(--font-size-xs),
-	sm: var(--font-size-sm),
-	base: var(--font-size-base),
-	md: var(--font-size-md),
-	lg: var(--font-size-lg),
-	xl: var(--font-size-xl),
-	2xl: var(--font-size-2xl)
+$font-size-values: (
+	xs: $font-size-xs,
+	sm: $font-size-sm,
+	base: $font-size-base,
+	md: $font-size-md,
+	lg: $font-size-lg,
+	xl: $font-size-xl,
+	2xl: $font-size-2xl
 );
 
-$font-weights: (
-	light: var(--font-weight-light),
-	normal: var(--font-weight-normal),
-	medium: var(--font-weight-medium),
-	semibold: var(--font-weight-semibold),
-	bold: var(--font-weight-bold)
+$font-weight-values: (
+	light: $font-weight-light,
+	normal: $font-weight-regular,
+	medium: $font-weight-medium,
+	semibold: $font-weight-semibold,
+	bold: $font-weight-bold,
+	"black": $font-weight-black
 );
 
-$line-heights: (
-	none: 1,
-	tight: 1.15,
-	normal: 1.5,
-	relaxed: 1.75
+$line-height-values: (
+	none: $line-height-none,
+	tight: $line-height-tight,
+	normal: $line-height-normal,
+	relaxed: $line-height-relaxed
 );
 
-$letter-spacing: (
-	tight: -0.01em,
-	normal: 0,
-	wide: 0.025em
+$letter-spacing-values: (
+	tight: $letter-spacing-tight,
+	normal: $letter-spacing-normal,
+	wide: $letter-spacing-wide
 );
+
+@function css-token-map($prefix, $values) {
+	$tokens: ();
+
+	@each $name, $value in $values {
+		$tokens: map.set($tokens, $name, var(--#{$prefix}-#{$name}));
+	}
+
+	@return $tokens;
+}
+
+$font-sizes: css-token-map("font-size", $font-size-values);
+$font-weights: css-token-map("font-weight", $font-weight-values);
+$line-heights: css-token-map("line-height", $line-height-values);
+$letter-spacing: css-token-map("letter-spacing", $letter-spacing-values);
 
 $radii: (
 	none: 0,
@@ -100,24 +116,26 @@ $shadows: (
 	--color-light: #{$white};
 	--color-dark: #{$black};
 
-	--font-body: "FunnelSans-Regular", "TTFirsNeue-Regular", system-ui, Avenir, Helvetica, Arial, sans-serif;
-	--font-heading: "Egiane", system-ui, Avenir, Helvetica, Arial, sans-serif;
+	--font-body: "General Sans", system-ui, Avenir, Helvetica, Arial, sans-serif;
+	--font-heading: "Clash Grotesk", system-ui, Avenir, Helvetica, Arial, sans-serif;
 	--body-font: var(--font-body);
 	--heading-font: var(--font-heading);
 
-	--font-weight-light: #{$font-weight-light};
-	--font-weight-normal: #{$font-weight-regular};
-	--font-weight-medium: #{$font-weight-medium};
-	--font-weight-semibold: #{$font-weight-semibold};
-	--font-weight-bold: #{$font-weight-bold};
+	@each $name, $value in $font-weight-values {
+		--font-weight-#{$name}: #{$value};
+	}
 
-	--font-size-xs: #{$font-size-xs};
-	--font-size-sm: #{$font-size-sm};
-	--font-size-base: #{$font-size-base};
-	--font-size-md: #{$font-size-md};
-	--font-size-lg: #{$font-size-lg};
-	--font-size-xl: #{$font-size-xl};
-	--font-size-2xl: clamp(4rem, 12vw, 8rem);
+	@each $name, $value in $font-size-values {
+		--font-size-#{$name}: #{$value};
+	}
+
+	@each $name, $value in $line-height-values {
+		--line-height-#{$name}: #{$value};
+	}
+
+	@each $name, $value in $letter-spacing-values {
+		--letter-spacing-#{$name}: #{$value};
+	}
 
 	--container-padding: 1.5rem;
 	--section-padding-sm: clamp(5em, 12vh, 12em);

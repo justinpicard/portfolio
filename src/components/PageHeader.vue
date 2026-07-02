@@ -126,10 +126,3 @@
   })
   </script>
   
-  <style scoped>
-  .text {
-	
-	/*mask-image: linear-gradient(to top, black 60%, transparent 100%);
-	-webkit-mask-image: linear-gradient(to top, black 60%, transparent 100%);*/
-  }
-  </style>

@@ -3,7 +3,11 @@
     <div class="project-item mb-3">
       <a :href="link" target="_blank" rel="noopener">
         <figure class="project-image mb-1">
-          <img :src="'/images/' + image + '.jpg'">
+          <BaseImage
+            :src="`/images/${image}`"
+            :alt="name"
+            aspect-ratio="9 / 11"
+          />
         </figure>
         <div class="project-info">
           <h3 class="project-title">{{ name }}</h3>
@@ -15,7 +19,12 @@
 </template>
 
 <script>
+import BaseImage from './base/BaseImage.vue'
+
 export default {
+  components: {
+    BaseImage
+  },
   props: [
       'name',
       'image',

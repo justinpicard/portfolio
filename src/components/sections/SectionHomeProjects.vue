@@ -1,5 +1,5 @@
 <template>
-	<section class="section projects pt-0" id="section-projects" ref="root">
+	<section class="section home-projects projects pt-0" id="section-projects" ref="root">
 		<div class="pinned-title-wrapper">
 			<div class="title text">
 				<h2 class="section-title" ref="titleRef">my work</h2>
@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import ProjectItem from "../../components/ProjectItem.vue";
+import ProjectItem from "../ProjectItem.vue";
 import { ref, onMounted, onUnmounted } from 'vue'
 import { gsap, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
 import { animationDurations, animationEases, animationStaggers } from '../../utils/animations/presets'
@@ -65,38 +65,3 @@ onUnmounted(() => {
   splitTitle?.revert()
 })
 </script>
-
-<style scoped>
-.pinned-title-wrapper {
-	height: 100vh;
-	position: relative;
-	z-index: 1;
-	pointer-events: none;
-	width: 100%;
-	position: sticky;
-	top: 0;
-	overflow: hidden;
-	margin-top: -30vh;
-}
-
-.title {
-	z-index: 1;
-    pointer-events: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: unsafe center;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    position: absolute;
-    top: 0;
-}
-.split-word {
-  display: inline-block;
-  overflow: hidden;
-}
-
-.section-title {
-
-}
-</style>

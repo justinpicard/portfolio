@@ -1,0 +1,19 @@
+.base-image {
+	display: block;
+	width: var(--base-image-width, 100%);
+	height: var(--base-image-height, auto);
+	aspect-ratio: var(--base-image-aspect-ratio, auto);
+	overflow: hidden;
+
+	img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: var(--base-image-fit, cover);
+		object-position: var(--base-image-position, center);
+	}
+
+	&--rounded {
+		border-radius: var(--radius-xl, 0.75rem);
+	}
+}

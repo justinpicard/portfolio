@@ -4,6 +4,8 @@
 .font-heading,
 .heading-font {
 	font-family: var(--heading-font) !important;
+	font-weight: var(--font-weight-semibold);
+	line-height: var(--line-height-tight);
 }
 
 .font-body,
@@ -16,10 +18,6 @@
 	@include utility("text-#{$name}") {
 		font-size: $value !important;
 	}
-}
-
-.text-xl {
-	line-height: 1.33 !important;
 }
 
 // Alignment, transform, style, weight, leading, and tracking.

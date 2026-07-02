@@ -85,16 +85,3 @@ onUnmounted(() => {
 	split?.revert()
 })
 </script>
-
-<style scoped>
-.char-mask {
-	overflow: hidden;
-	display: inline-block;
-	position: relative;
-}
-.masked-char {
-	display: inline-block;
-	transform: translateY(100%);
-	will-change: transform;
-}
-</style>

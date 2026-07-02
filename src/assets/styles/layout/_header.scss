@@ -23,10 +23,10 @@
 			font-family: var(--heading-font);
 
 			span {
-				font-size: $font-size-lg;
+				font-size: $font-size-md;
 				line-height: 1.1;
 
-				&.jobtitle {
+				&.role {
 					font-size: $font-size-sm;
 				}
 			}
@@ -39,23 +39,4 @@
 			margin: 0 1rem 0 0;
 		}
 	}
-
-	.work-status {
-
-		//&::before {
-		//	content: '';
-		//	display: inline-block;
-		//	width: 8px;
-		//	height: 8px;
-		//	background-color: green;
-		//	border-radius: 10px;
-		//	margin-right: 1rem;
-		//	box-shadow: 0 0 10px rgb(28 219 28);
-		//}
-	}
-}
-
-.logo-trigger {
-	position: absolute;
-	inset-block-end: 0;
 }

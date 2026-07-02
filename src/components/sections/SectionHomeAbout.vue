@@ -2,12 +2,21 @@
   <section class="section about">
     <div class="container">
       <div class="row">
-        <div class="col-12 col-lg-10 offset-lg-1 mb-3" ref="aboutText">
-          	<p  class="about-text text-xl heading-font narrow-bold mb-1">Hi <span class="wave">👋🏼</span> my name is Justin and I'm a digital product designer from The Netherlands. I love designing and building applications that look great and are easy to use.
+		<div class="col-12 col-lg-4">
+			<div class="personal-image" ref="personalImage">
+				<BaseImage
+					src="/images/justin-picard"
+					alt="Justin Picard"
+					aspect-ratio="3 / 2"
+				/>
+			</div>
+		</div>
+        <div class="col-12 col-lg-8 mb-3" ref="aboutText">
+          	<p  class="about-text text-lg heading-font mb-8">Hi <span class="wave">👋🏼</span> my name is Justin and I'm a digital product designer from The Netherlands. I love designing and building applications that look great and are easy to use.
   			</p>
 			<p>I am currently focussing on building scalable design systems and improving the user experience of SaaS products. In my free time, I love exploring side projects that combine design and development, usually something with too many ideas and too little time.</p>
 		</div>
-		<div class="col-12 col-lg-10 offset-lg-1 mt-8">
+		<div class="col-12 col-lg-8 mb-3 offset-lg-4 mt-8">
 			<Button
 				label="More about me"
 				:to="{ name: 'about' }"
@@ -19,12 +28,6 @@
 		
       </div>
     </div>
-	<img 
-		ref="duhGif"
-		:src="getImageUrl('duh','gif')"
-		alt="duh gif"
-		class="duh-gif"
-	/>
   </section>
 </template>
 
@@ -32,8 +35,8 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { gsap, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
 import { animationDurations, animationEases, animationStaggers } from '../../utils/animations/presets'
-import { getImageUrl } from '../../utils/image'
-import Button from '../../components/Button.vue'
+import Button from '../Button.vue'
+import BaseImage from '../base/BaseImage.vue'
 
 const aboutText = ref<HTMLElement | null>(null)
 const duhGif = ref<HTMLImageElement | null>(null)

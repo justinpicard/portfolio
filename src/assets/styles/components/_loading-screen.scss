@@ -32,3 +32,17 @@
 .wave {
 	display: inline-block;
 }
+
+.intro-screen {
+	.char-mask {
+		position: relative;
+		display: inline-block;
+		overflow: hidden;
+	}
+
+	.masked-char {
+		display: inline-block;
+		will-change: transform;
+		transform: translateY(100%);
+	}
+}

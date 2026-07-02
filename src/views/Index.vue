@@ -2,12 +2,14 @@
 	<LoadingScreen />
 	<SectionHomeHero/>
 	<SectionHomeAbout />
+	<HomePhotoStackSection />
 	<SectionHomeProjects />
 </template>
 
 <script setup>
 import LoadingScreen from "../components/LoadingScreen.vue"
-import SectionHomeHero from "./home/SectionHomeHero.vue";
-import SectionHomeAbout from "./home/SectionHomeAbout.vue";
-import SectionHomeProjects from "./home/SectionHomeProjects.vue";
+import HomePhotoStackSection from "../components/sections/HomePhotoStackSection.vue"
+import SectionHomeHero from "../components/sections/SectionHomeHero.vue";
+import SectionHomeAbout from "../components/sections/SectionHomeAbout.vue";
+import SectionHomeProjects from "../components/sections/SectionHomeProjects.vue";
 </script>

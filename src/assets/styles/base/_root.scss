@@ -3,14 +3,14 @@
 :root {
 	@include root-custom-properties;
 
-	line-height: 1.5;
+	line-height: var(--line-height-normal);
 	font-weight: $font-weight-regular;
 	font-size: 1rem;
 	color-scheme: light dark;
 	color: var(--color-white);
 	background-color: var(--color-primary);
 	background-position: 50%;
-	background-image: url("../images/dot3.png");
+	background-image: url("/images/dot3.png");
 	background-attachment: fixed;
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;

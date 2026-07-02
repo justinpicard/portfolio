@@ -1,5 +1,5 @@
 <template>
-  <div class="marquee-container" ref="container">
+  <div class="marquee marquee-container" ref="container">
     <div class="loop-wrap">
       <ul class="loop loop--left">
         <li>Justin Picard</li>
@@ -92,31 +92,3 @@ onUnmounted(() => {
   cleanupClones()
 })
 </script>
-
-<style scoped>
-.marquee-container {
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
-
-.loop-wrap {
-  overflow: hidden;
-  width: 100%;
-}
-
-.loop {
-  display: flex;
-  white-space: nowrap;
-  padding: 0;
-  margin: 0;
-  list-style: none;
-  will-change: transform;
-}
-
-.loop li {
-  font-size: 6vw;
-  padding: 0 2vw;
-  white-space: nowrap;
-}
-</style>

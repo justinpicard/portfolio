@@ -33,7 +33,8 @@ h5, .h5,
 h6, .h6 {
 	margin-top: 0;
 	font-family: var(--heading-font);
-	font-weight: 750;
+	font-weight: 800;
+	line-height: var(--line-height-tight);
 }
 
 h2, .h2 {
@@ -197,7 +198,7 @@ p {
 
 .text-xl {
 	font-size: $font-size-xl;
-	line-height: 1.33;
+	line-height: 1.1;
 }
 
 .byline {

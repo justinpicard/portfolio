@@ -3,11 +3,14 @@
 		<div class="position-fixed top-0 left-0 ml-8 mt-8">
 			<router-link :to="{ name: 'home' }" class="site-logo">
 				<figure class="avatar">
-					<img :src="getImageUrl('justin-picard-avatar','jpg')" alt="">
+					<BaseImage
+						src="/images/justin-picard-avatar"
+						alt="Justin Picard"
+					/>
 				</figure>
 				<span class="site-title">
-					<span class="name heading-font bold">Justin Picard</span>
-					<span class="jobtitle body-font">Digital Product Designer</span>
+					<span class="name heading-font bold text-md">Justin Picard</span>
+					<span class="role body-font">Digital Product Designer</span>
 				</span>
 			</router-link>
 		</div>
@@ -29,12 +32,14 @@
 <script>
 import { ref, onMounted, onUnmounted, getCurrentInstance, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { getImageUrl} from '../utils/image.ts'
 import { gsap, SplitText, registerGsapPlugins } from '../utils/animations/gsap'
+import BaseImage from './base/BaseImage.vue'
 
 export default {
+  components: {
+    BaseImage
+  },
   methods: {
-    getImageUrl,
     copy() {
       try {
         navigator.clipboard.writeText(this.text)
@@ -216,36 +221,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.slot-machine-text {
-  overflow: hidden;
-  display: block;
-  height: 2rem;
-  position: relative;
-}
-
-.slot-machine-text-container {
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  justify-content: start;
-  position: relative;
-}
-
-.slot-machine-text-container span:nth-child(2) {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.slot-machine-text-container span {
-  display: inline-block;
-  white-space: nowrap;
-  will-change: transform, opacity;
-}
-
-.chars {
-  display: inline-block;
-}
-</style>

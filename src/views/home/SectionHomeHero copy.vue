@@ -13,15 +13,17 @@
       <div class="wrapperRollingText02">
         <div class="rollingText02 text">
           <span><span class="star">✦</span> Digital product designer</span>
-          <span><span class="star">✦</span> Vibe coder</span>
 		  <span><span class="star">✦</span> Digital product designer</span>
-          <span><span class="star">✦</span> Vibe coder</span>
+          <span><span class="star">✦</span> Digital product designer</span>
         </div>
       </div>
-    </div>
+	</div>
 	<div class="personal-image" ref="personalImage">
       <figure>
-        <img :src="getImageUrl('justin-picard','jpg')" alt="">
+        <BaseImage
+          src="/images/justin-picard"
+          alt="Justin Picard"
+        />
       </figure>
     </div>
   </div>
@@ -31,7 +33,7 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { gsap, ScrollTrigger, registerGsapPlugins } from '../../utils/animations/gsap'
 import SplitType from 'split-type'
-import { getImageUrl} from '../../utils/image.ts'
+import BaseImage from '../../components/base/BaseImage.vue'
 
 const personalImage = ref(null)
 const root = ref(null)
@@ -193,17 +195,3 @@ onUnmounted(() => {
   splitInstances.forEach(split => split.revert())
 })
 </script>
-
-<style scoped>
-.marquee-container {
-	position: absolute;
-	top: 50%;
-	transform: translateY(-50%);
-	overflow: hidden;
-	/*mix-blend-mode:difference;*/
-	z-index: 2;
-}
-.text.rollingText02 {
-	transform: translateX(-25%)
-}
-</style>

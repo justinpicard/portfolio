@@ -1,0 +1,32 @@
+@use "../abstracts" as *;
+
+section.about {
+	z-index: 1;
+	padding-block: calc(var(--section-padding) * 0.66);
+
+	.obviously {
+		position: relative;
+		z-index: 1;
+		font-size: $font-size-lg;
+		text-decoration: underline;
+		user-select: none;
+		mix-blend-mode: difference;
+	}
+
+	.duh-gif {
+		position: fixed;
+		z-index: -1;
+		display: none;
+		width: 300px;
+		height: auto;
+		pointer-events: none;
+	}
+}
+
+.wave {
+	display: inline-block;
+	animation-name: wave-animation;
+	animation-duration: 2.5s;
+	animation-iteration-count: infinite;
+	transform-origin: 70% 70%;
+}
