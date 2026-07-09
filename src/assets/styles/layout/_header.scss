@@ -23,11 +23,11 @@
 			font-family: var(--heading-font);
 
 			span {
-				font-size: $font-size-md;
+				font-size: 1.75rem;
 				line-height: 1.1;
 
 				&.role {
-					font-size: $font-size-sm;
+					font-size: 1.15rem;
 				}
 			}
 		}

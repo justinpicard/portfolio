@@ -12,16 +12,10 @@ const routes = [
         redirect: "/"
     },
 	{
-        path: "/about",
-		name: "about",
-        meta: { title: 'About' },
-        component: () => import('./views/About.vue')
-    },
-	{
-        path: "/work",
-		name: "work",
-        meta: { title: 'My work' },
-        component: () => import('./views/Work.vue')
+        path: "/resume",
+		name: "resume",
+        meta: { title: 'My resume' },
+        component: () => import('./views/Resume.vue')
     },
     {
         path: "/:catchall(.*)*",

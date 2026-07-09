@@ -41,10 +41,17 @@
 			@include scrimGradient($primary, "to top");
 			top: initial;
 			bottom: 0;
+			opacity: 0;
 		}
 
 		&.scrolled {
 			&::before {
+				opacity: 1;
+			}
+		}
+
+		&.scrolled-after {
+			&::after {
 				opacity: 1;
 			}
 		}

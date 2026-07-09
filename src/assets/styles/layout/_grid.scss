@@ -18,13 +18,19 @@ $columns: 12;
 /* Responsive column and offset utilities */
 @each $name, $size in $breakpoints {
 	@include respond($name) {
+		$prefix: $name;
+
+		@if $name == 2xl {
+			$prefix: "\\32xl";
+		}
+
 		@for $width from 1 through $columns {
-			.col-#{$name}-#{$width} {
+			.#{$prefix}\:col-#{$width} {
 				flex-basis: math.div($width, $columns) * 100%;
 				padding-inline: var(--container-padding);
 			}
 
-			.offset-#{$name}-#{$width} {
+			.#{$prefix}\:offset-#{$width} {
 				margin-inline-start: math.div($width, $columns) * 100%;
 			}
 		}

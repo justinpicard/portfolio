@@ -8,6 +8,7 @@
 		<div class="projects">
 			<div class="row">
 				<div class="col-12">
+					<!--
 					<project-item
 						v-for="project in projects"
 						:key="project.id"
@@ -18,6 +19,7 @@
 						:type="project.type"
 						:year="project.year"
 					/>
+				-->
 				</div>
 			</div>
 		</div>

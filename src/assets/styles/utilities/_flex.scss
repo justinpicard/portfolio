@@ -23,6 +23,13 @@ $flex-utilities: (
 	}
 }
 
+// Order utilities.
+@for $order from 0 through 12 {
+	@include utility("order-#{$order}") {
+		order: $order !important;
+	}
+}
+
 // Alignment utilities.
 $justify-values: (
 	start: flex-start,

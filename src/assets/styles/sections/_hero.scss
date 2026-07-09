@@ -1,38 +1,192 @@
 @use "../abstracts" as *;
 
 .home-hero {
+	isolation: isolate;
 	position: relative;
 	width: 100vw;
 	height: 100vh;
+	overflow: hidden;
+
+	.hero-composition {
+		position: relative;
+		display: grid;
+		grid-template-columns: 1fr;
+		align-items: center;
+		justify-items: center;
+		width: 100%;
+	}
+
+	.hero-name {
+		position: relative;
+		z-index: 2;
+		display: inline-block;
+		overflow: hidden;
+		font-family: var(--heading-font);
+		font-size: clamp(5rem, 20vw, 14rem);
+		font-weight: 800;
+		line-height: 1;
+		pointer-events: none;
+
+		@include respond(sm) {
+			font-size: clamp(6rem, 12vw, 18rem);
+		}
+	}
+
+	.hero-name--first {
+		order: 0;
+	}
+
+	.hero-name--last {
+		order: 2;
+	}
+
+	.hero-figure {
+		position: relative;
+		z-index: 1;
+		order: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.hero-figure__media {
+		flex: none;
+		width: var(--hero-final-mask-width, 500px);
+		height: var(--hero-final-mask-height, 600px);
+	}
+
+	.hero-figure__content {
+		display: flex;
+		justify-content: center;
+		width: 100%;
+		overflow: hidden;
+	}
+
+	.hero-figure__role {
+		display: inline-block;
+		text-align: center;
+	}
+
+	.split-word {
+		display: inline-block;
+		will-change: transform;
+	}
+
+	&__scroll-indicator {
+		position: absolute;
+		left: 50%;
+		bottom: var(--space-8);
+		z-index: 2;
+		transform: translateX(-50%);
+		pointer-events: none;
+
+		span {
+			display: inline-block;
+			font-family: var(--body-font);
+			font-size: var(--font-size-sm);
+			line-height: 1;
+			white-space: nowrap;
+		}
+	}
+
+	@include respond(lg) {
+		.hero-composition {
+			grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+			grid-template-rows: 1fr 1fr;
+			grid-template-areas:
+				"first figure ."
+				". figure last";
+		}
+
+		.hero-name--first {
+			grid-area: first;
+			justify-self: end;
+			align-self: end;
+			order: initial;
+			transform: translate(0.7em, -0.2em);
+		}
+
+		.hero-figure {
+			grid-area: figure;
+			align-self: center;
+			order: initial;
+		}
+
+		.hero-name--last {
+			grid-area: last;
+			justify-self: start;
+			align-self: start;
+			order: initial;
+			transform: translate(-1em, 0);
+		}
+	}
 
 	.personal-image {
 		position: absolute;
-		top: 50%;
-		left: 50%;
-		z-index: -1;
-		height: 50vh;
-		aspect-ratio: 9 / 11;
-		box-shadow: 0 40px 80px rgba(0, 0, 0, 0.3);
-		transform: translate(-50%, 0);
+		top: 0;
+		left: 0;
+		z-index: 0;
+		height: 100vh;
+		width: 100vw;
+		pointer-events: none;
 
-		@include respond(sm) {
-			height: 70vh;
-		}
-
-		figure {
-			position: relative;
-			width: 100%;
-			height: 100%;
+		&__mask {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
 			overflow: hidden;
 		}
 
-		img {
+		&__wipe {
 			position: absolute;
+			inset: 0;
+			z-index: 2;
+			background-color: var(--hero-wipe-color, #1AFFD5);
+			transform: scaleX(0);
+			transform-origin: left center;
+			will-change: transform;
+		}
+
+		&__frame {
+			position: absolute;
+			top: 50%;
 			left: 50%;
-			width: auto;
+			z-index: 1;
+			width: var(--hero-final-frame-width, 100vw);
+			height: var(--hero-final-frame-height, 100vh);
+			transform: translate(-50%, -50%);
+		}
+
+		&__parallax {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+			will-change: transform;
+		}
+
+		.base-image {
+			width: 100%;
+			height: 100%;
+		}
+
+		.home-hero__image {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+		}
+
+		img {
+			width: 100%;
 			height: 100%;
 			object-fit: cover;
-			transform: translateX(-50%);
+			transform: translateY(0) scale(1.1);
+			transform-origin: center center;
+			visibility: hidden;
+			will-change: transform;
 		}
 
 		.image-backdrop {

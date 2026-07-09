@@ -1,9 +1,9 @@
 <template>
-	<LoadingScreen />
 	<SectionHomeHero/>
 	<SectionHomeAbout />
-	<HomePhotoStackSection />
 	<SectionHomeProjects />
+	<HomePhotoStackSection />
+	
 </template>
 
 <script setup>

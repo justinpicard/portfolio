@@ -6,7 +6,7 @@
           <div class="social-links">
             <a href="https://www.linkedin.com/in/picardjustin/" target="_blank" rel="noopener">LinkedIn</a><span class="star">✦</span>
             <a href="https://dribbble.com/justinpicard" target="_blank" rel="noopener">Dribbble</a><span class="star">✦</span>
-            <a href="https://blog.justinpicard.nl" target="_blank">Blog</a>
+			<router-link :to="{ name: 'resume' }">Resume</router-link>
           </div>
         </div>
       </div>

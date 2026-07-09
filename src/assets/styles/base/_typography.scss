@@ -101,6 +101,15 @@ p {
 	overflow: hidden;
 }
 
+.eyebrow {
+	font-size: var(--font-size-sm);
+	font-weight: var(--font-weight-semibold);
+	line-height: var(--line-height-none);
+	text-transform: uppercase;
+	letter-spacing: 3px;
+	color: $secondary;
+}
+
 //.slot-machine-text {
 //	z-index: 10;
 //	flex-direction: column;

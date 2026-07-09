@@ -1,5 +1,5 @@
 <template>
-	<main class="main" :class="{ 'scrolled': hasScrolled }">
+	<main class="main" :class="{ 'scrolled': hasScrolled, 'scrolled-after': hasScrolledAfter }">
 		<AppHeader/>
 		<router-view></router-view>
 		<AppFooter />
@@ -10,14 +10,20 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import AppHeader from "./components/AppHeader.vue"
 import AppFooter from "./components/AppFooter.vue"
 
+const SCROLL_THRESHOLD = 10
+const AFTER_SCROLL_THRESHOLD = 10
+
 const hasScrolled = ref(false)
+const hasScrolledAfter = ref(false)
 
 function handleScroll() {
-	hasScrolled.value = window.scrollY > 10
+	hasScrolled.value = window.scrollY > SCROLL_THRESHOLD
+	hasScrolledAfter.value = window.scrollY > AFTER_SCROLL_THRESHOLD
 }
 
 onMounted(() => {
-	window.addEventListener('scroll', handleScroll)
+	handleScroll()
+	window.addEventListener('scroll', handleScroll, { passive: true })
 })
 
 onUnmounted(() => {

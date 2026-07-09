@@ -1,108 +1,99 @@
 <template>
-  <section class="section about">
-    <div class="container">
-      <div class="row">
-		<div class="col-12 col-lg-4">
-			<div class="personal-image" ref="personalImage">
-				<BaseImage
-					src="/images/justin-picard"
-					alt="Justin Picard"
-					aspect-ratio="3 / 2"
-				/>
+	<section class="section about" ref="root">
+		<div class="container">
+			<div class="row">
+				<div class="about-text col-12 lg:col-8 lg:offset-2 mb-3" ref="aboutText">
+					<p class="about-section__eyebrow eyebrow mb-8" ref="aboutEyebrow">About</p>
+					<h2 class="text-xl heading-font mb-8" ref="aboutTitle">
+						Good digital products have always fascinated me. Not just for how they look, but for how everything behind the interface comes together.
+					</h2>
+					<p>Hi <span class="wave">👋🏼</span> I’m Justin, a Digital Product Designer from the Netherlands. I’ve spent more than 10 years designing websites and digital products, and over time my curiosity naturally shifted from visual design towards product thinking, design systems and how products evolve as they grow.</p>
+					<!--
+					<p>Great interfaces matter, but they’re only one piece of the puzzle. I’m just as interested in the decisions behind them, how everything fits together and what makes a product continue to work as it grows.
+					</p>
+					<p>Understanding how products are built has changed the way I design. It reminds me that good products aren’t just about great interfaces, but about making the right decisions for the people using them and the teams building them.
+					</p>
+					-->
+					<p>In my free time, I enjoy turning ideas into side projects that push me beyond my comfort zone. Some become products, others don’t. Every project teaches me something new,  which is what keeps me curious.
+					</p>
+				</div>
 			</div>
 		</div>
-        <div class="col-12 col-lg-8 mb-3" ref="aboutText">
-          	<p  class="about-text text-lg heading-font mb-8">Hi <span class="wave">👋🏼</span> my name is Justin and I'm a digital product designer from The Netherlands. I love designing and building applications that look great and are easy to use.
-  			</p>
-			<p>I am currently focussing on building scalable design systems and improving the user experience of SaaS products. In my free time, I love exploring side projects that combine design and development, usually something with too many ideas and too little time.</p>
-		</div>
-		<div class="col-12 col-lg-8 mb-3 offset-lg-4 mt-8">
-			<Button
-				label="More about me"
-				:to="{ name: 'about' }"
-				variant="outlined"
-				color="light"
-				size="md"
-			/>
-        </div>
-		
-      </div>
-    </div>
-  </section>
+	</section>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { gsap, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
 import { animationDurations, animationEases, animationStaggers } from '../../utils/animations/presets'
-import Button from '../Button.vue'
-import BaseImage from '../base/BaseImage.vue'
 
+const root = ref<HTMLElement | null>(null)
 const aboutText = ref<HTMLElement | null>(null)
-const duhGif = ref<HTMLImageElement | null>(null)
-let aboutSplit: any
+const aboutEyebrow = ref<HTMLParagraphElement | null>(null)
+const aboutTitle = ref<HTMLHeadingElement | null>(null)
+let eyebrowSplit: SplitText | undefined
+let titleSplit: SplitText | undefined
+let bodySplit: SplitText | undefined
 let ctx: gsap.Context | undefined
-let onMouseMove: ((event: MouseEvent) => void) | undefined
+
+function wrapSplitLines(lines: Element[]) {
+	lines.forEach((line: Element) => {
+		const wrapper = document.createElement('div')
+		wrapper.classList.add('split-line-wrapper')
+		line.parentNode?.insertBefore(wrapper, line)
+		wrapper.appendChild(line)
+	})
+}
 
 onMounted(() => {
 	registerGsapPlugins()
 
 	ctx = gsap.context(() => {
-		aboutSplit = new SplitText(aboutText.value, { type: 'lines', linesClass: 'split-line' })
+		if (!aboutText.value || !aboutEyebrow.value || !aboutTitle.value) return
 
-		aboutSplit.lines.forEach((line: Element) => {
-			const wrapper = document.createElement('div')
-			wrapper.classList.add('split-line-wrapper')
-			line.parentNode?.insertBefore(wrapper, line)
-			wrapper.appendChild(line)
+		const aboutBody = gsap.utils.toArray<HTMLParagraphElement>(
+			aboutText.value.querySelectorAll('p:not(.about-section__eyebrow)')
+		)
+
+		eyebrowSplit = new SplitText(aboutEyebrow.value, { type: 'lines', linesClass: 'split-line' })
+		titleSplit = new SplitText(aboutTitle.value, { type: 'lines', linesClass: 'split-line' })
+		bodySplit = new SplitText(aboutBody, { type: 'lines', linesClass: 'split-line' })
+
+		wrapSplitLines(eyebrowSplit.lines)
+		wrapSplitLines(titleSplit.lines)
+		wrapSplitLines(bodySplit.lines)
+
+		const revealLines = [
+			...eyebrowSplit.lines,
+			...titleSplit.lines,
+			...bodySplit.lines
+		]
+
+		const timeline = gsap.timeline({
+			scrollTrigger: {
+				trigger: aboutText.value,
+				start: 'top 60%',
+				toggleActions: 'play none none none'
+			}
 		})
 
-		gsap.fromTo(
-			aboutSplit.lines,
-			{ 
-				y: 90, 
-				opacity: 1 
-			},
-			{
-				y: 0,
-				opacity: 1,
-				duration: animationDurations.reveal,
-				stagger: animationStaggers.lines,
-				ease: animationEases.strongOut,
-				scrollTrigger: {
-					trigger: aboutText.value,
-					start: 'top 60%',
-					toggleActions: 'play reverse play reverse'
-				}
-			}
-		)
-	}, aboutText.value ?? undefined)
-
-  let setX: (v: number) => void
-  let setY: (v: number) => void
-
-  if (duhGif.value) {
-    gsap.set(duhGif.value, { xPercent: -50, yPercent: -50 })
-    setX = gsap.quickTo(duhGif.value, "left", { duration: 0.3, ease: "power3.out" })
-    setY = gsap.quickTo(duhGif.value, "top", { duration: 0.3, ease: "power3.out" })
-  }
-
-  onMouseMove = (e) => {
-    if (duhGif.value?.style.display === "block") {
-      setX(e.clientX)
-      setY(e.clientY)
-    }
-  }
-
-  document.addEventListener("mousemove", onMouseMove)
+		timeline.fromTo(revealLines, {
+			y: 90,
+			opacity: 1
+		}, {
+			y: 0,
+			opacity: 1,
+			duration: animationDurations.reveal,
+			stagger: animationStaggers.lines,
+			ease: animationEases.strongOut
+		})
+	}, root.value ?? undefined)
 })
 
 onUnmounted(() => {
 	ctx?.revert()
-	aboutSplit?.revert()
-
-	if (onMouseMove) {
-		document.removeEventListener("mousemove", onMouseMove)
-	}
+	eyebrowSplit?.revert()
+	titleSplit?.revert()
+	bodySplit?.revert()
 })
 </script>
