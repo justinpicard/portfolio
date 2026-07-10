@@ -1,5 +1,5 @@
 <template>
-	<section class="section about" ref="root">
+	<section id="about" class="section about" ref="root">
 		<div class="container">
 			<div class="row">
 				<div class="about-text col-12 lg:col-8 lg:offset-2 mb-3" ref="aboutText">
@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { nextTick, ref, onMounted, onUnmounted } from 'vue'
 import { gsap, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
 import { animationDurations, animationEases, animationStaggers } from '../../utils/animations/presets'
 
@@ -35,6 +35,7 @@ let eyebrowSplit: SplitText | undefined
 let titleSplit: SplitText | undefined
 let bodySplit: SplitText | undefined
 let ctx: gsap.Context | undefined
+let isMounted = false
 
 function wrapSplitLines(lines: Element[]) {
 	lines.forEach((line: Element) => {
@@ -45,8 +46,26 @@ function wrapSplitLines(lines: Element[]) {
 	})
 }
 
-onMounted(() => {
+function waitForFonts() {
+	return 'fonts' in document
+		? document.fonts.ready
+		: Promise.resolve()
+}
+
+function waitForFrame() {
+	return new Promise<void>((resolve) => {
+		requestAnimationFrame(() => resolve())
+	})
+}
+
+async function initAboutReveal() {
 	registerGsapPlugins()
+
+	await waitForFonts()
+	await nextTick()
+	await waitForFrame()
+
+	if (!isMounted) return
 
 	ctx = gsap.context(() => {
 		if (!aboutText.value || !aboutEyebrow.value || !aboutTitle.value) return
@@ -88,9 +107,15 @@ onMounted(() => {
 			ease: animationEases.strongOut
 		})
 	}, root.value ?? undefined)
+}
+
+onMounted(() => {
+	isMounted = true
+	initAboutReveal()
 })
 
 onUnmounted(() => {
+	isMounted = false
 	ctx?.revert()
 	eyebrowSplit?.revert()
 	titleSplit?.revert()

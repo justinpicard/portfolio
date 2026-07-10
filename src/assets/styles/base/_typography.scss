@@ -101,6 +101,28 @@ p {
 	overflow: hidden;
 }
 
+.split-display-char-wrapper {
+	display: inline-block;
+	overflow: hidden;
+	padding-inline: var(--split-display-char-inline-bleed, 0.08em);
+	padding-block: var(--split-display-char-block-bleed, 0.04em);
+	margin-inline: calc(var(--split-display-char-inline-bleed, 0.08em) * -1);
+	margin-block: calc(var(--split-display-char-block-bleed, 0.04em) * -1);
+	font: inherit;
+	line-height: inherit;
+	letter-spacing: inherit;
+	vertical-align: baseline;
+	transform: translateY(var(--split-display-char-offset-y, 0));
+}
+
+.split-display-char {
+	display: inline-block;
+	font: inherit;
+	line-height: inherit;
+	letter-spacing: inherit;
+	will-change: transform;
+}
+
 .eyebrow {
 	font-size: var(--font-size-sm);
 	font-weight: var(--font-weight-semibold);

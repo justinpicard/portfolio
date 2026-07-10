@@ -1,171 +1,193 @@
 @use "../abstracts" as *;
 
 .home-hero {
+	--home-hero-copy-offset-start: var(--space-4);
+	--home-hero-copy-offset-end: var(--space-12);
+	--home-hero-copy-height: calc(100svh - var(--home-hero-copy-offset-start) - var(--home-hero-copy-offset-end));
+
 	isolation: isolate;
 	position: relative;
-	width: 100vw;
-	height: 100vh;
-	overflow: hidden;
+	width: 100%;
+	height: 100svh;
+	overflow: visible;
 
 	.hero-composition {
 		position: relative;
 		display: grid;
 		grid-template-columns: 1fr;
-		align-items: center;
+		grid-template-rows: auto auto minmax(0, 1fr) auto;
+		row-gap: var(--space-8);
+		align-items: start;
 		justify-items: center;
 		width: 100%;
 	}
 
-	.hero-name {
+	.hero-copy-container {
 		position: relative;
 		z-index: 2;
-		display: inline-block;
-		overflow: hidden;
-		font-family: var(--heading-font);
-		font-size: clamp(5rem, 20vw, 14rem);
-		font-weight: 800;
-		line-height: 1;
-		pointer-events: none;
+		width: 100%;
+		box-sizing: border-box;
+		padding-block: var(--home-hero-copy-offset-start) var(--home-hero-copy-offset-end);
+	}
 
-		@include respond(sm) {
-			font-size: clamp(6rem, 12vw, 18rem);
+	.hero-copy-layer {
+		height: var(--home-hero-copy-height);
+		min-height: 0;
+	}
+
+	.hero-copy-layer--final {
+		color: var(--color-white);
+	}
+
+	.hero-copy-layer--intro {
+		color: var(--color-primary);
+
+		.hero-name,
+		.hero-figure__role,
+		.hero-figure__intro {
+			visibility: hidden;
+		}
+
+		.hero-figure__intro {
+			width: 100%;
 		}
 	}
 
-	.hero-name--first {
-		order: 0;
+	.hero-name {
+		--split-display-char-block-bleed: 0;
+		--split-display-char-offset-y: 0;
+
+		position: relative;
+		z-index: 2;
+		display: block;
+		overflow: hidden;
+		font-family: var(--heading-font);
+		font-size: clamp(5rem, 35vw, 8rem);
+		font-weight: var(--font-weight-bold);
+		line-height: 0.9;
+		letter-spacing: -0.04em;
+		pointer-events: none;
 	}
 
-	.hero-name--last {
-		order: 2;
+	.hero-name--first {
+		grid-column: 1;
+		grid-row: 1;
 	}
 
 	.hero-figure {
 		position: relative;
 		z-index: 1;
-		order: 1;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
+		grid-column: 1;
+		grid-row: 3;
+		display: block;
+		justify-self: center;
 	}
 
 	.hero-figure__media {
 		flex: none;
-		width: var(--hero-final-mask-width, 500px);
-		height: var(--hero-final-mask-height, 600px);
-	}
-
-	.hero-figure__content {
-		display: flex;
-		justify-content: center;
-		width: 100%;
-		overflow: hidden;
+		width: min(500px, 80vw, 33.333svh);
+		aspect-ratio: 5 / 6;
 	}
 
 	.hero-figure__role {
-		display: inline-block;
-		text-align: center;
+		grid-column: 1;
+		grid-row: 2;
+		justify-self: start;
+		align-self: start;
+		display: block;
+		overflow: hidden;
+		text-align: left;
+		text-transform: none;
 	}
 
-	.split-word {
-		display: inline-block;
-		will-change: transform;
+	.hero-figure__intro {
+		grid-column: 1;
+		grid-row: 4;
+		justify-self: start;
+		max-width: 28ch;
 	}
 
-	&__scroll-indicator {
-		position: absolute;
-		left: 50%;
-		bottom: var(--space-8);
-		z-index: 2;
-		transform: translateX(-50%);
-		pointer-events: none;
+	.hero-copy-layer--intro {
+		.split-line-wrapper {
+			display: block;
+			overflow: hidden;
+			font: inherit;
+			line-height: inherit;
+			letter-spacing: inherit;
+		}
 
-		span {
+		.split-line,
+		.split-word {
+			font: inherit;
+			line-height: inherit;
+			letter-spacing: inherit;
+		}
+
+		.split-line {
+			display: block;
+		}
+
+		.split-word {
 			display: inline-block;
-			font-family: var(--body-font);
-			font-size: var(--font-size-sm);
-			line-height: 1;
-			white-space: nowrap;
 		}
 	}
 
 	@include respond(lg) {
 		.hero-composition {
-			grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-			grid-template-rows: 1fr 1fr;
+			grid-template-columns: minmax(220px, 1fr) auto minmax(320px, 1fr);
+			grid-template-rows: auto minmax(0, 1fr);
 			grid-template-areas:
-				"first figure ."
-				". figure last";
+				"title title title"
+				"role figure intro";
+			column-gap: var(--space-10);
+			row-gap: 0;
+			align-items: start;
 		}
 
 		.hero-name--first {
-			grid-area: first;
-			justify-self: end;
-			align-self: end;
-			order: initial;
-			transform: translate(0.7em, -0.2em);
+			grid-area: title;
+			justify-self: center;
+			align-self: center;
+			width: 100%;
+			font-size: 36vw;
+			line-height: 0.85;
+			letter-spacing: -0.055em;
 		}
 
 		.hero-figure {
 			grid-area: figure;
-			align-self: center;
-			order: initial;
+			align-self: start;
 		}
 
-		.hero-name--last {
-			grid-area: last;
+		.hero-figure__media {
+			width: min(500px, 31.667svh);
+		}
+
+		.hero-figure__role {
+			grid-area: role;
 			justify-self: start;
 			align-self: start;
-			order: initial;
-			transform: translate(-1em, 0);
+		}
+
+		.hero-figure__intro {
+			grid-area: intro;
+			justify-self: end;
+			align-self: start;
+			max-width: 28ch;
 		}
 	}
 
-	.personal-image {
+	.hero-photo {
 		position: absolute;
-		top: 0;
-		left: 0;
-		z-index: 0;
-		height: 100vh;
-		width: 100vw;
+		bottom: -50%;
+		left: 50%;
+		z-index: 30;
+		width: clamp(470px, 30vw, 550px);
+		aspect-ratio: 5 / 7;
+		translate: -50% -50%;
 		pointer-events: none;
-
-		&__mask {
-			position: absolute;
-			top: 0;
-			left: 0;
-			width: 100vw;
-			height: 100vh;
-			overflow: hidden;
-		}
-
-		&__wipe {
-			position: absolute;
-			inset: 0;
-			z-index: 2;
-			background-color: var(--hero-wipe-color, #1AFFD5);
-			transform: scaleX(0);
-			transform-origin: left center;
-			will-change: transform;
-		}
-
-		&__frame {
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			z-index: 1;
-			width: var(--hero-final-frame-width, 100vw);
-			height: var(--hero-final-frame-height, 100vh);
-			transform: translate(-50%, -50%);
-		}
-
-		&__parallax {
-			position: absolute;
-			inset: 0;
-			width: 100%;
-			height: 100%;
-			will-change: transform;
-		}
+		will-change: transform;
+		box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, 0.35);
 
 		.base-image {
 			width: 100%;
@@ -183,10 +205,6 @@
 			width: 100%;
 			height: 100%;
 			object-fit: cover;
-			transform: translateY(0) scale(1.1);
-			transform-origin: center center;
-			visibility: hidden;
-			will-change: transform;
 		}
 
 		.image-backdrop {
@@ -197,15 +215,4 @@
 		}
 	}
 
-	.marquee-container {
-		position: absolute;
-		top: 50%;
-		z-index: 2;
-		overflow: hidden;
-		transform: translateY(-50%);
-	}
-
-	.text.rollingText02 {
-		transform: translateX(-25%);
-	}
 }

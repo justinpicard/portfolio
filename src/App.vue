@@ -1,17 +1,14 @@
 <template>
 	<main class="main" :class="{ 'scrolled': hasScrolled, 'scrolled-after': hasScrolledAfter }">
-		<AppHeader/>
 		<router-view></router-view>
-		<AppFooter />
+		<!--<AppFooter />-->
 	</main>
 </template>
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import AppHeader from "./components/AppHeader.vue"
-import AppFooter from "./components/AppFooter.vue"
 
 const SCROLL_THRESHOLD = 10
-const AFTER_SCROLL_THRESHOLD = 10
+const AFTER_SCROLL_THRESHOLD = 200
 
 const hasScrolled = ref(false)
 const hasScrolledAfter = ref(false)
