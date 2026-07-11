@@ -3,6 +3,11 @@
 		"id": "1",
 		"name": "MuziMatch",
 		"image": "hz-university-2",
+		"secondaryImages": [
+			"hz-university",
+			"dot3"
+		],
+		"overlayBackground": "#B0B0FE",
 		"link": "https://muzimatch.nl",
 		"job": "Sideproject",
 		"type": "Musicians classifieds platform",
@@ -12,6 +17,11 @@
 		"id": "2",
 		"name": "Recranet Booking",
 		"image": "recranet",
+		"secondaryImages": [
+			"vodatent",
+			"dehoop"
+		],
+		"overlayBackground": "#F6D4C8",
 		"link": "https://recranet.com",
 		"job": "Recranet",
 		"type": "Design system & SaaS product design",
@@ -21,6 +31,11 @@
 		"id": "3",
 		"name": "SFVonline",
 		"image": "sfvonline",
+		"secondaryImages": [
+			"dot3",
+			"hz-university"
+		],
+		"overlayBackground": "#C9EFD8",
 		"link": "https://sfvonline.nl",
 		"job": "Dondr ⚡ Web & design",
 		"type": "SaaS application",

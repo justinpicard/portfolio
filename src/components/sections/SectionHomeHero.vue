@@ -34,6 +34,7 @@ import BaseImage from '../base/BaseImage.vue'
 import LoadingScreen from '../LoadingScreen.vue'
 import CircularScrollIndicator from '../ui/CircularScrollIndicator.vue'
 import HomeHeroCopy from './HomeHeroCopy.vue'
+import { lockPageScroll } from '../../utils/dom/scrollLock'
 
 const root = ref<HTMLElement | null>(null)
 const loadingScreen = ref<InstanceType<typeof LoadingScreen> | null>(null)
@@ -48,10 +49,7 @@ let finalTitleSplit: SplitText | undefined
 let titleSplit: SplitText | undefined
 let roleSplit: SplitText | undefined
 let introSplit: SplitText | undefined
-let scrollLockState: {
-	htmlOverflow: string
-	bodyOverflow: string
-} | undefined
+let unlockScroll: (() => void) | undefined
 
 defineExpose({
 	element: root
@@ -66,27 +64,9 @@ function wrapSplitElements(elements: Element[], className: string, tagName: 'div
 	})
 }
 
-function lockScroll() {
-	if (scrollLockState) return
-
-	const html = document.documentElement
-	const body = document.body
-
-	scrollLockState = {
-		htmlOverflow: html.style.overflow,
-		bodyOverflow: body.style.overflow
-	}
-
-	html.style.overflow = 'hidden'
-	body.style.overflow = 'hidden'
-}
-
 function restoreScroll() {
-	if (!scrollLockState) return
-
-	document.documentElement.style.overflow = scrollLockState.htmlOverflow
-	document.body.style.overflow = scrollLockState.bodyOverflow
-	scrollLockState = undefined
+	unlockScroll?.()
+	unlockScroll = undefined
 }
 
 onMounted(() => {
@@ -159,7 +139,7 @@ onMounted(() => {
 			autoAlpha: 0
 		})
 
-		lockScroll()
+		unlockScroll = lockPageScroll()
 
 		heroTimeline = gsap.timeline({
 			onComplete: restoreScroll

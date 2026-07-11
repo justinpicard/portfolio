@@ -1,0 +1,286 @@
+<template>
+	<Teleport to="body">
+		<div
+			v-if="isRendered"
+			v-bind="$attrs"
+			ref="overlay"
+			class="app-overlay"
+			role="dialog"
+			aria-modal="true"
+			:aria-labelledby="labelledBy"
+		>
+			<div
+				ref="backdrop"
+				class="app-overlay__backdrop"
+				aria-hidden="true"
+				@click="emit('close')"
+			/>
+			<div
+				ref="scrollContainer"
+				class="app-overlay__panel"
+			>
+				<button
+					ref="closeButton"
+					class="app-overlay__close"
+					type="button"
+					aria-label="Close overlay"
+					@click="emit('close')"
+				>
+					Close
+				</button>
+				<div
+					ref="content"
+					class="app-overlay__content"
+				>
+					<slot />
+				</div>
+			</div>
+		</div>
+	</Teleport>
+</template>
+
+<script setup lang="ts">
+import { nextTick, onUnmounted, provide, ref, watch } from 'vue'
+import { gsap, prefersReducedMotion } from '../../utils/animations/gsap'
+import { lockPageScroll } from '../../utils/dom/scrollLock'
+import { overlayScrollContainerKey } from './overlayContext'
+
+defineOptions({
+	inheritAttrs: false
+})
+
+const props = defineProps<{
+	open: boolean
+	labelledBy?: string
+}>()
+
+const emit = defineEmits<{
+	close: []
+	'after-close': []
+}>()
+
+const isRendered = ref(false)
+const overlay = ref<HTMLElement | null>(null)
+const backdrop = ref<HTMLElement | null>(null)
+const scrollContainer = ref<HTMLElement | null>(null)
+const closeButton = ref<HTMLButtonElement | null>(null)
+const content = ref<HTMLElement | null>(null)
+
+let restoreScroll: (() => void) | undefined
+let previouslyFocusedElement: HTMLElement | null = null
+let pageRootHadInert = false
+let overlayTimeline: gsap.core.Timeline | undefined
+
+provide(overlayScrollContainerKey, scrollContainer)
+
+function getFocusableElements() {
+	if (!overlay.value) return []
+
+	return Array.from(overlay.value.querySelectorAll<HTMLElement>([
+		'a[href]',
+		'button:not([disabled])',
+		'textarea:not([disabled])',
+		'input:not([disabled])',
+		'select:not([disabled])',
+		'[tabindex]:not([tabindex="-1"])'
+	].join(','))).filter((element) => (
+		!element.hasAttribute('disabled')
+		&& !element.getAttribute('aria-hidden')
+		&& element.getClientRects().length > 0
+	))
+}
+
+function setPageInert(isInert: boolean) {
+	const pageRoot = document.getElementById('app')
+	if (!pageRoot) return
+
+	if (isInert) {
+		pageRootHadInert = pageRoot.hasAttribute('inert')
+		pageRoot.setAttribute('inert', '')
+		return
+	}
+
+	if (!pageRootHadInert) {
+		pageRoot.removeAttribute('inert')
+	}
+}
+
+function handleKeydown(event: KeyboardEvent) {
+	if (!isRendered.value) return
+
+	if (event.key === 'Escape') {
+		event.preventDefault()
+		emit('close')
+		return
+	}
+
+	if (event.key !== 'Tab') return
+
+	const focusableElements = getFocusableElements()
+	if (focusableElements.length === 0) {
+		event.preventDefault()
+		closeButton.value?.focus({ preventScroll: true })
+		return
+	}
+
+	const firstElement = focusableElements[0]
+	const lastElement = focusableElements[focusableElements.length - 1]
+
+	if (event.shiftKey && document.activeElement === firstElement) {
+		event.preventDefault()
+		lastElement.focus({ preventScroll: true })
+		return
+	}
+
+	if (!event.shiftKey && document.activeElement === lastElement) {
+		event.preventDefault()
+		firstElement.focus({ preventScroll: true })
+	}
+}
+
+function getAnimationTargets() {
+	return [
+		overlay.value,
+		backdrop.value,
+		scrollContainer.value,
+		content.value
+	].filter(Boolean) as HTMLElement[]
+}
+
+async function openOverlay() {
+	previouslyFocusedElement = document.activeElement instanceof HTMLElement
+		? document.activeElement
+		: null
+	isRendered.value = true
+
+	await nextTick()
+
+	restoreScroll = lockPageScroll()
+	setPageInert(true)
+	document.addEventListener('keydown', handleKeydown)
+	closeButton.value?.focus({ preventScroll: true })
+
+	const targets = getAnimationTargets()
+	if (prefersReducedMotion()) {
+		gsap.set(targets, {
+			autoAlpha: 1,
+			y: 0
+		})
+		return
+	}
+
+	overlayTimeline?.kill()
+	gsap.killTweensOf(targets)
+	gsap.set(overlay.value, {
+		autoAlpha: 1
+	})
+	gsap.set(backdrop.value, {
+		autoAlpha: 1
+	})
+	gsap.set(scrollContainer.value, {
+		autoAlpha: 1,
+		y: 32
+	})
+	gsap.set(content.value, {
+		autoAlpha: 0
+	})
+
+	overlayTimeline = gsap.timeline()
+		.fromTo(backdrop.value, {
+			autoAlpha: 0
+		}, {
+			autoAlpha: 1,
+			duration: 0.45,
+			ease: 'power3.out'
+		}, 0)
+		.to(scrollContainer.value, {
+			y: 0,
+			duration: 0.5,
+			ease: 'power3.out'
+		}, 0)
+		.to(content.value, {
+			autoAlpha: 1,
+			duration: 0.45,
+			ease: 'power3.out'
+		}, 0.08)
+}
+
+function restoreFocus() {
+	if (!previouslyFocusedElement?.isConnected) return
+
+	previouslyFocusedElement.focus({ preventScroll: true })
+	previouslyFocusedElement = null
+}
+
+function finishClose() {
+	document.removeEventListener('keydown', handleKeydown)
+	restoreScroll?.()
+	restoreScroll = undefined
+	setPageInert(false)
+	isRendered.value = false
+	restoreFocus()
+	emit('after-close')
+}
+
+function closeOverlay() {
+	const targets = getAnimationTargets()
+
+	if (prefersReducedMotion()) {
+		gsap.set(targets, {
+			autoAlpha: 0,
+			y: 0
+		})
+		finishClose()
+		return
+	}
+
+	overlayTimeline?.kill()
+	gsap.killTweensOf(targets)
+	overlayTimeline = gsap.timeline({
+		onComplete: finishClose
+	})
+		.to(content.value, {
+			autoAlpha: 0,
+			duration: 0.2,
+			ease: 'power2.inOut'
+		}, 0)
+		.to(scrollContainer.value, {
+			y: 32,
+			duration: 0.35,
+			ease: 'power2.inOut'
+		}, 0)
+		.to(backdrop.value, {
+			autoAlpha: 0,
+			duration: 0.35,
+			ease: 'power2.inOut'
+		}, 0)
+}
+
+watch(
+	() => props.open,
+	(isOpen) => {
+		if (isOpen) {
+			openOverlay()
+			return
+		}
+
+		if (isRendered.value) {
+			closeOverlay()
+		}
+	},
+	{ immediate: true }
+)
+
+onUnmounted(() => {
+	document.removeEventListener('keydown', handleKeydown)
+	overlayTimeline?.kill()
+	gsap.killTweensOf(getAnimationTargets())
+	restoreScroll?.()
+	setPageInert(false)
+})
+
+defineExpose({
+	backdrop,
+	scrollContainer
+})
+</script>

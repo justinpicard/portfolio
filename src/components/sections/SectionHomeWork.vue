@@ -12,6 +12,8 @@
 					:key="project.id"
 					:project="project"
 					:index="project.index"
+					:media-hidden="transitionHiddenProjectIndex === project.index"
+					@open="emit('open-project', $event)"
 				/>
 			</div>
 			<div class="work-section__column work-section__column--right">
@@ -20,6 +22,8 @@
 					:key="project.id"
 					:project="project"
 					:index="project.index"
+					:media-hidden="transitionHiddenProjectIndex === project.index"
+					@open="emit('open-project', $event)"
 				/>
 			</div>
 		</div>
@@ -31,6 +35,17 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { gsap, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
 import projects from '../../data/projects.json'
 import ProjectCard from '../work/ProjectCard.vue'
+import type { ProjectOpenPayload } from '../../types/project'
+
+withDefaults(defineProps<{
+	transitionHiddenProjectIndex?: number | null
+}>(), {
+	transitionHiddenProjectIndex: null
+})
+
+const emit = defineEmits<{
+	'open-project': [payload: ProjectOpenPayload]
+}>()
 
 const root = ref<HTMLElement | null>(null)
 const titleRef = ref<HTMLHeadingElement | null>(null)
