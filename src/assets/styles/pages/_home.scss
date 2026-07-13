@@ -1,1 +1,13 @@
 // Homepage section styling lives in src/assets/styles/sections.
+
+main:has(> .page-surface) {
+	background-color: var(--color-black);
+}
+
+.page-surface {
+	background-color: var(--color-primary);
+	background-position: 50%;
+	background-image: url("/images/dot3.png");
+	background-attachment: fixed;
+	transform-origin: center center;
+}

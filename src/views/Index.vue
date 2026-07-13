@@ -1,12 +1,14 @@
 <template>
-	<AppHeader :visible="isHeaderVisible" />
-	<SectionHomeHero ref="hero" />
-	<SectionHomeAbout />
-	<SectionHomeWork
-		:transition-hidden-project-index="transitionHiddenProjectIndex"
-		@open-project="openProject"
-	/>
-	<HomePhotoStackSection />
+	<div ref="pageSurface" class="page-surface">
+		<AppHeader :visible="isHeaderVisible" />
+		<SectionHomeHero ref="hero" />
+		<SectionHomeAbout />
+		<SectionHomeWork
+			:transition-hidden-project-index="transitionHiddenProjectIndex"
+			@open-project="openProject"
+		/>
+		<HomePhotoStackSection />
+	</div>
 	<AppOverlay
 		ref="appOverlay"
 		:open="activeOverlay !== null"
@@ -31,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, shallowRef, ref } from "vue"
+import { computed, onMounted, onUnmounted, shallowRef, ref, watch } from "vue"
 import type { CSSProperties } from "vue"
 import AppHeader from "../components/AppHeader.vue"
 import AppOverlay from "../components/overlay/AppOverlay.vue"
@@ -43,6 +45,7 @@ import SectionHomeAbout from "../components/sections/SectionHomeAbout.vue";
 import SectionHomeWork from "../components/sections/SectionHomeWork.vue";
 import projectsData from "../data/projects.json"
 import type { Project, ProjectOpenPayload } from "../types/project"
+import { gsap, prefersReducedMotion } from "../utils/animations/gsap"
 
 type OverlayState =
 	| {
@@ -55,6 +58,7 @@ type OverlayState =
 	| null
 
 const hero = ref<InstanceType<typeof SectionHomeHero> | null>(null)
+const pageSurface = ref<HTMLElement | null>(null)
 const appOverlay = ref<InstanceType<typeof AppOverlay> | null>(null)
 const isHeaderVisible = ref(false)
 const activeOverlay = ref<OverlayState>(null)
@@ -88,6 +92,31 @@ const projectOverlayStyle = computed<ProjectOverlayStyle | undefined>(() => {
 		'--project-overlay-background': project.overlayBackground
 	}
 })
+
+function setPageSurfaceDepth(isOpen: boolean) {
+	if (!pageSurface.value) return
+
+	gsap.killTweensOf(pageSurface.value)
+
+	if (prefersReducedMotion()) {
+		gsap.set(pageSurface.value, {
+			clearProps: 'transform,opacity,borderRadius,transformOrigin'
+		})
+		return
+	}
+
+	gsap.to(pageSurface.value, {
+		scale: isOpen ? 0.8 : 1,
+		y: isOpen ? '-20vh' : 0,
+		opacity: isOpen ? 0.45 : 1,
+		borderRadius: 0,
+		transformOrigin: 'center top',
+		duration: isOpen ? 1 : 0.85,
+		delay: isOpen ? 0 : 0.10,
+		ease: 'power2.inOut',
+		overwrite: true
+	})
+}
 
 function resetProjectOpeningTransition() {
 	transitionHiddenProjectIndex.value = null
@@ -147,6 +176,13 @@ const handleProjectChange = (nextIndex: number) => {
 	activeOverlay.value = nextOverlay
 }
 
+watch(
+	() => activeOverlay.value !== null,
+	(isOverlayOpen) => {
+		setPageSurfaceDepth(isOverlayOpen)
+	}
+)
+
 onMounted(() => {
 	const heroElement = hero.value?.element
 	if (!heroElement) return
@@ -162,6 +198,12 @@ onMounted(() => {
 
 onUnmounted(() => {
 	heroObserver?.disconnect()
+	if (pageSurface.value) {
+		gsap.killTweensOf(pageSurface.value)
+		gsap.set(pageSurface.value, {
+			clearProps: 'transform,opacity,borderRadius,transformOrigin'
+		})
+	}
 	resetProjectOpeningTransition()
 })
 </script>

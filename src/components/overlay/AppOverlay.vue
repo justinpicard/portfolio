@@ -162,7 +162,14 @@ async function openOverlay() {
 
 	const targets = getAnimationTargets()
 	if (prefersReducedMotion()) {
-		gsap.set(targets, {
+		gsap.set(overlay.value, {
+			autoAlpha: 1
+		})
+		gsap.set(backdrop.value, {
+			autoAlpha: 1,
+			yPercent: 0
+		})
+		gsap.set([scrollContainer.value, content.value], {
 			autoAlpha: 1,
 			y: 0
 		})
@@ -175,34 +182,37 @@ async function openOverlay() {
 		autoAlpha: 1
 	})
 	gsap.set(backdrop.value, {
-		autoAlpha: 1
+		autoAlpha: 1,
+		yPercent: 100
 	})
 	gsap.set(scrollContainer.value, {
 		autoAlpha: 1,
-		y: 32
+		y: 40
 	})
 	gsap.set(content.value, {
-		autoAlpha: 0
+		autoAlpha: 0,
+		opacity: 0
 	})
 
 	overlayTimeline = gsap.timeline()
 		.fromTo(backdrop.value, {
-			autoAlpha: 0
+			yPercent: 100
 		}, {
-			autoAlpha: 1,
-			duration: 0.45,
-			ease: 'power3.out'
-		}, 0)
+			yPercent: 0,
+			duration: 0.6,
+			ease: 'power4.inOut'
+		}, 0.12)
 		.to(scrollContainer.value, {
 			y: 0,
-			duration: 0.5,
+			duration: 0.45,
 			ease: 'power3.out'
-		}, 0)
+		}, 0.4)
 		.to(content.value, {
+			opacity: 1,
 			autoAlpha: 1,
 			duration: 0.45,
 			ease: 'power3.out'
-		}, 0.08)
+		}, 0.4)
 }
 
 function restoreFocus() {
@@ -230,6 +240,9 @@ function closeOverlay() {
 			autoAlpha: 0,
 			y: 0
 		})
+		gsap.set(backdrop.value, {
+			yPercent: 0
+		})
 		finishClose()
 		return
 	}
@@ -240,20 +253,21 @@ function closeOverlay() {
 		onComplete: finishClose
 	})
 		.to(content.value, {
+			opacity: 0,
 			autoAlpha: 0,
-			duration: 0.2,
-			ease: 'power2.inOut'
+			duration: 0.28,
+			ease: 'power2.in'
 		}, 0)
 		.to(scrollContainer.value, {
-			y: 32,
-			duration: 0.35,
-			ease: 'power2.inOut'
+			y: 24,
+			duration: 0.28,
+			ease: 'power2.in'
 		}, 0)
 		.to(backdrop.value, {
-			autoAlpha: 0,
-			duration: 0.35,
-			ease: 'power2.inOut'
-		}, 0)
+			yPercent: 100,
+			duration: 0.75,
+			ease: 'power3.inOut'
+		}, 0.08)
 }
 
 watch(
