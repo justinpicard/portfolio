@@ -1,10 +1,44 @@
 @use "../abstracts" as *;
 
 .project-overlay {
+	width: 100%;
+	min-height: 100svh;
+	margin-inline: calc(50% - 50vw);
+	position: relative;
+	width: 100vw;
+}
+
+.project-overlay__surface {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	width: 100%;
+	min-height: 100svh;
+	background-color: var(--project-surface-background, var(--color-secondary));
+	transform-origin: center top;
+}
+
+.project-overlay__surface--outgoing {
+	z-index: 1;
+}
+
+.project-overlay__surface--incoming {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	visibility: hidden;
+
+	.project-overlay__surface-content {
+		opacity: 0;
+		visibility: hidden;
+	}
+}
+
+.project-overlay__surface-content {
 	display: flex;
 	align-items: flex-start;
 	width: 100%;
-	min-height: 100%;
+	min-height: 100svh;
 }
 
 .project-overlay__media-column {
@@ -197,7 +231,8 @@
 }
 
 @media (max-width: 47.999rem) {
-	.project-overlay {
+	.project-overlay__surface,
+	.project-overlay__surface-content {
 		display: block;
 	}
 

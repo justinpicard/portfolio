@@ -52,6 +52,7 @@ defineOptions({
 const props = defineProps<{
 	open: boolean
 	labelledBy?: string
+	animateContent?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -147,6 +148,10 @@ function getAnimationTargets() {
 	].filter(Boolean) as HTMLElement[]
 }
 
+function usesProjectSurfaceAnimation() {
+	return props.animateContent === false
+}
+
 async function openOverlay() {
 	previouslyFocusedElement = document.activeElement instanceof HTMLElement
 		? document.activeElement
@@ -182,19 +187,30 @@ async function openOverlay() {
 		autoAlpha: 1
 	})
 	gsap.set(backdrop.value, {
-		autoAlpha: 1,
-		yPercent: 100
+		autoAlpha: usesProjectSurfaceAnimation() ? 0 : 1,
+		yPercent: usesProjectSurfaceAnimation() ? 0 : 100
 	})
 	gsap.set(scrollContainer.value, {
 		autoAlpha: 1,
-		y: 40
+		y: usesProjectSurfaceAnimation() ? 0 : 40
 	})
 	gsap.set(content.value, {
-		autoAlpha: 0,
-		opacity: 0
+		autoAlpha: usesProjectSurfaceAnimation() ? 1 : 0,
+		opacity: usesProjectSurfaceAnimation() ? 1 : 0
 	})
 
 	overlayTimeline = gsap.timeline()
+
+	if (usesProjectSurfaceAnimation()) {
+		overlayTimeline.to(backdrop.value, {
+			autoAlpha: 1,
+			duration: 0.01,
+			ease: 'none'
+		}, 0.95)
+		return
+	}
+
+	overlayTimeline
 		.fromTo(backdrop.value, {
 			yPercent: 100
 		}, {
@@ -249,9 +265,18 @@ function closeOverlay() {
 
 	overlayTimeline?.kill()
 	gsap.killTweensOf(targets)
+	if (usesProjectSurfaceAnimation()) {
+		gsap.set(backdrop.value, {
+			autoAlpha: 1,
+			yPercent: 0
+		})
+	}
 	overlayTimeline = gsap.timeline({
 		onComplete: finishClose
 	})
+
+	if (!usesProjectSurfaceAnimation()) {
+		overlayTimeline
 		.to(content.value, {
 			opacity: 0,
 			autoAlpha: 0,
@@ -263,11 +288,14 @@ function closeOverlay() {
 			duration: 0.28,
 			ease: 'power2.in'
 		}, 0)
+	}
+
+	overlayTimeline
 		.to(backdrop.value, {
 			yPercent: 100,
-			duration: 0.75,
+			duration: usesProjectSurfaceAnimation() ? 0.45 : 0.75,
 			ease: 'power3.inOut'
-		}, 0.08)
+		}, usesProjectSurfaceAnimation() ? 0.55 : 0.08)
 }
 
 watch(

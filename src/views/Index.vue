@@ -13,6 +13,7 @@
 		ref="appOverlay"
 		:open="activeOverlay !== null"
 		:labelled-by="overlayLabelledBy"
+		:animate-content="renderedOverlay?.type !== 'project'"
 		:style="projectOverlayStyle"
 		@close="closeOverlay"
 		@after-close="handleOverlayAfterClose"
@@ -70,6 +71,7 @@ const overlayFirstMediaHidden = ref(false)
 const projectOpeningTransitionActive = ref(false)
 const projects = projectsData as Project[]
 let heroObserver: IntersectionObserver | undefined
+let closeOverlayTimeout: ReturnType<typeof window.setTimeout> | undefined
 
 const overlayLabelledBy = computed(() => {
 	if (renderedOverlay.value?.type === 'project') return 'project-overlay-title'
@@ -150,8 +152,18 @@ const openCv = () => {
 }
 
 const closeOverlay = () => {
-	activeOverlay.value = null
-	resetProjectOpeningTransition()
+	if (activeOverlay.value === null || closeOverlayTimeout) return
+
+	const isProjectOverlay = activeOverlay.value.type === 'project'
+	if (isProjectOverlay) {
+		projectOverlay.value?.animateClose()
+	}
+
+	closeOverlayTimeout = window.setTimeout(() => {
+		activeOverlay.value = null
+		resetProjectOpeningTransition()
+		closeOverlayTimeout = undefined
+	}, isProjectOverlay ? 80 : 0)
 }
 
 const handleOverlayAfterClose = () => {
@@ -163,6 +175,7 @@ const handleOverlayAfterClose = () => {
 }
 
 const handleProjectChange = (nextIndex: number) => {
+	if (closeOverlayTimeout) return
 	if (activeOverlay.value?.type !== 'project') return
 
 	resetProjectOpeningTransition()
@@ -198,6 +211,9 @@ onMounted(() => {
 
 onUnmounted(() => {
 	heroObserver?.disconnect()
+	if (closeOverlayTimeout) {
+		window.clearTimeout(closeOverlayTimeout)
+	}
 	if (pageSurface.value) {
 		gsap.killTweensOf(pageSurface.value)
 		gsap.set(pageSurface.value, {

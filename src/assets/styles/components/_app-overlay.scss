@@ -12,8 +12,7 @@
 .app-overlay__backdrop {
 	position: absolute;
 	inset: 0;
-	background-color: var(--project-overlay-background, var(--color-secondary));
-	transition: background-color 0.35s ease;
+	background-color: var(--app-overlay-stage-background, var(--color-black));
 }
 
 .app-overlay__panel {
