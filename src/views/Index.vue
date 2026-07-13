@@ -108,13 +108,13 @@ function setPageSurfaceDepth(isOpen: boolean) {
 	}
 
 	gsap.to(pageSurface.value, {
-		scale: isOpen ? 0.8 : 1,
-		y: isOpen ? '-20vh' : 0,
+		scale: isOpen ? 0.88 : 1,
+		y: isOpen ? '-12vh' : 0,
 		opacity: isOpen ? 0.45 : 1,
 		borderRadius: 0,
 		transformOrigin: 'center top',
-		duration: isOpen ? 1 : 0.85,
-		delay: isOpen ? 0 : 0.10,
+		duration: 1,
+		delay: 0,
 		ease: 'power2.inOut',
 		overwrite: true
 	})
@@ -163,7 +163,7 @@ const closeOverlay = () => {
 		activeOverlay.value = null
 		resetProjectOpeningTransition()
 		closeOverlayTimeout = undefined
-	}, isProjectOverlay ? 80 : 0)
+	}, isProjectOverlay ? 20 : 0)
 }
 
 const handleOverlayAfterClose = () => {

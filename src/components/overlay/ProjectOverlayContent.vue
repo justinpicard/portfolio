@@ -569,7 +569,7 @@ async function animateClose() {
 		}, 0)
 		.to(surface, {
 			yPercent: 100,
-			duration: 0.75,
+			duration: 0.8,
 			ease: 'power3.inOut',
 			overwrite: true
 		}, 0.08)

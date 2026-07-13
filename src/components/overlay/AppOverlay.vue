@@ -71,6 +71,7 @@ let restoreScroll: (() => void) | undefined
 let previouslyFocusedElement: HTMLElement | null = null
 let pageRootHadInert = false
 let overlayTimeline: gsap.core.Timeline | undefined
+const PROJECT_SURFACE_CLOSE_DURATION = 0.9
 
 provide(overlayScrollContainerKey, scrollContainer)
 
@@ -267,7 +268,7 @@ function closeOverlay() {
 	gsap.killTweensOf(targets)
 	if (usesProjectSurfaceAnimation()) {
 		gsap.set(backdrop.value, {
-			autoAlpha: 1,
+			autoAlpha: 0,
 			yPercent: 0
 		})
 	}
@@ -288,14 +289,17 @@ function closeOverlay() {
 			duration: 0.28,
 			ease: 'power2.in'
 		}, 0)
-	}
-
-	overlayTimeline
 		.to(backdrop.value, {
 			yPercent: 100,
-			duration: usesProjectSurfaceAnimation() ? 0.45 : 0.75,
+			duration: 0.8,
 			ease: 'power3.inOut'
-		}, usesProjectSurfaceAnimation() ? 0.55 : 0.08)
+		}, 0.08)
+		return
+	}
+
+	overlayTimeline.to({}, {
+		duration: PROJECT_SURFACE_CLOSE_DURATION
+	}, 0)
 }
 
 watch(
