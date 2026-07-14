@@ -1,13 +1,57 @@
+@use "../abstracts" as *;
+
 // Homepage section styling lives in src/assets/styles/sections.
 
 main:has(> .page-surface) {
 	background-color: var(--color-black);
+
+	&.scrolled {
+		.page-surface__scrim--top {
+			opacity: 1;
+		}
+	}
+
+	&.scrolled-after {
+		.page-surface__scrim--bottom {
+			opacity: 1;
+		}
+	}
 }
 
 .page-surface {
+	position: relative;
 	background-color: var(--color-primary);
 	background-position: 50%;
 	background-image: url("/images/dot3.png");
 	background-attachment: fixed;
 	transform-origin: center center;
+}
+
+.page-surface__scrims {
+	position: sticky;
+	top: 0;
+	z-index: 998;
+	width: 100%;
+	height: 100svh;
+	margin-block-end: -100svh;
+	pointer-events: none;
+}
+
+.page-surface__scrim {
+	position: absolute;
+	left: 0;
+	width: 100%;
+	height: 8rem;
+	opacity: 0;
+	transition: opacity .3s cubic-bezier(.165,.84,.44,1);
+}
+
+.page-surface__scrim--top {
+	top: 0;
+	@include scrimGradient($primary, "to bottom");
+}
+
+.page-surface__scrim--bottom {
+	bottom: 0;
+	@include scrimGradient($primary, "to top");
 }

@@ -1,5 +1,9 @@
 <template>
 	<div ref="pageSurface" class="page-surface">
+		<div class="page-surface__scrims" aria-hidden="true">
+			<div class="page-surface__scrim page-surface__scrim--top" />
+			<div class="page-surface__scrim page-surface__scrim--bottom" />
+		</div>
 		<AppHeader :visible="isHeaderVisible" />
 		<SectionHomeHero ref="hero" />
 		<SectionHomeAbout />
