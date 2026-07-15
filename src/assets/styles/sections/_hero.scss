@@ -20,6 +20,7 @@
 		align-items: start;
 		justify-items: center;
 		width: 100%;
+		container-type: inline-size;
 	}
 
 	.hero-copy-container {
@@ -72,6 +73,7 @@
 	.hero-name--first {
 		grid-column: 1;
 		grid-row: 1;
+		font-size: 37cqw;
 	}
 
 	.hero-figure {
@@ -149,7 +151,6 @@
 			justify-self: center;
 			align-self: center;
 			width: 100%;
-			font-size: 36vw;
 			line-height: 0.85;
 			letter-spacing: -0.055em;
 		}

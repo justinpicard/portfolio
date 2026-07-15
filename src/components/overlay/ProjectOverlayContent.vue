@@ -63,22 +63,23 @@
 						>
 							{{ surface.project.name }}
 						</h2>
-						<p
+						<div
 							:ref="(element) => setMetaElement(element, surface.role)"
-							class="project-overlay__meta"
+							class="project-overlay__meta font-medium"
 						>
-							{{ surface.project.type }} · {{ surface.project.job }} · {{ surface.project.year }}
-						</p>
+							{{ surface.project.year }}<span class="star mx-2">✦</span>{{ surface.project.type }}<span class="star mx-2">✦</span>{{ surface.project.job }}
+							<div class="role d-flex flex-column mt-8">
+								<span class="role-label text-xs font-bold uppercase tracking-extrawide">Role</span>
+								<span class="role-title text-sm">{{ surface.project.role }}</span>
+							</div>
+						</div>
 					</header>
 
 					<div
 						:ref="(element) => setBodyElement(element, surface.role)"
 						class="project-overlay__body"
 					>
-						<p>
-							A compact project introduction will be added here in the case-study pass.
-							For now this overlay uses the existing project data and image as the source of truth.
-						</p>
+						<RichTextContent :content="surface.project.description" />
 					</div>
 
 					<a
@@ -129,6 +130,7 @@ import type { ComponentPublicInstance, CSSProperties } from 'vue'
 import { gsap, prefersReducedMotion, registerGsapPlugins, ScrollTrigger } from '../../utils/animations/gsap'
 import type { Project } from '../../types/project'
 import BaseImage from '../base/BaseImage.vue'
+import RichTextContent from '../base/RichTextContent.vue'
 import { overlayScrollContainerKey } from './overlayContext'
 
 const props = defineProps<{

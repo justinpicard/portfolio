@@ -44,7 +44,6 @@
 .project-overlay__media-column {
 	display: flex;
 	flex-direction: column;
-	gap: clamp(1.5rem, 4vw, 4rem);
 	flex: 0 0 60%;
 	width: 60%;
 	min-width: 0;
@@ -97,7 +96,7 @@
 .project-overlay__meta {
 	max-width: 48rem;
 	//color: color-mix(in srgb, var(--color-white) 76%, transparent);
-	font-size: var(--font-size-sm);
+	font-size: var(--font-size-xs);
 	line-height: var(--line-height-normal);
 }
 
@@ -137,8 +136,11 @@
 .project-overlay__body {
 	max-width: 42rem;
 	//color: color-mix(in srgb, var(--color-white) 78%, transparent);
-	font-size: var(--font-size-md);
-	line-height: var(--line-height-relaxed);
+
+	p {
+		font-size: var(--font-size-sm);
+		line-height: var(--line-height-relaxed);
+	}
 }
 
 .project-overlay__link {

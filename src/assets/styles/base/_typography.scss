@@ -132,6 +132,10 @@ p {
 	color: $secondary;
 }
 
+.huge-title {
+	white-space: nowrap;
+}
+
 //.slot-machine-text {
 //	z-index: 10;
 //	flex-direction: column;
@@ -241,6 +245,6 @@ p {
 
 span.star {
 	font-size: 60%;
-	margin: 0 1.5rem 0 0;
+	//margin: 0 1.5rem;
 	vertical-align: middle;
 }

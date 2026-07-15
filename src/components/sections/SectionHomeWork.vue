@@ -2,7 +2,7 @@
 	<section class="section work-section" id="work" ref="root">
 		<div class="work-section__title-wrapper">
 			<div class="work-section__title-inner">
-				<h2 class="work-section__title" ref="titleRef">Work.</h2>
+				<h2 class="work-section__title huge-title" ref="titleRef">Work.</h2>
 			</div>
 		</div>
 		<div class="work-section__projects">

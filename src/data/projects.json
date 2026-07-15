@@ -2,6 +2,7 @@
 	{
 		"id": "1",
 		"name": "MuziMatch",
+		"description": "MuziMatch brengt muzikanten samen die op zoek zijn naar een band, samenwerking of nieuw project. Het platform maakt het eenvoudiger om elkaar te vinden op basis van **muzikale interesses**, ervaring en locatie.\n\nBinnen dit project komen *product design*, development en het uitwerken van een schaalbaar design system samen. Deze tekst is tijdelijk en kan later worden vervangen door de definitieve case study.",
 		"image": "hz-university-2",
 		"secondaryImages": [
 			"hz-university",
@@ -10,12 +11,14 @@
 		"overlayBackground": "#B0B0FE",
 		"link": "https://muzimatch.nl",
 		"job": "Sideproject",
+		"role": "Product designer & developer",
 		"type": "Musicians classifieds platform",
 		"year": "2026"
 	},
 	{
 		"id": "2",
 		"name": "Recranet Booking",
+		"description": "Recranet Booking is een SaaS-product voor vakantieparken en campings. De oplossing ondersteunt het volledige boekingsproces, van het zoeken naar een verblijf tot het afronden van de reservering.\n\nDe focus lag op het ontwikkelen van een **consistent design system** en het verbeteren van complexe gebruikersflows. Daarbij waren *duidelijkheid*, herbruikbaarheid en schaalbaarheid belangrijke uitgangspunten.",
 		"image": "recranet",
 		"secondaryImages": [
 			"vodatent",
@@ -24,12 +27,14 @@
 		"overlayBackground": "#F6D4C8",
 		"link": "https://recranet.com",
 		"job": "Recranet",
+		"role": "Product designer",
 		"type": "Design system & SaaS product design",
 		"year": "2023"
 	},
 	{
 		"id": "3",
 		"name": "SFVonline",
+		"description": "SFVonline helpt organisaties om processen en documentatie rondom sociale veiligheid overzichtelijk te beheren. Het product vertaalt uitgebreide informatie naar een toegankelijke digitale werkomgeving.\n\nVoor dit project werkte ik aan de **gebruikerservaring en interface**, met extra aandacht voor structuur en leesbaarheid. *Deze voorbeeldtekst dient als tijdelijke invulling* totdat de volledige projectbeschrijving beschikbaar is.",
 		"image": "sfvonline",
 		"secondaryImages": [
 			"dot3",
@@ -38,6 +43,7 @@
 		"overlayBackground": "#C9EFD8",
 		"link": "https://sfvonline.nl",
 		"job": "Dondr ⚡ Web & design",
+		"role": "UX/UI designer",
 		"type": "SaaS application",
 		"year": "2020"
 	}

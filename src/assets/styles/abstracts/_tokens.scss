@@ -63,7 +63,8 @@ $line-height-values: (
 $letter-spacing-values: (
 	tight: $letter-spacing-tight,
 	normal: $letter-spacing-normal,
-	wide: $letter-spacing-wide
+	wide: $letter-spacing-wide,
+	extrawide: $letter-spacing-extrawide
 );
 
 @function css-token-map($prefix, $values) {

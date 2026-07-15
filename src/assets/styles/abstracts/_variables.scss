@@ -5,8 +5,8 @@ $font-weight-semibold:	600;
 $font-weight-bold:		700;
 $font-weight-black:		900;
 
-$font-size-xs:          0.813rem;
-$font-size-sm:          1.063rem;	// 16px
+$font-size-xs:          0.875rem;	// 14px
+$font-size-sm:          1.125rem;	// 18px
 $font-size-md:			1.5rem; 	// 24px
 $font-size-lg:          2.25rem;	// 36px
 $font-size-xl:			4rem;
@@ -19,9 +19,10 @@ $line-height-tight:     1.15;
 $line-height-normal:    1.5;
 $line-height-relaxed:   1.75;
 
-$letter-spacing-tight:  -0.01em;
-$letter-spacing-normal: 0;
-$letter-spacing-wide:   0.025em;
+$letter-spacing-tight:  	-0.01em;
+$letter-spacing-normal: 	0;
+$letter-spacing-wide:   	0.025em;
+$letter-spacing-extrawide:	3px;
 
 $primary:				#0a15df;
 $secondary:             #1AFFD5;

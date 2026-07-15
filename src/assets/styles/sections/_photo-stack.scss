@@ -52,10 +52,16 @@
 	}
 
 	&__title {
-		max-width: 11ch;
+		//max-width: 11ch;
+		font-size: 39cqw;
 		margin-inline: auto;
-		font-size: clamp(3rem, 10vw, 8rem);
+		//font-size: clamp(3rem, 10vw, 8rem);
 		line-height: 0.9;
+	}
+
+	&__text {
+		max-width: 44ch;
+		margin-inline: auto;
 	}
 }
 
@@ -70,6 +76,10 @@
 		}
 
 		&__title {
+			max-width: 9ch;
+		}
+
+		&__text {
 			max-width: 9ch;
 		}
 	}

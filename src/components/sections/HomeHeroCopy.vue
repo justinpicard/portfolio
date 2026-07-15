@@ -2,7 +2,7 @@
 	<div class="hero-composition" :aria-hidden="decorative ? 'true' : undefined">
 		<component
 			:is="decorative ? 'div' : 'h1'"
-			class="hero-name hero-name--first"
+			class="hero-name hero-name--first huge-title"
 		>
 			Justin.
 		</component>

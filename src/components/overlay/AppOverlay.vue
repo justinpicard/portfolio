@@ -15,19 +15,19 @@
 				aria-hidden="true"
 				@click="emit('close')"
 			/>
+			<button
+				ref="closeButton"
+				class="app-overlay__close"
+				type="button"
+				aria-label="Close overlay"
+				@click="emit('close')"
+			>
+				Close
+			</button>
 			<div
 				ref="scrollContainer"
 				class="app-overlay__panel"
 			>
-				<button
-					ref="closeButton"
-					class="app-overlay__close"
-					type="button"
-					aria-label="Close overlay"
-					@click="emit('close')"
-				>
-					Close
-				</button>
 				<div
 					ref="content"
 					class="app-overlay__content"

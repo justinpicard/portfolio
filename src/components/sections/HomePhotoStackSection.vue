@@ -4,8 +4,9 @@
 			<div class="container">
 				<div class="row">
 					<div class="col-12">
-						<p class="home-photo-stack-section__eyebrow eyebrow mb-8">Get to know me a little</p>
-						<h2 class="home-photo-stack-section__title mb-0">A sneak peek into my world</h2>
+						<h2 class="home-photo-stack-section__title huge-title" ref="titleRef">Life.</h2>
+						<!--<p class="home-photo-stack-section__text">Enim quibusdam omnis aut occaecati quia possimus accusantium vel perferendis. Est architecto voluptatem eaque quae iure iste ex repellendus tempora et praesentium. Molestias ratione fugiat quae culpa dolores omnis in magni cupiditate facere reprehenderit.
+						</p>-->
 					</div>
 				</div>
 			</div>
