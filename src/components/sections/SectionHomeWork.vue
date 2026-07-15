@@ -95,7 +95,7 @@ onMounted(() => {
 			ease: 'power4.out',
 			scrollTrigger: {
 				trigger: root.value?.querySelector('.work-section__title-wrapper'),
-				start: 'top 40%',
+				start: 'top top',
 				toggleActions: 'play none none reverse'
 			}
 		})

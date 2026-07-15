@@ -1,7 +1,6 @@
 <template>
 	<main class="main" :class="{ 'scrolled': hasScrolled, 'scrolled-after': hasScrolledAfter }">
 		<router-view></router-view>
-		<!--<AppFooter />-->
 	</main>
 </template>
 <script setup>

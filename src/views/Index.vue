@@ -12,6 +12,7 @@
 			@open-project="openProject"
 		/>
 		<HomePhotoStackSection />
+		<AppFooter />
 	</div>
 	<AppOverlay
 		ref="appOverlay"
@@ -51,6 +52,7 @@ import SectionHomeWork from "../components/sections/SectionHomeWork.vue";
 import projectsData from "../data/projects.json"
 import type { Project, ProjectOpenPayload } from "../types/project"
 import { gsap, prefersReducedMotion, ScrollTrigger } from "../utils/animations/gsap"
+import AppFooter from "../components/AppFooter.vue"
 
 type OverlayState =
 	| {

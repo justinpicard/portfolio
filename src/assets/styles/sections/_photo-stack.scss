@@ -57,6 +57,12 @@
 		margin-inline: auto;
 		//font-size: clamp(3rem, 10vw, 8rem);
 		line-height: 0.9;
+		overflow: visible;
+
+		&.life-title .char {
+			display: inline-block;
+			will-change: transform, opacity;
+		}
 	}
 
 	&__text {
