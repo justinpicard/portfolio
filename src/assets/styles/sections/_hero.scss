@@ -12,10 +12,12 @@
 	overflow: visible;
 
 	.hero-composition {
+		--hero-title-optical-trim: clamp(1rem, 4.4cqw, 4rem);
+
 		position: relative;
 		display: grid;
 		grid-template-columns: 1fr;
-		grid-template-rows: auto auto minmax(0, 1fr) auto;
+		grid-template-rows: auto auto auto minmax(0, 1fr) auto;
 		row-gap: var(--space-8);
 		align-items: start;
 		justify-items: center;
@@ -44,6 +46,7 @@
 		color: var(--color-primary);
 
 		.hero-name,
+		.hero-divider,
 		.hero-figure__role,
 		.hero-figure__intro {
 			visibility: hidden;
@@ -76,11 +79,22 @@
 		font-size: 37cqw;
 	}
 
+	.hero-divider {
+		grid-column: 1;
+		grid-row: 2;
+		justify-self: start;
+		width: 100%;
+		height: 1px;
+		margin-block-start: calc(var(--hero-title-optical-trim) * -1);
+		background-color: currentColor;
+		will-change: width;
+	}
+
 	.hero-figure {
 		position: relative;
 		z-index: 1;
 		grid-column: 1;
-		grid-row: 3;
+		grid-row: 4;
 		display: block;
 		justify-self: center;
 	}
@@ -93,7 +107,7 @@
 
 	.hero-figure__role {
 		grid-column: 1;
-		grid-row: 2;
+		grid-row: 3;
 		justify-self: start;
 		align-self: start;
 		display: block;
@@ -104,7 +118,7 @@
 
 	.hero-figure__intro {
 		grid-column: 1;
-		grid-row: 4;
+		grid-row: 5;
 		justify-self: start;
 		max-width: 28ch;
 	}
@@ -137,9 +151,10 @@
 	@include respond(lg) {
 		.hero-composition {
 			grid-template-columns: minmax(220px, 1fr) auto minmax(320px, 1fr);
-			grid-template-rows: auto minmax(0, 1fr);
+			grid-template-rows: auto auto minmax(0, 1fr);
 			grid-template-areas:
 				"title title title"
+				"divider divider divider"
 				"role figure intro";
 			column-gap: var(--space-10);
 			row-gap: 0;
@@ -153,6 +168,11 @@
 			width: 100%;
 			line-height: 0.85;
 			letter-spacing: -0.055em;
+			margin-bottom: 2rem;
+		}
+
+		.hero-divider {
+			grid-area: divider;
 		}
 
 		.hero-figure {

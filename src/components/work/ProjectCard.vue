@@ -23,6 +23,7 @@
 						class-name="project-card__image"
 						:src="`/images/${project.image}`"
 						:alt="project.name"
+						:fallback-format="project.imageFormat"
 						aspect-ratio="4 / 3"
 					/>
 				</div>

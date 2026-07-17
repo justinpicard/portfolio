@@ -30,6 +30,7 @@
 							class-name="project-overlay__image"
 							:src="`/images/${surface.project.image}`"
 							:alt="surface.project.name"
+							:fallback-format="surface.project.imageFormat"
 							aspect-ratio="3 / 3.75"
 						/>
 					</div>

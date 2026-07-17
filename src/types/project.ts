@@ -3,6 +3,7 @@ export type Project = {
 	name: string
 	description: string
 	image: string
+	imageFormat?: 'jpg' | 'jpeg' | 'png'
 	secondaryImages?: string[]
 	overlayBackground?: string
 	link: string

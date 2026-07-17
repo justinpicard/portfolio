@@ -2,20 +2,24 @@
 	<section id="about" class="section about" ref="root">
 		<div class="container">
 			<div class="row">
-				<div class="about-text col-12 lg:col-8 lg:offset-2 mb-3" ref="aboutText">
+				<div class="about-text d-flex flex-column col-12 lg:col-8 lg:offset-2 mb-3" ref="aboutText">
 					<p class="about-section__eyebrow eyebrow mb-8" ref="aboutEyebrow">About</p>
-					<h2 class="text-xl heading-font mb-8" ref="aboutTitle">
+					<h2 class="text-xl heading-font mb-32" ref="aboutTitle">
 						Good digital products have always fascinated me. Not just for how they look, but for how everything behind the interface comes together.
 					</h2>
-					<p>Hi <span class="wave">👋🏼</span> I’m Justin, a Digital Product Designer from the Netherlands. I’ve spent more than 10 years designing websites and digital products, and over time my curiosity naturally shifted from visual design towards product thinking, design systems and how products evolve as they grow.</p>
-					<!--
-					<p>Great interfaces matter, but they’re only one piece of the puzzle. I’m just as interested in the decisions behind them, how everything fits together and what makes a product continue to work as it grows.
-					</p>
-					<p>Understanding how products are built has changed the way I design. It reminds me that good products aren’t just about great interfaces, but about making the right decisions for the people using them and the teams building them.
-					</p>
-					-->
-					<p>In my free time, I enjoy turning ideas into side projects that push me beyond my comfort zone. Some become products, others don’t. Every project teaches me something new,  which is what keeps me curious.
-					</p>
+					<div class="row">
+						<div class="col-12 lg:col-8 lg:offset-4">
+							<p>Hi <span class="wave">👋🏼</span> I’m Justin, a Digital Product Designer from the Netherlands. I’ve spent more than 10 years designing websites and digital products, and over time my curiosity naturally shifted from visual design towards product thinking, design systems and how products evolve as they grow.</p>
+							<!--
+							<p>Great interfaces matter, but they’re only one piece of the puzzle. I’m just as interested in the decisions behind them, how everything fits together and what makes a product continue to work as it grows.
+							</p>
+							<p>Understanding how products are built has changed the way I design. It reminds me that good products aren’t just about great interfaces, but about making the right decisions for the people using them and the teams building them.
+							</p>
+							-->
+							<p>In my free time, I enjoy turning ideas into side projects that push me beyond my comfort zone. Some become products, others don’t. Every project teaches me something new,  which is what keeps me curious.
+							</p>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

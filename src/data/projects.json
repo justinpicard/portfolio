@@ -3,7 +3,8 @@
 		"id": "1",
 		"name": "MuziMatch",
 		"description": "MuziMatch brengt muzikanten samen die op zoek zijn naar een band, samenwerking of nieuw project. Het platform maakt het eenvoudiger om elkaar te vinden op basis van **muzikale interesses**, ervaring en locatie.\n\nBinnen dit project komen *product design*, development en het uitwerken van een schaalbaar design system samen. Deze tekst is tijdelijk en kan later worden vervangen door de definitieve case study.",
-		"image": "hz-university-2",
+		"image": "projects/muzimatch/muzimatch_oproepen",
+		"imageFormat": "png",
 		"secondaryImages": [
 			"hz-university",
 			"dot3"
@@ -19,9 +20,9 @@
 		"id": "2",
 		"name": "Recranet Booking",
 		"description": "Recranet Booking is een SaaS-product voor vakantieparken en campings. De oplossing ondersteunt het volledige boekingsproces, van het zoeken naar een verblijf tot het afronden van de reservering.\n\nDe focus lag op het ontwikkelen van een **consistent design system** en het verbeteren van complexe gebruikersflows. Daarbij waren *duidelijkheid*, herbruikbaarheid en schaalbaarheid belangrijke uitgangspunten.",
-		"image": "recranet",
+		"image": "projects/recranet/recranet",
 		"secondaryImages": [
-			"vodatent",
+			"projects/recranet/vodatent",
 			"dehoop"
 		],
 		"overlayBackground": "#F6D4C8",
@@ -35,7 +36,7 @@
 		"id": "3",
 		"name": "SFVonline",
 		"description": "SFVonline helpt organisaties om processen en documentatie rondom sociale veiligheid overzichtelijk te beheren. Het product vertaalt uitgebreide informatie naar een toegankelijke digitale werkomgeving.\n\nVoor dit project werkte ik aan de **gebruikerservaring en interface**, met extra aandacht voor structuur en leesbaarheid. *Deze voorbeeldtekst dient als tijdelijke invulling* totdat de volledige projectbeschrijving beschikbaar is.",
-		"image": "sfvonline",
+		"image": "projects/sfvonline/sfvonline",
 		"secondaryImages": [
 			"dot3",
 			"hz-university"

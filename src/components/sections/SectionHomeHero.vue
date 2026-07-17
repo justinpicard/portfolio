@@ -78,12 +78,16 @@ onMounted(() => {
 	if (!loadingScreenElement || !heroPhotoElement || !scrollIndicatorElement) return
 	const finalTitle = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-name')
 	const introTitle = loadingScreenElement.querySelector<HTMLElement>('.hero-copy-layer--intro .hero-name')
+	const introDivider = loadingScreenElement.querySelector<HTMLElement>('.hero-copy-layer--intro .hero-divider')
 	const introRole = loadingScreenElement.querySelector<HTMLElement>('.hero-copy-layer--intro .hero-figure__role')
 	const introText = loadingScreenElement.querySelector<HTMLElement>('.hero-copy-layer--intro .hero-figure__intro')
 
 	if (prefersReducedMotion()) {
-		gsap.set([introTitle, introRole, introText].filter(Boolean), {
+		gsap.set([introTitle, introDivider, introRole, introText].filter(Boolean), {
 			visibility: 'visible'
+		})
+		gsap.set(introDivider, {
+			width: '100%'
 		})
 		gsap.set(loadingScreenElement, {
 			clipPath: 'inset(0 0 100% 0)'
@@ -102,7 +106,7 @@ onMounted(() => {
 	}
 
 	ctx = gsap.context(() => {
-		if (!finalTitle || !introTitle || !introRole || !introText) return
+		if (!finalTitle || !introTitle || !introDivider || !introRole || !introText) return
 
 		finalTitleSplit = new SplitText(finalTitle, { type: 'chars', charsClass: 'split-display-char' })
 		titleSplit = new SplitText(introTitle, { type: 'chars', charsClass: 'split-display-char' })
@@ -126,7 +130,10 @@ onMounted(() => {
 			y: 90,
 			opacity: 1
 		})
-		gsap.set([introTitle, introRole, introText], {
+		gsap.set(introDivider, {
+			width: '0%'
+		})
+		gsap.set([introTitle, introDivider, introRole, introText], {
 			visibility: 'visible'
 		})
 		gsap.set(heroPhotoElement, {
@@ -152,6 +159,11 @@ onMounted(() => {
 				stagger: 0.06,
 				ease: 'power4.out'
 			}, 0)
+			.to(introDivider, {
+				width: '100%',
+				duration: 1.15,
+				ease: 'power3.inOut'
+			}, 0.35)
 			.to(roleSplit.lines, {
 				y: 0,
 				opacity: 1,

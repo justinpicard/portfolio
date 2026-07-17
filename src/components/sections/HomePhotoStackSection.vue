@@ -45,9 +45,9 @@ type Photo = {
 }
 
 const photos: Photo[] = [
-	{ src: '/images/photos/justin-picard_portrait.jpg', alt: 'Justin Picard portrait', orientation: 'landscape' },
-	{ src: '/images/photos/justin-picard_architecture-berlin.jpg', alt: 'Architectuur Berlijn', orientation: 'portrait' },
 	{ src: '/images/photos/justin-picard_new-york-selfie.jpg', alt: 'Selfie in New York', orientation: 'portrait' },
+	{ src: '/images/photos/justin-picard_family.jpg', alt: 'Justin Picard family', orientation: 'landscape' },
+	{ src: '/images/photos/justin-picard_architecture-berlin.jpg', alt: 'Architectuur Berlijn', orientation: 'portrait' },
 	{ src: '/images/photos/justin-picard_bassist.jpg', alt: 'Bassist', orientation: 'landscape' },
 	{ src: '/images/photos/justin-picard_architecture-valencia.jpg', alt: 'Architectuur Valencia', orientation: 'portrait' },
 	{ src: '/images/photos/justin-picard_madison-square-garden.jpg', alt: 'Madison Square Garden', orientation: 'landscape' },
@@ -85,7 +85,7 @@ const stackOffsets = [
 ]
 
 const spreadOffsets = [
-	{ x: '-34vw', y: '-14vh', rotate: -14, scale: 1 },
+	{ x: '-34vw', y: '-14vh', rotate: -14, scale: 1 },	// Family
 	{ x: '-25vw', y: '18vh', rotate: -9, scale: 0.96 }, // Berlin
 	{ x: '-2vw', y: '-22vh', rotate: -5, scale: 1.04 },
 	{ x: '18vw', y: '16vh', rotate: 13, scale: 0.98 },

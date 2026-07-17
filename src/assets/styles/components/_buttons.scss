@@ -4,7 +4,7 @@
 	position: relative;
 	display: inline-flex;
 	align-items: center;
-	text-transform: uppercase;
+	//text-transform: uppercase;
 	font-size: $font-size-sm;
 	text-align: center;
 	text-decoration: none;
@@ -22,7 +22,7 @@
 		align-items: stretch;
 		display: flex;
 		position: relative;
-		font-weight: $font-weight-semibold;
+		font-weight: $font-weight-medium;
 
 		.btn-text-wrapper {
 			grid-column-gap: 8px;

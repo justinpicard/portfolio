@@ -12,7 +12,7 @@ main:has(> .page-surface) {
 		}
 	}
 
-	&.scrolled-after {
+	&.scrolled-after:not(.page-bottom) {
 		.page-surface__scrim--bottom {
 			opacity: 1;
 			transform: translateY(0);

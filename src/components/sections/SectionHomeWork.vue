@@ -35,7 +35,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { gsap, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
 import projects from '../../data/projects.json'
 import ProjectCard from '../work/ProjectCard.vue'
-import type { ProjectOpenPayload } from '../../types/project'
+import type { Project, ProjectOpenPayload } from '../../types/project'
 
 withDefaults(defineProps<{
 	transitionHiddenProjectIndex?: number | null
@@ -52,8 +52,10 @@ const titleRef = ref<HTMLHeadingElement | null>(null)
 let splitTitle: SplitText | undefined
 let ctx: gsap.Context | undefined
 
+const projectData = projects as Project[]
+
 const orderedProjects = computed(() => (
-	projects.map((project, index) => ({
+	projectData.map((project, index) => ({
 		...project,
 		index
 	}))
