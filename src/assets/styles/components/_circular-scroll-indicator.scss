@@ -12,10 +12,14 @@
 }
 
 .circular-scroll-indicator {
+	--indicator-size: clamp(7rem, 10vw, 10rem);
+	--indicator-text-size: 1.14rem;
+	--indicator-letter-spacing: 0.14em;
+
 	position: relative;
 	display: grid;
 	place-items: center;
-	width: clamp(7rem, 10vw, 10rem);
+	width: var(--indicator-size);
 	aspect-ratio: 1;
 	color: var(--color-secondary);
 	text-decoration: none;
@@ -30,6 +34,12 @@
 	}
 }
 
+.circular-scroll-indicator--project {
+	--indicator-size: 8rem;
+	--indicator-text-size: 1.18rem;
+	--indicator-letter-spacing: 0.11em;
+}
+
 .circular-scroll-indicator__graphic,
 .circular-scroll-indicator__icon {
 	grid-column: 1;
@@ -39,16 +49,16 @@
 .circular-scroll-indicator__graphic {
 	width: 100%;
 	height: 100%;
-	animation: circular-scroll-rotation 22s linear infinite;
+	animation: circular-scroll-rotation 16s linear infinite;
 	transform-origin: center;
 }
 
 .circular-scroll-indicator__text {
 	fill: currentColor;
 	font-family: var(--body-font);
-	font-size: 0.9rem;
+	font-size: var(--indicator-text-size);
 	font-weight: var(--font-weight-medium);
-	letter-spacing: 0.14em;
+	letter-spacing: var(--indicator-letter-spacing);
 	text-transform: uppercase;
 }
 
@@ -72,5 +82,36 @@
 @media (prefers-reduced-motion: reduce) {
 	.circular-scroll-indicator__graphic {
 		animation: none;
+	}
+}
+
+@media (pointer: fine) {
+	.circular-scroll-indicator-wrapper {
+		position: fixed;
+		top: 0;
+		right: auto;
+		bottom: auto;
+		left: 0;
+		pointer-events: none;
+		transform: none;
+		transition: none;
+	}
+
+	.circular-scroll-indicator-wrapper--project {
+		position: absolute;
+		top: 0;
+		right: auto;
+		bottom: auto;
+		left: 0;
+	}
+
+	.circular-scroll-indicator {
+		translate: none;
+		transform: none;
+		transition: none;
+	}
+
+	.circular-scroll-indicator__icon {
+		display: none;
 	}
 }

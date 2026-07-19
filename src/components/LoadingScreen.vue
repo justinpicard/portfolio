@@ -120,6 +120,11 @@ onMounted(() => {
 			scale: layout.zoomScale,
 			svgOrigin: `${layout.centerX} ${layout.centerY}`
 		})
+		gsap.set(introElement, {
+			autoAlpha: 0,
+			pointerEvents: 'none',
+			display: 'none'
+		})
 		return
 	}
 
@@ -153,7 +158,8 @@ onMounted(() => {
 		})
 		.set(introElement, {
 			autoAlpha: 0,
-			pointerEvents: 'none'
+			pointerEvents: 'none',
+			display: 'none'
 		})
 	})
 

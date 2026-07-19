@@ -81,6 +81,7 @@
 	text-align: left;
 	text-decoration: none;
 	cursor: pointer;
+	overflow: hidden;
 
 	&:hover {
 		color: var(--color-white);

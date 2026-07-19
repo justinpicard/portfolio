@@ -1,10 +1,20 @@
 <template>
-	<div ref="root" class="circular-scroll-indicator-wrapper">
-		<a
+	<div
+		ref="root"
+		:class="[
+			'circular-scroll-indicator-wrapper',
+			`circular-scroll-indicator-wrapper--${variant}`
+		]"
+	>
+		<component
+			:is="href ? 'a' : 'div'"
 			ref="indicator"
-			class="circular-scroll-indicator"
-			href="#about"
-			aria-label="Scroll to the About section"
+			:class="[
+				'circular-scroll-indicator',
+				`circular-scroll-indicator--${variant}`
+			]"
+			:href="href"
+			:aria-label="ariaLabel || undefined"
 		>
 			<svg
 				class="circular-scroll-indicator__graphic"
@@ -22,19 +32,37 @@
 						:href="`#${pathId}`"
 						startOffset="0%"
 					>
-						SCROLL FOR MORE • SCROLL FOR MORE •
+						{{ text }}
 					</textPath>
 				</text>
 			</svg>
-			<span class="circular-scroll-indicator__icon" aria-hidden="true">
+			<span
+				v-if="showIcon"
+				class="circular-scroll-indicator__icon"
+				aria-hidden="true"
+			>
 				↓
 			</span>
-		</a>
+		</component>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { ref, useId } from 'vue'
+
+withDefaults(defineProps<{
+	variant?: 'hero' | 'project'
+	text?: string
+	href?: string
+	ariaLabel?: string
+	showIcon?: boolean
+}>(), {
+	variant: 'hero',
+	text: 'SCROLL DOWN • SCROLL DOWN •',
+	href: '#about',
+	ariaLabel: 'Scroll to the About section',
+	showIcon: true
+})
 
 const pathId = `scroll-indicator-path-${useId()}`
 const root = ref<HTMLElement | null>(null)

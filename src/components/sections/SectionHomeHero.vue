@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { gsap, prefersReducedMotion, registerGsapPlugins, SplitText } from '../../utils/animations/gsap'
 import { animationDurations, animationEases, animationStaggers } from '../../utils/animations/presets'
 import BaseImage from '../base/BaseImage.vue'
@@ -28,15 +28,19 @@ import LoadingScreen from '../LoadingScreen.vue'
 import CircularScrollIndicator from '../ui/CircularScrollIndicator.vue'
 import HomeHeroCopy from './HomeHeroCopy.vue'
 import { lockPageScroll } from '../../utils/dom/scrollLock'
+import { useCursorFollowIndicator } from '../../composables/useCursorFollowIndicator'
 
 const root = ref<HTMLElement | null>(null)
 const loadingScreen = ref<InstanceType<typeof LoadingScreen> | null>(null)
 const heroPhoto = ref<HTMLElement | null>(null)
 const scrollIndicator = ref<InstanceType<typeof CircularScrollIndicator> | null>(null)
+const scrollIndicatorWrapper = computed(() => scrollIndicator.value?.element ?? null)
+const scrollIndicatorElement = computed(() => scrollIndicator.value?.indicator ?? null)
 const FINAL_PHOTO_ROTATION = 4
 const HERO_PHOTO_START = 0.2
 const HERO_PHOTO_DURATION = 1.05
 const HERO_INTRO_LOADING_OVERLAP = 0.14
+const CURSOR_FOLLOW_POINTER_QUERY = '(hover: hover) and (pointer: fine)'
 let ctx: gsap.Context | undefined
 let heroTimeline: gsap.core.Timeline | undefined
 let isHeroIntroLinked = false
@@ -44,6 +48,7 @@ let titleSplit: SplitText | undefined
 let roleSplit: SplitText | undefined
 let introSplit: SplitText | undefined
 let unlockScroll: (() => void) | undefined
+let scrollIndicatorFollow: ReturnType<typeof useCursorFollowIndicator> | undefined
 
 defineExpose({
 	element: root,
@@ -77,6 +82,10 @@ function markHeroIntroStarted() {
 	root.value?.classList.remove('home-hero--intro-pending')
 }
 
+function supportsCursorFollow() {
+	return window.matchMedia(CURSOR_FOLLOW_POINTER_QUERY).matches
+}
+
 function linkHeroIntroTimeline() {
 	if (isHeroIntroLinked || !heroTimeline) return
 
@@ -99,12 +108,20 @@ onMounted(() => {
 
 	const loadingScreenElement = loadingScreen.value?.element
 	const heroPhotoElement = heroPhoto.value
-	const scrollIndicatorElement = scrollIndicator.value?.indicator
-	if (!loadingScreenElement || !heroPhotoElement || !scrollIndicatorElement) return
+	const scrollIndicatorVisualElement = scrollIndicatorElement.value
+	if (!loadingScreenElement || !heroPhotoElement || !scrollIndicatorWrapper.value || !scrollIndicatorVisualElement) return
+	const useCursorScrollIndicator = supportsCursorFollow()
 	const finalTitle = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-name')
 	const finalDivider = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-divider')
 	const finalRole = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-figure__role')
 	const finalText = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-figure__intro')
+	if (!finalTitle || !finalDivider || !finalRole || !finalText) return
+
+	scrollIndicatorFollow = useCursorFollowIndicator({
+		triggerElement: root,
+		wrapperElement: scrollIndicatorWrapper,
+		visualElement: scrollIndicatorElement
+	})
 
 	unlockScroll = lockPageScroll()
 
@@ -130,10 +147,14 @@ onMounted(() => {
 				rotation: FINAL_PHOTO_ROTATION,
 				scale: 1
 			}, 0)
-			.set(scrollIndicatorElement, {
+			.set(scrollIndicatorVisualElement, {
 				yPercent: 0,
-				autoAlpha: 1
+				autoAlpha: useCursorScrollIndicator ? 0 : 1,
+				scale: 1
 			}, 0)
+			.call(() => {
+				scrollIndicatorFollow?.enable()
+			}, [], 0)
 
 		linkHeroIntroTimeline()
 
@@ -141,8 +162,6 @@ onMounted(() => {
 	}
 
 	ctx = gsap.context(() => {
-		if (!finalTitle || !finalDivider || !finalRole || !finalText) return
-
 		titleSplit = new SplitText(finalTitle, { type: 'chars', charsClass: 'split-display-char' })
 		roleSplit = new SplitText(finalRole, { type: 'lines', linesClass: 'split-line' })
 		introSplit = new SplitText(finalText, { type: 'lines', linesClass: 'split-line' })
@@ -171,8 +190,8 @@ onMounted(() => {
 			rotation: -8,
 			scale: 0.98
 		})
-		gsap.set(scrollIndicatorElement, {
-			yPercent: 120,
+		gsap.set(scrollIndicatorVisualElement, {
+			yPercent: useCursorScrollIndicator ? 0 : 120,
 			autoAlpha: 0
 		})
 
@@ -224,7 +243,9 @@ onMounted(() => {
 				duration: HERO_PHOTO_DURATION,
 				ease: 'power4.out'
 			}, 'photoIn')
-			.fromTo(scrollIndicatorElement, {
+
+		if (!useCursorScrollIndicator) {
+			heroTimeline.fromTo(scrollIndicatorVisualElement, {
 				yPercent: 120,
 				autoAlpha: 0
 			}, {
@@ -232,7 +253,12 @@ onMounted(() => {
 				autoAlpha: 1,
 				duration: 0.65,
 				ease: 'power3.out'
-			}, 'photoIn+=0.75')
+			}, '>')
+		}
+
+		heroTimeline.add(() => {
+			scrollIndicatorFollow?.enable()
+		}, '>')
 
 		linkHeroIntroTimeline()
 	}, root.value ?? undefined)
@@ -241,6 +267,7 @@ onMounted(() => {
 onUnmounted(() => {
 	heroTimeline?.kill()
 	isHeroIntroLinked = false
+	scrollIndicatorFollow?.cleanup()
 	restoreScroll()
 	ctx?.revert()
 	titleSplit?.revert()

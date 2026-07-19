@@ -4,6 +4,7 @@
 		:style="cardStyles"
 	>
 		<button
+			ref="trigger"
 			class="project-card__trigger"
 			type="button"
 			@click="handleOpen"
@@ -28,15 +29,25 @@
 					/>
 				</div>
 			</div>
+			<CircularScrollIndicator
+				ref="projectIndicator"
+				variant="project"
+				text="VIEW PROJECT • VIEW PROJECT •"
+				:href="undefined"
+				aria-label=""
+				:show-icon="false"
+			/>
 		</button>
 	</article>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import type { CSSProperties } from 'vue'
 import type { Project, ProjectOpenPayload } from '../../types/project'
+import { useCursorFollowIndicator } from '../../composables/useCursorFollowIndicator'
 import BaseImage from '../base/BaseImage.vue'
+import CircularScrollIndicator from '../ui/CircularScrollIndicator.vue'
 
 const props = defineProps<{
 	project: Project
@@ -48,8 +59,13 @@ const emit = defineEmits<{
 	open: [payload: ProjectOpenPayload]
 }>()
 
+const trigger = ref<HTMLElement | null>(null)
 const mediaFrame = ref<HTMLElement | null>(null)
+const projectIndicator = ref<InstanceType<typeof CircularScrollIndicator> | null>(null)
+const projectIndicatorWrapper = computed(() => projectIndicator.value?.element ?? null)
+const projectIndicatorVisual = computed(() => projectIndicator.value?.indicator ?? null)
 const formattedNumber = computed(() => String(props.index + 1).padStart(2, '0'))
+let cursorFollowIndicator: ReturnType<typeof useCursorFollowIndicator> | undefined
 
 const cardStyles = computed<CSSProperties>(() => ({
 	'--project-card-mobile-order': props.index + 1
@@ -65,6 +81,21 @@ function handleOpen(event: MouseEvent) {
 		sourceMediaElement: mediaFrame.value
 	})
 }
+
+onMounted(() => {
+	if (!projectIndicatorWrapper.value || !projectIndicatorVisual.value) return
+
+	cursorFollowIndicator = useCursorFollowIndicator({
+		triggerElement: trigger,
+		wrapperElement: projectIndicatorWrapper,
+		visualElement: projectIndicatorVisual
+	})
+	cursorFollowIndicator.enable()
+})
+
+onUnmounted(() => {
+	cursorFollowIndicator?.cleanup()
+})
 
 defineExpose({
 	mediaFrame
