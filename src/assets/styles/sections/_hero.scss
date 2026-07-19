@@ -11,6 +11,14 @@
 	height: 100svh;
 	overflow: visible;
 
+	&--intro-pending {
+		.hero-copy-container--final,
+		.hero-photo,
+		.circular-scroll-indicator-wrapper {
+			visibility: hidden;
+		}
+	}
+
 	.hero-composition {
 		--hero-title-optical-trim: clamp(1rem, 4.4cqw, 4rem);
 
@@ -40,21 +48,6 @@
 
 	.hero-copy-layer--final {
 		color: var(--color-white);
-	}
-
-	.hero-copy-layer--intro {
-		color: var(--color-primary);
-
-		.hero-name,
-		.hero-divider,
-		.hero-figure__role,
-		.hero-figure__intro {
-			visibility: hidden;
-		}
-
-		.hero-figure__intro {
-			width: 100%;
-		}
 	}
 
 	.hero-name {
@@ -123,7 +116,7 @@
 		max-width: 28ch;
 	}
 
-	.hero-copy-layer--intro {
+	.hero-copy-layer {
 		.split-line-wrapper {
 			display: block;
 			overflow: hidden;

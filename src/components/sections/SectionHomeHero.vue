@@ -1,5 +1,5 @@
 <template>
-	<section ref="root" class="home-hero">
+	<section ref="root" class="home-hero home-hero--intro-pending">
 		<div class="container hero-copy-container hero-copy-container--final">
 			<HomeHeroCopy class="hero-copy-layer hero-copy-layer--final" />
 		</div>
@@ -13,14 +13,7 @@
 			/>
 		</div>
 
-		<LoadingScreen ref="loadingScreen">
-			<div class="container hero-copy-container hero-copy-container--intro">
-				<HomeHeroCopy
-					decorative
-					class="hero-copy-layer hero-copy-layer--intro"
-				/>
-			</div>
-		</LoadingScreen>
+		<LoadingScreen ref="loadingScreen" />
 
 		<CircularScrollIndicator ref="scrollIndicator" />
 	</section>
@@ -41,18 +34,21 @@ const loadingScreen = ref<InstanceType<typeof LoadingScreen> | null>(null)
 const heroPhoto = ref<HTMLElement | null>(null)
 const scrollIndicator = ref<InstanceType<typeof CircularScrollIndicator> | null>(null)
 const FINAL_PHOTO_ROTATION = 4
-const HERO_PHOTO_START = 2.4
+const HERO_PHOTO_START = 0.2
 const HERO_PHOTO_DURATION = 1.05
+const HERO_INTRO_LOADING_OVERLAP = 0.14
 let ctx: gsap.Context | undefined
 let heroTimeline: gsap.core.Timeline | undefined
-let finalTitleSplit: SplitText | undefined
+let isHeroIntroLinked = false
 let titleSplit: SplitText | undefined
 let roleSplit: SplitText | undefined
 let introSplit: SplitText | undefined
 let unlockScroll: (() => void) | undefined
 
 defineExpose({
-	element: root
+	element: root,
+	getHeroIntroTimeline,
+	playHeroIntro
 })
 
 function wrapSplitElements(elements: Element[], className: string, tagName: 'div' | 'span' = 'div') {
@@ -69,6 +65,35 @@ function restoreScroll() {
 	unlockScroll = undefined
 }
 
+function playHeroIntro() {
+	heroTimeline?.play(0)
+}
+
+function getHeroIntroTimeline() {
+	return heroTimeline
+}
+
+function markHeroIntroStarted() {
+	root.value?.classList.remove('home-hero--intro-pending')
+}
+
+function linkHeroIntroTimeline() {
+	if (isHeroIntroLinked || !heroTimeline) return
+
+	const loadingTimeline = loadingScreen.value?.getSignatureDrawTimeline()
+	heroTimeline.pause(0)
+
+	if (!loadingTimeline) {
+		playHeroIntro()
+		isHeroIntroLinked = true
+		return
+	}
+
+	loadingTimeline.add(heroTimeline, `-=${HERO_INTRO_LOADING_OVERLAP}`)
+	heroTimeline.paused(false)
+	isHeroIntroLinked = true
+}
+
 onMounted(() => {
 	registerGsapPlugins()
 
@@ -77,43 +102,51 @@ onMounted(() => {
 	const scrollIndicatorElement = scrollIndicator.value?.indicator
 	if (!loadingScreenElement || !heroPhotoElement || !scrollIndicatorElement) return
 	const finalTitle = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-name')
-	const introTitle = loadingScreenElement.querySelector<HTMLElement>('.hero-copy-layer--intro .hero-name')
-	const introDivider = loadingScreenElement.querySelector<HTMLElement>('.hero-copy-layer--intro .hero-divider')
-	const introRole = loadingScreenElement.querySelector<HTMLElement>('.hero-copy-layer--intro .hero-figure__role')
-	const introText = loadingScreenElement.querySelector<HTMLElement>('.hero-copy-layer--intro .hero-figure__intro')
+	const finalDivider = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-divider')
+	const finalRole = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-figure__role')
+	const finalText = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-figure__intro')
+
+	unlockScroll = lockPageScroll()
 
 	if (prefersReducedMotion()) {
-		gsap.set([introTitle, introDivider, introRole, introText].filter(Boolean), {
-			visibility: 'visible'
+		heroTimeline = gsap.timeline({
+			paused: true,
+			onComplete: restoreScroll
 		})
-		gsap.set(introDivider, {
-			width: '100%'
-		})
-		gsap.set(loadingScreenElement, {
-			clipPath: 'inset(0 0 100% 0)'
-		})
-		gsap.set(heroPhotoElement, {
-			y: 0,
-			rotation: FINAL_PHOTO_ROTATION,
-			scale: 1
-		})
-		gsap.set(scrollIndicatorElement, {
-			yPercent: 0,
-			autoAlpha: 1
-		})
-		restoreScroll()
+
+		heroTimeline
+			.call(markHeroIntroStarted, [], 0)
+			.set([finalTitle, finalDivider, finalRole, finalText].filter(Boolean), {
+				visibility: 'visible'
+			}, 0)
+			.set(finalDivider, {
+				width: '100%'
+			}, 0)
+			.set(loadingScreenElement, {
+				clipPath: 'inset(0 0 100% 0)'
+			}, 0)
+			.set(heroPhotoElement, {
+				y: 0,
+				rotation: FINAL_PHOTO_ROTATION,
+				scale: 1
+			}, 0)
+			.set(scrollIndicatorElement, {
+				yPercent: 0,
+				autoAlpha: 1
+			}, 0)
+
+		linkHeroIntroTimeline()
+
 		return
 	}
 
 	ctx = gsap.context(() => {
-		if (!finalTitle || !introTitle || !introDivider || !introRole || !introText) return
+		if (!finalTitle || !finalDivider || !finalRole || !finalText) return
 
-		finalTitleSplit = new SplitText(finalTitle, { type: 'chars', charsClass: 'split-display-char' })
-		titleSplit = new SplitText(introTitle, { type: 'chars', charsClass: 'split-display-char' })
-		roleSplit = new SplitText(introRole, { type: 'lines', linesClass: 'split-line' })
-		introSplit = new SplitText(introText, { type: 'lines', linesClass: 'split-line' })
+		titleSplit = new SplitText(finalTitle, { type: 'chars', charsClass: 'split-display-char' })
+		roleSplit = new SplitText(finalRole, { type: 'lines', linesClass: 'split-line' })
+		introSplit = new SplitText(finalText, { type: 'lines', linesClass: 'split-line' })
 
-		wrapSplitElements(finalTitleSplit.chars, 'split-display-char-wrapper', 'span')
 		wrapSplitElements(titleSplit.chars, 'split-display-char-wrapper', 'span')
 		wrapSplitElements(roleSplit.lines, 'split-line-wrapper')
 		wrapSplitElements(introSplit.lines, 'split-line-wrapper')
@@ -130,11 +163,8 @@ onMounted(() => {
 			y: 90,
 			opacity: 1
 		})
-		gsap.set(introDivider, {
+		gsap.set(finalDivider, {
 			width: '0%'
-		})
-		gsap.set([introTitle, introDivider, introRole, introText], {
-			visibility: 'visible'
 		})
 		gsap.set(heroPhotoElement, {
 			y: '110vh',
@@ -146,24 +176,27 @@ onMounted(() => {
 			autoAlpha: 0
 		})
 
-		unlockScroll = lockPageScroll()
-
 		heroTimeline = gsap.timeline({
+			paused: true,
 			onComplete: restoreScroll
 		})
 
 		heroTimeline
+			.call(markHeroIntroStarted, [], 0)
+			.set([finalTitle, finalDivider, finalRole, finalText], {
+				visibility: 'visible'
+			}, 0)
 			.to(titleSplit.chars, {
 				yPercent: 0,
 				duration: 0.9,
 				stagger: 0.06,
 				ease: 'power4.out'
 			}, 0)
-			.to(introDivider, {
-				width: '100%',
-				duration: 1.15,
-				ease: 'power3.inOut'
-			}, 0.35)
+				.to(finalDivider, {
+					width: '100%',
+					duration: 0.9,
+					ease: 'power3.inOut'
+				}, 0)
 			.to(roleSplit.lines, {
 				y: 0,
 				opacity: 1,
@@ -200,14 +233,16 @@ onMounted(() => {
 				duration: 0.65,
 				ease: 'power3.out'
 			}, 'photoIn+=0.75')
+
+		linkHeroIntroTimeline()
 	}, root.value ?? undefined)
 })
 
 onUnmounted(() => {
 	heroTimeline?.kill()
+	isHeroIntroLinked = false
 	restoreScroll()
 	ctx?.revert()
-	finalTitleSplit?.revert()
 	titleSplit?.revert()
 	roleSplit?.revert()
 	introSplit?.revert()
