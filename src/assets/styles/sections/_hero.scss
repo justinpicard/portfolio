@@ -1,7 +1,7 @@
 @use "../abstracts" as *;
 
 .home-hero {
-	--home-hero-copy-offset-start: var(--space-4);
+	--home-hero-copy-offset-start: var(--space-24);
 	--home-hero-copy-offset-end: var(--space-12);
 	--home-hero-copy-height: calc(100svh - var(--home-hero-copy-offset-start) - var(--home-hero-copy-offset-end));
 

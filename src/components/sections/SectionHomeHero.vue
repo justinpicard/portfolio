@@ -50,6 +50,10 @@ let introSplit: SplitText | undefined
 let unlockScroll: (() => void) | undefined
 let scrollIndicatorFollow: ReturnType<typeof useCursorFollowIndicator> | undefined
 
+const emit = defineEmits<{
+	'intro-start': []
+}>()
+
 defineExpose({
 	element: root,
 	getHeroIntroTimeline,
@@ -80,6 +84,7 @@ function getHeroIntroTimeline() {
 
 function markHeroIntroStarted() {
 	root.value?.classList.remove('home-hero--intro-pending')
+	emit('intro-start')
 }
 
 function supportsCursorFollow() {

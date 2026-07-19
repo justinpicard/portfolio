@@ -103,27 +103,45 @@
 		display: flex;
 		align-items: center;
 
-		h1,
-		h2 {
-			font-size: $font-size-md;
-			line-height: 1.1;
-		}
-
-		h1 {
-			margin-block-start: 0;
-		}
-
-		h2 {
-			margin-block-start: var(--space-1);
-		}
-
 		.avatar {
-			max-width: 3.75rem;
+			max-width: 2.75rem;
 			border-radius: 30px;
 			overflow: hidden;
 			margin: 0 1rem 0 0;
 		}
 	}
+
+	.name,
+	.role,
+	.lang-switcher {
+		line-height: 2.75rem;
+	}
+
+	//.site-logo {
+	//	display: flex;
+	//	align-items: center;
+
+	//	h1,
+	//	h2 {
+	//		font-size: $font-size-md;
+	//		line-height: 1.1;
+	//	}
+
+	//	h1 {
+	//		margin-block-start: 0;
+	//	}
+
+	//	h2 {
+	//		margin-block-start: var(--space-1);
+	//	}
+
+	//	.avatar {
+	//		max-width: 3.75rem;
+	//		border-radius: 30px;
+	//		overflow: hidden;
+	//		margin: 0 1rem 0 0;
+	//	}
+	//}
 
 	//.nav-link {
 	//	font-size: $font-size-lg;

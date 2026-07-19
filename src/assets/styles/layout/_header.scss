@@ -27,31 +27,4 @@
 		text-decoration: none;
 		color: var(--color-white);
 	}
-
-	.site-logo {
-		display: flex;
-		align-items: center;
-		
-		.site-title {
-			display: flex;
-			flex-direction: column;
-			font-family: var(--heading-font);
-
-			span {
-				font-size: 1.75rem;
-				line-height: 1.1;
-
-				&.role {
-					font-size: 1.15rem;
-				}
-			}
-		}
-
-		.avatar {
-			max-width: 3.75rem;
-			border-radius: 30px;
-			overflow: hidden;
-			margin: 0 1rem 0 0;
-		}
-	}
 }

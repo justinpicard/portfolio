@@ -5,7 +5,10 @@
 			<div ref="pageSurfaceScrimBottom" class="page-surface__scrim page-surface__scrim--bottom" />
 		</div>
 		<AppHeader :visible="isHeaderVisible" />
-		<SectionHomeHero ref="hero" />
+		<SectionHomeHero
+			ref="hero"
+			@intro-start="showHeader"
+		/>
 		<SectionHomeAbout />
 		<SectionHomeWork
 			:transition-hidden-project-index="transitionHiddenProjectIndex"
@@ -39,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, shallowRef, ref, watch } from "vue"
+import { computed, onUnmounted, shallowRef, ref, watch } from "vue"
 import type { CSSProperties } from "vue"
 import AppHeader from "../components/AppHeader.vue"
 import AppOverlay from "../components/overlay/AppOverlay.vue"
@@ -79,7 +82,6 @@ const transitionHiddenProjectIndex = ref<number | null>(null)
 const overlayFirstMediaHidden = ref(false)
 const projectOpeningTransitionActive = ref(false)
 const projects = projectsData as Project[]
-let heroObserver: IntersectionObserver | undefined
 let closeOverlayTimeout: ReturnType<typeof window.setTimeout> | undefined
 
 const overlayLabelledBy = computed(() => {
@@ -208,6 +210,10 @@ const openCv = () => {
 	activeOverlay.value = nextOverlay
 }
 
+function showHeader() {
+	isHeaderVisible.value = true
+}
+
 const closeOverlay = () => {
 	if (activeOverlay.value === null || closeOverlayTimeout) return
 
@@ -256,21 +262,7 @@ watch(
 	}
 )
 
-onMounted(() => {
-	const heroElement = hero.value?.element
-	if (!heroElement) return
-
-	heroObserver = new IntersectionObserver(([entry]) => {
-		isHeaderVisible.value = !entry.isIntersecting
-	}, {
-		threshold: 0
-	})
-
-	heroObserver.observe(heroElement)
-})
-
 onUnmounted(() => {
-	heroObserver?.disconnect()
 	if (closeOverlayTimeout) {
 		window.clearTimeout(closeOverlayTimeout)
 	}
