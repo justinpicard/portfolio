@@ -99,26 +99,17 @@ onMounted(() => {
 	if (!introElement || !mask || !line || !dot) return
 
 	const layout = getSignatureLayout()
+	const initialBox = getSignatureBox(layout, 1)
 
 	gsap.set(mask, {
-		attr: {
-			x: layout.x,
-			y: layout.y
-		},
-		scale: 1,
-		svgOrigin: `${layout.centerX} ${layout.centerY}`
+		attr: initialBox
 	})
 
 	if (prefersReducedMotion()) {
 		gsap.set(line, { strokeDashoffset: 0 })
 		gsap.set(dot, { opacity: 1 })
 		gsap.set(mask, {
-			attr: {
-				x: layout.x,
-				y: layout.y
-			},
-			scale: layout.zoomScale,
-			svgOrigin: `${layout.centerX} ${layout.centerY}`
+			attr: getSignatureBox(layout, layout.zoomScale)
 		})
 		gsap.set(introElement, {
 			autoAlpha: 0,
@@ -145,14 +136,14 @@ onMounted(() => {
 			opacity: 1
 		}, `-=${SIGNATURE_DOT_OVERLAP}`)
 		.to(mask, {
-			scale: SIGNATURE_ZOOM_BOUNCE_SCALE,
-			svgOrigin: `${layout.centerX} ${layout.centerY}`,
+			// Animate SVG geometry because mobile Safari does not reliably repaint
+			// transforms applied to nested SVG elements inside masks.
+			attr: getSignatureBox(layout, SIGNATURE_ZOOM_BOUNCE_SCALE),
 			duration: SIGNATURE_ZOOM_BOUNCE_DURATION,
 			ease: 'sine.inOut'
 		}, `+=${SIGNATURE_ZOOM_DELAY}`)
 		.to(mask, {
-			scale: layout.zoomScale,
-			svgOrigin: `${layout.centerX} ${layout.centerY}`,
+			attr: getSignatureBox(layout, layout.zoomScale),
 			duration: SIGNATURE_ZOOM_DURATION,
 			ease: 'expo.in'
 		})
@@ -180,11 +171,21 @@ function getSignatureLayout() {
 	const centerY = height / 2
 
 	return {
-		x: centerX - SIGNATURE_MONOGRAM_WIDTH / 2,
-		y: centerY - SIGNATURE_MONOGRAM_HEIGHT / 2,
 		centerX,
 		centerY,
 		zoomScale: (viewportDiagonal / SIGNATURE_MONOGRAM_WIDTH) * SIGNATURE_ZOOM_OVERSCAN
+	}
+}
+
+function getSignatureBox(layout: ReturnType<typeof getSignatureLayout>, scale: number) {
+	const width = SIGNATURE_MONOGRAM_WIDTH * scale
+	const height = SIGNATURE_MONOGRAM_HEIGHT * scale
+
+	return {
+		x: layout.centerX - width / 2,
+		y: layout.centerY - height / 2,
+		width,
+		height
 	}
 }
 

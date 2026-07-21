@@ -112,14 +112,22 @@
 
 		.name,
 		.role {
-			line-height: 1;
+			line-height: var(--line-height-tight);
+
+			@include respond(sm) {
+				line-height: 2.75rem;
+			}
 		}
 	}
 
 	.name,
 	.role,
 	.lang-switcher {
-		line-height: 2.75rem;
+		line-height: var(--line-height-tight);
 		user-select: none;
+
+		@include respond(sm) {
+			line-height: 2.75rem;
+		}
 	}
 }

@@ -4,13 +4,15 @@
 			<HomeHeroCopy class="hero-copy-layer hero-copy-layer--final" />
 		</div>
 
-		<div ref="heroPhoto" class="hero-photo" aria-hidden="true">
-			<BaseImage
-				class-name="home-hero__image"
-				src="/images/justin-picard"
-				alt=""
-				loading="eager"
-			/>
+		<div ref="heroPhotoPositioner" class="hero-photo-positioner" aria-hidden="true">
+			<div ref="heroPhoto" class="hero-photo">
+				<BaseImage
+					class-name="home-hero__image"
+					src="/images/justin-picard"
+					alt=""
+					loading="eager"
+				/>
+			</div>
 		</div>
 
 		<LoadingScreen ref="loadingScreen" />
@@ -32,6 +34,7 @@ import { useCursorFollowIndicator } from '../../composables/useCursorFollowIndic
 
 const root = ref<HTMLElement | null>(null)
 const loadingScreen = ref<InstanceType<typeof LoadingScreen> | null>(null)
+const heroPhotoPositioner = ref<HTMLElement | null>(null)
 const heroPhoto = ref<HTMLElement | null>(null)
 const scrollIndicator = ref<InstanceType<typeof CircularScrollIndicator> | null>(null)
 const scrollIndicatorWrapper = computed(() => scrollIndicator.value?.element ?? null)
@@ -40,6 +43,7 @@ const FINAL_PHOTO_ROTATION = 4
 const HERO_PHOTO_START = 0.2
 const HERO_PHOTO_DURATION = 1.05
 const HERO_INTRO_LOADING_OVERLAP = 0.14
+const HERO_SCROLL_DRIFT = 48
 const CURSOR_FOLLOW_POINTER_QUERY = '(hover: hover) and (pointer: fine)'
 let ctx: gsap.Context | undefined
 let heroTimeline: gsap.core.Timeline | undefined
@@ -112,9 +116,10 @@ onMounted(() => {
 	registerGsapPlugins()
 
 	const loadingScreenElement = loadingScreen.value?.element
+	const heroPhotoPositionerElement = heroPhotoPositioner.value
 	const heroPhotoElement = heroPhoto.value
 	const scrollIndicatorVisualElement = scrollIndicatorElement.value
-	if (!loadingScreenElement || !heroPhotoElement || !scrollIndicatorWrapper.value || !scrollIndicatorVisualElement) return
+	if (!loadingScreenElement || !heroPhotoPositionerElement || !heroPhotoElement || !scrollIndicatorWrapper.value || !scrollIndicatorVisualElement) return
 	const useCursorScrollIndicator = supportsCursorFollow()
 	const finalTitle = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-name')
 	const finalDivider = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-divider')
@@ -199,6 +204,18 @@ onMounted(() => {
 		gsap.set(scrollIndicatorVisualElement, {
 			yPercent: useCursorScrollIndicator ? 0 : 120,
 			autoAlpha: 0
+		})
+
+		gsap.to([heroPhotoPositionerElement, finalText], {
+			y: HERO_SCROLL_DRIFT,
+			ease: 'none',
+			scrollTrigger: {
+				trigger: root.value,
+				start: 'top top',
+				end: 'bottom top',
+				scrub: true,
+				invalidateOnRefresh: true
+			}
 		})
 
 		heroTimeline = gsap.timeline({

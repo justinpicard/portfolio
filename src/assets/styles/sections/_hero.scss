@@ -26,7 +26,7 @@
 		display: grid;
 		grid-template-columns: 1fr;
 		grid-template-rows: auto auto auto minmax(0, 1fr) auto;
-		row-gap: var(--space-8);
+		//row-gap: var(--space-0);
 		align-items: start;
 		justify-items: center;
 		width: 100%;
@@ -189,17 +189,27 @@
 			align-self: start;
 			max-width: 28ch;
 		}
+
+		.hero-photo {
+			top: 80%;
+		}
+	}
+
+	.hero-photo-positioner {
+		position: absolute;
+		inset: 0;
+		z-index: 30;
+		pointer-events: none;
+		will-change: transform;
 	}
 
 	.hero-photo {
 		position: absolute;
-		bottom: -50%;
+		top: 60%;
 		left: 50%;
-		z-index: 30;
-		width: clamp(470px, 30vw, 550px);
+		width: clamp(300px, 30vw, 550px);
 		aspect-ratio: 5 / 7;
 		translate: -50% -50%;
-		pointer-events: none;
 		will-change: transform;
 		box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, 0.35);
 

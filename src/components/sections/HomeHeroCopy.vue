@@ -6,7 +6,7 @@
 		>
 			Justin.
 		</component>
-		<div class="hero-divider" aria-hidden="true"></div>
+		<div class="hero-divider d-none sm:d-block" aria-hidden="true"></div>
 		<p class="hero-figure__role text-md sm:text-lg font-body font-regular mb-0">
 			Digital Product Designer
 		</p>
