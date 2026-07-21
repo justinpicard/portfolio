@@ -1,6 +1,6 @@
 <template>
 	<div class="main-nav position-relative">
-		<div class="position-fixed top-0 left-0 ml-8 mt-8">
+		<div class="position-fixed top-0 left-0 ml-6 sm:ml-8 mt-6 sm:mt-8">
 			<router-link :to="{ name: 'home' }" class="site-logo">
 				<figure class="avatar">
 					<BaseImage
@@ -9,12 +9,13 @@
 					/>
 				</figure>
 				<span class="site-title">
-					<span class="name">Justin Picard</span>
+					<span class="name text-sm sm:text-md">Justin Picard</span>
+					<span class="role d-block sm:d-none text-xs">Digital Product Designer</span>
 				</span>
 			</router-link>
 		</div>
 		<div class="position-fixed top-0 horizontal-center mt-8">
-			<span class="role">Digital Product Designer</span>
+			<span class="role d-none sm:d-block">Digital Product Designer</span>
 		</div>
 		<div class="position-fixed top-0 right-0 mr-8 mt-8">
 			<div class="lang-switcher">

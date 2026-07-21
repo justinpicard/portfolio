@@ -5,7 +5,10 @@ type CursorFollowIndicatorOptions = {
 	triggerElement: Ref<HTMLElement | null>
 	wrapperElement: Ref<HTMLElement | null>
 	visualElement: Ref<HTMLElement | null>
+	suppressSelector?: string
 }
+
+type QuickSetter = ReturnType<typeof gsap.quickSetter>
 
 const POINTER_QUERY = '(hover: hover) and (pointer: fine)'
 const MAX_OFFSET = 64
@@ -37,8 +40,8 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 	let latestPointerY: number | undefined
 	let isRevealPending = false
 	let isVisible = false
-	let setX: gsap.QuickSetter | undefined
-	let setY: gsap.QuickSetter | undefined
+	let setX: QuickSetter | undefined
+	let setY: QuickSetter | undefined
 
 	function hasFinePointer() {
 		return typeof window !== 'undefined'
@@ -158,9 +161,18 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 			&& clientY <= bounds.bottom
 	}
 
+	function isPointerSuppressed(clientX: number, clientY: number) {
+		if (!options.suppressSelector) return false
+
+		return document
+			.elementFromPoint(clientX, clientY)
+			?.closest(options.suppressSelector) !== null
+	}
+
 	function showIndicator(clientX: number, clientY: number) {
 		const elements = getElements()
 		if (!elements) return
+		if (isPointerSuppressed(clientX, clientY)) return
 
 		isRevealPending = false
 		isVisible = true
@@ -183,12 +195,18 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 	function handlePointerEnter(event: PointerEvent) {
 		latestPointerX = event.clientX
 		latestPointerY = event.clientY
+		if (isPointerSuppressed(event.clientX, event.clientY)) return
 		showIndicator(event.clientX, event.clientY)
 	}
 
 	function handlePointerMove(event: PointerEvent) {
 		latestPointerX = event.clientX
 		latestPointerY = event.clientY
+
+		if (isPointerSuppressed(event.clientX, event.clientY)) {
+			handlePointerLeave()
+			return
+		}
 
 		if (isRevealPending && isPointerInsideTrigger(event.clientX, event.clientY)) {
 			showIndicator(event.clientX, event.clientY)
@@ -206,6 +224,25 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 		pointerY = pointerPosition.y
 		targetOffsetX = gsap.utils.clamp(-MAX_OFFSET, MAX_OFFSET, -deltaX * VELOCITY_MULTIPLIER)
 		targetOffsetY = gsap.utils.clamp(-MAX_OFFSET, MAX_OFFSET, -deltaY * VELOCITY_MULTIPLIER)
+	}
+
+	function handleSuppressedPointerMove(event: PointerEvent) {
+		latestPointerX = event.clientX
+		latestPointerY = event.clientY
+
+		if (!isEnabled) return
+
+		if (isPointerSuppressed(event.clientX, event.clientY)) {
+			handlePointerLeave()
+			return
+		}
+
+		if (
+			!isVisible
+			&& isPointerInsideTrigger(event.clientX, event.clientY)
+		) {
+			showIndicator(event.clientX, event.clientY)
+		}
 	}
 
 	function handlePointerLeave() {
@@ -256,11 +293,13 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 		elements.triggerElement.addEventListener('pointerenter', handlePointerEnter)
 		elements.triggerElement.addEventListener('pointermove', handlePointerMove)
 		elements.triggerElement.addEventListener('pointerleave', handlePointerLeave)
+		window.addEventListener('pointermove', handleSuppressedPointerMove)
 
 		if (
 			latestPointerX !== undefined
 			&& latestPointerY !== undefined
 			&& isPointerInsideTrigger(latestPointerX, latestPointerY)
+			&& !isPointerSuppressed(latestPointerX, latestPointerY)
 		) {
 			showIndicator(latestPointerX, latestPointerY)
 			return
@@ -279,6 +318,7 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 			elements.triggerElement.removeEventListener('pointerleave', handlePointerLeave)
 		}
 
+		window.removeEventListener('pointermove', handleSuppressedPointerMove)
 		isEnabled = false
 		isRevealPending = false
 		handlePointerLeave()
@@ -297,6 +337,7 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 		}
 
 		window.removeEventListener('pointermove', handleTrackingPointerMove)
+		window.removeEventListener('pointermove', handleSuppressedPointerMove)
 		stopTicker()
 		isInitialized = false
 		isEnabled = false

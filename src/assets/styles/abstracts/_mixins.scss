@@ -41,7 +41,9 @@ https://css-tricks.com/easing-linear-gradients/
 }
 
 @mixin utility($selector) {
-	.#{$selector} {
+	// Keep base utilities less specific so responsive variants always win,
+	// regardless of the order in which utility values are generated.
+	:where(.#{$selector}) {
 		@content;
 	}
 

@@ -125,7 +125,8 @@ onMounted(() => {
 	scrollIndicatorFollow = useCursorFollowIndicator({
 		triggerElement: root,
 		wrapperElement: scrollIndicatorWrapper,
-		visualElement: scrollIndicatorElement
+		visualElement: scrollIndicatorElement,
+		suppressSelector: '.site-header a, .site-header button, .site-header [role="button"], .site-header .role'
 	})
 
 	unlockScroll = lockPageScroll()
@@ -248,6 +249,7 @@ onMounted(() => {
 				duration: HERO_PHOTO_DURATION,
 				ease: 'power4.out'
 			}, 'photoIn')
+			.call(restoreScroll, [], '>')
 
 		if (!useCursorScrollIndicator) {
 			heroTimeline.fromTo(scrollIndicatorVisualElement, {

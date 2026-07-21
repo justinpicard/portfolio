@@ -27,10 +27,11 @@ main:has(> .page-surface) {
 	background-image: url("/images/dot3.png");
 	background-attachment: fixed;
 	transform-origin: center center;
+	overflow-x: clip;
 }
 
 .page-surface__scrims {
-	position: sticky;
+	position: fixed;
 	top: 0;
 	z-index: 998;
 	width: 100%;

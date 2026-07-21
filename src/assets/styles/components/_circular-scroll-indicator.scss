@@ -38,12 +38,22 @@
 	--indicator-size: 8rem;
 	--indicator-text-size: 1.18rem;
 	--indicator-letter-spacing: 0.11em;
+	color: var(--color-primary);
+	mix-blend-mode: difference;
+	
+	//.circular-scroll-indicator__text {
+	//	mix-blend-mode: difference;
+	//}
 }
 
 .circular-scroll-indicator__graphic,
 .circular-scroll-indicator__icon {
 	grid-column: 1;
 	grid-row: 1;
+}
+
+.project-card__trigger {
+	isolation: isolate;
 }
 
 .circular-scroll-indicator__graphic {

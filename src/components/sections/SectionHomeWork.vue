@@ -6,33 +6,21 @@
 			</div>
 		</div>
 		<div class="work-section__projects">
-			<div class="work-section__column work-section__column--left">
-				<ProjectCard
-					v-for="project in leftColumnProjects"
-					:key="project.id"
-					:project="project"
-					:index="project.index"
-					:media-hidden="transitionHiddenProjectIndex === project.index"
-					@open="emit('open-project', $event)"
-				/>
-			</div>
-			<div class="work-section__column work-section__column--right">
-				<ProjectCard
-					v-for="project in rightColumnProjects"
-					:key="project.id"
-					:project="project"
-					:index="project.index"
-					:media-hidden="transitionHiddenProjectIndex === project.index"
-					@open="emit('open-project', $event)"
-				/>
-			</div>
+			<ProjectCard
+				v-for="project in orderedProjects"
+				:key="project.id"
+				:project="project"
+				:index="project.index"
+				:media-hidden="transitionHiddenProjectIndex === project.index"
+				@open="emit('open-project', $event)"
+			/>
 		</div>
 	</section>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { gsap, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
+import { gsap, prefersReducedMotion, ScrollTrigger, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
 import projects from '../../data/projects.json'
 import ProjectCard from '../work/ProjectCard.vue'
 import type { Project, ProjectOpenPayload } from '../../types/project'
@@ -51,6 +39,7 @@ const root = ref<HTMLElement | null>(null)
 const titleRef = ref<HTMLHeadingElement | null>(null)
 let splitTitle: SplitText | undefined
 let ctx: gsap.Context | undefined
+let stackTriggers: Array<ReturnType<typeof ScrollTrigger.create>> = []
 
 const projectData = projects as Project[]
 
@@ -61,15 +50,61 @@ const orderedProjects = computed(() => (
 	}))
 ))
 
-const leftColumnProjects = computed(() => orderedProjects.value.filter((_, index) => index % 2 === 0))
-const rightColumnProjects = computed(() => orderedProjects.value.filter((_, index) => index % 2 === 1))
-
 function wrapSplitElements(elements: Element[], className: string, tagName: 'span' = 'span') {
 	elements.forEach((element) => {
 		const wrapper = document.createElement(tagName)
 		wrapper.classList.add(className)
 		element.parentNode?.insertBefore(wrapper, element)
 		wrapper.appendChild(element)
+	})
+}
+
+function setupProjectStack() {
+	if (!root.value || prefersReducedMotion()) return
+
+	const projectsElement = root.value.querySelector<HTMLElement>('.work-section__projects')
+	const cards = gsap.utils.toArray<HTMLElement>('[data-project-card]', root.value)
+	if (!projectsElement || cards.length === 0) return
+
+	const getCenteredPinOffset = (card: HTMLElement) => (
+		Math.max((window.innerHeight - card.getBoundingClientRect().height) / 2, 0)
+	)
+	const sectionStyles = window.getComputedStyle(root.value)
+	const stackOffset = Number.parseFloat(sectionStyles.getPropertyValue('--project-stack-offset')) || 12
+	const scaleStep = 0.018
+
+	stackTriggers = cards.map((card, index) => {
+		const remainingCards = cards.length - index - 1
+		const targetScale = index === cards.length - 1
+			? 1
+			: 1 - remainingCards * scaleStep
+
+		gsap.set(card, {
+			zIndex: index + 1,
+			transformOrigin: 'center top'
+		})
+
+		const tween = gsap.to(card, {
+			scale: targetScale,
+			ease: 'none',
+			paused: true
+		})
+
+		return ScrollTrigger.create({
+			trigger: card,
+			start: () => `top ${getCenteredPinOffset(card) + index * stackOffset}px`,
+			endTrigger: projectsElement,
+			end: 'bottom bottom',
+			pin: true,
+			pinSpacing: false,
+			scrub: true,
+			animation: tween,
+			invalidateOnRefresh: true
+		})
+	})
+
+	requestAnimationFrame(() => {
+		ScrollTrigger.refresh()
 	})
 }
 
@@ -101,10 +136,14 @@ onMounted(() => {
 				toggleActions: 'play none none reverse'
 			}
 		})
+
+		setupProjectStack()
 	}, root.value ?? undefined)
 })
 
 onUnmounted(() => {
+	stackTriggers.forEach((trigger) => trigger.kill())
+	stackTriggers = []
 	ctx?.revert()
 	splitTitle?.revert()
 })

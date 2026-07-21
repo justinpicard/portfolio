@@ -1,7 +1,7 @@
 <template>
 	<header
 		ref="header"
-		class="site-header fixed-nav"
+		class="site-header fixed fixed-nav"
 		:class="{ 'site-header--hidden': isInitiallyHidden }"
 	>
 		<SiteNav />

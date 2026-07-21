@@ -2,22 +2,38 @@
 	<article
 		class="project-card"
 		:style="cardStyles"
+		data-project-card
 	>
 		<button
 			ref="trigger"
 			class="project-card__trigger"
 			type="button"
 			@click="handleOpen"
+			data-project-card-background
 		>
-			<div class="project-card__meta">
+			<div
+				class="project-card__content d-flex justify-center flex-column"
+				data-project-meta
+			>
 				<span class="project-card__number">{{ formattedNumber }}</span>
-				<h3 class="project-card__title">{{ project.name }}</h3>
-				<p class="project-card__context">{{ project.type }} · {{ project.job }}</p>
+				<h3
+					class="project-card__title text-xl"
+					data-project-title
+				>
+					{{ project.name }}
+				</h3>
+				<div class="project-card__meta">
+					<span>{{ project.year }}</span>
+					<span><span class="star mr-2">✦</span>{{ project.type }}</span>
+					<span><span class="star mr-2">✦</span>{{ project.job }}</span>
+					<span><span class="star mr-2">✦</span>{{ project.role }}</span>
+				</div>
 			</div>
 			<div
 				ref="mediaFrame"
 				class="project-card__media"
 				:class="{ 'project-card__media--transition-hidden': mediaHidden }"
+				data-project-visual
 			>
 				<div class="project-card__media-inner">
 					<BaseImage
@@ -68,7 +84,8 @@ const formattedNumber = computed(() => String(props.index + 1).padStart(2, '0'))
 let cursorFollowIndicator: ReturnType<typeof useCursorFollowIndicator> | undefined
 
 const cardStyles = computed<CSSProperties>(() => ({
-	'--project-card-mobile-order': props.index + 1
+	'--project-card-mobile-order': props.index + 1,
+	'--project-card-background': props.project.overlayBackground ?? 'var(--color-secondary)'
 } as CSSProperties))
 
 function handleOpen(event: MouseEvent) {
