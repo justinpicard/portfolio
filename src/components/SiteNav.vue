@@ -4,22 +4,22 @@
 			<router-link :to="{ name: 'home' }" class="site-logo">
 				<figure class="avatar">
 					<BaseImage
-						src="/images/justin-picard-avatar"
+						src="/images/justin-picard-avatar-3"
 						alt="Justin Picard"
 					/>
 				</figure>
 				<span class="site-title d-flex flex-column">
-					<span class="name text-sm sm:text-md">Justin Picard</span>
+					<span class="name text-lg">Justin Picard</span>
 					<span class="role d-block sm:d-none text-xs">Digital Product Designer</span>
 				</span>
 			</router-link>
 		</div>
 		<div class="position-fixed top-0 horizontal-center mt-8">
-			<span class="role d-none sm:d-block">Digital Product Designer</span>
+			<span class="role text-lg d-none sm:d-block">Digital Product Designer</span>
 		</div>
 		<div class="position-fixed top-0 right-0 mr-8 mt-8">
 			<div class="lang-switcher">
-				<a href="#" class="nav-link text-sm sm:text-md">
+				<a href="#" class="nav-link text-lg">
 					<SlotMachineText
 						:top="currentLang"
 						:bottom="switchToLang"

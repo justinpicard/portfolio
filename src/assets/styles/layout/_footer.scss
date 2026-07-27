@@ -27,8 +27,7 @@
 	&__copy {
 		max-width: 32ch;
 		margin: 0;
-		//font-size: var(--font-size-lg);
-		//line-height: var(--line-height-tight);
+		font-size: var(--font-size-body);
 	}
 
 	&__intro {
@@ -82,8 +81,5 @@
 			font-size: 36cqw;
 		}
 
-		&__copy {
-			font-size: var(--font-size-md);
-		}
 	}
 }

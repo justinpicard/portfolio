@@ -13,10 +13,27 @@
 	font-family: var(--body-font) !important;
 }
 
-// Text sizing uses existing design tokens.
+// Font-size utilities are emitted in two phases so responsive variants always
+// follow base variants without relying on !important or extra specificity.
 @each $name, $value in $font-sizes {
-	@include utility("text-#{$name}") {
-		font-size: $value !important;
+	.text-#{$name} {
+		font-size: $value;
+	}
+}
+
+@each $breakpoint, $width in $breakpoints {
+	@media (min-width: #{$width}) {
+		$prefix: $breakpoint;
+
+		@if $breakpoint == 2xl {
+			$prefix: "\\32xl";
+		}
+
+		@each $name, $value in $font-sizes {
+			.#{$prefix}\:text-#{$name} {
+				font-size: $value;
+			}
+		}
 	}
 }
 

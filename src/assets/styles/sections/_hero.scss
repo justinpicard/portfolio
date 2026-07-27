@@ -114,6 +114,7 @@
 		grid-row: 5;
 		justify-self: start;
 		max-width: 28ch;
+		font-size: var(--font-size-body);
 	}
 
 	.hero-copy-layer {
@@ -205,7 +206,7 @@
 
 	.hero-photo {
 		position: absolute;
-		top: 60%;
+		top: 70%;
 		left: 50%;
 		width: clamp(300px, 30vw, 550px);
 		aspect-ratio: 5 / 7;

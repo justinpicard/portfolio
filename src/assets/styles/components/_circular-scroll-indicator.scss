@@ -12,8 +12,9 @@
 }
 
 .circular-scroll-indicator {
-	--indicator-size: clamp(7rem, 10vw, 10rem);
-	--indicator-text-size: 1.14rem;
+	// Keep the SVG composition fixed once the viewport reaches the desktop layout.
+	--indicator-size: clamp(7rem, 10vw, 160px);
+	--indicator-text-size: 18.24px;
 	--indicator-letter-spacing: 0.14em;
 
 	position: relative;
@@ -35,8 +36,8 @@
 }
 
 .circular-scroll-indicator--project {
-	--indicator-size: 8rem;
-	--indicator-text-size: 1.18rem;
+	--indicator-size: 128px;
+	--indicator-text-size: 18.88px;
 	--indicator-letter-spacing: 0.11em;
 	color: var(--color-primary);
 	mix-blend-mode: difference;

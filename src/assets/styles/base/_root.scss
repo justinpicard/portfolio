@@ -5,7 +5,7 @@
 
 	line-height: var(--line-height-normal);
 	font-weight: $font-weight-regular;
-	font-size: 1rem;
+	font-size: var(--root-font-size);
 	color-scheme: light dark;
 	color: var(--color-white);
 	background-color: var(--color-primary);

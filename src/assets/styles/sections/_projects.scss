@@ -1,7 +1,7 @@
 @use "../abstracts" as *;
 
 .work-section {
-	--project-stack-gutter-x: 30px;
+	--project-stack-gutter-x: 1.875rem;
 	--project-stack-gutter-y: 8rem;
 	--project-stack-card-padding: 3rem;
 	--project-stack-offset: 12px;
@@ -107,19 +107,18 @@
 	display: none;
 	margin-block-end: 0;
 	font-family: var(--body-font);
-	font-size: var(--font-size-sm);
 	font-weight: var(--font-weight-bold);
 	line-height: var(--line-height-none);
 	color: rgba(0, 0, 0, .1);
 	letter-spacing: -0.04em;
-    font-size: 440px;
-    bottom: 0;
+	font-size: 440px;
+	bottom: 0;
 }
 
 .project-card__title {
 	margin: 0;
 	font-family: var(--heading-font);
-	//font-size: clamp(4rem, 9vw, 10rem);
+	font-size: var(--font-size-display-project-card);
 	font-weight: var(--font-weight-bold);
 	line-height: 0.84;
 	letter-spacing: -0.055em;

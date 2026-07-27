@@ -6,7 +6,7 @@
 				<h2 class="site-footer__title huge-title col-span-1 md:col-span-3">Say hi.</h2>
 
 				<div class="site-footer__intro col-span-1 md:col-span-2">
-					<p class="site-footer__copy text-md">
+					<p class="site-footer__copy">
 						Every great conversation starts with a simple hello. Whether it’s about design, side projects, or something completely different, my inbox is always open.
 					</p>
 					<Button label="Send me an email" href="mailto:hallo@justinpicard.nl" />

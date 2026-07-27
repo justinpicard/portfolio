@@ -41,7 +41,9 @@ $font-size-values: (
 	md: $font-size-md,
 	lg: $font-size-lg,
 	xl: $font-size-xl,
-	2xl: $font-size-2xl
+	2xl: $font-size-2xl,
+	3xl: $font-size-3xl,
+	4xl: $font-size-4xl
 );
 
 $font-weight-values: (
@@ -109,6 +111,21 @@ $shadows: (
 );
 
 @mixin root-custom-properties {
+	// Keep the root readable on compact screens and scale proportionally on
+	// wide canvases without shrinking the mobile composition below 16px.
+	--scale-unit: 16;
+	--scale-ideal-width: 1440;
+	--scale-min-width: 320px;
+	--scale-max-width: 1920px;
+	--scale-width: clamp(var(--scale-min-width), 100vw, var(--scale-max-width));
+	--root-font-size-min: 1rem;
+	--root-font-size-max: 1.125rem;
+	--root-font-size: clamp(
+		var(--root-font-size-min),
+		calc(var(--scale-width) / (var(--scale-ideal-width) / var(--scale-unit))),
+		var(--root-font-size-max)
+	);
+
 	--color-primary: #{$primary};
 	--color-secondary: #{$secondary};
 	--color-white: #{$white};
@@ -129,6 +146,16 @@ $shadows: (
 	@each $name, $value in $font-size-values {
 		--font-size-#{$name}: #{$value};
 	}
+
+	// Semantic roles sit above the reusable scale. Body copy is intentionally
+	// fluid so editorial rhythm can evolve without resizing UI typography.
+	--font-size-ui: var(--font-size-base);
+	--font-size-lead: var(--font-size-lg);
+	--font-size-body: clamp(21px, calc(20.1429px + 0.2679vw), 24px);
+	--line-height-body: var(--line-height-normal);
+
+	--font-size-display-project-card: 4rem;
+	--font-size-display-overlay-title: 4rem;
 
 	@each $name, $value in $line-height-values {
 		--line-height-#{$name}: #{$value};

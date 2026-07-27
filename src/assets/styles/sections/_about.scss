@@ -8,7 +8,7 @@ section.about {
 	.obviously {
 		position: relative;
 		z-index: 1;
-		font-size: $font-size-lg;
+		font-size: $font-size-2xl;
 		text-decoration: underline;
 		user-select: none;
 		mix-blend-mode: difference;
@@ -22,6 +22,18 @@ section.about {
 		height: auto;
 		pointer-events: none;
 	}
+}
+
+.about-section__title {
+	font-size: 2.25rem;
+
+	@include respond(md) {
+		font-size: 4rem;
+	}
+}
+
+.about-text > p:not(.about-section__eyebrow) {
+	font-size: var(--font-size-body);
 }
 
 .wave {

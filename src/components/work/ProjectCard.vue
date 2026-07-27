@@ -17,7 +17,7 @@
 			>
 				<span class="project-card__number">{{ formattedNumber }}</span>
 				<h3
-					class="project-card__title text-xl"
+					class="project-card__title"
 					data-project-title
 				>
 					{{ project.name }}

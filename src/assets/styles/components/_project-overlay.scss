@@ -87,7 +87,7 @@
 .project-overlay__title {
 	margin: 0;
 	font-family: var(--heading-font);
-	font-size: var(--font-size-xl);
+	font-size: var(--font-size-display-overlay-title);
 	font-weight: var(--font-weight-bold);
 	line-height: 0.86;
 	letter-spacing: -0.055em;
@@ -138,8 +138,8 @@
 	//color: color-mix(in srgb, var(--color-white) 78%, transparent);
 
 	p {
-		font-size: var(--font-size-sm);
-		line-height: var(--line-height-relaxed);
+		font-size: var(--font-size-body);
+		line-height: var(--line-height-body);
 	}
 }
 
@@ -228,8 +228,8 @@
 .cv-overlay__text {
 	margin: 0;
 	color: color-mix(in srgb, var(--color-white) 78%, transparent);
-	font-size: var(--font-size-md);
-	line-height: var(--line-height-normal);
+	font-size: var(--font-size-body);
+	line-height: var(--line-height-body);
 }
 
 @media (max-width: 47.999rem) {
