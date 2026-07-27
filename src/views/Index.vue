@@ -4,16 +4,16 @@
 			<div ref="pageSurfaceScrimTop" class="page-surface__scrim page-surface__scrim--top" />
 			<div ref="pageSurfaceScrimBottom" class="page-surface__scrim page-surface__scrim--bottom" />
 		</div>
-		<AppHeader :visible="isHeaderVisible" />
+		<AppHeader
+			:visible="isHeaderVisible"
+			:overlay-active="activeOverlay !== null || isWorkOverlayOpen"
+		/>
 		<SectionHomeHero
 			ref="hero"
 			@intro-start="showHeader"
 		/>
 		<SectionHomeAbout />
-		<SectionHomeWork
-			:transition-hidden-project-index="transitionHiddenProjectIndex"
-			@open-project="openProject"
-		/>
+		<SectionHomeWork @overlay-change="isWorkOverlayOpen = $event" />
 		<HomePhotoStackSection />
 		<AppFooter />
 	</div>
@@ -53,7 +53,7 @@ import SectionHomeHero from "../components/sections/SectionHomeHero.vue";
 import SectionHomeAbout from "../components/sections/SectionHomeAbout.vue";
 import SectionHomeWork from "../components/sections/SectionHomeWork.vue";
 import projectsData from "../data/projects.json"
-import type { Project, ProjectOpenPayload } from "../types/project"
+import type { Project } from "../types/project"
 import { gsap, prefersReducedMotion, ScrollTrigger } from "../utils/animations/gsap"
 import AppFooter from "../components/AppFooter.vue"
 
@@ -74,11 +74,10 @@ const pageSurfaceScrimTop = ref<HTMLElement | null>(null)
 const pageSurfaceScrimBottom = ref<HTMLElement | null>(null)
 const appOverlay = ref<InstanceType<typeof AppOverlay> | null>(null)
 const isHeaderVisible = ref(false)
+const isWorkOverlayOpen = ref(false)
 const activeOverlay = ref<OverlayState>(null)
 const renderedOverlay = ref<OverlayState>(null)
-const projectTransitionSource = shallowRef<HTMLElement | null>(null)
 const projectOverlay = ref<InstanceType<typeof ProjectOverlayContent> | null>(null)
-const transitionHiddenProjectIndex = ref<number | null>(null)
 const overlayFirstMediaHidden = ref(false)
 const projectOpeningTransitionActive = ref(false)
 const projects = projectsData as Project[]
@@ -180,25 +179,8 @@ function setPageSurfaceDepth(isOpen: boolean, isProjectOverlay = false) {
 }
 
 function resetProjectOpeningTransition() {
-	transitionHiddenProjectIndex.value = null
 	overlayFirstMediaHidden.value = false
 	projectOpeningTransitionActive.value = false
-}
-
-function openProjectNormally(projectIndex: number) {
-	const nextOverlay = {
-		type: 'project',
-		projectIndex
-	} as const
-
-	renderedOverlay.value = nextOverlay
-	activeOverlay.value = nextOverlay
-}
-
-const openProject = (payload: ProjectOpenPayload) => {
-	projectTransitionSource.value = payload.sourceMediaElement
-	resetProjectOpeningTransition()
-	openProjectNormally(payload.projectIndex)
 }
 
 const openCv = () => {
@@ -233,7 +215,6 @@ const handleOverlayAfterClose = () => {
 	if (activeOverlay.value !== null) return
 
 	renderedOverlay.value = null
-	projectTransitionSource.value = null
 	resetProjectOpeningTransition()
 }
 

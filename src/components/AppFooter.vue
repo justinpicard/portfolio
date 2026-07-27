@@ -14,12 +14,25 @@
 
 				<div class="site-footer__links col-span-1 md:col-span-1">
 					<nav aria-label="Contact and social links">
-						<ul class="site-footer__link-list d-flex flex-row items-center">
+						<ul ref="linkList" class="site-footer__link-list d-flex flex-row items-center">
 							<!--<li><a href="mailto:hallo@justinpicard.nl">hallo@justinpicard.nl</a></li>-->
-							<li><a href="https://www.linkedin.com/in/picardjustin/" target="_blank" rel="noopener">LinkedIn</a></li>
+							<li>
+								<a
+									href="https://www.linkedin.com/in/picardjustin/"
+									target="_blank"
+									rel="noopener"
+									data-stagger-link
+								>
+									<span data-stagger-link-container>LinkedIn</span>
+								</a>
+							</li>
 							<span class="star mx-2">✦</span>
 							<!--<li><a href="https://dribbble.com/justinpicard" target="_blank" rel="noopener">Dribbble</a></li>-->
-							<li><router-link :to="{ name: 'resume' }">Resume</router-link></li>
+							<li>
+								<router-link :to="{ name: 'resume' }" data-stagger-link>
+									<span data-stagger-link-container>Resume</span>
+								</router-link>
+							</li>
 						</ul>
 					</nav>
 					<p class="site-footer__copyright">&copy; {{ new Date().getFullYear() }} Justin Picard</p>
@@ -30,5 +43,20 @@
 </template>
 
 <script setup lang="ts">
-import Button from './Button.vue';
+import { onMounted, onUnmounted, ref } from 'vue'
+import { initStaggerLinks, type StaggerLinksController } from '../utils/animations/staggerLinks'
+import Button from './Button.vue'
+
+const linkList = ref<HTMLUListElement | null>(null)
+let staggerLinks: StaggerLinksController | undefined
+
+onMounted(() => {
+	if (!linkList.value) return
+
+	staggerLinks = initStaggerLinks(linkList.value)
+})
+
+onUnmounted(() => {
+	staggerLinks?.destroy()
+})
 </script>

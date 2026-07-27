@@ -2,7 +2,10 @@
 	<header
 		ref="header"
 		class="site-header fixed fixed-nav"
-		:class="{ 'site-header--hidden': isInitiallyHidden }"
+		:class="{
+			'site-header--hidden': isInitiallyHidden,
+			'site-header--overlay-active': overlayActive
+		}"
 	>
 		<SiteNav />
 	</header>
@@ -16,8 +19,10 @@ import SiteNav from './SiteNav.vue'
 
 const props = withDefaults(defineProps<{
 	visible?: boolean
+	overlayActive?: boolean
 }>(), {
-	visible: true
+	visible: true,
+	overlayActive: false
 })
 
 const header = ref<HTMLElement | null>(null)

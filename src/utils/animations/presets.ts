@@ -10,6 +10,7 @@ export const animationEases = {
 	strongOut: 'power3.out',
 	inOut: 'power2.inOut',
 	strongInOut: 'power3.inOut',
+	backOut: 'back.out(1.7)',
 	none: 'none'
 } as const
 
@@ -19,8 +20,10 @@ export const animationStaggers = {
 	lines: 0.1
 } as const
 
-export const slotTextPreset = {
-	duration: animationDurations.fast,
-	ease: animationEases.out,
-	stagger: animationStaggers.chars
+export const staggerLinkPreset = {
+	duration: animationDurations.base,
+	ease: animationEases.backOut,
+	stagger: {
+		each: animationStaggers.chars
+	}
 } as const

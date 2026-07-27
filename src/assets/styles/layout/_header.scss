@@ -8,6 +8,8 @@
 	inset-inline: 0;
 	height: 0;
 	z-index: 999;
+	color: var(--color-white);
+	transition: color 0.25s ease;
 
 	.main-nav {
 		width: 100%;
@@ -23,8 +25,12 @@
 		transform: translateY(-16px);
 	}
 
+	&--overlay-active {
+		color: var(--color-primary);
+	}
+
 	a {
 		text-decoration: none;
-		color: var(--color-white);
+		color: inherit;
 	}
 }

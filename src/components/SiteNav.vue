@@ -1,5 +1,5 @@
 <template>
-	<div class="main-nav position-relative">
+	<div ref="root" class="main-nav position-relative">
 		<div class="position-fixed top-0 left-0 ml-6 sm:ml-8 mt-6 sm:mt-8">
 			<router-link :to="{ name: 'home' }" class="site-logo">
 				<figure class="avatar">
@@ -19,40 +19,33 @@
 		</div>
 		<div class="position-fixed top-0 right-0 mr-8 mt-8">
 			<div class="lang-switcher">
-				<a href="#" class="nav-link text-lg">
-					<SlotMachineText
-						:top="currentLang"
-						:bottom="switchToLang"
-						bottom-class="bottom-text"
-					/>
+				<a href="#" class="nav-link text-lg" data-stagger-link>
+					<span data-stagger-link-container>{{ currentLang }}</span>
 				</a>
-			</div><!-- end .nav-links -->
-		</div><!-- end nav container-->
-		
-		<!--<div class="position-fixed bottom-0 left-0 ml-8 mb-8">
-			<a class="nav-link">
-				<SlotMachineText top="About" />
-			</a>
+			</div>
 		</div>
-		<div class="position-fixed bottom-0 right-0 mr-8 mb-8">
-			<a class="nav-link">
-				<SlotMachineText top="My work" />
-			</a>
-		</div>-->
-		
 	</div>
 </template>
 
 <script setup lang="ts">
-import { onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import BaseImage from './base/BaseImage.vue'
-import SlotMachineText from './SlotMachineText.vue'
+import { initStaggerLinks, type StaggerLinksController } from '../utils/animations/staggerLinks'
 
 const currentLang = 'EN'
-const switchToLang = 'NL'
+const root = ref<HTMLElement | null>(null)
+let staggerLinks: StaggerLinksController | undefined
 let copyResetTimeout: ReturnType<typeof window.setTimeout> | undefined
 
+onMounted(() => {
+	if (!root.value) return
+
+	staggerLinks = initStaggerLinks(root.value)
+})
+
 onUnmounted(() => {
+	staggerLinks?.destroy()
+
 	if (copyResetTimeout) {
 		window.clearTimeout(copyResetTimeout)
 	}

@@ -1,0 +1,17 @@
+[data-stagger-link-container] {
+	--stagger-link-descender-space: 0.08em;
+
+	display: inline-block;
+	overflow: hidden;
+	line-height: 1;
+	vertical-align: bottom;
+}
+
+.stagger-link-char {
+	display: inline-block;
+	padding-block-end: var(--stagger-link-descender-space);
+	text-shadow:
+		0 calc(1em + var(--stagger-link-descender-space)) 0 currentColor;
+	white-space: pre;
+	will-change: transform;
+}

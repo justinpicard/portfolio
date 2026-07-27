@@ -4,14 +4,12 @@
 		ref="root"
 		v-bind="componentAttrs"
 		:class="buttonClasses"
+		data-stagger-link
 		@mouseenter="onEnter"
 		@mouseleave="onLeave"
 		@click="onClick"
 	>
-		<span class="btn-text-container">
-			<span class="btn-text-wrapper top-text" ref="textTop">{{ label }}</span>
-			<span class="btn-text-wrapper bottom-text" ref="textBottom">{{ label }}</span>
-		</span>
+		<span data-stagger-link-container>{{ label }}</span>
 		<div class="btn-bg rounded-pill"></div>
 	</component>
 </template>
@@ -19,8 +17,7 @@
 <script setup lang="ts">
 import { RouterLink, type RouteLocationRaw } from 'vue-router'
 import { computed, nextTick, onMounted, onUnmounted, ref, useAttrs, watch } from 'vue'
-import { gsap, SplitText, registerGsapPlugins } from '../utils/animations/gsap'
-import { slotTextPreset } from '../utils/animations/presets'
+import { initStaggerLinks, type StaggerLinksController } from '../utils/animations/staggerLinks'
 
 defineOptions({
 	inheritAttrs: false
@@ -59,15 +56,7 @@ const emit = defineEmits<{
 
 const attrs = useAttrs()
 const root = ref<HTMLElement | { $el: HTMLElement } | null>(null)
-const textTop = ref<HTMLElement | null>(null)
-const textBottom = ref<HTMLElement | null>(null)
-
-let topSplit: SplitText | undefined
-let bottomSplit: SplitText | undefined
-let hoverTimeline: gsap.core.Timeline | undefined
-let ctx: gsap.Context | undefined
-
-registerGsapPlugins()
+let staggerLinks: StaggerLinksController | undefined
 
 const isRouterLink = computed(() => Boolean(props.to))
 const isAnchor = computed(() => !props.to && Boolean(props.href))
@@ -139,14 +128,8 @@ function getRootElement() {
 }
 
 function cleanupAnimation() {
-	ctx?.revert()
-	ctx = undefined
-	hoverTimeline?.kill()
-	hoverTimeline = undefined
-	topSplit?.revert()
-	bottomSplit?.revert()
-	topSplit = undefined
-	bottomSplit = undefined
+	staggerLinks?.destroy()
+	staggerLinks = undefined
 }
 
 async function setupAnimation() {
@@ -155,39 +138,9 @@ async function setupAnimation() {
 
 	const contextRoot = getRootElement()
 
-	if (!contextRoot || !textTop.value || !textBottom.value) {
-		return
-	}
+	if (!contextRoot) return
 
-	ctx = gsap.context(() => {
-		topSplit = new SplitText(textTop.value, { type: 'chars', charsClass: 'chars' })
-		bottomSplit = new SplitText(textBottom.value, { type: 'chars', charsClass: 'chars' })
-
-		hoverTimeline = gsap.timeline({ paused: true })
-		hoverTimeline
-			.to(
-				topSplit.chars,
-				{
-					y: -10,
-					opacity: 0,
-					...slotTextPreset
-				},
-				0
-			)
-			.fromTo(
-				bottomSplit.chars,
-				{
-					y: 10,
-					opacity: 0
-				},
-				{
-					y: 0,
-					opacity: 1,
-					...slotTextPreset
-				},
-				0
-			)
-	}, contextRoot)
+	staggerLinks = initStaggerLinks(contextRoot)
 }
 
 function preventDisabledEvent(event: MouseEvent) {
@@ -213,7 +166,6 @@ function onEnter(event: MouseEvent) {
 		return
 	}
 
-	hoverTimeline?.play()
 	emit('mouseenter', event)
 }
 
@@ -222,7 +174,6 @@ function onLeave(event: MouseEvent) {
 		return
 	}
 
-	hoverTimeline?.reverse()
 	emit('mouseleave', event)
 }
 

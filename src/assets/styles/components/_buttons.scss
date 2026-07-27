@@ -14,30 +14,10 @@
 	user-select: none;
 	overflow: hidden;
 
-	.btn-text-container {
+	[data-stagger-link-container] {
 		z-index: 10;
-		flex-direction: column;
-		flex: none;
-		justify-content: flex-start;
-		align-items: stretch;
-		display: flex;
 		position: relative;
 		font-weight: $font-weight-medium;
-
-		.btn-text-wrapper {
-			grid-column-gap: 8px;
-			justify-content: center;
-			align-items: center;
-			transition: transform .3s cubic-bezier(.165,.84,.44,1);
-			width: 100%;
-			transform: translate(0);
-
-			&.bottom-text {
-				position: absolute;
-				top: 100%;
-				color: $secondary;
-			}
-		}
 	}
 
 	.btn-bg {
@@ -144,11 +124,6 @@
 	@media (hover: hover) {
 
 		&:hover {
-
-			.btn-text-wrapper {
-				transform: translateY(-100%);
-			}
-
 			.btn-bg {
 				transform: scale3d(0.95, 0.95, 0.95);
 				border: 1px solid $secondary;
