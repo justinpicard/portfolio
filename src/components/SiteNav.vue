@@ -46,6 +46,7 @@ import {
 } from '../utils/animations/gsap'
 
 const currentLang = 'EN'
+const HEADER_COPY_REVEAL_SCROLL_RATIO = 0.7
 const root = ref<HTMLElement | null>(null)
 const avatar = ref<HTMLElement | null>(null)
 const name = ref<HTMLElement | null>(null)
@@ -93,7 +94,7 @@ function setupHeaderCopyReveal() {
 		const revealTimeline = gsap.timeline({
 			paused: true,
 			scrollTrigger: {
-				start: () => window.innerHeight,
+				start: () => window.innerHeight * HEADER_COPY_REVEAL_SCROLL_RATIO,
 				toggleActions: 'play none none reverse',
 				invalidateOnRefresh: true
 			}

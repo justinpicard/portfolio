@@ -23,7 +23,13 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { gsap, prefersReducedMotion, registerGsapPlugins, SplitText } from '../../utils/animations/gsap'
+import {
+	gsap,
+	prefersReducedMotion,
+	registerGsapPlugins,
+	ScrollTrigger,
+	SplitText
+} from '../../utils/animations/gsap'
 import { animationDurations, animationEases, animationStaggers } from '../../utils/animations/presets'
 import BaseImage from '../base/BaseImage.vue'
 import LoadingScreen from '../LoadingScreen.vue'
@@ -45,6 +51,8 @@ const HERO_PHOTO_DURATION = 1.05
 const HERO_INTRO_LOADING_OVERLAP = 0.14
 const HERO_SCROLL_DRIFT = 48
 const CURSOR_FOLLOW_POINTER_QUERY = '(hover: hover) and (pointer: fine)'
+const INDICATOR_MAX_PLAYBACK_RATE = 30
+const INDICATOR_VELOCITY_DIVISOR = 500
 let ctx: gsap.Context | undefined
 let heroTimeline: gsap.core.Timeline | undefined
 let isHeroIntroLinked = false
@@ -53,6 +61,11 @@ let roleSplit: SplitText | undefined
 let introSplit: SplitText | undefined
 let unlockScroll: (() => void) | undefined
 let scrollIndicatorFollow: ReturnType<typeof useCursorFollowIndicator> | undefined
+let scrollIndicatorRotation: Animation | undefined
+let scrollIndicatorVelocityTrigger: ReturnType<typeof ScrollTrigger.create> | undefined
+let scrollIndicatorRateTween: gsap.core.Tween | undefined
+let scrollIndicatorSettleCall: gsap.core.Tween | undefined
+const scrollIndicatorPlayback = { rate: 1 }
 
 const emit = defineEmits<{
 	'intro-start': []
@@ -95,6 +108,76 @@ function supportsCursorFollow() {
 	return window.matchMedia(CURSOR_FOLLOW_POINTER_QUERY).matches
 }
 
+function applyScrollIndicatorPlaybackRate() {
+	scrollIndicatorRotation?.updatePlaybackRate(scrollIndicatorPlayback.rate)
+}
+
+function settleScrollIndicatorRotation() {
+	scrollIndicatorRateTween?.kill()
+	scrollIndicatorRateTween = gsap.to(scrollIndicatorPlayback, {
+		rate: 1,
+		duration: 0.75,
+		ease: 'power3.out',
+		onUpdate: applyScrollIndicatorPlaybackRate
+	})
+}
+
+function updateScrollIndicatorRotation(scrollVelocity: number) {
+	const targetRate = gsap.utils.clamp(
+		1,
+		INDICATOR_MAX_PLAYBACK_RATE,
+		1 + Math.abs(scrollVelocity) / INDICATOR_VELOCITY_DIVISOR
+	)
+
+	scrollIndicatorRateTween?.kill()
+	scrollIndicatorSettleCall?.kill()
+	scrollIndicatorRateTween = gsap.to(scrollIndicatorPlayback, {
+		rate: targetRate,
+		duration: 0.14,
+		ease: 'power2.out',
+		onUpdate: applyScrollIndicatorPlaybackRate
+	})
+	scrollIndicatorSettleCall = gsap.delayedCall(
+		0.1,
+		settleScrollIndicatorRotation
+	)
+}
+
+function setupScrollIndicatorVelocity(
+	scrollIndicatorVisualElement: HTMLElement
+) {
+	if (prefersReducedMotion() || !root.value) return
+
+	const graphic = scrollIndicatorVisualElement.querySelector<SVGElement>(
+		'.circular-scroll-indicator__graphic'
+	)
+	scrollIndicatorRotation = graphic?.getAnimations()[0]
+	if (!scrollIndicatorRotation) return
+
+	scrollIndicatorVelocityTrigger = ScrollTrigger.create({
+		trigger: root.value,
+		start: 'top top',
+		end: 'bottom top',
+		onUpdate: (trigger) => {
+			updateScrollIndicatorRotation(trigger.getVelocity())
+		},
+		onLeave: settleScrollIndicatorRotation,
+		onLeaveBack: settleScrollIndicatorRotation
+	})
+}
+
+function cleanupScrollIndicatorVelocity() {
+	scrollIndicatorVelocityTrigger?.kill()
+	scrollIndicatorVelocityTrigger = undefined
+	scrollIndicatorRateTween?.kill()
+	scrollIndicatorRateTween = undefined
+	scrollIndicatorSettleCall?.kill()
+	scrollIndicatorSettleCall = undefined
+	scrollIndicatorPlayback.rate = 1
+	applyScrollIndicatorPlaybackRate()
+	scrollIndicatorRotation = undefined
+}
+
 function linkHeroIntroTimeline() {
 	if (isHeroIntroLinked || !heroTimeline) return
 
@@ -133,6 +216,7 @@ onMounted(() => {
 		visualElement: scrollIndicatorElement,
 		suppressSelector: '.site-header a, .site-header button, .site-header [role="button"], .site-header .role'
 	})
+	setupScrollIndicatorVelocity(scrollIndicatorVisualElement)
 
 	unlockScroll = lockPageScroll()
 
@@ -292,6 +376,7 @@ onUnmounted(() => {
 	heroTimeline?.kill()
 	isHeroIntroLinked = false
 	scrollIndicatorFollow?.cleanup()
+	cleanupScrollIndicatorVelocity()
 	restoreScroll()
 	ctx?.revert()
 	titleSplit?.revert()

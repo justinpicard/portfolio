@@ -13,53 +13,64 @@
 				class="project-layer-prototype__surface"
 				:class="initialProjectClass"
 			>
+
 				<div ref="content" class="project-layer-prototype__content">
 					<ProjectHero
 						ref="projectHero"
 						:project="displayedProject"
 					/>
+
 					<div ref="caseContent" class="project-layer-prototype__copy">
 						<component
 							:is="activeCaseComponent"
 							:key="displayedProject.case"
 						/>
 					</div>
+
+					<section class="project-nav pt-32">
+						<div class="project-nav__title">
+							<div class="container">
+								<div class="project-nav-title__inner d-flex flex-1 justify-center">
+									<h2>Want to see more?</h2>
+								</div>
+							</div>
+						</div>
+
+						<nav ref="projectNav" class="project-layer-prototype__nav" aria-label="Project navigation">
+							<a
+								v-if="previousProject"
+								ref="previousLink"
+								class="project-layer-prototype__nav-link"
+								href="#"
+								:aria-disabled="isPreviousDisabled"
+								data-stagger-link
+								@click.prevent="navigate('previous', true)"
+							>
+								<span data-stagger-link-container>← {{ previousProject.name }}</span>
+							</a>
+							<a
+								v-if="nextProject"
+								ref="nextLink"
+								class="project-layer-prototype__nav-link project-layer-prototype__nav-link--next"
+								href="#"
+								:aria-disabled="isNextDisabled"
+								data-stagger-link
+								@click.prevent="navigate('next', true)"
+							>
+								<span data-stagger-link-container>{{ nextProject.name }} →</span>
+							</a>
+						</nav>
+					</section>
 				</div>
 
-				<button
-					ref="closeButton"
+				<Button
+					:ref="setCloseButtonRef"
 					class="project-layer-prototype__close"
-					type="button"
+					label="✕ Close"
+					color="primary"
 					aria-label="Close project"
 					@click="requestClose"
-				>
-					Close
-				</button>
-
-				<nav ref="projectNav" class="project-layer-prototype__nav" aria-label="Project navigation">
-					<a
-						v-if="previousProject"
-						ref="previousLink"
-						class="project-layer-prototype__nav-link"
-						href="#"
-						:aria-disabled="isPreviousDisabled"
-						data-stagger-link
-						@click.prevent="navigate('previous', true)"
-					>
-						<span data-stagger-link-container>← {{ previousProject.name }}</span>
-					</a>
-					<a
-						v-if="nextProject"
-						ref="nextLink"
-						class="project-layer-prototype__nav-link project-layer-prototype__nav-link--next"
-						href="#"
-						:aria-disabled="isNextDisabled"
-						data-stagger-link
-						@click.prevent="navigate('next', true)"
-					>
-						<span data-stagger-link-container>{{ nextProject.name }} →</span>
-					</a>
-				</nav>
+				/>
 
 				<p class="sr-only" aria-live="polite" aria-atomic="true">
 					{{ announcement }}
@@ -67,15 +78,13 @@
 
 				<div ref="scrims" class="project-layer-prototype__scrims" aria-hidden="true">
 					<span class="project-layer-prototype__scrim project-layer-prototype__scrim--top" />
-					<span class="project-layer-prototype__scrim project-layer-prototype__scrim--bottom" />
+					<span
+						ref="bottomScrim"
+						class="project-layer-prototype__scrim project-layer-prototype__scrim--bottom"
+					/>
 				</div>
 			</article>
 		</div>
-		<div
-			ref="sharedTransitionLayer"
-			class="project-layer-prototype__shared-elements"
-			aria-hidden="true"
-		/>
 	</Teleport>
 </template>
 
@@ -85,14 +94,20 @@ import {
 	gsap,
 	prefersReducedMotion,
 	registerGsapPlugins,
+	ScrollTrigger,
 	SplitText
 } from '../../utils/animations/gsap'
 import {
 	initStaggerLinks,
 	type StaggerLinksController
 } from '../../utils/animations/staggerLinks'
-import { animationEases } from '../../utils/animations/presets'
+import {
+	animationDurations,
+	animationEases,
+	animationStaggers
+} from '../../utils/animations/presets'
 import type { Project } from '../../types/project'
+import Button from '../Button.vue'
 import ProjectHero from './ProjectHero.vue'
 import { getCaseComponent } from './cases/caseRegistry'
 
@@ -163,6 +178,7 @@ const content = ref<HTMLElement | null>(null)
 const projectHero = ref<InstanceType<typeof ProjectHero> | null>(null)
 const caseContent = ref<HTMLElement | null>(null)
 const scrims = ref<HTMLElement | null>(null)
+const bottomScrim = ref<HTMLElement | null>(null)
 const closeButton = ref<HTMLButtonElement | null>(null)
 const projectNav = ref<HTMLElement | null>(null)
 const sharedTransitionLayer = ref<HTMLElement | null>(null)
@@ -202,7 +218,7 @@ const CLOSE_HEADER_CONTRAST_POSITION = CLOSE_DURATION * (
 )
 const TEXT_OUT_DURATION = 0.24
 const CONTEXT_FADE_DURATION = 0.48
-const TEXT_IN_DURATION = 0.5
+const SHARED_ELEMENT_TRANSITIONS_ENABLED = false
 const DEBUG_SHARED_TRANSITION = import.meta.env.DEV
 	&& new URLSearchParams(window.location.search).has('debugSharedTransition')
 const DEBUG_TYPOGRAPHY_DRIFT = import.meta.env.DEV
@@ -288,7 +304,14 @@ const activeOpenMediaTiming: SharedElementTiming = EXPERIMENT_SYMMETRIC_OPEN
 let timeline: gsap.core.Timeline | undefined
 let transitionTimeline: gsap.core.Timeline | undefined
 let transitionSplits: SplitText[] = []
+let heroRevealTimeline: gsap.core.Timeline | undefined
+let heroRevealSplits: SplitText[] = []
+let heroRevealTargets: HTMLElement[] = []
+let cardRestoreSplits: SplitText[] = []
+let cardRestoreTargets: HTMLElement[] = []
 let navStaggerLinks: StaggerLinksController | undefined
+let contextTransitionRunId = 0
+let isBottomScrimVisible: boolean | undefined
 let sharedRepresentations: SharedElementRepresentation[] = []
 let previousDocumentOverflow = ''
 let closeRequestedDuringOpen = false
@@ -372,10 +395,6 @@ function getHeroSharedElements(): SharedElementMap | undefined {
 	return elements as SharedElementMap
 }
 
-function getHeroMedia() {
-	return getHeroSharedElements()?.media ?? null
-}
-
 function getTransitionBodies() {
 	return [
 		...(projectHero.value?.getContextBodyElements() ?? []),
@@ -392,6 +411,20 @@ function getDetailElements() {
 
 function getOverlayControls() {
 	return [closeButton.value, projectNav.value].filter(Boolean) as HTMLElement[]
+}
+
+function setCloseButtonRef(instance: unknown) {
+	if (instance instanceof HTMLButtonElement) {
+		closeButton.value = instance
+		return
+	}
+
+	const componentElement = (
+		instance as { $el?: unknown } | null
+	)?.$el
+	closeButton.value = componentElement instanceof HTMLButtonElement
+		? componentElement
+		: null
 }
 
 function captureSharedTargets(elements: SharedElementMap) {
@@ -1388,23 +1421,138 @@ function revertTransitionSplits() {
 	transitionSplits = []
 }
 
-function splitTransitionText() {
-	if (!content.value) return []
+function splitHeroTransitionLines(elements: SharedElementMap) {
+	const titleReveal = splitMaskedLines(elements.title)
+	transitionSplits = [titleReveal.split]
 
-	transitionSplits = Array.from(
-		content.value.querySelectorAll<HTMLElement>('[data-project-transition-text]')
-	).map((element) => new SplitText(element, {
-		type: 'chars',
-		charsClass: 'project-context-char'
-	}))
+	return {
+		titleLines: titleReveal.lines,
+		introLines: [] as HTMLElement[]
+	}
+}
 
-	return transitionSplits.flatMap((split) => split.chars)
+function getHeroMetadataElements(elements: SharedElementMap) {
+	return projectHero.value?.getMetadataElements() ?? [
+		elements.intro,
+		elements.year,
+		...Array.from(elements.tags.children)
+	] as HTMLElement[]
+}
+
+async function waitForImageReady(image?: HTMLImageElement | null) {
+	if (!image) return
+
+	if (!image.complete) {
+		await new Promise<void>((resolve) => {
+			image.addEventListener('load', () => resolve(), { once: true })
+			image.addEventListener('error', () => resolve(), { once: true })
+		})
+	}
+
+	if (typeof image.decode === 'function') {
+		try {
+			await image.decode()
+		} catch {
+			// A loaded fallback can still be painted when decode() rejects.
+		}
+	}
+}
+
+function waitForAnimationFrame() {
+	return new Promise<void>((resolve) => {
+		requestAnimationFrame(() => resolve())
+	})
+}
+
+function updateBottomScrim(immediate = false) {
+	if (!content.value || !bottomScrim.value) return
+
+	const heroMedia = getHeroSharedElements()?.media
+	const contentBottom = content.value.getBoundingClientRect().bottom
+	const scrimHeight = bottomScrim.value.getBoundingClientRect().height
+	const shouldShow = heroMedia
+		? heroMedia.getBoundingClientRect().bottom <= contentBottom - scrimHeight
+		: false
+
+	if (shouldShow === isBottomScrimVisible) return
+	isBottomScrimVisible = shouldShow
+
+	gsap.to(bottomScrim.value, {
+		autoAlpha: shouldShow ? 1 : 0,
+		yPercent: shouldShow ? 0 : 100,
+		duration: immediate || prefersReducedMotion() ? 0 : 0.28,
+		ease: animationEases.out,
+		overwrite: true
+	})
+}
+
+function setupBottomScrim() {
+	isBottomScrimVisible = undefined
+	updateBottomScrim(true)
+	content.value?.addEventListener('scroll', handleProjectContentScroll, {
+		passive: true
+	})
+	window.addEventListener('resize', handleProjectContentScroll)
+}
+
+function cleanupBottomScrim() {
+	content.value?.removeEventListener('scroll', handleProjectContentScroll)
+	window.removeEventListener('resize', handleProjectContentScroll)
+	if (bottomScrim.value) {
+		gsap.killTweensOf(bottomScrim.value)
+		gsap.set(bottomScrim.value, {
+			clearProps: 'opacity,transform,visibility'
+		})
+	}
+	isBottomScrimVisible = undefined
+}
+
+function handleProjectContentScroll() {
+	updateBottomScrim()
 }
 
 function killContextTransition() {
+	contextTransitionRunId += 1
 	transitionTimeline?.kill()
 	transitionTimeline = undefined
 	revertTransitionSplits()
+	cleanupHeroReveal()
+	if (content.value) {
+		gsap.set(content.value, {
+			clearProps: 'opacity,transform,visibility'
+		})
+	}
+	if (surface.value) {
+		gsap.set(surface.value, {
+			'--project-card-color': getProjectBackground(displayedIndex.value)
+		})
+	}
+}
+
+function playUntil(
+	animation: gsap.core.Timeline,
+	position: number
+) {
+	return new Promise<void>((resolve) => {
+		let hasResolved = false
+		const finish = () => {
+			if (hasResolved) return
+			hasResolved = true
+			resolve()
+		}
+
+		animation.call(finish, [], position)
+		animation.eventCallback('onInterrupt', finish)
+		animation.play(0)
+	})
+}
+
+function continueTimeline(animation: gsap.core.Timeline) {
+	return new Promise<void>((resolve) => {
+		animation.eventCallback('onComplete', resolve)
+		animation.eventCallback('onInterrupt', resolve)
+		animation.play()
+	})
 }
 
 function setupNavStaggerLinks() {
@@ -1453,16 +1601,36 @@ async function navigate(direction: NavigationDirection, restoreFocus = false) {
 	isTransitioning.value = true
 	announcement.value = ''
 	killContextTransition()
+	const runId = contextTransitionRunId
 	navStaggerLinks?.destroy()
 	navStaggerLinks = undefined
 
 	if (prefersReducedMotion()) {
+		gsap.set(content.value, { autoAlpha: 0 })
 		displayedIndex.value = nextIndex
 		emit('change-project', nextIndex)
 		await nextTick()
+		if (runId !== contextTransitionRunId) return
+		if (content.value) {
+			content.value.scrollTop = 0
+		}
+		isBottomScrimVisible = undefined
+		updateBottomScrim(true)
 		gsap.set(surface.value, {
 			'--project-card-color': getProjectBackground(nextIndex)
 		})
+		await waitForAnimationFrame()
+		if (runId !== contextTransitionRunId) return
+		gsap.set([
+			...Object.values(getHeroSharedElements() ?? {}),
+			...getTransitionBodies()
+		], {
+			clearProps: 'clipPath,opacity,transform,visibility'
+		})
+		gsap.set(content.value, {
+			clearProps: 'opacity,transform,visibility'
+		})
+		ScrollTrigger.refresh()
 		announcement.value = `${displayedProject.value.name} project loaded`
 		isTransitioning.value = false
 		setupNavStaggerLinks()
@@ -1470,75 +1638,89 @@ async function navigate(direction: NavigationDirection, restoreFocus = false) {
 		return
 	}
 
-	const outgoingChars = splitTransitionText()
+	const outgoingHero = getHeroSharedElements()
+	if (!outgoingHero || !content.value) {
+		isTransitioning.value = false
+		setupNavStaggerLinks()
+		return
+	}
+
+	const outgoingLines = splitHeroTransitionLines(outgoingHero)
+	const outgoingMetadata = getHeroMetadataElements(outgoingHero)
+
 	transitionTimeline = gsap.timeline({ paused: true })
 	transitionTimeline
-		.to(outgoingChars, {
-			y: '-0.25em',
+		.to([...outgoingLines.titleLines, ...outgoingLines.introLines], {
+			yPercent: -110,
+			duration: 0.34,
+			ease: 'power2.in',
+			stagger: 0.045
+		}, 0)
+		.to(outgoingMetadata, {
 			autoAlpha: 0,
+			y: -8,
 			duration: TEXT_OUT_DURATION,
 			ease: 'power2.in',
-			stagger: {
-				each: 0.006
-			}
+			stagger: 0.025
 		}, 0)
-		.to(getTransitionBodies(), {
+		.to(content.value, {
 			autoAlpha: 0,
+			y: -12,
 			duration: TEXT_OUT_DURATION,
 			ease: 'power2.in'
-		}, 0)
-		.to(getHeroMedia(), {
-			autoAlpha: 0,
-			duration: 0.28,
+		}, 0.08)
+		.to(surface.value, {
+			'--project-card-color': getProjectBackground(nextIndex),
+			duration: CONTEXT_FADE_DURATION,
 			ease: 'power2.inOut'
-		}, 0)
+		}, 0.18)
 
-	await playTimeline(transitionTimeline)
+	await playUntil(transitionTimeline, 0.34)
+	if (runId !== contextTransitionRunId) return
+
 	revertTransitionSplits()
 
 	displayedIndex.value = nextIndex
 	emit('change-project', nextIndex)
 	await nextTick()
+	if (runId !== contextTransitionRunId || !content.value) return
 
-	const incomingChars = splitTransitionText()
-	gsap.set(incomingChars, {
-		y: '0.42em',
-		autoAlpha: 0
-	})
-	gsap.set([getHeroMedia(), ...getTransitionBodies()], {
-		autoAlpha: 0
-	})
+	content.value.scrollTop = 0
+	isBottomScrimVisible = undefined
+	updateBottomScrim(true)
+	const incomingHero = getHeroSharedElements()
+	if (!incomingHero) {
+		gsap.set(content.value, {
+			clearProps: 'opacity,transform,visibility'
+		})
+		isTransitioning.value = false
+		setupNavStaggerLinks()
+		return
+	}
 
-	transitionTimeline = gsap.timeline({ paused: true })
-	transitionTimeline
-		.to(surface.value, {
-			'--project-card-color': getProjectBackground(nextIndex),
-			duration: CONTEXT_FADE_DURATION,
-			ease: 'power2.inOut'
-		}, 0)
-		.to(getHeroMedia(), {
-			autoAlpha: 1,
-			duration: CONTEXT_FADE_DURATION,
-			ease: 'power2.out'
-		}, 0.04)
-		.to(getTransitionBodies(), {
-			autoAlpha: 1,
-			duration: 0.4,
-			ease: 'power2.out'
-		}, 0.1)
-		.to(incomingChars, {
-			y: 0,
-			autoAlpha: 1,
-			duration: TEXT_IN_DURATION,
-			ease: 'back.out(1.25)',
-			stagger: {
-				each: 0.012
-			}
-		}, 0.08)
+	await waitForAnimationFrame()
+	if (runId !== contextTransitionRunId) return
+	await waitForImageReady(
+		incomingHero.media.querySelector<HTMLImageElement>('img')
+	)
+	if (runId !== contextTransitionRunId) return
 
-	await playTimeline(transitionTimeline)
-	revertTransitionSplits()
+	const caseHeroReveal = createCaseHeroReveal()
+	if (caseHeroReveal) {
+		transitionTimeline.add(caseHeroReveal, transitionTimeline.time())
+		caseHeroReveal.paused(false)
+		await continueTimeline(transitionTimeline)
+	} else {
+		gsap.set(content.value, {
+			clearProps: 'opacity,transform,visibility'
+		})
+		await continueTimeline(transitionTimeline)
+	}
+	if (runId !== contextTransitionRunId) return
+
+	cleanupHeroReveal()
 	transitionTimeline = undefined
+	ScrollTrigger.refresh()
 	announcement.value = `${displayedProject.value.name} project loaded`
 	isTransitioning.value = false
 	setupNavStaggerLinks()
@@ -1591,7 +1773,326 @@ function setFullscreenGeometry() {
 	})
 }
 
+function getProjectCardContents(card: HTMLElement) {
+	return Array.from(card.querySelectorAll<HTMLElement>([
+		'.project-card__content',
+		'.project-card__visual',
+		'.project-card__shadow'
+	].join(', ')))
+}
+
+function wrapHeroRevealLines(lines: Element[]) {
+	lines.forEach((line) => {
+		const mask = document.createElement('div')
+		mask.classList.add('split-line-wrapper')
+		line.parentNode?.insertBefore(mask, line)
+		mask.appendChild(line)
+	})
+}
+
+function splitMaskedLines(element: HTMLElement) {
+	const split = new SplitText(element, {
+		type: 'lines',
+		linesClass: 'split-line'
+	})
+	const lines = split.lines as HTMLElement[]
+	wrapHeroRevealLines(lines)
+
+	return { split, lines }
+}
+
+function revertHeroRevealSplits() {
+	heroRevealSplits.forEach((split) => split.revert())
+	heroRevealSplits = []
+}
+
+function cleanupHeroReveal() {
+	heroRevealTimeline?.kill()
+	heroRevealTimeline = undefined
+	revertHeroRevealSplits()
+
+	if (heroRevealTargets.length > 0) {
+		gsap.killTweensOf(heroRevealTargets)
+		gsap.set(heroRevealTargets, {
+			clearProps: 'clipPath,opacity,transform,visibility'
+		})
+		heroRevealTargets = []
+	}
+}
+
+function cleanupCardRestore() {
+	cardRestoreSplits.forEach((split) => split.revert())
+	cardRestoreSplits = []
+
+	if (cardRestoreTargets.length > 0) {
+		gsap.killTweensOf(cardRestoreTargets)
+		gsap.set(cardRestoreTargets, {
+			clearProps: 'opacity,transform,visibility'
+		})
+		cardRestoreTargets = []
+	}
+}
+
+function prepareCardRestore(targetCard: HTMLElement) {
+	const title = targetCard.querySelector<HTMLElement>('.project-card__title')
+	const description = targetCard.querySelector<HTMLElement>(
+		'.project-card__description'
+	)
+	const thumbnail = targetCard.querySelector<HTMLElement>('.project-card__visual')
+	const year = targetCard.querySelector<HTMLElement>('.project-card__year')
+	const tags = Array.from(
+		targetCard.querySelectorAll<HTMLElement>('.project-card__tags .tag')
+	)
+
+	if (!title || !description || !thumbnail || !year) return undefined
+
+	cleanupCardRestore()
+	const titleReveal = splitMaskedLines(title)
+	const descriptionReveal = splitMaskedLines(description)
+	cardRestoreSplits = [titleReveal.split, descriptionReveal.split]
+
+	const lineTargets = [
+		...titleReveal.lines,
+		...descriptionReveal.lines
+	]
+	const metadataTargets = [year, ...tags]
+	cardRestoreTargets = [
+		thumbnail,
+		...lineTargets,
+		...metadataTargets
+	]
+
+	gsap.set(thumbnail, {
+		autoAlpha: 0,
+		y: 5
+	})
+	gsap.set(lineTargets, {
+		autoAlpha: 1,
+		yPercent: 105
+	})
+	gsap.set(metadataTargets, {
+		autoAlpha: 0,
+		y: 6
+	})
+
+	return {
+		thumbnail,
+		titleLines: titleReveal.lines,
+		descriptionLines: descriptionReveal.lines,
+		metadataTargets
+	}
+}
+
+async function waitForHeroRevealLayout() {
+	if ('fonts' in document) {
+		await document.fonts.ready
+	}
+
+	await nextTick()
+}
+
+function createCaseHeroReveal() {
+	const heroElements = getHeroSharedElements()
+	if (!heroElements || !content.value || !scrims.value) return undefined
+
+	cleanupHeroReveal()
+
+	const titleReveal = splitMaskedLines(heroElements.title)
+	heroRevealSplits = [titleReveal.split]
+
+	const titleLines = titleReveal.lines
+	const eyebrow = heroElements.intro
+	const metadata = getHeroMetadataElements(heroElements)
+		.filter((element) => element !== eyebrow)
+	const image = heroElements.media.querySelector<HTMLElement>('img')
+	const controls = getOverlayControls()
+
+	heroRevealTargets = [
+		content.value,
+		heroElements.media,
+		eyebrow,
+		...titleLines,
+		...metadata,
+		...(caseContent.value ? [caseContent.value] : []),
+		...controls,
+		scrims.value,
+		...(image ? [image] : [])
+	]
+
+	gsap.set(content.value, {
+		autoAlpha: 0,
+		y: 12
+	})
+	gsap.set(heroElements.media, {
+		clipPath: 'inset(100% 0 0 0)'
+	})
+	if (image) {
+		gsap.set(image, {
+			scale: 1.04,
+			transformOrigin: 'center center'
+		})
+	}
+	gsap.set([eyebrow, ...metadata], {
+		autoAlpha: 0,
+		y: 10
+	})
+	gsap.set(titleLines, {
+		autoAlpha: 1,
+		yPercent: 110
+	})
+	gsap.set(caseContent.value, {
+		autoAlpha: 0,
+		y: 12
+	})
+	gsap.set([...controls, scrims.value], { autoAlpha: 0 })
+	gsap.set(bottomScrim.value, { autoAlpha: 0 })
+
+	heroRevealTimeline = gsap.timeline({ paused: true })
+		.to(content.value, {
+			autoAlpha: 1,
+			y: 0,
+			duration: animationDurations.fast,
+			ease: animationEases.out
+		}, 0)
+		.to(heroElements.media, {
+			clipPath: 'inset(0% 0 0 0)',
+			duration: animationDurations.reveal,
+			ease: animationEases.strongInOut
+		}, 0)
+
+	if (image) {
+		// TODO: Replace this with the future enhanced case-image reveal.
+		heroRevealTimeline.to(image, {
+			scale: 1,
+			duration: animationDurations.intro,
+			ease: animationEases.strongOut
+		}, 0)
+	}
+
+	heroRevealTimeline
+		.to(eyebrow, {
+			autoAlpha: 1,
+			y: 0,
+			duration: animationDurations.fast,
+			ease: animationEases.out
+		}, 0.1)
+		.to(titleLines, {
+			yPercent: 0,
+			duration: animationDurations.base,
+			ease: animationEases.strongOut,
+			stagger: animationStaggers.lines
+		}, 0.16)
+		.to(metadata, {
+			autoAlpha: 1,
+			y: 0,
+			duration: animationDurations.fast,
+			ease: animationEases.out,
+			stagger: 0.04
+		}, 0.38)
+		.to(caseContent.value, {
+			autoAlpha: 1,
+			y: 0,
+			duration: animationDurations.fast,
+			ease: animationEases.out
+		}, 0.46)
+		.to([...controls, scrims.value], {
+			autoAlpha: 1,
+			duration: animationDurations.fast,
+			ease: animationEases.out
+		}, 0.52)
+
+	return heroRevealTimeline
+}
+
+async function animateSimpleOpen() {
+	if (
+		!surface.value
+		|| !content.value
+		|| !scrims.value
+	) return
+
+	const sourceCardContents = getProjectCardContents(props.sourceCard)
+	const destinationElements = [
+		content.value,
+		...getOverlayControls(),
+		scrims.value
+	]
+
+	setInitialGeometry()
+	gsap.set(surface.value, { backgroundColor: 'transparent' })
+	gsap.set(destinationElements, { autoAlpha: 0 })
+
+	if (prefersReducedMotion()) {
+		emit('source-ready')
+		await nextTick()
+		gsap.set(sourceCardContents, { clearProps: 'opacity,visibility' })
+		gsap.set(surface.value, { clearProps: 'backgroundColor' })
+		setFullscreenGeometry()
+		isOpening.value = false
+		gsap.set(destinationElements, { autoAlpha: 1 })
+		setupNavStaggerLinks()
+		emit('header-contrast-change', true)
+		closeButton.value?.focus()
+		ScrollTrigger.refresh()
+		return
+	}
+
+	timeline = gsap.timeline({ paused: true })
+		.to(sourceCardContents, {
+			autoAlpha: 0,
+			duration: 0.2,
+			ease: 'power2.out'
+		})
+
+	await playTimeline(timeline)
+	emit('source-ready')
+	await nextTick()
+	gsap.set(sourceCardContents, { clearProps: 'opacity,visibility' })
+	gsap.set(surface.value, { clearProps: 'backgroundColor' })
+
+	timeline = gsap.timeline({ paused: true })
+		.to(surface.value, {
+			top: 0,
+			left: 0,
+			width: '100vw',
+			height: '100dvh',
+			borderRadius: 0,
+			duration: OPEN_DURATION,
+			ease: animationEases.strongInOut
+		})
+		.call(() => {
+			emit('header-contrast-change', true)
+		}, [], OPEN_HEADER_CONTRAST_POSITION)
+
+	await playTimeline(timeline)
+	await waitForHeroRevealLayout()
+	const caseHeroReveal = createCaseHeroReveal()
+	isOpening.value = false
+	await nextTick()
+
+	if (caseHeroReveal) {
+		await playTimeline(caseHeroReveal)
+		cleanupHeroReveal()
+	} else {
+		gsap.set(destinationElements, { autoAlpha: 1 })
+	}
+
+	ScrollTrigger.refresh()
+	setupNavStaggerLinks()
+	closeButton.value?.focus()
+
+	if (closeRequestedDuringOpen) {
+		closeRequestedDuringOpen = false
+		requestClose()
+	}
+}
+
 async function animateOpen() {
+	if (!SHARED_ELEMENT_TRANSITIONS_ENABLED) {
+		await animateSimpleOpen()
+		return
+	}
+
 	if (
 		!surface.value
 		|| !content.value
@@ -1862,9 +2363,107 @@ function animateSimpleClose(targetCard: HTMLElement) {
 	})
 }
 
+async function animateBackdropClose(targetCard: HTMLElement) {
+	if (
+		!surface.value
+		|| !content.value
+		|| !scrims.value
+	) return
+
+	timeline?.kill()
+	const target = targetCard.getBoundingClientRect()
+	const destinationElements = [
+		content.value,
+		...getOverlayControls(),
+		scrims.value
+	]
+
+	if (prefersReducedMotion()) {
+		gsap.set(destinationElements, { autoAlpha: 0 })
+		gsap.set(surface.value, {
+			top: target.top,
+			left: target.left,
+			width: target.width,
+			height: target.height,
+			borderRadius: window.getComputedStyle(targetCard).borderRadius
+		})
+		emit('header-contrast-change', false)
+		emit('target-ready')
+		await nextTick()
+		return
+	}
+
+	timeline = gsap.timeline({ paused: true })
+		.to(destinationElements, {
+			autoAlpha: 0,
+			duration: 0.22,
+			ease: 'power2.in'
+		})
+
+	await playTimeline(timeline)
+
+	// TODO: Insert the redesigned destination-page exit animation here.
+	timeline = gsap.timeline({ paused: true })
+		.to(surface.value, {
+			top: target.top,
+			left: target.left,
+			width: target.width,
+			height: target.height,
+			borderRadius: window.getComputedStyle(targetCard).borderRadius,
+			duration: CLOSE_DURATION,
+			ease: animationEases.strongInOut
+		})
+		.call(() => {
+			emit('header-contrast-change', false)
+		}, [], CLOSE_HEADER_CONTRAST_POSITION)
+
+	await playTimeline(timeline)
+	const cardRestore = prepareCardRestore(targetCard)
+	gsap.set(surface.value, { autoAlpha: 0 })
+	emit('target-ready')
+	await nextTick()
+
+	if (!cardRestore) return
+
+	timeline = gsap.timeline({ paused: true })
+		.to(cardRestore.thumbnail, {
+			autoAlpha: 1,
+			y: 0,
+			duration: 0.28,
+			ease: animationEases.out
+		}, 0)
+		.to(cardRestore.titleLines, {
+			yPercent: 0,
+			duration: 0.42,
+			ease: animationEases.strongOut,
+			stagger: 0.04
+		}, 0.04)
+		.to(cardRestore.descriptionLines, {
+			yPercent: 0,
+			duration: 0.38,
+			ease: animationEases.strongOut,
+			stagger: 0.04
+		}, 0.08)
+		.to(cardRestore.metadataTargets, {
+			autoAlpha: 1,
+			y: 0,
+			duration: 0.26,
+			ease: animationEases.out,
+			stagger: 0.025
+		}, 0.1)
+
+	await playTimeline(timeline)
+	cleanupCardRestore()
+}
+
 async function animateClose(targetCard: HTMLElement) {
 	killContextTransition()
 	isTransitioning.value = false
+
+	if (!SHARED_ELEMENT_TRANSITIONS_ENABLED) {
+		await animateBackdropClose(targetCard)
+		return
+	}
 
 	if (
 		!surface.value
@@ -2015,17 +2614,18 @@ onMounted(async () => {
 	document.documentElement.style.overflow = 'hidden'
 	window.addEventListener('keydown', handleKeydown)
 	await nextTick()
+	setupBottomScrim()
 	await animateOpen()
 })
 
 onBeforeUnmount(() => {
 	timeline?.kill()
-	finishSharedGeometryDebug()
-	finishSurfaceCloneSyncDebug()
+	cleanupHeroReveal()
+	cleanupCardRestore()
 	killContextTransition()
 	navStaggerLinks?.destroy()
 	navStaggerLinks = undefined
-	clearSharedRepresentations()
+	cleanupBottomScrim()
 	emit('header-contrast-change', false)
 	document.documentElement.style.overflow = previousDocumentOverflow
 	window.removeEventListener('keydown', handleKeydown)

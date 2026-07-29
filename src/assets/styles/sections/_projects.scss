@@ -89,8 +89,12 @@
 }
 
 .project-card {
-	--project-card-color: #b0b0fe;
-	--project-card-accent: #ececff;
+	--project-card-color: var(--color-secondary);
+	--project-card-accent: color-mix(
+		in srgb,
+		var(--project-card-color) 28%,
+		var(--color-white)
+	);
 
 	position: absolute;
 	top: 50%;
@@ -114,26 +118,6 @@
 		visibility: hidden;
 	}
 
-	&--1 {
-		--project-card-color: #b0b0fe;
-		--project-card-accent: #ececff;
-	}
-
-	&--2 {
-		--project-card-color: #f6d4c8;
-		--project-card-accent: #fff1ec;
-	}
-
-	&--3 {
-		--project-card-color: #c9efd8;
-		--project-card-accent: #edfff4;
-	}
-
-	&--4 {
-		--project-card-color: #ffd87f;
-		--project-card-accent: #fff3d6;
-	}
-
 	&__number {
 		position: absolute;
 		top: clamp(1.5rem, 3vw, 3rem);
@@ -151,9 +135,9 @@
 		// Stable top and bottom anchors preserve the authored card composition
 		// while the card itself is transformed by the Cover Flow.
 		position: absolute;
-		right: clamp(1.5rem, 3vw, 3rem);
-		top: clamp(1.5rem, 3vw, 3rem);
-		left: clamp(1.5rem, 3vw, 3rem);
+		right: clamp(1rem, 3vw, 2rem);
+		top: clamp(1rem, 3vw, 2rem);
+		left: clamp(1rem, 3vw, 2rem);
 		z-index: 2;
 		color: var(--color-primary);
 	}
@@ -165,7 +149,8 @@
 	}
 
 	&__year {
-		font-size: var(--font-size-xs);
+		font-size: var(--font-size-sm);
+		font-weight: var(--font-weight-medium);
 	}
 
 	&__title {
@@ -179,7 +164,7 @@
 		display: -webkit-box;
 		margin-block-start: var(--space-2);
 		overflow: hidden;
-		font-size: var(--font-size-sm);
+		font-size: var(--font-size-md);
 		line-height: var(--line-height-tight);
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 2;
@@ -194,12 +179,12 @@
 
 	&__visual {
 		position: absolute;
-		bottom: clamp(1.5rem, 3vw, 3rem);
-		right: clamp(1.5rem, 3vw, 3rem);
-		left: clamp(1.5rem, 3vw, 3rem);
+		bottom: clamp(1rem, 3vw, 2rem);
+		right: clamp(1rem, 3vw, 2rem);
+		left: clamp(1rem, 3vw, 2rem);
 		height: 44%;
 		overflow: hidden;
-		border-radius: clamp(1rem, 1.6vw, 1.75rem);
+		border-radius: clamp(1rem, 1vw, 1.75rem);
 		background:
 			linear-gradient(
 				145deg,
@@ -310,7 +295,7 @@
 		inset: 0;
 		z-index: 4;
 		overflow-y: auto;
-		padding-block: clamp(9rem, 16vh, 12rem);
+		padding-block-start: clamp(12rem, 16vh, 12rem);
 			//clamp(1.5rem, 7vw, 8rem)
 			//clamp(9rem, 16vh, 12rem);
 		background: var(--project-layer-background);
@@ -350,24 +335,18 @@
 
 	&__close {
 		position: absolute;
-		top: clamp(5.5rem, 11vh, 7rem);
-		right: clamp(var(--space-6), 4vw, var(--space-10));
+		bottom: clamp(1rem, 5vh, 2rem);
+		left: 50%;
+		transform: translateX(-50%);
 		z-index: 7;
-		border: 1px solid currentColor;
-		border-radius: 999px;
-		padding: var(--space-3) var(--space-5);
-		background: transparent;
-		color: inherit;
-		font: inherit;
-		cursor: pointer;
 	}
 
 	&__copy {
-		width: min(100%, 760px);
-		margin-inline: auto;
+		//width: min(100%, 760px);
+		//margin-inline: auto;
 
 		h2 {
-			margin-block: var(--space-6) var(--space-10);
+			margin-block: var(--space-6) var(--space-16);
 			//font-size: clamp(3.5rem, 9vw, 8rem);
 		}
 
@@ -394,15 +373,16 @@
 	}
 
 	&__nav {
-		position: absolute;
-		right: clamp(var(--space-6), 4vw, var(--space-10));
-		bottom: clamp(var(--space-6), 4vh, var(--space-10));
-		left: clamp(var(--space-6), 4vw, var(--space-10));
-		z-index: 7;
 		display: flex;
+		flex-wrap: wrap;
 		justify-content: space-between;
+		width: calc(
+			100%
+			- (2 * clamp(var(--space-6), 4vw, var(--space-10)))
+		);
+		margin-block-start: var(--space-32);
+		margin-inline: auto;
 		gap: var(--space-4);
-		pointer-events: none;
 	}
 
 	&__nav-link {
@@ -412,7 +392,6 @@
 		text-align: left;
 		text-decoration: none;
 		cursor: pointer;
-		pointer-events: auto;
 
 		[data-stagger-link-container] {
 			//overflow: hidden;
@@ -436,11 +415,6 @@
 			outline: 2px solid currentColor;
 			outline-offset: 3px;
 		}
-	}
-
-	.project-context-char {
-		display: inline-block;
-		will-change: transform, opacity;
 	}
 
 	&__scrims {
@@ -520,13 +494,31 @@
 
 		&__visual {
 			inset: var(--space-4);
-			border-radius: 1rem;
+			border-radius: 0.5rem;
 		}
 
 		&__number {
 			top: var(--space-6);
 			left: var(--space-6);
 			font-size: clamp(3.5rem, 20vw, 6rem);
+		}
+	}
+
+	.project-layer-prototype {
+		&__nav {
+			flex-direction: column;
+			align-items: stretch;
+			gap: var(--space-6);
+		}
+
+		&__nav-link,
+		&__nav-link--next {
+			margin-inline-start: 0;
+			text-align: left;
+
+			[data-stagger-link-container] {
+				white-space: normal;
+			}
 		}
 	}
 }

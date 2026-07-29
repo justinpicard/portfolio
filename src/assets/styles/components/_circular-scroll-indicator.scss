@@ -5,6 +5,7 @@
 	right: 0;
     bottom: 0;
     z-index: 50;
+	mix-blend-mode: difference;
     transform: translate(-360%, -95%);
 	transition:
 		transform 0.3s ease,
@@ -22,7 +23,7 @@
 	place-items: center;
 	width: var(--indicator-size);
 	aspect-ratio: 1;
-	color: var(--color-secondary);
+	color: var(--color-white);
 	text-decoration: none;
 	visibility: hidden;
 	opacity: 0;
@@ -39,22 +40,12 @@
 	--indicator-size: 128px;
 	--indicator-text-size: 18.88px;
 	--indicator-letter-spacing: 0.11em;
-	color: var(--color-primary);
-	mix-blend-mode: difference;
-	
-	//.circular-scroll-indicator__text {
-	//	mix-blend-mode: difference;
-	//}
 }
 
 .circular-scroll-indicator__graphic,
 .circular-scroll-indicator__icon {
 	grid-column: 1;
 	grid-row: 1;
-}
-
-.project-card__trigger {
-	isolation: isolate;
 }
 
 .circular-scroll-indicator__graphic {

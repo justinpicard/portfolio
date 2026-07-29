@@ -22,15 +22,10 @@
 									target="_blank"
 									rel="noopener"
 									data-stagger-link
+									class="d-flex items-center"
 								>
-									<span data-stagger-link-container>LinkedIn</span>
+									<span data-stagger-link-container>LinkedIn</span><span class="ml-1 mt-1">↗</span>
 								</a>
-							</li>
-							<!--<li><a href="https://dribbble.com/justinpicard" target="_blank" rel="noopener">Dribbble</a></li>-->
-							<li>
-								<router-link :to="{ name: 'resume' }" data-stagger-link>
-									<span data-stagger-link-container>Resume</span>
-								</router-link>
 							</li>
 							<li>
 								<a
@@ -38,9 +33,15 @@
 									target="_blank"
 									rel="noopener"
 									data-stagger-link
+									class="d-flex items-center"
 								>
-									<span data-stagger-link-container>Unsplash</span>
+									<span data-stagger-link-container>Unsplash</span><span class="ml-1 mt-1">↗</span>
 								</a>
+							</li>
+							<li>
+								<router-link :to="{ name: 'resume' }" data-stagger-link class="d-flex items-center">
+									<span data-stagger-link-container>Resume</span><span class="ml-1 mt-1">↓</span>
+								</router-link>
 							</li>
 						</ul>
 					</nav>

@@ -3,7 +3,7 @@
 		<div class="container">
 			<div class="row">
 				<div class="about-text d-flex flex-column col-12 lg:col-8 lg:offset-2 mb-3" ref="aboutText">
-					<p class="about-section__eyebrow eyebrow mb-8" ref="aboutEyebrow">About</p>
+					<p class="about-section__eyebrow eyebrow mb-8 text-secondary" ref="aboutEyebrow">About</p>
 					<h2 class="about-section__title heading-font mb-8 md:mb-16" ref="aboutTitle">
 						Good digital products have always fascinated me. Not just for how they look, but for how everything behind the interface comes together.
 					</h2>

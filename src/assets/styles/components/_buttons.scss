@@ -1,10 +1,14 @@
 @use "../abstracts" as *;
 
 .btn {
+	appearance: none;
 	position: relative;
 	display: inline-flex;
 	align-items: center;
+	border: 0;
+	background: transparent;
 	//text-transform: uppercase;
+	font: inherit;
 	font-size: var(--font-size-ui);
 	text-align: center;
 	text-decoration: none;
@@ -43,11 +47,12 @@
 	}
 
 	&.btn-dark {
-		color: var(--color-black);
+		color: var(--color-primary);
 
 		.btn-bg {
 			border: 1px solid color-mix(in srgb, var(--color-black) 30%, transparent);
 			background-color: color-mix(in srgb, var(--color-black) 7%, transparent);
+			backdrop-filter: blur(10px);
 		}
 	}
 
@@ -57,6 +62,7 @@
 		.btn-bg {
 			border: 1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
 			background-color: color-mix(in srgb, var(--color-primary) 7%, transparent);
+			backdrop-filter: blur(10px);
 		}
 	}
 
@@ -126,7 +132,19 @@
 		&:hover {
 			.btn-bg {
 				transform: scale3d(0.95, 0.95, 0.95);
-				border: 1px solid $secondary;
+			}
+		}
+
+		&.btn-light:hover,
+		&.btn-dark:hover {
+			.btn-bg {
+				border-color: $secondary;
+			}
+		}
+
+		&.btn-primary:hover {
+			.btn-bg {
+				border-color: var(--color-primary);
 			}
 		}
 	}

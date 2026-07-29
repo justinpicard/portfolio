@@ -14,6 +14,7 @@
 		:aria-disabled="!interactive"
 		:tabindex="interactive ? 0 : -1"
 		:role="interactive ? 'button' : undefined"
+		:style="cardStyles"
 		data-project-card
 		@click="handleOpen"
 		@keydown.enter.prevent="handleOpen"
@@ -45,6 +46,16 @@
 			/>
 		</div>
 
+		<CircularScrollIndicator
+			ref="projectIndicator"
+			variant="project"
+			text="VIEW PROJECT • VIEW PROJECT •"
+			:href="undefined"
+			aria-label=""
+			:show-icon="false"
+			aria-hidden="true"
+		/>
+
 		<span
 			class="project-card__shadow project-card__shadow--from-left"
 			data-project-shadow-from-left
@@ -59,9 +70,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import {
+	computed,
+	onMounted,
+	onUnmounted,
+	ref,
+	watch,
+	type CSSProperties
+} from 'vue'
+import { useCursorFollowIndicator } from '../../composables/useCursorFollowIndicator'
 import type { Project } from '../../types/project'
 import BaseImage from '../base/BaseImage.vue'
+import CircularScrollIndicator from '../ui/CircularScrollIndicator.vue'
 import Tag from '../ui/Tag.vue'
 
 const props = defineProps<{
@@ -79,7 +99,26 @@ const emit = defineEmits<{
 	}]
 }>()
 
+const cardStyles = computed<CSSProperties>(() => (
+	props.project.overlayBackground
+		? {
+			'--project-card-color': props.project.overlayBackground
+		} as CSSProperties
+		: {}
+))
+
 const card = ref<HTMLElement | null>(null)
+const projectIndicator = ref<InstanceType<typeof CircularScrollIndicator> | null>(
+	null
+)
+const projectIndicatorWrapper = computed(
+	() => projectIndicator.value?.element ?? null
+)
+const projectIndicatorVisual = computed(
+	() => projectIndicator.value?.indicator ?? null
+)
+let cursorFollowIndicator: ReturnType<typeof useCursorFollowIndicator> | undefined
+
 function handleOpen() {
 	if (!props.interactive || !card.value) return
 
@@ -88,4 +127,31 @@ function handleOpen() {
 		sourceElement: card.value
 	})
 }
+
+onMounted(() => {
+	if (!projectIndicatorWrapper.value || !projectIndicatorVisual.value) return
+
+	cursorFollowIndicator = useCursorFollowIndicator({
+		triggerElement: card,
+		wrapperElement: projectIndicatorWrapper,
+		visualElement: projectIndicatorVisual
+	})
+
+	if (props.interactive) {
+		cursorFollowIndicator.enable()
+	}
+})
+
+watch(() => props.interactive, (interactive) => {
+	if (interactive) {
+		cursorFollowIndicator?.enable()
+		return
+	}
+
+	cursorFollowIndicator?.disable()
+})
+
+onUnmounted(() => {
+	cursorFollowIndicator?.cleanup()
+})
 </script>
