@@ -16,27 +16,35 @@
 					v-for="projectIndex in projectCount"
 					:key="projectIndex"
 					:index="projectIndex - 1"
+					:project="projects[projectIndex - 1]"
 					:active="activeProjectIndex === projectIndex - 1"
 					:interactive="interactiveProjectIndex === projectIndex - 1"
-					:transition-hidden="openProjectIndex === projectIndex - 1"
+					:transition-hidden="hiddenProjectIndex === projectIndex - 1"
 					@open="openProject"
 				/>
 			</div>
 		</div>
 		<ProjectLayerPrototype
-			v-if="openProjectIndex !== null && layerOrigin"
+			v-if="isProjectOpen && layerOrigin && openSourceCard"
 			ref="projectLayer"
-			:project-index="openProjectIndex"
+			:projects="projects"
+			:project-index="activeProjectIndex"
 			:origin="layerOrigin"
+			:source-card="openSourceCard"
 			@close="closeProject"
+			@change-project="changeProject"
+			@source-ready="hideActiveProjectCard"
+			@target-ready="showActiveProjectCard"
 			@header-contrast-change="emit('overlay-change', $event)"
 		/>
 	</section>
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref, shallowRef } from 'vue'
 import { gsap, prefersReducedMotion, ScrollTrigger, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
+import projectsData from '../../data/projects.json'
+import type { Project } from '../../types/project'
 import ProjectCard from '../work/ProjectCard.vue'
 import ProjectLayerPrototype from '../work/ProjectLayerPrototype.vue'
 
@@ -44,7 +52,8 @@ const emit = defineEmits<{
 	'overlay-change': [isOpen: boolean]
 }>()
 
-const projectCount = 4
+const projects = projectsData as Project[]
+const projectCount = projects.length
 
 const root = ref<HTMLElement | null>(null)
 const stage = ref<HTMLElement | null>(null)
@@ -53,12 +62,20 @@ const titleRef = ref<HTMLHeadingElement | null>(null)
 const projectLayer = ref<InstanceType<typeof ProjectLayerPrototype> | null>(null)
 const activeProjectIndex = ref(0)
 const interactiveProjectIndex = ref<number | null>(null)
-const openProjectIndex = ref<number | null>(null)
-const openProjectSource = ref<HTMLElement | null>(null)
+const isProjectOpen = ref(false)
+const hiddenProjectIndex = ref<number | null>(null)
 const layerOrigin = ref<LayerOrigin | null>(null)
+const openSourceCard = shallowRef<HTMLElement | null>(null)
 
 let ctx: gsap.Context | undefined
 let splitTitle: SplitText | undefined
+let exhibitionTimeline: gsap.core.Timeline | undefined
+let exhibitionTrigger: ReturnType<typeof ScrollTrigger.create> | undefined
+let projectCards: HTMLElement[] = []
+let reducedMotionActivationEnabled = false
+
+const DEBUG_EXHIBITION_ACTIVATION = import.meta.env.DEV
+	&& new URLSearchParams(window.location.search).has('debugExhibitionActivation')
 
 type LayerOrigin = {
 	top: number
@@ -83,21 +100,56 @@ function getElementOrigin(element: HTMLElement): LayerOrigin {
 function openProject(payload: { projectIndex: number; sourceElement: HTMLElement }) {
 	if (interactiveProjectIndex.value !== payload.projectIndex) return
 
-	openProjectSource.value = payload.sourceElement
 	layerOrigin.value = getElementOrigin(payload.sourceElement)
-	openProjectIndex.value = payload.projectIndex
+	openSourceCard.value = payload.sourceElement
+	activeProjectIndex.value = payload.projectIndex
+	hiddenProjectIndex.value = null
+	isProjectOpen.value = true
+}
+
+function hideActiveProjectCard() {
+	hiddenProjectIndex.value = activeProjectIndex.value
+}
+
+function showActiveProjectCard() {
+	hiddenProjectIndex.value = null
 }
 
 async function closeProject() {
-	if (!openProjectSource.value || !projectLayer.value) return
+	const sourceElement = projectCards[activeProjectIndex.value]
+	if (!sourceElement || !projectLayer.value) return
 
-	const sourceElement = openProjectSource.value
-	await projectLayer.value.animateClose(getElementOrigin(sourceElement))
-	openProjectIndex.value = null
+	await projectLayer.value.animateClose(sourceElement)
+	isProjectOpen.value = false
+	hiddenProjectIndex.value = null
 	layerOrigin.value = null
-	openProjectSource.value = null
+	openSourceCard.value = null
 	await nextTick()
 	sourceElement.focus({ preventScroll: true })
+}
+
+function changeProject(nextIndex: number) {
+	if (
+		nextIndex < 0
+		|| nextIndex >= projectCount
+		|| !exhibitionTimeline
+		|| !exhibitionTrigger
+	) return
+
+	const labelPosition = exhibitionTimeline.labels[`project-${nextIndex}`]
+	const progress = labelPosition / exhibitionTimeline.duration()
+
+	activeProjectIndex.value = nextIndex
+	interactiveProjectIndex.value = nextIndex
+	hiddenProjectIndex.value = nextIndex
+
+	// The fullscreen layer completely covers this direct gallery synchronization.
+	exhibitionTimeline.progress(progress)
+	exhibitionTrigger.scroll(
+		exhibitionTrigger.start
+		+ (exhibitionTrigger.end - exhibitionTrigger.start) * progress
+	)
+	ScrollTrigger.update()
 }
 
 function wrapSplitElements(elements: Element[], className: string, tagName: 'span' = 'span') {
@@ -153,6 +205,60 @@ function getShadowState(cardIndex: number, activeIndex: number) {
 	}
 }
 
+function updateVisualProjectActivation(cards: HTMLElement[], useVerticalAxis = false) {
+	if (cards.length === 0) {
+		interactiveProjectIndex.value = null
+		return
+	}
+
+	const viewportCenter = useVerticalAxis
+		? window.innerHeight / 2
+		: window.innerWidth / 2
+	const activeRadius = readCssNumber('--exhibition-active-radius', 140)
+	let nearestIndex = 0
+	let nearestDistance = Number.POSITIVE_INFINITY
+
+	const measurements = cards.map((card, index) => {
+		const rect = card.getBoundingClientRect()
+		const cardCenter = useVerticalAxis
+			? rect.top + rect.height / 2
+			: rect.left + rect.width / 2
+		const distance = Math.abs(cardCenter - viewportCenter)
+
+		if (distance < nearestDistance) {
+			nearestDistance = distance
+			nearestIndex = index
+		}
+
+		return {
+			index,
+			cardCenter,
+			viewportCenter,
+			distance
+		}
+	})
+
+	activeProjectIndex.value = nearestIndex
+	interactiveProjectIndex.value = nearestDistance <= activeRadius
+		? nearestIndex
+		: null
+
+	if (DEBUG_EXHIBITION_ACTIVATION) {
+		console.table(measurements.map((measurement) => ({
+			...measurement,
+			nearestIndex,
+			activeRadius,
+			interactive: interactiveProjectIndex.value === measurement.index
+		})))
+	}
+}
+
+function updateReducedMotionActivation() {
+	if (!reducedMotionActivationEnabled) return
+
+	updateVisualProjectActivation(projectCards, true)
+}
+
 function setupExhibition() {
 	if (
 		!root.value
@@ -163,6 +269,7 @@ function setupExhibition() {
 
 	const cards = gsap.utils.toArray<HTMLElement>('[data-project-card]', exhibition.value)
 	if (cards.length === 0) return
+	projectCards = cards
 	const shadowsFromLeft = cards.map((card) => (
 		card.querySelector<HTMLElement>('[data-project-shadow-from-left]')
 	))
@@ -172,7 +279,13 @@ function setupExhibition() {
 	if (shadowsFromLeft.some((shadow) => !shadow) || shadowsFromRight.some((shadow) => !shadow)) return
 	const titleChars = splitTitle?.chars ?? []
 
-	if (prefersReducedMotion()) return
+	if (prefersReducedMotion()) {
+		reducedMotionActivationEnabled = true
+		window.addEventListener('scroll', updateReducedMotionActivation, { passive: true })
+		window.addEventListener('resize', updateReducedMotionActivation)
+		requestAnimationFrame(updateReducedMotionActivation)
+		return
+	}
 
 	const transitionDistance = readCssNumber('--exhibition-transition-distance', 1)
 	const restDistance = readCssNumber('--exhibition-rest-distance', 0.58)
@@ -209,16 +322,11 @@ function setupExhibition() {
 			ease: 'power2.inOut'
 		}
 	})
+	exhibitionTimeline = timeline
 
 	const galleryEntryPosition = titleRevealDistance + titleRestDistance
 
 	timeline
-		.to(titleChars, {
-			y: 0,
-			duration: titleRevealDistance * 0.78,
-			stagger: 0.06,
-			ease: 'power4.out'
-		}, 0)
 		.to({}, { duration: titleRestDistance }, titleRevealDistance)
 		.to(cards, {
 			x: 0,
@@ -302,20 +410,11 @@ function setupExhibition() {
 	const snapPoints = Array.from({ length: projectCount }, (_, index) => (
 		timeline.labels[`project-${index}`] / timeline.duration()
 	))
-	const activeWindows = snapPoints.map((_, index) => {
-		const start = timeline.labels[`project-${index}`]
-
-		return {
-			index,
-			start,
-			end: start + restDistance
-		}
-	})
 	const scrollDistance = timeline.duration() * window.innerHeight * (scrollPerProject / 100)
-	const snapRange = readCssNumber('--exhibition-snap-range', 100)
+	const snapRange = readCssNumber('--exhibition-snap-range', 240)
 	const snapThreshold = snapRange / scrollDistance
 
-	ScrollTrigger.create({
+	exhibitionTrigger = ScrollTrigger.create({
 		trigger: root.value,
 		start: 'top top',
 		end: `+=${scrollDistance}`,
@@ -325,16 +424,8 @@ function setupExhibition() {
 		anticipatePin: 1,
 		invalidateOnRefresh: true,
 		animation: timeline,
-		onUpdate: (self) => {
-			const currentTime = self.progress * timeline.duration()
-			const activeWindow = activeWindows.find((window) => (
-				currentTime >= window.start && currentTime <= window.end
-			))
-
-			interactiveProjectIndex.value = activeWindow?.index ?? null
-			if (activeWindow) {
-				activeProjectIndex.value = activeWindow.index
-			}
+		onUpdate: () => {
+			updateVisualProjectActivation(cards)
 		},
 		snap: {
 			snapTo: (value: number) => {
@@ -369,10 +460,26 @@ onMounted(() => {
 			wrapSplitElements(splitTitle.chars, 'split-display-char-wrapper')
 
 			gsap.set(splitTitle.chars, {
-				y: () => window.innerHeight,
+				y: () => (
+					window.innerHeight
+					* readCssNumber('--exhibition-title-entry-offset', 100)
+					/ 100
+				),
 				yPercent: 0
 			})
 
+			gsap.to(splitTitle.chars, {
+				y: 0,
+				stagger: 0.06,
+				ease: 'power2.inOut',
+				scrollTrigger: {
+					trigger: root.value,
+					start: 'top bottom',
+					end: () => `+=${window.innerHeight * 1.6}`,
+					scrub: true,
+					invalidateOnRefresh: true
+				}
+			})
 		}
 
 		setupExhibition()
@@ -385,6 +492,12 @@ onMounted(() => {
 
 onUnmounted(() => {
 	emit('overlay-change', false)
+	window.removeEventListener('scroll', updateReducedMotionActivation)
+	window.removeEventListener('resize', updateReducedMotionActivation)
+	reducedMotionActivationEnabled = false
+	exhibitionTrigger = undefined
+	exhibitionTimeline = undefined
+	projectCards = []
 	ctx?.revert()
 	splitTitle?.revert()
 })

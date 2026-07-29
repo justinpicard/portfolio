@@ -10,7 +10,7 @@
 				'project-card--transition-hidden': transitionHidden
 			}
 		]"
-		:aria-label="`Prototype project ${index + 1}`"
+		:aria-label="project.name"
 		:aria-disabled="!interactive"
 		:tabindex="interactive ? 0 : -1"
 		:role="interactive ? 'button' : undefined"
@@ -19,9 +19,32 @@
 		@keydown.enter.prevent="handleOpen"
 		@keydown.space.prevent="handleOpen"
 	>
-		<span class="project-card__number" aria-hidden="true">
-			{{ formattedNumber }}
-		</span>
+
+		<div class="project-card__content">
+			<p class="project-card__year" data-project-shared="year">{{ project.year }}</p>
+			<h3 class="project-card__title" data-project-shared="title">{{ project.name }}</h3>
+			<p class="project-card__description" data-project-shared="intro">
+				{{ project.type }}
+			</p>
+			<div class="project-card__tags" data-project-shared="tags">
+				<Tag
+					v-for="tag in project.tags"
+					:key="tag"
+				>
+					{{ tag }}
+				</Tag>
+			</div>
+		</div>
+
+		<div class="project-card__visual" data-project-shared="media">
+			<BaseImage
+				:src="`/images/${project.image}`"
+				:alt="project.name"
+				:fallback-format="project.imageFormat"
+				aspect-ratio="16 / 7"
+			/>
+		</div>
+
 		<span
 			class="project-card__shadow project-card__shadow--from-left"
 			data-project-shadow-from-left
@@ -36,10 +59,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
+import type { Project } from '../../types/project'
+import BaseImage from '../base/BaseImage.vue'
+import Tag from '../ui/Tag.vue'
 
 const props = defineProps<{
 	index: number
+	project: Project
 	active?: boolean
 	interactive?: boolean
 	transitionHidden?: boolean
@@ -53,8 +80,6 @@ const emit = defineEmits<{
 }>()
 
 const card = ref<HTMLElement | null>(null)
-const formattedNumber = computed(() => String(props.index + 1).padStart(2, '0'))
-
 function handleOpen() {
 	if (!props.interactive || !card.value) return
 

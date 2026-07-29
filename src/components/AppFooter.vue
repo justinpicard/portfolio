@@ -14,7 +14,7 @@
 
 				<div class="site-footer__links col-span-1 md:col-span-1">
 					<nav aria-label="Contact and social links">
-						<ul ref="linkList" class="site-footer__link-list d-flex flex-row items-center">
+						<ul ref="linkList" class="site-footer__link-list d-flex flex-column">
 							<!--<li><a href="mailto:hallo@justinpicard.nl">hallo@justinpicard.nl</a></li>-->
 							<li>
 								<a
@@ -26,12 +26,21 @@
 									<span data-stagger-link-container>LinkedIn</span>
 								</a>
 							</li>
-							<span class="star mx-2">✦</span>
 							<!--<li><a href="https://dribbble.com/justinpicard" target="_blank" rel="noopener">Dribbble</a></li>-->
 							<li>
 								<router-link :to="{ name: 'resume' }" data-stagger-link>
 									<span data-stagger-link-container>Resume</span>
 								</router-link>
+							</li>
+							<li>
+								<a
+									href="https://unsplash.com/@justinpicard"
+									target="_blank"
+									rel="noopener"
+									data-stagger-link
+								>
+									<span data-stagger-link-container>Unsplash</span>
+								</a>
 							</li>
 						</ul>
 					</nav>

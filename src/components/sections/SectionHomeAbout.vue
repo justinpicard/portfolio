@@ -84,8 +84,8 @@ async function initAboutReveal() {
 
 		const timeline = gsap.timeline({
 			scrollTrigger: {
-				trigger: aboutText.value,
-				start: 'top 60%',
+				trigger: root.value,
+				start: 'top 50%',
 				toggleActions: 'play none none none'
 			}
 		})

@@ -1,9 +1,16 @@
 [
 	{
 		"id": "1",
+		"case": "muzimatch",
 		"name": "MuziMatch",
+		"tags": [
+			"Side project",
+			"Product Design",
+			"Nuxt",
+			"GSAP"
+		],
 		"description": "MuziMatch brengt muzikanten samen die op zoek zijn naar een band, samenwerking of nieuw project. Het platform maakt het eenvoudiger om elkaar te vinden op basis van **muzikale interesses**, ervaring en locatie.\n\nBinnen dit project komen *product design*, development en het uitwerken van een schaalbaar design system samen. Deze tekst is tijdelijk en kan later worden vervangen door de definitieve case study.",
-		"image": "projects/muzimatch/muzimatch_oproepen",
+		"image": "projects/muzimatch/muzimatch-thumb",
 		"imageFormat": "png",
 		"secondaryImages": [
 			"hz-university",
@@ -18,7 +25,14 @@
 	},
 	{
 		"id": "2",
+		"case": "recranet",
 		"name": "Recranet Booking",
+		"tags": [
+			"Enterprise SaaS",
+			"Product Design",
+			"Design System",
+			"Booking"
+		],
 		"description": "Recranet Booking is een SaaS-product voor vakantieparken en campings. De oplossing ondersteunt het volledige boekingsproces, van het zoeken naar een verblijf tot het afronden van de reservering.\n\nDe focus lag op het ontwikkelen van een **consistent design system** en het verbeteren van complexe gebruikersflows. Daarbij waren *duidelijkheid*, herbruikbaarheid en schaalbaarheid belangrijke uitgangspunten.",
 		"image": "projects/recranet/recranet",
 		"secondaryImages": [
@@ -34,7 +48,14 @@
 	},
 	{
 		"id": "3",
+		"case": "sfvonline",
 		"name": "SFVonline",
+		"tags": [
+			"Product Design",
+			"UX/UI",
+			"SaaS",
+			"Early work"
+		],
 		"description": "SFVonline helpt organisaties om processen en documentatie rondom sociale veiligheid overzichtelijk te beheren. Het product vertaalt uitgebreide informatie naar een toegankelijke digitale werkomgeving.\n\nVoor dit project werkte ik aan de **gebruikerservaring en interface**, met extra aandacht voor structuur en leesbaarheid. *Deze voorbeeldtekst dient als tijdelijke invulling* totdat de volledige projectbeschrijving beschikbaar is.",
 		"image": "projects/sfvonline/sfvonline",
 		"secondaryImages": [
@@ -47,5 +68,43 @@
 		"role": "UX/UI designer",
 		"type": "SaaS application",
 		"year": "2020"
+	},
+	{
+		"id": "4",
+		"case": "undrift",
+		"name": "Undrift",
+		"tags": [
+			"Side project",
+			"Design Systems",
+			"Nuxt",
+			"Work in progress"
+		],
+		"description": "Een verzameling kleinere productexperimenten waarin interactie, visuele richting en technische prototyping samenkomen.\n\nDeze tijdelijke projectinhoud houdt de vierde positie in de gecureerde reeks beschikbaar totdat de definitieve case study is uitgewerkt.",
+		"image": "hz-university",
+		"overlayBackground": "#FFD87F",
+		"link": "#",
+		"job": "Side project",
+		"role": "Product designer & developer",
+		"type": "Product experiments",
+		"year": "2026"
+	},
+	{
+		"id": "5",
+		"case": "charlie",
+		"name": "Charlie",
+		"tags": [
+			"Side project",
+			"Personal productivity",
+			"Nuxt",
+			"Work in progress"
+		],
+		"description": "Een verzameling kleinere productexperimenten waarin interactie, visuele richting en technische prototyping samenkomen.\n\nDeze tijdelijke projectinhoud houdt de vierde positie in de gecureerde reeks beschikbaar totdat de definitieve case study is uitgewerkt.",
+		"image": "hz-university",
+		"overlayBackground": "#FFD87F",
+		"link": "#",
+		"job": "Side project",
+		"role": "Product designer & developer",
+		"type": "Product experiments",
+		"year": "2026"
 	}
 ]

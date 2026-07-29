@@ -1,7 +1,15 @@
+export type ProjectCaseKey =
+	| 'muzimatch'
+	| 'undrift'
+	| 'recranet'
+	| 'sfvonline'
+
 export type Project = {
 	id: string
+	case: ProjectCaseKey
 	name: string
 	description: string
+	tags: string[]
 	image: string
 	imageFormat?: 'jpg' | 'jpeg' | 'png'
 	secondaryImages?: string[]

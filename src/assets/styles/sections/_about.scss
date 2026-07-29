@@ -3,7 +3,7 @@
 section.about {
 	z-index: 1;
 	padding-top: calc(var(--section-padding) * 2);
-	padding-bottom: var(--section-padding);
+	padding-bottom: var(--section-padding-sm);
 
 	.obviously {
 		position: relative;
