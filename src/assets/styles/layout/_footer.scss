@@ -64,6 +64,7 @@
 	&__copyright {
 		margin: 0;
 		font-size: $font-size-xs;
+		opacity: 0.6;
 
 		@include respond(sm) {
 			font-size: $font-size-sm;
