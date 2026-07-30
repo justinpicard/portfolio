@@ -25,6 +25,14 @@
 		fill: var(--color-secondary);
 	}
 
+	&__signature-dot-layer {
+		pointer-events: none;
+	}
+
+	&__signature-dot {
+		fill: var(--color-white);
+	}
+
 	.container {
 		min-height: 100svh;
 	}
