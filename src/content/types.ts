@@ -26,6 +26,17 @@ export type FooterContent = {
 	introduction: string
 }
 
+export type PageSeoContent = {
+	title: string
+	description: string
+	ogTitle?: string
+	ogDescription?: string
+}
+
+export type SeoContent = {
+	home: PageSeoContent
+}
+
 export type HomeContent = {
 	hero: HeroContent
 	about: AboutContent
@@ -74,6 +85,7 @@ export type Project = ProjectMedia & ProjectContent
 export type PortfolioContent = {
 	home: HomeContent
 	projects: Project[]
+	seo: SeoContent
 }
 
 export type PortfolioContentOverrides = {

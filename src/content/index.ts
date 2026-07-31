@@ -3,7 +3,9 @@ import aboutEn from './en/about'
 import footerEn from './en/footer'
 import heroEn from './en/hero'
 import { projects as projectsEn } from './en/projects'
+import seoEn from './en/seo'
 import nlOverrides from './nl'
+import seoNl from './nl/seo'
 import { projectMedia } from './projects/media'
 import type {
 	LocaleCode,
@@ -12,7 +14,8 @@ import type {
 	Project,
 	ProjectContent,
 	ProjectContentOverride,
-	ProjectSlug
+	ProjectSlug,
+	SeoContent
 } from './types'
 
 const englishHome = {
@@ -32,7 +35,10 @@ function getProjectOverride(
 	return overrides?.find((project) => project.slug === slug)
 }
 
-function buildContent(overrides: PortfolioContentOverrides = {}): PortfolioContent {
+function buildContent(
+	seo: SeoContent,
+	overrides: PortfolioContentOverrides = {}
+): PortfolioContent {
 	const projects = projectMedia.map((media): Project => {
 		const englishProject = getEnglishProject(media.slug)
 		const override = getProjectOverride(overrides.projects, media.slug)
@@ -59,13 +65,14 @@ function buildContent(overrides: PortfolioContentOverrides = {}): PortfolioConte
 				...overrides.home?.footer
 			}
 		},
-		projects
+		projects,
+		seo
 	}
 }
 
 const content = {
-	en: buildContent(),
-	nl: buildContent(nlOverrides)
+	en: buildContent(seoEn),
+	nl: buildContent(seoNl, nlOverrides)
 } satisfies Record<LocaleCode, PortfolioContent>
 
 function validateProjectRegistry() {
@@ -118,6 +125,8 @@ export type {
 	Project,
 	ProjectCaseStudy,
 	ProjectContent,
+	PageSeoContent,
+	SeoContent,
 	ProjectSection,
 	ProjectSlug
 } from './types'

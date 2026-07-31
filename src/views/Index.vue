@@ -55,6 +55,9 @@ import SectionHomeWork from "../components/sections/SectionHomeWork.vue";
 import { usePortfolioContent } from "../composables/usePortfolioContent"
 import { gsap, prefersReducedMotion, ScrollTrigger } from "../utils/animations/gsap"
 import AppFooter from "../components/AppFooter.vue"
+import { usePageSeo } from '../composables/usePageSeo'
+
+usePageSeo('home')
 
 type OverlayState =
 	| {

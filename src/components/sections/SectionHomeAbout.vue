@@ -2,7 +2,11 @@
 	<section id="about" class="section about" ref="root">
 		<div class="container">
 			<div class="row">
-				<div class="about-text d-flex flex-column col-12 lg:col-8 lg:offset-2 mb-3" ref="aboutText">
+				<div
+					:key="locale"
+					class="about-text d-flex flex-column col-12 lg:col-8 lg:offset-2 mb-3"
+					ref="aboutText"
+				>
 					<p class="about-section__eyebrow eyebrow mb-8 text-secondary" ref="aboutEyebrow">{{ t('home.aboutLabel') }}</p>
 					<h2 class="about-section__title heading-font mb-8 md:mb-16" ref="aboutTitle">
 						{{ about.title }}
@@ -39,8 +43,10 @@ let bodySplit: SplitText | undefined
 let ctx: gsap.Context | undefined
 let isMounted = false
 let hasRevealCompleted = false
+let revealRequestId = 0
 
 function cleanupAboutReveal() {
+	revealRequestId += 1
 	ctx?.revert()
 	ctx = undefined
 	eyebrowSplit?.revert()
@@ -73,13 +79,15 @@ function waitForFrame() {
 }
 
 async function initAboutReveal() {
+	const requestId = ++revealRequestId
+
 	registerGsapPlugins()
 
 	await waitForFonts()
 	await nextTick()
 	await waitForFrame()
 
-	if (!isMounted) return
+	if (!isMounted || requestId !== revealRequestId) return
 
 	ctx = gsap.context(() => {
 		if (!aboutText.value || !aboutEyebrow.value || !aboutTitle.value) return

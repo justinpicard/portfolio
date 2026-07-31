@@ -1,4 +1,7 @@
-import { createI18n } from 'vue-i18n'
+import {
+	createI18n,
+	type I18n
+} from 'vue-i18n'
 import en from './locales/en'
 import nl from './locales/nl'
 
@@ -22,19 +25,25 @@ export function getLocaleParams(locale: Locale) {
 	return locale === DEFAULT_LOCALE ? {} : { locale }
 }
 
-export const i18n = createI18n({
-	legacy: false,
-	locale: DEFAULT_LOCALE,
-	fallbackLocale: DEFAULT_LOCALE,
-	messages: {
-		en,
-		nl
-	}
-})
-
-export function setActiveLocale(locale: Locale) {
-	i18n.global.locale.value = locale
-	document.documentElement.lang = locale
+export function createI18nInstance(locale: Locale = DEFAULT_LOCALE) {
+	return createI18n({
+		legacy: false,
+		locale,
+		fallbackLocale: DEFAULT_LOCALE,
+		messages: {
+			en,
+			nl
+		}
+	})
 }
 
-export default i18n
+export function setActiveLocale(
+	i18n: I18n<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, string, false>,
+	locale: Locale
+) {
+	i18n.global.locale.value = locale
+
+	if (typeof document !== 'undefined') {
+		document.documentElement.lang = locale
+	}
+}

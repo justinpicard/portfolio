@@ -1,9 +1,7 @@
-import { createRouter, createWebHistory } from 'vue-router'
 import {
 	getLocaleParams,
 	PREFIXED_LOCALES,
-	resolveLocale,
-	setActiveLocale
+	resolveLocale
 } from './i18n'
 import Index from './views/Index.vue'
 
@@ -11,11 +9,14 @@ const localePattern = PREFIXED_LOCALES.join('|')
 const localePrefix = `/:locale(${localePattern})?`
 const localizedPath = (path = '') => `${localePrefix}${path}`
 
-const routes = [
+export const routes = [
 	{
 		path: localizedPath(),
 		name: 'home',
-		meta: { title: 'Justin Picard ✦ Digital Product Designer' },
+		meta: {
+			seoKey: 'home',
+			indexable: true
+		},
 		component: Index
 	},
 	{
@@ -28,27 +29,27 @@ const routes = [
 	{
 		path: localizedPath('/resume'),
 		name: "resume",
-		meta: { titleKey: 'pages.resumeTitle' },
+		meta: {
+			titleKey: 'pages.resumeTitle',
+			indexable: false
+		},
 		component: () => import('./views/Resume.vue')
 	},
 	{
 		path: localizedPath('/:pathMatch(.*)*'),
 		name: '404notfound',
-		meta: { titleKey: 'errors.notFoundTitle' },
+		meta: {
+			titleKey: 'errors.notFoundTitle',
+			indexable: false
+		},
 		component: () => import('./views/404.vue')
 	}
 ]
 
-const router = createRouter({
-	history: createWebHistory(import.meta.env.BASE_URL),
+export const routerOptions = {
+	base: import.meta.env.BASE_URL,
 	routes,
 	scrollBehavior() {
 		return { top: 0 }
 	}
-})
-
-router.beforeEach((to) => {
-	setActiveLocale(resolveLocale(to.params.locale))
-})
-
-export default router
+}

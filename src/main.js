@@ -1,14 +1,25 @@
-import { createApp } from 'vue'
+import { ViteSSG } from 'vite-ssg'
 import App from './App.vue'
-import router from './router'
-import i18n from './i18n'
+import { routerOptions } from './router'
+import {
+	createI18nInstance,
+	resolveLocale,
+	setActiveLocale
+} from './i18n'
 import "./assets/styles/main.scss"
 
-const app = createApp(App)
+export const createApp = ViteSSG(
+	App,
+	routerOptions,
+	({ app, router }) => {
+		const i18n = createI18nInstance()
 
-app.use(i18n)
-app.use(router)
-
-router.isReady().then(() => {
-	app.mount('#app')
-})
+		app.use(i18n)
+		router.beforeEach((to) => {
+			setActiveLocale(i18n, resolveLocale(to.params.locale))
+		})
+	},
+	{
+		hydration: true
+	}
+)

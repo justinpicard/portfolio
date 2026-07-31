@@ -71,6 +71,7 @@ const openSourceCard = shallowRef<HTMLElement | null>(null)
 let ctx: gsap.Context | undefined
 let splitTitle: SplitText | undefined
 let titleRevealTween: gsap.core.Tween | undefined
+let titleRefreshId = 0
 let exhibitionTimeline: gsap.core.Timeline | undefined
 let exhibitionTrigger: ReturnType<typeof ScrollTrigger.create> | undefined
 let projectCards: HTMLElement[] = []
@@ -507,8 +508,13 @@ onMounted(() => {
 watch(
 	() => t('home.workLabel'),
 	async () => {
+		const refreshId = ++titleRefreshId
+
 		cleanupTitleReveal()
 		await nextTick()
+
+		if (refreshId !== titleRefreshId) return
+
 		setupTitleReveal()
 		ScrollTrigger.refresh()
 	},
@@ -516,6 +522,7 @@ watch(
 )
 
 onUnmounted(() => {
+	titleRefreshId += 1
 	emit('overlay-change', false)
 	window.removeEventListener('scroll', updateReducedMotionActivation)
 	window.removeEventListener('resize', updateReducedMotionActivation)

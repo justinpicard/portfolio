@@ -116,6 +116,7 @@ let ctx: gsap.Context | undefined
 let titleSplit: SplitText | undefined
 let galleryTimeline: gsap.core.Timeline | undefined
 let titleMotionTweens: gsap.core.Tween[] = []
+let titleRefreshId = 0
 let hoverCleanups: Array<() => void> = []
 
 type PhotoMotion = {
@@ -460,10 +461,13 @@ onMounted(() => {
 watch(
 	() => t('home.lifeLabel'),
 	async () => {
+		const refreshId = ++titleRefreshId
 		const timelineTime = galleryTimeline?.time() ?? 0
 
 		cleanupTitleMotion()
 		await nextTick()
+
+		if (refreshId !== titleRefreshId) return
 
 		if (galleryTimeline) {
 			setupTitleMotion(galleryTimeline)
@@ -475,6 +479,7 @@ watch(
 )
 
 onUnmounted(() => {
+	titleRefreshId += 1
 	hoverCleanups.forEach(cleanup => cleanup())
 	hoverCleanups = []
 	cleanupTitleMotion()

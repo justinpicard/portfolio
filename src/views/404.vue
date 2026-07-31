@@ -16,12 +16,22 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useHead } from '@unhead/vue'
 import { useI18n } from 'vue-i18n'
 import PageTitle from '../components/PageHeader.vue'
 import AppHeader from '../components/AppHeader.vue'
 import { getLocaleParams, resolveLocale } from '../i18n'
 
 const { locale, t } = useI18n()
+useHead(() => ({
+	title: t('errors.notFoundTitle'),
+	htmlAttrs: {
+		lang: resolveLocale(locale.value)
+	},
+	meta: [
+		{ name: 'robots', content: 'noindex,nofollow' }
+	]
+}))
 const homeRoute = computed(() => ({
 	name: 'home',
 	params: getLocaleParams(resolveLocale(locale.value))

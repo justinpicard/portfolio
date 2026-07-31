@@ -13,6 +13,7 @@ export function usePortfolioContent() {
 		about: computed(() => portfolio.value.home.about),
 		footer: computed(() => portfolio.value.home.footer),
 		projects: computed(() => portfolio.value.projects),
+		seo: computed(() => portfolio.value.seo),
 		getProjectBySlug: (slug: string) => getProjectBySlug(activeLocale.value, slug)
 	}
 }

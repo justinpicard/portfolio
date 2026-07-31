@@ -67,6 +67,7 @@ let isHeroIntroLinked = false
 let titleSplit: SplitText | undefined
 let roleSplit: SplitText | undefined
 let introSplit: SplitText | undefined
+let copyRefreshId = 0
 let unlockScroll: (() => void) | undefined
 let scrollIndicatorFollow: ReturnType<typeof useCursorFollowIndicator> | undefined
 let scrollIndicatorRotation: Animation | undefined
@@ -95,7 +96,7 @@ function wrapSplitElements(elements: Element[], className: string, tagName: 'div
 }
 
 async function refreshHeroCopySplits() {
-	if (prefersReducedMotion()) return
+	const refreshId = ++copyRefreshId
 
 	titleSplit?.revert()
 	roleSplit?.revert()
@@ -104,7 +105,11 @@ async function refreshHeroCopySplits() {
 	roleSplit = undefined
 	introSplit = undefined
 
+	if (prefersReducedMotion()) return
+
 	await nextTick()
+
+	if (refreshId !== copyRefreshId) return
 
 	const finalTitle = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-name')
 	const finalRole = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-figure__role')
@@ -435,6 +440,7 @@ watch(
 )
 
 onUnmounted(() => {
+	copyRefreshId += 1
 	heroTimeline?.kill()
 	isHeroIntroLinked = false
 	scrollIndicatorFollow?.cleanup()

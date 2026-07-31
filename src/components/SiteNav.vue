@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import BaseImage from './base/BaseImage.vue'
 import { useLocalizedRoute } from '../composables/useLocalizedRoute'
@@ -80,6 +80,7 @@ let staggerLinks: StaggerLinksController | undefined
 let revealContext: gsap.Context | undefined
 let nameSplit: SplitText | undefined
 let roleSplits: SplitText[] = []
+let headerRefreshId = 0
 
 function wrapSplitChar(char: Element, className: string) {
 	const wrapper = document.createElement('span')
@@ -155,21 +156,43 @@ function setupHeaderCopyReveal() {
 	}, root.value)
 }
 
+function cleanupHeaderCopyReveal() {
+	revealContext?.revert()
+	revealContext = undefined
+	nameSplit?.revert()
+	nameSplit = undefined
+	roleSplits.forEach(split => split.revert())
+	roleSplits = []
+}
+
+async function refreshHeaderCopyReveal() {
+	const refreshId = ++headerRefreshId
+
+	cleanupHeaderCopyReveal()
+	await nextTick()
+
+	if (refreshId !== headerRefreshId) return
+
+	setupHeaderCopyReveal()
+	ScrollTrigger.refresh()
+}
+
 onMounted(async () => {
 	if (!root.value) return
 
 	staggerLinks = initStaggerLinks(root.value)
-	await nextTick()
-	setupHeaderCopyReveal()
-	ScrollTrigger.refresh()
+	await refreshHeaderCopyReveal()
 })
 
+watch(
+	() => t('navigation.role'),
+	refreshHeaderCopyReveal,
+	{ flush: 'pre' }
+)
+
 onUnmounted(() => {
+	headerRefreshId += 1
 	staggerLinks?.destroy()
-	revealContext?.revert()
-	nameSplit?.revert()
-	nameSplit = undefined
-	roleSplits.forEach((split) => split.revert())
-	roleSplits = []
+	cleanupHeaderCopyReveal()
 })
 </script>
