@@ -1,9 +1,14 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
+import i18n from './i18n'
 import "./assets/styles/main.scss"
 
-let app = createApp(App)
+const app = createApp(App)
 
+app.use(i18n)
 app.use(router)
-app.mount('#app')
+
+router.isReady().then(() => {
+	app.mount('#app')
+})

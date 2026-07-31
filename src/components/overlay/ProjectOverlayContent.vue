@@ -29,7 +29,7 @@
 						<BaseImage
 							class-name="project-overlay__image"
 							:src="`/images/${surface.project.image}`"
-							:alt="surface.project.name"
+							:alt="surface.project.title"
 							:fallback-format="surface.project.imageFormat"
 							aspect-ratio="3 / 3.75"
 						/>
@@ -45,7 +45,10 @@
 						<BaseImage
 							class-name="project-overlay__image"
 							:src="`/images/${image}`"
-							:alt="`${surface.project.name} project image ${index + 2}`"
+							:alt="t('project.imageAlt', {
+								title: surface.project.title,
+								number: index + 2
+							})"
 							aspect-ratio="16 / 10"
 						/>
 					</div>
@@ -62,7 +65,7 @@
 							:ref="(element) => setTitleElement(element, surface.role)"
 							class="project-overlay__title"
 						>
-							{{ surface.project.name }}
+							{{ surface.project.title }}
 						</h2>
 						<div
 							:ref="(element) => setMetaElement(element, surface.role)"
@@ -70,7 +73,7 @@
 						>
 							{{ surface.project.year }}<span class="star mx-2">✦</span>{{ surface.project.type }}<span class="star mx-2">✦</span>{{ surface.project.job }}
 							<div class="role d-flex flex-column mt-8">
-								<span class="role-label text-xs font-bold uppercase tracking-extrawide">Role</span>
+								<span class="role-label text-xs font-bold uppercase tracking-extrawide">{{ t('project.role') }}</span>
 								<span class="role-title text-sm">{{ surface.project.role }}</span>
 							</div>
 						</div>
@@ -80,7 +83,7 @@
 						:ref="(element) => setBodyElement(element, surface.role)"
 						class="project-overlay__body"
 					>
-						<RichTextContent :content="surface.project.description" />
+						<p>{{ surface.project.summary }}</p>
 					</div>
 
 					<a
@@ -89,7 +92,7 @@
 						target="_blank"
 						rel="noreferrer"
 					>
-						Visit project
+						{{ t('project.visit') }}
 					</a>
 
 					<footer
@@ -102,9 +105,9 @@
 							:disabled="isTransitioning"
 							@click="changeProject(getPreviousIndex(surface.index))"
 						>
-							<span class="project-overlay__nav-label">Previous project</span>
+							<span class="project-overlay__nav-label">{{ t('project.previous') }}</span>
 							<span class="project-overlay__nav-title">
-								{{ getProjectAt(getPreviousIndex(surface.index)).name }}
+								{{ getProjectAt(getPreviousIndex(surface.index)).title }}
 							</span>
 						</button>
 						<button
@@ -113,9 +116,9 @@
 							:disabled="isTransitioning"
 							@click="changeProject(getNextIndex(surface.index))"
 						>
-							<span class="project-overlay__nav-label">Next project</span>
+							<span class="project-overlay__nav-label">{{ t('project.next') }}</span>
 							<span class="project-overlay__nav-title">
-								{{ getProjectAt(getNextIndex(surface.index)).name }}
+								{{ getProjectAt(getNextIndex(surface.index)).title }}
 							</span>
 						</button>
 					</footer>
@@ -127,13 +130,14 @@
 
 <script setup lang="ts">
 import { computed, inject, nextTick, onBeforeUpdate, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { ComponentPublicInstance, CSSProperties } from 'vue'
 import { gsap, prefersReducedMotion, registerGsapPlugins, ScrollTrigger } from '../../utils/animations/gsap'
-import type { Project } from '../../types/project'
+import type { Project } from '../../content'
 import BaseImage from '../base/BaseImage.vue'
-import RichTextContent from '../base/RichTextContent.vue'
 import { overlayScrollContainerKey } from './overlayContext'
 
+const { t } = useI18n()
 const props = defineProps<{
 	projects: Project[]
 	activeIndex: number

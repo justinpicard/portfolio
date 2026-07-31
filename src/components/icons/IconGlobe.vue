@@ -1,6 +1,5 @@
 <template>
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-    <title>Globus</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
     <g fill="none">
       <circle cx="12" cy="10" r="7" stroke="#ffffff" stroke-width="1"></circle>
       <path d="M4 16.5623C5.88838 18.6722 8.63263 20 11.687 20C17.3827 20 22 15.3827 22 9.68699C22 6.63263 20.6722 3.88838 18.5623 2" stroke="#ffffff" stroke-width="1" stroke-linecap="round"></path>

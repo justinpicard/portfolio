@@ -3,14 +3,14 @@
 		<div class="work-section__stage" ref="stage">
 			<div class="work-section__title-wrapper" aria-hidden="true">
 				<div class="work-section__title-inner">
-					<h2 class="work-section__title huge-title" ref="titleRef">Work.</h2>
+					<h2 class="work-section__title huge-title" ref="titleRef">{{ t('home.workLabel') }}</h2>
 				</div>
 			</div>
 
 			<div
 				class="work-section__exhibition"
 				ref="exhibition"
-				aria-label="Selected work exhibition"
+				:aria-label="t('home.workExhibitionLabel')"
 			>
 				<ProjectCard
 					v-for="projectIndex in projectCount"
@@ -41,10 +41,10 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, onUnmounted, ref, shallowRef } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { usePortfolioContent } from '../../composables/usePortfolioContent'
 import { gsap, prefersReducedMotion, ScrollTrigger, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
-import projectsData from '../../data/projects.json'
-import type { Project } from '../../types/project'
 import ProjectCard from '../work/ProjectCard.vue'
 import ProjectLayerPrototype from '../work/ProjectLayerPrototype.vue'
 
@@ -52,8 +52,9 @@ const emit = defineEmits<{
 	'overlay-change': [isOpen: boolean]
 }>()
 
-const projects = projectsData as Project[]
-const projectCount = projects.length
+const { t } = useI18n()
+const { projects } = usePortfolioContent()
+const projectCount = projects.value.length
 
 const root = ref<HTMLElement | null>(null)
 const stage = ref<HTMLElement | null>(null)
@@ -69,6 +70,7 @@ const openSourceCard = shallowRef<HTMLElement | null>(null)
 
 let ctx: gsap.Context | undefined
 let splitTitle: SplitText | undefined
+let titleRevealTween: gsap.core.Tween | undefined
 let exhibitionTimeline: gsap.core.Timeline | undefined
 let exhibitionTrigger: ReturnType<typeof ScrollTrigger.create> | undefined
 let projectCards: HTMLElement[] = []
@@ -166,6 +168,47 @@ function readCssNumber(property: string, fallback: number) {
 
 	const value = Number.parseFloat(window.getComputedStyle(root.value).getPropertyValue(property))
 	return Number.isFinite(value) ? value : fallback
+}
+
+function cleanupTitleReveal() {
+	titleRevealTween?.scrollTrigger?.kill()
+	titleRevealTween?.kill()
+	titleRevealTween = undefined
+	splitTitle?.revert()
+	splitTitle = undefined
+}
+
+function setupTitleReveal() {
+	if (!titleRef.value || prefersReducedMotion()) return
+
+	splitTitle = new SplitText(titleRef.value, {
+		type: 'chars',
+		charsClass: 'split-display-char'
+	})
+
+	wrapSplitElements(splitTitle.chars, 'split-display-char-wrapper')
+
+	gsap.set(splitTitle.chars, {
+		y: () => (
+			window.innerHeight
+			* readCssNumber('--exhibition-title-entry-offset', 100)
+			/ 100
+		),
+		yPercent: 0
+	})
+
+	titleRevealTween = gsap.to(splitTitle.chars, {
+		y: 0,
+		stagger: 0.06,
+		ease: 'power2.inOut',
+		scrollTrigger: {
+			trigger: root.value,
+			start: 'top bottom',
+			end: () => `+=${window.innerHeight * 1.6}`,
+			scrub: true,
+			invalidateOnRefresh: true
+		}
+	})
 }
 
 function getCardState(cardIndex: number, activeIndex: number) {
@@ -451,36 +494,7 @@ onMounted(() => {
 	registerGsapPlugins()
 
 	ctx = gsap.context(() => {
-		if (titleRef.value && !prefersReducedMotion()) {
-			splitTitle = new SplitText(titleRef.value, {
-				type: 'chars',
-				charsClass: 'split-display-char'
-			})
-
-			wrapSplitElements(splitTitle.chars, 'split-display-char-wrapper')
-
-			gsap.set(splitTitle.chars, {
-				y: () => (
-					window.innerHeight
-					* readCssNumber('--exhibition-title-entry-offset', 100)
-					/ 100
-				),
-				yPercent: 0
-			})
-
-			gsap.to(splitTitle.chars, {
-				y: 0,
-				stagger: 0.06,
-				ease: 'power2.inOut',
-				scrollTrigger: {
-					trigger: root.value,
-					start: 'top bottom',
-					end: () => `+=${window.innerHeight * 1.6}`,
-					scrub: true,
-					invalidateOnRefresh: true
-				}
-			})
-		}
+		setupTitleReveal()
 
 		setupExhibition()
 	}, root.value ?? undefined)
@@ -490,6 +504,17 @@ onMounted(() => {
 	})
 })
 
+watch(
+	() => t('home.workLabel'),
+	async () => {
+		cleanupTitleReveal()
+		await nextTick()
+		setupTitleReveal()
+		ScrollTrigger.refresh()
+	},
+	{ flush: 'pre' }
+)
+
 onUnmounted(() => {
 	emit('overlay-change', false)
 	window.removeEventListener('scroll', updateReducedMotionActivation)
@@ -498,7 +523,7 @@ onUnmounted(() => {
 	exhibitionTrigger = undefined
 	exhibitionTimeline = undefined
 	projectCards = []
+	cleanupTitleReveal()
 	ctx?.revert()
-	splitTitle?.revert()
 })
 </script>

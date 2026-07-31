@@ -4,7 +4,7 @@
 			<div class="container">
 				<div class="row">
 					<div class="col-12">
-						<h2 class="home-photo-stack-section__title life-title huge-title" ref="titleRef">Life.</h2>
+						<h2 class="home-photo-stack-section__title life-title huge-title" ref="titleRef">{{ t('home.lifeLabel') }}</h2>
 						<!--<p class="home-photo-stack-section__text">Enim quibusdam omnis aut occaecati quia possimus accusantium vel perferendis. Est architecto voluptatem eaque quae iure iste ex repellendus tempora et praesentium. Molestias ratione fugiat quae culpa dolores omnis in magni cupiditate facere reprehenderit.
 						</p>-->
 					</div>
@@ -25,7 +25,7 @@
 					ref="photoImageRefs"
 					class="home-photo-stack-section__photo"
 					:src="photo.src"
-					:alt="photo.alt"
+					:alt="t(photo.altKey)"
 					loading="lazy"
 					decoding="async"
 				>
@@ -35,33 +35,34 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { gsap, ScrollTrigger, SplitText, prefersReducedMotion, registerGsapPlugins } from '../../utils/animations/gsap'
 
 type Photo = {
 	src: string
-	alt: string
+	altKey: string
 	orientation: 'portrait' | 'landscape'
 }
 
 const photos: Photo[] = [
-	{ src: '/images/photos/justin-picard_new-york-selfie.jpg', alt: 'Selfie in New York', orientation: 'portrait' },
-	{ src: '/images/photos/justin-picard_family.jpg', alt: 'Justin Picard family', orientation: 'landscape' },
-	{ src: '/images/photos/justin-picard_architecture-berlin.jpg', alt: 'Architectuur Berlijn', orientation: 'portrait' },
-	{ src: '/images/photos/justin-picard_bassist.jpg', alt: 'Bassist', orientation: 'landscape' },
-	{ src: '/images/photos/justin-picard_architecture-valencia.jpg', alt: 'Architectuur Valencia', orientation: 'portrait' },
-	{ src: '/images/photos/justin-picard_madison-square-garden.jpg', alt: 'Madison Square Garden', orientation: 'landscape' },
-	{ src: '/images/photos/justin-picard_new-york-art.jpg', alt: 'Kunst in New York', orientation: 'landscape' },
-	{ src: '/images/photos/justin-picard_new-york-empire-state-building.jpg', alt: 'Empire State Building in New York', orientation: 'portrait' },
-	{ src: '/images/photos/justin-picard_pintxos-bilbao.jpg', alt: 'Pintxos in Bilbao', orientation: 'portrait' },
-	{ src: '/images/photos/justin-picard_cats.jpg', alt: 'Katten', orientation: 'portrait' },
-	{ src: '/images/photos/justin-picard_graffiti.jpg', alt: 'Graffiti', orientation: 'portrait' },
-	{ src: '/images/photos/justin-picard_oktoberfest.jpg', alt: 'Oktoberfest', orientation: 'portrait' },
-	{ src: '/images/photos/justin-picard_paris.jpg', alt: 'Parijs', orientation: 'portrait' },
-	{ src: '/images/photos/justin-picard_pasta.jpg', alt: 'Verse pasta', orientation: 'portrait' },
-	{ src: '/images/photos/justin-picard_perfume.jpg', alt: 'Parfum', orientation: 'portrait' },
-	{ src: '/images/photos/justin-picard_spanish.jpg', alt: 'Spaans moment', orientation: 'portrait' },
-	{ src: '/images/photos/justin-picard_star-wars.jpg', alt: 'Star Wars', orientation: 'landscape' }
+	{ src: '/images/photos/justin-picard_new-york-selfie.jpg', altKey: 'accessibility.lifePhotoAlts.newYorkSelfie', orientation: 'portrait' },
+	{ src: '/images/photos/justin-picard_family.jpg', altKey: 'accessibility.lifePhotoAlts.family', orientation: 'landscape' },
+	{ src: '/images/photos/justin-picard_architecture-berlin.jpg', altKey: 'accessibility.lifePhotoAlts.berlinArchitecture', orientation: 'portrait' },
+	{ src: '/images/photos/justin-picard_bassist.jpg', altKey: 'accessibility.lifePhotoAlts.bassist', orientation: 'landscape' },
+	{ src: '/images/photos/justin-picard_architecture-valencia.jpg', altKey: 'accessibility.lifePhotoAlts.valenciaArchitecture', orientation: 'portrait' },
+	{ src: '/images/photos/justin-picard_madison-square-garden.jpg', altKey: 'accessibility.lifePhotoAlts.madisonSquareGarden', orientation: 'landscape' },
+	{ src: '/images/photos/justin-picard_new-york-art.jpg', altKey: 'accessibility.lifePhotoAlts.newYorkArt', orientation: 'landscape' },
+	{ src: '/images/photos/justin-picard_new-york-empire-state-building.jpg', altKey: 'accessibility.lifePhotoAlts.empireStateBuilding', orientation: 'portrait' },
+	{ src: '/images/photos/justin-picard_pintxos-bilbao.jpg', altKey: 'accessibility.lifePhotoAlts.pintxosBilbao', orientation: 'portrait' },
+	{ src: '/images/photos/justin-picard_cats.jpg', altKey: 'accessibility.lifePhotoAlts.cats', orientation: 'portrait' },
+	{ src: '/images/photos/justin-picard_graffiti.jpg', altKey: 'accessibility.lifePhotoAlts.graffiti', orientation: 'portrait' },
+	{ src: '/images/photos/justin-picard_oktoberfest.jpg', altKey: 'accessibility.lifePhotoAlts.oktoberfest', orientation: 'portrait' },
+	{ src: '/images/photos/justin-picard_paris.jpg', altKey: 'accessibility.lifePhotoAlts.paris', orientation: 'portrait' },
+	{ src: '/images/photos/justin-picard_pasta.jpg', altKey: 'accessibility.lifePhotoAlts.freshPasta', orientation: 'portrait' },
+	{ src: '/images/photos/justin-picard_perfume.jpg', altKey: 'accessibility.lifePhotoAlts.perfume', orientation: 'portrait' },
+	{ src: '/images/photos/justin-picard_spanish.jpg', altKey: 'accessibility.lifePhotoAlts.spanishMoment', orientation: 'portrait' },
+	{ src: '/images/photos/justin-picard_star-wars.jpg', altKey: 'accessibility.lifePhotoAlts.starWars', orientation: 'landscape' }
 ]
 
 const stackOffsets = [
@@ -105,6 +106,7 @@ const spreadOffsets = [
 ]
 
 const spreadOrder = [0, 2, 4, 6, 9, 13, 1, 14, 3, 5, 15, 10, 8, 16, 11, 7, 12]
+const { t } = useI18n()
 const root = ref<HTMLElement | null>(null)
 const titleRef = ref<HTMLElement | null>(null)
 const stack = ref<HTMLElement | null>(null)
@@ -112,6 +114,8 @@ const photoCardRefs = ref<HTMLElement[]>([])
 const photoImageRefs = ref<HTMLImageElement[]>([])
 let ctx: gsap.Context | undefined
 let titleSplit: SplitText | undefined
+let galleryTimeline: gsap.core.Timeline | undefined
+let titleMotionTweens: gsap.core.Tween[] = []
 let hoverCleanups: Array<() => void> = []
 
 type PhotoMotion = {
@@ -140,6 +144,83 @@ const POINTER_SMOOTHING = 0.18
 const POINTER_DECAY = 0.86
 const GALLERY_SCROLL_VIEWPORTS = 2.6
 
+function cleanupTitleMotion() {
+	titleMotionTweens.forEach(tween => tween.kill())
+	titleMotionTweens = []
+	titleSplit?.revert()
+	titleSplit = undefined
+}
+
+function setupTitleMotion(timeline: gsap.core.Timeline) {
+	if (!titleRef.value || prefersReducedMotion()) return
+
+	titleSplit = new SplitText(titleRef.value, {
+		type: 'chars',
+		charsClass: 'char'
+	})
+
+	const galleryDuration = timeline.duration()
+	const stackCenteredAt = timeline.labels['stack-centered'] ?? 0
+	const galleryScrollDistance = window.innerHeight * GALLERY_SCROLL_VIEWPORTS
+	const letterMotions = [
+		{ axis: 'y', start: -120, end: 120, fadeScrollDistance: 60 },
+		{ axis: 'y', start: 100, end: -100, fadeScrollDistance: 180 },
+		{ axis: 'y', start: -110, end: 110, fadeScrollDistance: 100 },
+		{ axis: 'y', start: 125, end: -125, fadeScrollDistance: 260 },
+		{ axis: 'y', start: -100, end: 100, fadeScrollDistance: 140 }
+	] as const
+	let letterIndex = 0
+
+	titleSplit.chars.forEach((character) => {
+		const isPeriod = character.textContent === '.'
+		const motion = isPeriod
+			? { axis: 'x' as const, start: 60, end: -60, fadeScrollDistance: 140 }
+			: letterMotions[letterIndex++ % letterMotions.length]
+		const titleFadeDuration = galleryDuration * (motion.fadeScrollDistance / galleryScrollDistance)
+
+		const motionIn = gsap.fromTo(
+			character,
+			{ [motion.axis]: motion.start },
+			{
+				[motion.axis]: 0,
+				duration: stackCenteredAt,
+				ease: 'none',
+				immediateRender: true,
+				paused: true
+			}
+		)
+		const motionOut = gsap.to(character, {
+			[motion.axis]: motion.end,
+			duration: galleryDuration - stackCenteredAt,
+			ease: 'none',
+			paused: true
+		})
+		const fadeIn = gsap.fromTo(
+			character,
+			{ opacity: 0 },
+			{
+				opacity: 1,
+				duration: titleFadeDuration,
+				ease: 'none',
+				immediateRender: true,
+				paused: true
+			}
+		)
+		const fadeOut = gsap.to(character, {
+			opacity: 0,
+			duration: titleFadeDuration,
+			ease: 'none',
+			paused: true
+		})
+
+		timeline.add(motionIn, 0)
+		timeline.add(motionOut, stackCenteredAt)
+		timeline.add(fadeIn, 0)
+		timeline.add(fadeOut, galleryDuration - titleFadeDuration)
+		titleMotionTweens.push(motionIn, motionOut, fadeIn, fadeOut)
+	})
+}
+
 onMounted(() => {
 	registerGsapPlugins()
 
@@ -149,16 +230,6 @@ onMounted(() => {
 		const photoCards = photoCardRefs.value
 		const photoImages = photoImageRefs.value
 		const shouldReduceMotion = prefersReducedMotion()
-		let titleCharacters: Element[] = []
-
-		if (!shouldReduceMotion && titleRef.value) {
-			titleSplit = new SplitText(titleRef.value, {
-				type: 'chars',
-				charsClass: 'char'
-			})
-			titleCharacters = titleSplit.chars
-		}
-
 		gsap.set(stack.value, {
 			y: '70vh',
 			scale: 0.92
@@ -187,6 +258,7 @@ onMounted(() => {
 				anticipatePin: 1
 			}
 		})
+		galleryTimeline = timeline
 
 		// Phase 0: keep the intro text in focus before the photo stack enters.
 		timeline.to({}, { duration: 2 })
@@ -243,69 +315,8 @@ onMounted(() => {
 			)
 		})
 
-		// Overlay the title motion without extending or shifting the photo choreography.
-		if (titleCharacters.length === 5) {
-			const galleryDuration = timeline.duration()
-			const stackCenteredAt = timeline.labels['stack-centered'] ?? 0
-			const galleryScrollDistance = window.innerHeight * GALLERY_SCROLL_VIEWPORTS
-			const [letterL, letterI, letterF, letterE, period] = titleCharacters
-			const titleMotions = [
-				{ character: letterL, axis: 'y', start: -120, end: 120, fadeScrollDistance: 60 },
-				{ character: letterI, axis: 'y', start: 100, end: -100, fadeScrollDistance: 180 },
-				{ character: letterF, axis: 'y', start: -110, end: 110, fadeScrollDistance: 100 },
-				{ character: letterE, axis: 'y', start: 125, end: -125, fadeScrollDistance: 260 },
-				{ character: period, axis: 'x', start: 60, end: -60, fadeScrollDistance: 140 }
-			] as const
-
-			titleMotions.forEach(({ character, axis, start, end, fadeScrollDistance }) => {
-				const titleFadeDuration = galleryDuration * (fadeScrollDistance / galleryScrollDistance)
-
-				timeline.fromTo(
-					character,
-					{ [axis]: start },
-					{
-						[axis]: 0,
-						duration: stackCenteredAt,
-						ease: 'none',
-						immediateRender: true
-					},
-					0
-				)
-
-				timeline.to(
-					character,
-					{
-						[axis]: end,
-						duration: galleryDuration - stackCenteredAt,
-						ease: 'none'
-					},
-					stackCenteredAt
-				)
-
-				// Keep the title fully readable between short, scroll-distance-based fades.
-				timeline.fromTo(
-					character,
-					{ opacity: 0 },
-					{
-						opacity: 1,
-						duration: titleFadeDuration,
-						ease: 'none',
-						immediateRender: true
-					},
-					0
-				)
-
-				timeline.to(
-					character,
-					{
-						opacity: 0,
-						duration: titleFadeDuration,
-						ease: 'none'
-					},
-					galleryDuration - titleFadeDuration
-				)
-			})
-		}
+		// Overlay the locale-aware title motion without shifting the photo choreography.
+		setupTitleMotion(timeline)
 
 		if (!shouldReduceMotion) {
 			const pointer = {
@@ -446,10 +457,28 @@ onMounted(() => {
 	}, root.value)
 })
 
+watch(
+	() => t('home.lifeLabel'),
+	async () => {
+		const timelineTime = galleryTimeline?.time() ?? 0
+
+		cleanupTitleMotion()
+		await nextTick()
+
+		if (galleryTimeline) {
+			setupTitleMotion(galleryTimeline)
+			galleryTimeline.time(timelineTime, false)
+			ScrollTrigger.refresh()
+		}
+	},
+	{ flush: 'pre' }
+)
+
 onUnmounted(() => {
 	hoverCleanups.forEach(cleanup => cleanup())
 	hoverCleanups = []
+	cleanupTitleMotion()
 	ctx?.revert()
-	titleSplit?.revert()
+	galleryTimeline = undefined
 })
 </script>

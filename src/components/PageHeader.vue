@@ -5,9 +5,9 @@
 	  <div class="marquee-container">
 		<div class="wrapperRollingText">
 		  <div class="rollingText text">
-			<span><span class="star">✦</span> {{ $route.meta.title }}</span>
-			<span><span class="star">✦</span> {{ $route.meta.title }}</span>
-			<span><span class="star">✦</span> {{ $route.meta.title }}</span>
+			<span><span class="star">✦</span> {{ title }}</span>
+			<span><span class="star">✦</span> {{ title }}</span>
+			<span><span class="star">✦</span> {{ title }}</span>
 		  </div>
 		</div>
 	  </div>
@@ -15,10 +15,21 @@
   </template>
   
   <script setup>
-  import { onMounted, onUnmounted, ref } from 'vue'
+  import { computed, onMounted, onUnmounted, ref } from 'vue'
+  import { useI18n } from 'vue-i18n'
+  import { useRoute } from 'vue-router'
   import { gsap, ScrollTrigger, registerGsapPlugins } from '../utils/animations/gsap'
   import SplitType from 'split-type'
   
+  const route = useRoute()
+  const { t } = useI18n()
+  const title = computed(() => {
+	const titleKey = route.meta.titleKey
+
+	return typeof titleKey === 'string'
+		? t(titleKey)
+		: String(route.meta.title ?? '')
+  })
   const root = ref(null)
   let ctx
   const splitInstances = []

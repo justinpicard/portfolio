@@ -31,6 +31,8 @@
 					<textPath
 						:href="`#${pathId}`"
 						startOffset="0%"
+						:textLength="INDICATOR_TEXT_LENGTH"
+						lengthAdjust="spacing"
 					>
 						{{ text }}
 					</textPath>
@@ -52,19 +54,18 @@ import { ref, useId } from 'vue'
 
 withDefaults(defineProps<{
 	variant?: 'hero' | 'project'
-	text?: string
+	text: string
 	href?: string
 	ariaLabel?: string
 	showIcon?: boolean
 }>(), {
 	variant: 'hero',
-	text: 'SCROLL DOWN • SCROLL DOWN •',
-	href: '#about',
-	ariaLabel: 'Scroll to the About section',
 	showIcon: true
 })
 
 const pathId = `scroll-indicator-path-${useId()}`
+// Keep translated labels distributed consistently without scaling the glyphs.
+const INDICATOR_TEXT_LENGTH = 350
 const root = ref<HTMLElement | null>(null)
 const indicator = ref<HTMLElement | null>(null)
 

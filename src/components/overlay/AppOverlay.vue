@@ -19,10 +19,10 @@
 				ref="closeButton"
 				class="app-overlay__close"
 				type="button"
-				aria-label="Close overlay"
+				:aria-label="t('accessibility.closeOverlay')"
 				@click="emit('close')"
 			>
-				Close
+				{{ t('project.close') }}
 			</button>
 			<div
 				ref="scrollContainer"
@@ -41,6 +41,7 @@
 
 <script setup lang="ts">
 import { nextTick, onUnmounted, provide, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { gsap, prefersReducedMotion } from '../../utils/animations/gsap'
 import { lockPageScroll } from '../../utils/dom/scrollLock'
 import { overlayScrollContainerKey } from './overlayContext'
@@ -60,6 +61,7 @@ const emit = defineEmits<{
 	'after-close': []
 }>()
 
+const { t } = useI18n()
 const isRendered = ref(false)
 const overlay = ref<HTMLElement | null>(null)
 const backdrop = ref<HTMLElement | null>(null)

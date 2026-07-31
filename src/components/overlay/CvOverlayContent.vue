@@ -4,10 +4,16 @@
 			id="cv-overlay-title"
 			class="cv-overlay__title"
 		>
-			Curriculum Vitae
+			{{ t('cv.title') }}
 		</h2>
 		<p class="cv-overlay__text">
-			CV content will be added later.
+			{{ t('cv.placeholder') }}
 		</p>
 	</section>
 </template>
+
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+</script>

@@ -21,9 +21,9 @@
 					/>
 
 					<div ref="caseContent" class="project-layer-prototype__copy">
-						<component
-							:is="activeCaseComponent"
-							:key="displayedProject.case"
+						<ProjectCaseContent
+							:key="displayedProject.slug"
+							:case-study="displayedProject.caseStudy"
 						/>
 					</div>
 
@@ -31,12 +31,12 @@
 						<div class="project-nav__title">
 							<div class="container">
 								<div class="project-nav-title__inner d-flex flex-1 justify-center">
-									<h2>Want to see more?</h2>
+									<h2>{{ t('project.wantToSeeMore') }}</h2>
 								</div>
 							</div>
 						</div>
 
-						<nav ref="projectNav" class="project-layer-prototype__nav" aria-label="Project navigation">
+						<nav ref="projectNav" class="project-layer-prototype__nav" :aria-label="t('project.navigationLabel')">
 							<a
 								v-if="previousProject"
 								ref="previousLink"
@@ -46,7 +46,7 @@
 								data-stagger-link
 								@click.prevent="navigate('previous', true)"
 							>
-								<span data-stagger-link-container>← {{ previousProject.name }}</span>
+								<span data-stagger-link-container>← {{ previousProject.title }}</span>
 							</a>
 							<a
 								v-if="nextProject"
@@ -57,7 +57,7 @@
 								data-stagger-link
 								@click.prevent="navigate('next', true)"
 							>
-								<span data-stagger-link-container>{{ nextProject.name }} →</span>
+								<span data-stagger-link-container>{{ nextProject.title }} →</span>
 							</a>
 						</nav>
 					</section>
@@ -66,9 +66,9 @@
 				<Button
 					:ref="setCloseButtonRef"
 					class="project-layer-prototype__close"
-					label="✕ Close"
+					:label="t('project.close')"
 					color="primary"
-					aria-label="Close project"
+					:aria-label="t('project.closeLabel')"
 					@click="requestClose"
 				/>
 
@@ -90,6 +90,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
 	gsap,
 	prefersReducedMotion,
@@ -106,11 +107,12 @@ import {
 	animationEases,
 	animationStaggers
 } from '../../utils/animations/presets'
-import type { Project } from '../../types/project'
+import type { Project } from '../../content'
 import Button from '../Button.vue'
+import ProjectCaseContent from './ProjectCaseContent.vue'
 import ProjectHero from './ProjectHero.vue'
-import { getCaseComponent } from './cases/caseRegistry'
 
+const { t } = useI18n()
 type LayerOrigin = {
 	top: number
 	left: number
@@ -192,9 +194,6 @@ const announcement = ref('')
 const initialProjectClass = `project-card--${props.projectIndex + 1}`
 
 const displayedProject = computed(() => props.projects[displayedIndex.value])
-const activeCaseComponent = computed(() => (
-	getCaseComponent(displayedProject.value.case)
-))
 const previousProject = computed(() => props.projects[displayedIndex.value - 1])
 const nextProject = computed(() => props.projects[displayedIndex.value + 1])
 const isPreviousDisabled = computed(() => (
@@ -1631,7 +1630,7 @@ async function navigate(direction: NavigationDirection, restoreFocus = false) {
 			clearProps: 'opacity,transform,visibility'
 		})
 		ScrollTrigger.refresh()
-		announcement.value = `${displayedProject.value.name} project loaded`
+		announcement.value = `${displayedProject.value.title} project loaded`
 		isTransitioning.value = false
 		setupNavStaggerLinks()
 		if (restoreFocus) restoreNavigationFocus(direction)
@@ -1721,7 +1720,7 @@ async function navigate(direction: NavigationDirection, restoreFocus = false) {
 	cleanupHeroReveal()
 	transitionTimeline = undefined
 	ScrollTrigger.refresh()
-	announcement.value = `${displayedProject.value.name} project loaded`
+	announcement.value = `${displayedProject.value.title} project loaded`
 	isTransitioning.value = false
 	setupNavStaggerLinks()
 

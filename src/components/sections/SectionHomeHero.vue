@@ -17,12 +17,18 @@
 
 		<LoadingScreen ref="loadingScreen" />
 
-		<CircularScrollIndicator ref="scrollIndicator" />
+		<CircularScrollIndicator
+			ref="scrollIndicator"
+			:text="t('accessibility.scrollDown')"
+			:aria-label="t('accessibility.scrollToAbout')"
+		/>
 	</section>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { usePortfolioContent } from '../../composables/usePortfolioContent'
 import {
 	gsap,
 	prefersReducedMotion,
@@ -38,6 +44,8 @@ import HomeHeroCopy from './HomeHeroCopy.vue'
 import { lockPageScroll } from '../../utils/dom/scrollLock'
 import { useCursorFollowIndicator } from '../../composables/useCursorFollowIndicator'
 
+const { t } = useI18n()
+const { hero } = usePortfolioContent()
 const root = ref<HTMLElement | null>(null)
 const loadingScreen = ref<InstanceType<typeof LoadingScreen> | null>(null)
 const heroPhotoPositioner = ref<HTMLElement | null>(null)
@@ -84,6 +92,54 @@ function wrapSplitElements(elements: Element[], className: string, tagName: 'div
 		element.parentNode?.insertBefore(wrapper, element)
 		wrapper.appendChild(element)
 	})
+}
+
+async function refreshHeroCopySplits() {
+	if (prefersReducedMotion()) return
+
+	titleSplit?.revert()
+	roleSplit?.revert()
+	introSplit?.revert()
+	titleSplit = undefined
+	roleSplit = undefined
+	introSplit = undefined
+
+	await nextTick()
+
+	const finalTitle = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-name')
+	const finalRole = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-figure__role')
+	const finalText = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-figure__intro')
+	if (!finalTitle || !finalRole || !finalText) return
+
+	titleSplit = new SplitText(finalTitle, {
+		type: 'chars',
+		charsClass: 'split-display-char'
+	})
+	roleSplit = new SplitText(finalRole, {
+		type: 'lines',
+		linesClass: 'split-line'
+	})
+	introSplit = new SplitText(finalText, {
+		type: 'lines',
+		linesClass: 'split-line'
+	})
+
+	wrapSplitElements(titleSplit.chars, 'split-display-char-wrapper', 'span')
+	wrapSplitElements(roleSplit.lines, 'split-line-wrapper')
+	wrapSplitElements(introSplit.lines, 'split-line-wrapper')
+
+	gsap.set([
+		...titleSplit.chars,
+		...roleSplit.lines,
+		...introSplit.lines
+	], {
+		y: 0,
+		yPercent: 0,
+		opacity: 1,
+		visibility: 'visible'
+	})
+
+	ScrollTrigger.refresh()
 }
 
 function restoreScroll() {
@@ -371,6 +427,12 @@ onMounted(() => {
 		linkHeroIntroTimeline()
 	}, root.value ?? undefined)
 })
+
+watch(
+	() => [hero.value.name, hero.value.role, hero.value.introduction],
+	refreshHeroCopySplits,
+	{ flush: 'pre' }
+)
 
 onUnmounted(() => {
 	heroTimeline?.kill()

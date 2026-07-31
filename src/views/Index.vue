@@ -52,8 +52,7 @@ import HomePhotoStackSection from "../components/sections/HomePhotoStackSection.
 import SectionHomeHero from "../components/sections/SectionHomeHero.vue";
 import SectionHomeAbout from "../components/sections/SectionHomeAbout.vue";
 import SectionHomeWork from "../components/sections/SectionHomeWork.vue";
-import projectsData from "../data/projects.json"
-import type { Project } from "../types/project"
+import { usePortfolioContent } from "../composables/usePortfolioContent"
 import { gsap, prefersReducedMotion, ScrollTrigger } from "../utils/animations/gsap"
 import AppFooter from "../components/AppFooter.vue"
 
@@ -80,7 +79,7 @@ const renderedOverlay = ref<OverlayState>(null)
 const projectOverlay = ref<InstanceType<typeof ProjectOverlayContent> | null>(null)
 const overlayFirstMediaHidden = ref(false)
 const projectOpeningTransitionActive = ref(false)
-const projects = projectsData as Project[]
+const { projects } = usePortfolioContent()
 let closeOverlayTimeout: ReturnType<typeof window.setTimeout> | undefined
 
 const overlayLabelledBy = computed(() => {
@@ -97,7 +96,7 @@ type ProjectOverlayStyle = CSSProperties & {
 const projectOverlayStyle = computed<ProjectOverlayStyle | undefined>(() => {
 	if (renderedOverlay.value?.type !== 'project') return undefined
 
-	const project = projects[renderedOverlay.value.projectIndex]
+	const project = projects.value[renderedOverlay.value.projectIndex]
 	if (!project?.overlayBackground) return undefined
 
 	return {

@@ -1,38 +1,54 @@
-import { createWebHistory, createRouter } from "vue-router";
-import Index from "./views/Index.vue";
+import { createRouter, createWebHistory } from 'vue-router'
+import {
+	getLocaleParams,
+	PREFIXED_LOCALES,
+	resolveLocale,
+	setActiveLocale
+} from './i18n'
+import Index from './views/Index.vue'
+
+const localePattern = PREFIXED_LOCALES.join('|')
+const localePrefix = `/:locale(${localePattern})?`
+const localizedPath = (path = '') => `${localePrefix}${path}`
 
 const routes = [
-    {
-        path: "/",
-        name: "home",
-        meta: { title: 'Justin Picard ✦ Digital Product Designer' },
-        component: Index
-    },
-    {
-        path: "/home",
-        redirect: "/"
-    },
 	{
-        path: "/resume",
+		path: localizedPath(),
+		name: 'home',
+		meta: { title: 'Justin Picard ✦ Digital Product Designer' },
+		component: Index
+	},
+	{
+		path: localizedPath('/home'),
+		redirect: (to) => ({
+			name: 'home',
+			params: getLocaleParams(resolveLocale(to.params.locale))
+		})
+	},
+	{
+		path: localizedPath('/resume'),
 		name: "resume",
-        meta: { title: 'My resume' },
-        component: () => import('./views/Resume.vue')
-    },
-    {
-        path: "/:catchall(.*)*",
-        name: "404notfound",
-        meta: { title: '404 — Page not found' },
-        component: () => import('./views/404.vue')
-    }
-];
+		meta: { titleKey: 'pages.resumeTitle' },
+		component: () => import('./views/Resume.vue')
+	},
+	{
+		path: localizedPath('/:pathMatch(.*)*'),
+		name: '404notfound',
+		meta: { titleKey: 'errors.notFoundTitle' },
+		component: () => import('./views/404.vue')
+	}
+]
 
 const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
-    routes,
-    scrollBehavior(to, from, savedPosition) {
-        // always scroll to top
-        return { top: 0 }
-    },
-});
+	history: createWebHistory(import.meta.env.BASE_URL),
+	routes,
+	scrollBehavior() {
+		return { top: 0 }
+	}
+})
 
-export default router;
+router.beforeEach((to) => {
+	setActiveLocale(resolveLocale(to.params.locale))
+})
+
+export default router

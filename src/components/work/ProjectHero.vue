@@ -9,7 +9,7 @@
 							class="eyebrow"
 							data-project-shared="intro"
 						>
-							{{ project.name }}
+							{{ project.title }}
 						</span>
 						<h2
 							ref="title"
@@ -18,7 +18,7 @@
 							data-project-shared="title"
 							class="text-4xl"
 						>
-							{{ project.description }}
+							{{ project.summary }}
 						</h2>
 					</div>
 				</div>
@@ -35,28 +35,28 @@
 							data-project-metadata 
 							class="d-flex gap-2 items-baseline"
 						>
-								<span class="eyebrow text-2xs opacity-50">Year</span>
+								<span class="eyebrow text-2xs opacity-50">{{ t('project.year') }}</span>
 								<span class="text-md">{{ project.year }}</span>
 						</div>
 						<div 
 							data-project-metadata
 							class="d-flex gap-2 items-baseline"
 						>
-							<span class="eyebrow text-2xs opacity-50">Job</span>
+							<span class="eyebrow text-2xs opacity-50">{{ t('project.job') }}</span>
 							<span class="text-md">{{ project.job }}</span>
 						</div>
 						<div 
 							data-project-metadata
 							class="d-flex gap-2 items-baseline"
 						>
-							<span class="eyebrow text-2xs opacity-50">Role</span>
+							<span class="eyebrow text-2xs opacity-50">{{ t('project.role') }}</span>
 							<span class="text-md">{{ project.role }}</span>
 						</div>
 						<div 
 							class="project-layer-prototype__intro d-flex gap-2 items-baseline" 
 							data-project-metadata
 						>
-							<span class="eyebrow text-2xs opacity-50">Type</span>
+							<span class="eyebrow text-2xs opacity-50">{{ t('project.type') }}</span>
 							<span class="text-md">{{ project.type }}</span>
 						</div>
 					</div>
@@ -72,7 +72,7 @@
 			<BaseImage
 				:key="project.id"
 				:src="`/images/${project.image}`"
-				:alt="project.name"
+				:alt="project.title"
 				:fallback-format="project.imageFormat"
 				loading="eager"
 			/>
@@ -115,7 +115,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { Project } from '../../types/project'
+import { useI18n } from 'vue-i18n'
+import type { Project } from '../../content'
 import BaseImage from '../base/BaseImage.vue'
 import Tag from '../ui/Tag.vue'
 
@@ -123,6 +124,7 @@ defineProps<{
 	project: Project
 }>()
 
+const { t } = useI18n()
 const media = ref<HTMLElement | null>(null)
 const year = ref<HTMLElement | null>(null)
 const title = ref<HTMLElement | null>(null)

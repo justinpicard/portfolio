@@ -11,10 +11,10 @@
 
     <div class="loop-wrap">
       <ul class="loop loop--right">
-        <li>Product designer</li>
-        <li>Product designer</li>
-        <li>Product designer</li>
-        <li>Product designer</li>
+        <li>{{ t('navigation.role') }}</li>
+        <li>{{ t('navigation.role') }}</li>
+        <li>{{ t('navigation.role') }}</li>
+        <li>{{ t('navigation.role') }}</li>
       </ul>
     </div>
   </div>
@@ -22,9 +22,11 @@
 
 <script setup>
 import { onMounted, onUnmounted, nextTick, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { gsap, ScrollTrigger, registerGsapPlugins } from '../utils/animations/gsap'
 import { animationEases } from '../utils/animations/presets'
 
+const { t } = useI18n()
 const container = ref(null)
 let ctx
 let cleanupClones = () => {}

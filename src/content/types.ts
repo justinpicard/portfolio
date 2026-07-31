@@ -1,0 +1,86 @@
+import type { Locale } from '../i18n'
+
+export type LocaleCode = Locale
+
+export type ProjectSlug =
+	| 'muzimatch'
+	| 'recranet'
+	| 'undrift'
+	| 'charlie'
+	| 'sfvonline'
+
+export type AboutContent = {
+	title: string
+	greeting: string
+	introduction: string
+	paragraphs: string[]
+}
+
+export type HeroContent = {
+	name: string
+	role: string
+	introduction: string
+}
+
+export type FooterContent = {
+	introduction: string
+}
+
+export type HomeContent = {
+	hero: HeroContent
+	about: AboutContent
+	footer: FooterContent
+}
+
+export type ProjectSection = {
+	id: string
+	title?: string
+	paragraphs: string[]
+}
+
+export type ProjectCaseStudy = {
+	layout: 'contained' | 'plain'
+	sections: ProjectSection[]
+}
+
+export type ProjectContent = {
+	slug: ProjectSlug
+	title: string
+	summary: string
+	tags: string[]
+	year: string
+	job: string
+	role: string
+	type: string
+	caseStudy: ProjectCaseStudy
+}
+
+export type ProjectContentOverride = {
+	slug: ProjectSlug
+} & Partial<Omit<ProjectContent, 'slug'>>
+
+export type ProjectMedia = {
+	id: string
+	slug: ProjectSlug
+	image: string
+	imageFormat?: 'jpg' | 'jpeg' | 'png'
+	secondaryImages?: string[]
+	overlayBackground?: string
+	link: string
+}
+
+export type Project = ProjectMedia & ProjectContent
+
+export type PortfolioContent = {
+	home: HomeContent
+	projects: Project[]
+}
+
+export type PortfolioContentOverrides = {
+	home?: {
+		hero?: Partial<HeroContent>
+		about?: Partial<AboutContent>
+		footer?: Partial<FooterContent>
+	}
+	projects?: ProjectContentOverride[]
+}

@@ -3,12 +3,16 @@
 		<div class="container">
 			<div class="row">
 				<div class="about-text d-flex flex-column col-12 lg:col-8 lg:offset-2 mb-3" ref="aboutText">
-					<p class="about-section__eyebrow eyebrow mb-8 text-secondary" ref="aboutEyebrow">About</p>
+					<p class="about-section__eyebrow eyebrow mb-8 text-secondary" ref="aboutEyebrow">{{ t('home.aboutLabel') }}</p>
 					<h2 class="about-section__title heading-font mb-8 md:mb-16" ref="aboutTitle">
-						Good digital products have always fascinated me. Not just for how they look, but for how everything behind the interface comes together.
+						{{ about.title }}
 					</h2>
-					<p>Hi <span class="wave">👋🏼</span> I’m Justin, a Digital Product Designer from the Netherlands. I’ve spent more than 10 years designing websites and digital products, and over time my curiosity naturally shifted from visual design towards product thinking, design systems and how products evolve as they grow.</p>
-					<p>In my free time, I enjoy turning ideas into side projects that push me beyond my comfort zone. Some become products, others don’t. Every project teaches me something new,  which is what keeps me curious.
+					<p>{{ about.greeting }} <span class="wave">👋🏼</span> {{ about.introduction }}</p>
+					<p
+						v-for="(paragraph, index) in about.paragraphs"
+						:key="index"
+					>
+						{{ paragraph }}
 					</p>
 				</div>
 			</div>
@@ -17,10 +21,14 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, ref, onMounted, onUnmounted } from 'vue'
+import { nextTick, ref, onMounted, onUnmounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { usePortfolioContent } from '../../composables/usePortfolioContent'
 import { gsap, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
 import { animationDurations, animationEases, animationStaggers } from '../../utils/animations/presets'
 
+const { locale, t } = useI18n()
+const { about } = usePortfolioContent()
 const root = ref<HTMLElement | null>(null)
 const aboutText = ref<HTMLElement | null>(null)
 const aboutEyebrow = ref<HTMLParagraphElement | null>(null)
@@ -30,6 +38,18 @@ let titleSplit: SplitText | undefined
 let bodySplit: SplitText | undefined
 let ctx: gsap.Context | undefined
 let isMounted = false
+let hasRevealCompleted = false
+
+function cleanupAboutReveal() {
+	ctx?.revert()
+	ctx = undefined
+	eyebrowSplit?.revert()
+	titleSplit?.revert()
+	bodySplit?.revert()
+	eyebrowSplit = undefined
+	titleSplit = undefined
+	bodySplit = undefined
+}
 
 function wrapSplitLines(lines: Element[]) {
 	lines.forEach((line: Element) => {
@@ -82,6 +102,11 @@ async function initAboutReveal() {
 			...bodySplit.lines
 		]
 
+		if (hasRevealCompleted) {
+			gsap.set(revealLines, { y: 0, opacity: 1 })
+			return
+		}
+
 		const timeline = gsap.timeline({
 			scrollTrigger: {
 				trigger: root.value,
@@ -98,7 +123,10 @@ async function initAboutReveal() {
 			opacity: 1,
 			duration: animationDurations.reveal,
 			stagger: animationStaggers.lines,
-			ease: animationEases.strongOut
+			ease: animationEases.strongOut,
+			onComplete: () => {
+				hasRevealCompleted = true
+			}
 		})
 	}, root.value ?? undefined)
 }
@@ -108,11 +136,17 @@ onMounted(() => {
 	initAboutReveal()
 })
 
+watch(locale, async () => {
+	cleanupAboutReveal()
+	await nextTick()
+
+	if (isMounted) {
+		initAboutReveal()
+	}
+}, { flush: 'pre' })
+
 onUnmounted(() => {
 	isMounted = false
-	ctx?.revert()
-	eyebrowSplit?.revert()
-	titleSplit?.revert()
-	bodySplit?.revert()
+	cleanupAboutReveal()
 })
 </script>

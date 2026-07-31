@@ -1,18 +1,29 @@
 <template>
   <AppHeader />
-	<PageTitle/>
+	<PageTitle :key="locale"/>
   <div class="page-intro mt-3 text-lg">
     <div class="container">
       <div class="row">
-        <div class="col-10">MAKE THIS A BLUE SCREEN OF DEATH WITH A FUNNY TWIST
-          Whoops! Looks like this page doesn't exist (anymore) 😰<br/>Go back to the <router-link :to="{ name: 'home' }">homepage</router-link>.
+        <div class="col-10">
+          {{ t('errors.notFoundMessage') }}<br>
+          {{ t('errors.backToHomepageBefore') }}
+          <router-link :to="homeRoute">{{ t('errors.homepage') }}</router-link>{{ t('errors.backToHomepageAfter') }}
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
-import PageTitle from "../components/PageHeader.vue";
-import AppHeader from "../components/AppHeader.vue";
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import PageTitle from '../components/PageHeader.vue'
+import AppHeader from '../components/AppHeader.vue'
+import { getLocaleParams, resolveLocale } from '../i18n'
+
+const { locale, t } = useI18n()
+const homeRoute = computed(() => ({
+	name: 'home',
+	params: getLocaleParams(resolveLocale(locale.value))
+}))
 </script>

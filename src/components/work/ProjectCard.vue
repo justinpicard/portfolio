@@ -10,7 +10,7 @@
 				'project-card--transition-hidden': transitionHidden
 			}
 		]"
-		:aria-label="project.name"
+		:aria-label="project.title"
 		:aria-disabled="!interactive"
 		:tabindex="interactive ? 0 : -1"
 		:role="interactive ? 'button' : undefined"
@@ -23,7 +23,7 @@
 
 		<div class="project-card__content">
 			<p class="project-card__year" data-project-shared="year">{{ project.year }}</p>
-			<h3 class="project-card__title" data-project-shared="title">{{ project.name }}</h3>
+			<h3 class="project-card__title" data-project-shared="title">{{ project.title }}</h3>
 			<p class="project-card__description" data-project-shared="intro">
 				{{ project.type }}
 			</p>
@@ -40,7 +40,7 @@
 		<div class="project-card__visual" data-project-shared="media">
 			<BaseImage
 				:src="`/images/${project.image}`"
-				:alt="project.name"
+				:alt="project.title"
 				:fallback-format="project.imageFormat"
 				aspect-ratio="16 / 7"
 			/>
@@ -49,7 +49,7 @@
 		<CircularScrollIndicator
 			ref="projectIndicator"
 			variant="project"
-			text="VIEW PROJECT • VIEW PROJECT •"
+			:text="t('project.viewProjectIndicator')"
 			:href="undefined"
 			aria-label=""
 			:show-icon="false"
@@ -78,8 +78,9 @@ import {
 	watch,
 	type CSSProperties
 } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useCursorFollowIndicator } from '../../composables/useCursorFollowIndicator'
-import type { Project } from '../../types/project'
+import type { Project } from '../../content'
 import BaseImage from '../base/BaseImage.vue'
 import CircularScrollIndicator from '../ui/CircularScrollIndicator.vue'
 import Tag from '../ui/Tag.vue'
@@ -99,6 +100,7 @@ const emit = defineEmits<{
 	}]
 }>()
 
+const { t } = useI18n()
 const cardStyles = computed<CSSProperties>(() => (
 	props.project.overlayBackground
 		? {
