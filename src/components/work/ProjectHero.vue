@@ -23,7 +23,46 @@
 					</div>
 				</div>
 			</div>
+			<div class="row">
+				<div class="col-12 mb-3">
+					<div
+						ref="metadata"
+						class="project-layer-prototype__copy project-layer-prototype__metadata d-flex flex-row justify-between"
+					>
+						<div 
+							ref="year" 
+							data-project-shared="year" 
+							data-project-metadata 
+							class="d-flex gap-2 items-baseline"
+						>
+								<span class="eyebrow text-2xs opacity-50">Year</span>
+								<span class="text-md">{{ project.year }}</span>
+						</div>
+						<div 
+							data-project-metadata
+							class="d-flex gap-2 items-baseline"
+						>
+							<span class="eyebrow text-2xs opacity-50">Job</span>
+							<span class="text-md">{{ project.job }}</span>
+						</div>
+						<div 
+							data-project-metadata
+							class="d-flex gap-2 items-baseline"
+						>
+							<span class="eyebrow text-2xs opacity-50">Role</span>
+							<span class="text-md">{{ project.role }}</span>
+						</div>
+						<div 
+							class="project-layer-prototype__intro d-flex gap-2 items-baseline" 
+							data-project-metadata
+						>
+							<span class="eyebrow text-2xs opacity-50">Type</span>
+							<span class="text-md">{{ project.type }}</span>
+						</div>
+					</div>
+				</div>
 			</div>
+		</div>
 
 		<div
 			ref="media"
