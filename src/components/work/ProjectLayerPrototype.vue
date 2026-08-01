@@ -2,7 +2,9 @@
 	<Teleport to="body">
 		<div
 			class="project-layer-prototype"
-			:class="{ 'project-layer-prototype--opening': isOpening }"
+			:class="{
+				'project-layer-prototype--opening': isOpening && isOpeningVisibilityLocked
+			}"
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="project-layer-title"
@@ -39,52 +41,14 @@
 						</div>
 
 						<div class="container">
-							<div class="col-12">
-
-								<nav ref="projectNav" class="project-layer-prototype__nav" :aria-label="t('project.navigationLabel')">
-									<a
-										v-if="previousProject"
-										ref="previousLink"
-										class="project-layer-prototype__nav-link"
-										href="#"
-										:aria-label="`${t('project.previous')}: ${previousProject.title}`"
-										:aria-disabled="isPreviousDisabled"
-										data-stagger-link
-										@click.prevent="navigate('previous', true)"
-									>
-										<span
-											class="project-layer-prototype__nav-title eyebrow"
-											data-stagger-link-container
-										>
-											<span aria-hidden="true">←</span>
-											{{ previousProject.title }}
-										</span>
-										<span class="project-layer-prototype__nav-summary">
-											{{ previousProject.summary }}
-										</span>
-									</a>
-									<a
-										v-if="nextProject"
-										ref="nextLink"
-										class="project-layer-prototype__nav-link project-layer-prototype__nav-link--next"
-										href="#"
-										:aria-label="`${t('project.next')}: ${nextProject.title}`"
-										:aria-disabled="isNextDisabled"
-										data-stagger-link
-										@click.prevent="navigate('next', true)"
-									>
-										<span
-											class="project-layer-prototype__nav-title eyebrow"
-											data-stagger-link-container
-										>
-											{{ nextProject.title }}
-											<span aria-hidden="true">→</span>
-										</span>
-										<span class="project-layer-prototype__nav-summary">
-											{{ nextProject.summary }}
-										</span>
-									</a>
-								</nav>
+							<div class="col-12 lg:col-8 lg:offset-2">
+								<ProjectStackNavigator
+									ref="projectNavigator"
+									:projects="projects"
+									:current-project-index="displayedIndex"
+									:disabled="isOpening || isTransitioning || isClosing"
+									@select="navigateToProject($event, true)"
+								/>
 							</div>
 						</div>
 					</section>
@@ -126,10 +90,6 @@ import {
 	SplitText
 } from '../../utils/animations/gsap'
 import {
-	initStaggerLinks,
-	type StaggerLinksController
-} from '../../utils/animations/staggerLinks'
-import {
 	animationDurations,
 	animationEases,
 	animationStaggers
@@ -138,6 +98,7 @@ import type { Project } from '../../content'
 import Button from '../Button.vue'
 import ProjectCaseContent from './ProjectCaseContent.vue'
 import ProjectHero from './ProjectHero.vue'
+import ProjectStackNavigator from './ProjectStackNavigator.vue'
 
 const { t } = useI18n()
 type LayerOrigin = {
@@ -148,7 +109,6 @@ type LayerOrigin = {
 	borderRadius: string
 }
 
-type NavigationDirection = 'previous' | 'next'
 type SharedElementKey = 'media' | 'year' | 'title' | 'intro' | 'tags'
 type SharedElementMap = Record<SharedElementKey, HTMLElement>
 type HeroElementMap = Omit<SharedElementMap, 'tags'> & {
@@ -212,34 +172,20 @@ const caseContent = ref<HTMLElement | null>(null)
 const scrims = ref<HTMLElement | null>(null)
 const bottomScrim = ref<HTMLElement | null>(null)
 const closeButton = ref<HTMLButtonElement | null>(null)
-const projectNav = ref<HTMLElement | null>(null)
+const projectNavigator = ref<InstanceType<typeof ProjectStackNavigator> | null>(null)
 const sharedTransitionLayer = ref<HTMLElement | null>(null)
-const previousLink = ref<HTMLAnchorElement | null>(null)
-const nextLink = ref<HTMLAnchorElement | null>(null)
 const displayedIndex = ref(props.projectIndex)
 const isTransitioning = ref(false)
 const isOpening = ref(true)
+const isOpeningVisibilityLocked = ref(true)
 const isClosing = ref(false)
 const announcement = ref('')
 const initialProjectClass = `project-card--${props.projectIndex + 1}`
 
 const displayedProject = computed(() => props.projects[displayedIndex.value])
-const previousProject = computed(() => props.projects[displayedIndex.value - 1])
-const nextProject = computed(() => props.projects[displayedIndex.value + 1])
-const isPreviousDisabled = computed(() => (
-	isOpening.value
-	|| isTransitioning.value
-	|| isClosing.value
-	|| displayedIndex.value === 0
-))
-const isNextDisabled = computed(() => (
-	isOpening.value
-	|| isTransitioning.value
-	|| isClosing.value
-	|| displayedIndex.value === props.projects.length - 1
-))
 
 const OPEN_DURATION = 1
+const HERO_REVEAL_START = 0.64
 const CLOSE_DURATION = 0.9
 const OPEN_HEADER_CONTRAST_POSITION = 0.58
 const CLOSE_HEADER_CONTRAST_POSITION = CLOSE_DURATION * (
@@ -338,7 +284,6 @@ let heroRevealSplits: SplitText[] = []
 let heroRevealTargets: HTMLElement[] = []
 let cardRestoreSplits: SplitText[] = []
 let cardRestoreTargets: HTMLElement[] = []
-let navStaggerLinks: StaggerLinksController | undefined
 let contextTransitionRunId = 0
 let isBottomScrimVisible: boolean | undefined
 let sharedRepresentations: SharedElementRepresentation[] = []
@@ -446,7 +391,10 @@ function getDetailElements() {
 }
 
 function getOverlayControls() {
-	return [closeButton.value, projectNav.value].filter(Boolean) as HTMLElement[]
+	return [
+		closeButton.value,
+		projectNavigator.value?.element
+	].filter(Boolean) as HTMLElement[]
 }
 
 function setCloseButtonRef(instance: unknown) {
@@ -1591,31 +1539,6 @@ function continueTimeline(animation: gsap.core.Timeline) {
 	})
 }
 
-function setupNavStaggerLinks() {
-	navStaggerLinks?.destroy()
-	navStaggerLinks = projectNav.value
-		? initStaggerLinks(projectNav.value)
-		: undefined
-}
-
-function restoreNavigationFocus(direction: NavigationDirection) {
-	const preferredButton = direction === 'previous'
-		? previousLink.value
-		: nextLink.value
-	const fallbackButton = direction === 'previous'
-		? nextLink.value
-		: previousLink.value
-
-	if (preferredButton && preferredButton.getAttribute('aria-disabled') !== 'true') {
-		preferredButton.focus({ preventScroll: true })
-		return
-	}
-
-	if (fallbackButton && fallbackButton.getAttribute('aria-disabled') !== 'true') {
-		fallbackButton.focus({ preventScroll: true })
-	}
-}
-
 function requestClose() {
 	if (isClosing.value) return
 
@@ -1628,18 +1551,19 @@ function requestClose() {
 	emit('close')
 }
 
-async function navigate(direction: NavigationDirection, restoreFocus = false) {
+async function navigateToProject(nextIndex: number, restoreFocus = false) {
 	if (isOpening.value || isTransitioning.value || isClosing.value) return
 
-	const nextIndex = displayedIndex.value + (direction === 'next' ? 1 : -1)
-	if (nextIndex < 0 || nextIndex >= props.projects.length) return
+	if (
+		nextIndex < 0
+		|| nextIndex >= props.projects.length
+		|| nextIndex === displayedIndex.value
+	) return
 
 	isTransitioning.value = true
 	announcement.value = ''
 	killContextTransition()
 	const runId = contextTransitionRunId
-	navStaggerLinks?.destroy()
-	navStaggerLinks = undefined
 
 	if (prefersReducedMotion()) {
 		gsap.set(content.value, { autoAlpha: 0 })
@@ -1669,15 +1593,13 @@ async function navigate(direction: NavigationDirection, restoreFocus = false) {
 		ScrollTrigger.refresh()
 		announcement.value = `${displayedProject.value.title} project loaded`
 		isTransitioning.value = false
-		setupNavStaggerLinks()
-		if (restoreFocus) restoreNavigationFocus(direction)
+		if (restoreFocus) projectNavigator.value?.focusActiveCard()
 		return
 	}
 
 	const outgoingHero = getHeroElements()
 	if (!outgoingHero || !content.value) {
 		isTransitioning.value = false
-		setupNavStaggerLinks()
 		return
 	}
 
@@ -1730,7 +1652,6 @@ async function navigate(direction: NavigationDirection, restoreFocus = false) {
 			clearProps: 'opacity,transform,visibility'
 		})
 		isTransitioning.value = false
-		setupNavStaggerLinks()
 		return
 	}
 
@@ -1759,28 +1680,16 @@ async function navigate(direction: NavigationDirection, restoreFocus = false) {
 	ScrollTrigger.refresh()
 	announcement.value = `${displayedProject.value.title} project loaded`
 	isTransitioning.value = false
-	setupNavStaggerLinks()
 
 	if (restoreFocus) {
 		await nextTick()
-		restoreNavigationFocus(direction)
+		projectNavigator.value?.focusActiveCard()
 	}
 }
 
 function handleKeydown(event: KeyboardEvent) {
 	if (event.key === 'Escape') {
 		requestClose()
-		return
-	}
-
-	if (event.key === 'ArrowLeft') {
-		event.preventDefault()
-		void navigate('previous')
-	}
-
-	if (event.key === 'ArrowRight') {
-		event.preventDefault()
-		void navigate('next')
 	}
 }
 
@@ -1817,22 +1726,29 @@ function getProjectCardContents(card: HTMLElement) {
 	].join(', ')))
 }
 
-function wrapHeroRevealLines(lines: Element[]) {
+function wrapHeroRevealLines(
+	lines: Element[],
+	tagName: 'div' | 'span' = 'div'
+) {
 	lines.forEach((line) => {
-		const mask = document.createElement('div')
+		const mask = document.createElement(tagName)
 		mask.classList.add('split-line-wrapper')
 		line.parentNode?.insertBefore(mask, line)
 		mask.appendChild(line)
 	})
 }
 
-function splitMaskedLines(element: HTMLElement) {
+function splitMaskedLines(
+	element: HTMLElement,
+	tagName: 'div' | 'span' = 'div'
+) {
 	const split = new SplitText(element, {
 		type: 'lines',
-		linesClass: 'split-line'
+		linesClass: 'split-line',
+		tag: tagName
 	})
 	const lines = split.lines as HTMLElement[]
-	wrapHeroRevealLines(lines)
+	wrapHeroRevealLines(lines, tagName)
 
 	return { split, lines }
 }
@@ -1940,6 +1856,13 @@ function createCaseHeroReveal() {
 	const eyebrow = heroElements.intro
 	const metadata = getHeroMetadataElements(heroElements)
 		.filter((element) => element !== eyebrow)
+	const metadataReveals = metadata.flatMap((element) => (
+		Array.from(element.children)
+			.filter((child): child is HTMLElement => child instanceof HTMLElement)
+			.map((line) => splitMaskedLines(line, 'span'))
+	))
+	const metadataLines = metadataReveals.flatMap(({ lines }) => lines)
+	heroRevealSplits.push(...metadataReveals.map(({ split }) => split))
 	const image = heroElements.media.querySelector<HTMLElement>('img')
 	const controls = getOverlayControls()
 
@@ -1949,6 +1872,7 @@ function createCaseHeroReveal() {
 		eyebrow,
 		...titleLines,
 		...metadata,
+		...metadataLines,
 		...(caseContent.value ? [caseContent.value] : []),
 		...controls,
 		scrims.value,
@@ -1968,11 +1892,15 @@ function createCaseHeroReveal() {
 			transformOrigin: 'center center'
 		})
 	}
-	gsap.set([eyebrow, ...metadata], {
+	gsap.set(eyebrow, {
 		autoAlpha: 0,
 		y: 10
 	})
-	gsap.set(titleLines, {
+	gsap.set(metadata, {
+		autoAlpha: 1,
+		y: 0
+	})
+	gsap.set([...titleLines, ...metadataLines], {
 		autoAlpha: 1,
 		yPercent: 110
 	})
@@ -2018,12 +1946,11 @@ function createCaseHeroReveal() {
 			ease: animationEases.strongOut,
 			stagger: animationStaggers.lines
 		}, 0.16)
-		.to(metadata, {
-			autoAlpha: 1,
-			y: 0,
-			duration: animationDurations.fast,
-			ease: animationEases.out,
-			stagger: 0.04
+		.to(metadataLines, {
+			yPercent: 0,
+			duration: animationDurations.base,
+			ease: animationEases.strongOut,
+			stagger: 0.035
 		}, 0.38)
 		.to(caseContent.value, {
 			autoAlpha: 1,
@@ -2057,6 +1984,12 @@ async function animateSimpleOpen() {
 	setInitialGeometry()
 	gsap.set(surface.value, { backgroundColor: 'transparent' })
 	gsap.set(destinationElements, { autoAlpha: 0 })
+	// Lay out the hero at its final viewport width while the surface clips it.
+	// This prevents text from rewrapping as the card expands.
+	gsap.set(content.value, {
+		width: '100vw',
+		height: '100dvh'
+	})
 
 	if (prefersReducedMotion()) {
 		emit('source-ready')
@@ -2064,14 +1997,17 @@ async function animateSimpleOpen() {
 		gsap.set(sourceCardContents, { clearProps: 'opacity,visibility' })
 		gsap.set(surface.value, { clearProps: 'backgroundColor' })
 		setFullscreenGeometry()
+		isOpeningVisibilityLocked.value = false
 		isOpening.value = false
 		gsap.set(destinationElements, { autoAlpha: 1 })
-		setupNavStaggerLinks()
+		gsap.set(content.value, { clearProps: 'width,height' })
 		emit('header-contrast-change', true)
 		closeButton.value?.focus()
 		ScrollTrigger.refresh()
 		return
 	}
+
+	const heroRevealLayoutReady = waitForHeroRevealLayout()
 
 	timeline = gsap.timeline({ paused: true })
 		.to(sourceCardContents, {
@@ -2086,7 +2022,11 @@ async function animateSimpleOpen() {
 	gsap.set(sourceCardContents, { clearProps: 'opacity,visibility' })
 	gsap.set(surface.value, { clearProps: 'backgroundColor' })
 
+	await heroRevealLayoutReady
+	const caseHeroReveal = createCaseHeroReveal()
+
 	timeline = gsap.timeline({ paused: true })
+	timeline
 		.to(surface.value, {
 			top: 0,
 			left: 0,
@@ -2099,22 +2039,22 @@ async function animateSimpleOpen() {
 		.call(() => {
 			emit('header-contrast-change', true)
 		}, [], OPEN_HEADER_CONTRAST_POSITION)
-
-	await playTimeline(timeline)
-	await waitForHeroRevealLayout()
-	const caseHeroReveal = createCaseHeroReveal()
-	isOpening.value = false
-	await nextTick()
+		.call(() => {
+			isOpeningVisibilityLocked.value = false
+		}, [], HERO_REVEAL_START)
 
 	if (caseHeroReveal) {
-		await playTimeline(caseHeroReveal)
-		cleanupHeroReveal()
+		timeline.add(caseHeroReveal.paused(false), HERO_REVEAL_START)
 	} else {
-		gsap.set(destinationElements, { autoAlpha: 1 })
+		timeline.set(destinationElements, { autoAlpha: 1 }, HERO_REVEAL_START)
 	}
 
+	await playTimeline(timeline)
+	isOpeningVisibilityLocked.value = false
+	isOpening.value = false
+	cleanupHeroReveal()
+	gsap.set(content.value, { clearProps: 'width,height' })
 	ScrollTrigger.refresh()
-	setupNavStaggerLinks()
 	closeButton.value?.focus()
 
 	if (closeRequestedDuringOpen) {
@@ -2153,7 +2093,6 @@ async function animateOpen() {
 			autoAlpha: 1
 		})
 		isOpening.value = false
-		setupNavStaggerLinks()
 		emit('header-contrast-change', true)
 		closeButton.value?.focus()
 		return
@@ -2169,7 +2108,6 @@ async function animateOpen() {
 			autoAlpha: 1
 		})
 		isOpening.value = false
-		setupNavStaggerLinks()
 		emit('header-contrast-change', true)
 		closeButton.value?.focus()
 		return
@@ -2197,7 +2135,6 @@ async function animateOpen() {
 			scrims.value
 		], { autoAlpha: 1 })
 		isOpening.value = false
-		setupNavStaggerLinks()
 		emit('header-contrast-change', true)
 		closeButton.value?.focus()
 		return
@@ -2217,7 +2154,6 @@ async function animateOpen() {
 			scrims.value
 		], { autoAlpha: 1 })
 		isOpening.value = false
-		setupNavStaggerLinks()
 		emit('header-contrast-change', true)
 		closeButton.value?.focus()
 		return
@@ -2275,7 +2211,6 @@ async function animateOpen() {
 			clearSharedRepresentations()
 			gsap.set(Object.values(heroElements), { autoAlpha: 1 })
 			isOpening.value = false
-			setupNavStaggerLinks()
 			closeButton.value?.focus()
 
 			if (closeRequestedDuringOpen) {
@@ -2659,8 +2594,6 @@ onBeforeUnmount(() => {
 	cleanupHeroReveal()
 	cleanupCardRestore()
 	killContextTransition()
-	navStaggerLinks?.destroy()
-	navStaggerLinks = undefined
 	cleanupBottomScrim()
 	emit('header-contrast-change', false)
 	document.documentElement.style.overflow = previousDocumentOverflow

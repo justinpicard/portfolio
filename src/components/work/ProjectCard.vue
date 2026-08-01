@@ -17,55 +17,58 @@
 		:style="cardStyles"
 		data-project-card
 		@click="handleOpen"
+		@pointerenter="animateHover(true)"
+		@pointerleave="animateHover(false)"
 		@keydown.enter.prevent="handleOpen"
 		@keydown.space.prevent="handleOpen"
 	>
-
-		<div class="project-card__content">
-			<p class="project-card__year" data-project-shared="year">{{ project.year }}</p>
-			<h3 class="project-card__title" data-project-shared="title">{{ project.title }}</h3>
-			<p class="project-card__description" data-project-shared="intro">
-				{{ project.type }}
-			</p>
-			<div class="project-card__tags" data-project-shared="tags">
-				<Tag
-					v-for="tag in project.tags"
-					:key="tag"
-				>
-					{{ tag }}
-				</Tag>
+		<div ref="hoverSurface" class="project-card__hover-surface">
+			<div class="project-card__content">
+				<p class="project-card__year" data-project-shared="year">{{ project.year }}</p>
+				<h3 class="project-card__title" data-project-shared="title">{{ project.title }}</h3>
+				<p class="project-card__description" data-project-shared="intro">
+					{{ project.type }}
+				</p>
+				<div class="project-card__tags" data-project-shared="tags">
+					<Tag
+						v-for="tag in project.tags"
+						:key="tag"
+					>
+						{{ tag }}
+					</Tag>
+				</div>
 			</div>
-		</div>
 
-		<div class="project-card__visual" data-project-shared="media">
-			<BaseImage
-				:src="`/images/${project.image}`"
-				:alt="project.title"
-				:fallback-format="project.imageFormat"
-				aspect-ratio="16 / 7"
+			<div class="project-card__visual" data-project-shared="media">
+				<BaseImage
+					:src="`/images/${project.image}`"
+					:alt="project.title"
+					:fallback-format="project.imageFormat"
+					aspect-ratio="16 / 7"
+				/>
+			</div>
+
+			<CircularScrollIndicator
+				ref="projectIndicator"
+				variant="project"
+				:text="t('project.viewProjectIndicator')"
+				:href="undefined"
+				aria-label=""
+				:show-icon="false"
+				aria-hidden="true"
+			/>
+
+			<span
+				class="project-card__shadow project-card__shadow--from-left"
+				data-project-shadow-from-left
+				aria-hidden="true"
+			/>
+			<span
+				class="project-card__shadow project-card__shadow--from-right"
+				data-project-shadow-from-right
+				aria-hidden="true"
 			/>
 		</div>
-
-		<CircularScrollIndicator
-			ref="projectIndicator"
-			variant="project"
-			:text="t('project.viewProjectIndicator')"
-			:href="undefined"
-			aria-label=""
-			:show-icon="false"
-			aria-hidden="true"
-		/>
-
-		<span
-			class="project-card__shadow project-card__shadow--from-left"
-			data-project-shadow-from-left
-			aria-hidden="true"
-		/>
-		<span
-			class="project-card__shadow project-card__shadow--from-right"
-			data-project-shadow-from-right
-			aria-hidden="true"
-		/>
 	</article>
 </template>
 
@@ -81,6 +84,8 @@ import {
 import { useI18n } from 'vue-i18n'
 import { useCursorFollowIndicator } from '../../composables/useCursorFollowIndicator'
 import type { Project } from '../../content'
+import { gsap } from '../../utils/animations/gsap'
+import { animationEases } from '../../utils/animations/presets'
 import BaseImage from '../base/BaseImage.vue'
 import CircularScrollIndicator from '../ui/CircularScrollIndicator.vue'
 import Tag from '../ui/Tag.vue'
@@ -110,6 +115,7 @@ const cardStyles = computed<CSSProperties>(() => (
 ))
 
 const card = ref<HTMLElement | null>(null)
+const hoverSurface = ref<HTMLElement | null>(null)
 const projectIndicator = ref<InstanceType<typeof CircularScrollIndicator> | null>(
 	null
 )
@@ -127,6 +133,17 @@ function handleOpen() {
 	emit('open', {
 		projectIndex: props.index,
 		sourceElement: card.value
+	})
+}
+
+function animateHover(isHovered: boolean) {
+	if (!hoverSurface.value || (!props.interactive && isHovered)) return
+
+	gsap.to(hoverSurface.value, {
+		scale: isHovered ? 1.1 : 1,
+		duration: isHovered ? 0.45 : 0.3,
+		ease: isHovered ? animationEases.backOut : animationEases.out,
+		overwrite: 'auto'
 	})
 }
 
@@ -151,9 +168,11 @@ watch(() => props.interactive, (interactive) => {
 	}
 
 	cursorFollowIndicator?.disable()
+	animateHover(false)
 })
 
 onUnmounted(() => {
 	cursorFollowIndicator?.cleanup()
+	gsap.killTweensOf(hoverSurface.value)
 })
 </script>

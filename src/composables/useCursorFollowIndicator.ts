@@ -232,14 +232,23 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 
 		if (!isEnabled) return
 
+		const isInsideTrigger = isPointerInsideTrigger(event.clientX, event.clientY)
+
 		if (isPointerSuppressed(event.clientX, event.clientY)) {
+			handlePointerLeave()
+			isRevealPending = isInsideTrigger
+			return
+		}
+
+		if (isVisible && !isInsideTrigger) {
 			handlePointerLeave()
 			return
 		}
 
 		if (
 			!isVisible
-			&& isPointerInsideTrigger(event.clientX, event.clientY)
+			&& isRevealPending
+			&& isInsideTrigger
 		) {
 			showIndicator(event.clientX, event.clientY)
 		}
@@ -250,6 +259,7 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 		if (!elements) return
 
 		isVisible = false
+		isRevealPending = false
 		stopTicker()
 		targetOffsetX = 0
 		targetOffsetY = 0

@@ -39,7 +39,7 @@
 				>
 					<span lang="en" data-stagger-link-container>EN</span>
 				</router-link>
-				<span class="lang-switcher__separator mx-2 text-secondary" aria-hidden="true">✦</span>
+				<span class="lang-switcher__separator mx-1 text-secondary" aria-hidden="true">✦</span>
 				<router-link
 					:to="getLocalizedRoute('nl')"
 					class="lang-switcher__option nav-link text-lg"
