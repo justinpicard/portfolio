@@ -77,7 +77,7 @@ export type ProjectMedia = {
 	imageFormat?: 'jpg' | 'jpeg' | 'png'
 	secondaryImages?: string[]
 	overlayBackground?: string
-	link: string
+	live?: string
 }
 
 export type Project = ProjectMedia & ProjectContent

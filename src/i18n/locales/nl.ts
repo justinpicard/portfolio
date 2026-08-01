@@ -19,6 +19,7 @@ export default {
 		job: 'Functie',
 		role: 'Rol',
 		type: 'Type',
+		live: 'Live',
 		viewProject: 'Bekijk project',
 		viewProjectIndicator: 'BEKIJK PROJECT • BEKIJK PROJECT •',
 		wantToSeeMore: 'Meer zien?',

@@ -19,6 +19,7 @@ export default {
 		job: 'Job',
 		role: 'Role',
 		type: 'Type',
+		live: 'Live',
 		viewProject: 'View project',
 		viewProjectIndicator: 'VIEW PROJECT • VIEW PROJECT •',
 		wantToSeeMore: 'Want to see more?',

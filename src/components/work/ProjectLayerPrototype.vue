@@ -27,39 +27,66 @@
 						/>
 					</div>
 
-					<section class="project-nav pt-32">
+					<section class="project-nav py-32">
 						<div class="project-nav__title">
 							<div class="container">
-								<div class="project-nav-title__inner d-flex flex-1 justify-center">
-									<h2>{{ t('project.wantToSeeMore') }}</h2>
+								<div class="col-12 lg:col-8 lg:offset-2">
+									<div class="project-nav-title__inner d-flex flex-1 justify-center">
+										<h2>{{ t('project.wantToSeeMore') }}</h2>
+									</div>
 								</div>
 							</div>
 						</div>
 
-						<nav ref="projectNav" class="project-layer-prototype__nav" :aria-label="t('project.navigationLabel')">
-							<a
-								v-if="previousProject"
-								ref="previousLink"
-								class="project-layer-prototype__nav-link"
-								href="#"
-								:aria-disabled="isPreviousDisabled"
-								data-stagger-link
-								@click.prevent="navigate('previous', true)"
-							>
-								<span data-stagger-link-container>← {{ previousProject.title }}</span>
-							</a>
-							<a
-								v-if="nextProject"
-								ref="nextLink"
-								class="project-layer-prototype__nav-link project-layer-prototype__nav-link--next"
-								href="#"
-								:aria-disabled="isNextDisabled"
-								data-stagger-link
-								@click.prevent="navigate('next', true)"
-							>
-								<span data-stagger-link-container>{{ nextProject.title }} →</span>
-							</a>
-						</nav>
+						<div class="container">
+							<div class="col-12">
+
+								<nav ref="projectNav" class="project-layer-prototype__nav" :aria-label="t('project.navigationLabel')">
+									<a
+										v-if="previousProject"
+										ref="previousLink"
+										class="project-layer-prototype__nav-link"
+										href="#"
+										:aria-label="`${t('project.previous')}: ${previousProject.title}`"
+										:aria-disabled="isPreviousDisabled"
+										data-stagger-link
+										@click.prevent="navigate('previous', true)"
+									>
+										<span
+											class="project-layer-prototype__nav-title eyebrow"
+											data-stagger-link-container
+										>
+											<span aria-hidden="true">←</span>
+											{{ previousProject.title }}
+										</span>
+										<span class="project-layer-prototype__nav-summary">
+											{{ previousProject.summary }}
+										</span>
+									</a>
+									<a
+										v-if="nextProject"
+										ref="nextLink"
+										class="project-layer-prototype__nav-link project-layer-prototype__nav-link--next"
+										href="#"
+										:aria-label="`${t('project.next')}: ${nextProject.title}`"
+										:aria-disabled="isNextDisabled"
+										data-stagger-link
+										@click.prevent="navigate('next', true)"
+									>
+										<span
+											class="project-layer-prototype__nav-title eyebrow"
+											data-stagger-link-container
+										>
+											{{ nextProject.title }}
+											<span aria-hidden="true">→</span>
+										</span>
+										<span class="project-layer-prototype__nav-summary">
+											{{ nextProject.summary }}
+										</span>
+									</a>
+								</nav>
+							</div>
+						</div>
 					</section>
 				</div>
 
@@ -124,6 +151,9 @@ type LayerOrigin = {
 type NavigationDirection = 'previous' | 'next'
 type SharedElementKey = 'media' | 'year' | 'title' | 'intro' | 'tags'
 type SharedElementMap = Record<SharedElementKey, HTMLElement>
+type HeroElementMap = Omit<SharedElementMap, 'tags'> & {
+	tags?: HTMLElement
+}
 
 type SharedElementTarget = {
 	rect: DOMRect
@@ -381,17 +411,24 @@ function getSharedElements(root: ParentNode): SharedElementMap | undefined {
 	return Object.fromEntries(entries) as SharedElementMap
 }
 
-function getHeroSharedElements(): SharedElementMap | undefined {
+function getHeroElements(): HeroElementMap | undefined {
 	const elements = projectHero.value?.getSharedElements()
 	if (
 		!elements?.media
 		|| !elements.year
 		|| !elements.title
 		|| !elements.intro
-		|| !elements.tags
 	) return undefined
 
-	return elements as SharedElementMap
+	return elements as HeroElementMap
+}
+
+function getHeroSharedElements(): SharedElementMap | undefined {
+	const elements = getHeroElements()
+
+	return elements?.tags
+		? elements as SharedElementMap
+		: undefined
 }
 
 function getTransitionBodies() {
@@ -1420,7 +1457,7 @@ function revertTransitionSplits() {
 	transitionSplits = []
 }
 
-function splitHeroTransitionLines(elements: SharedElementMap) {
+function splitHeroTransitionLines(elements: HeroElementMap) {
 	const titleReveal = splitMaskedLines(elements.title)
 	transitionSplits = [titleReveal.split]
 
@@ -1430,11 +1467,11 @@ function splitHeroTransitionLines(elements: SharedElementMap) {
 	}
 }
 
-function getHeroMetadataElements(elements: SharedElementMap) {
+function getHeroMetadataElements(elements: HeroElementMap) {
 	return projectHero.value?.getMetadataElements() ?? [
 		elements.intro,
 		elements.year,
-		...Array.from(elements.tags.children)
+		...(elements.tags ? Array.from(elements.tags.children) : [])
 	] as HTMLElement[]
 }
 
@@ -1466,7 +1503,7 @@ function waitForAnimationFrame() {
 function updateBottomScrim(immediate = false) {
 	if (!content.value || !bottomScrim.value) return
 
-	const heroMedia = getHeroSharedElements()?.media
+	const heroMedia = projectHero.value?.getMediaElement()
 	const contentBottom = content.value.getBoundingClientRect().bottom
 	const scrimHeight = bottomScrim.value.getBoundingClientRect().height
 	const shouldShow = heroMedia
@@ -1621,7 +1658,7 @@ async function navigate(direction: NavigationDirection, restoreFocus = false) {
 		await waitForAnimationFrame()
 		if (runId !== contextTransitionRunId) return
 		gsap.set([
-			...Object.values(getHeroSharedElements() ?? {}),
+			...Object.values(getHeroElements() ?? {}),
 			...getTransitionBodies()
 		], {
 			clearProps: 'clipPath,opacity,transform,visibility'
@@ -1637,7 +1674,7 @@ async function navigate(direction: NavigationDirection, restoreFocus = false) {
 		return
 	}
 
-	const outgoingHero = getHeroSharedElements()
+	const outgoingHero = getHeroElements()
 	if (!outgoingHero || !content.value) {
 		isTransitioning.value = false
 		setupNavStaggerLinks()
@@ -1687,7 +1724,7 @@ async function navigate(direction: NavigationDirection, restoreFocus = false) {
 	content.value.scrollTop = 0
 	isBottomScrimVisible = undefined
 	updateBottomScrim(true)
-	const incomingHero = getHeroSharedElements()
+	const incomingHero = getHeroElements()
 	if (!incomingHero) {
 		gsap.set(content.value, {
 			clearProps: 'opacity,transform,visibility'
@@ -1891,7 +1928,7 @@ async function waitForHeroRevealLayout() {
 }
 
 function createCaseHeroReveal() {
-	const heroElements = getHeroSharedElements()
+	const heroElements = getHeroElements()
 	if (!heroElements || !content.value || !scrims.value) return undefined
 
 	cleanupHeroReveal()

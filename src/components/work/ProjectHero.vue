@@ -2,7 +2,7 @@
 	<div class="project-hero">
 		<div class="container">
 			<div class="row">
-				<div class="col-12 lg:col-8 lg:offset-2 mb-3">
+				<div class="col-12 lg:col-8 lg:offset-2">
 					<div class="project-layer-prototype__copy">
 						<span
 							ref="intro"
@@ -24,7 +24,7 @@
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-12 mb-3">
+				<div class="col-12 mb-6">
 					<div
 						ref="metadata"
 						class="project-layer-prototype__copy project-layer-prototype__metadata d-flex flex-row justify-between"
@@ -33,31 +33,46 @@
 							ref="year" 
 							data-project-shared="year" 
 							data-project-metadata 
-							class="d-flex gap-2 items-baseline"
+							class="d-flex gap-1 flex-column"
 						>
 								<span class="eyebrow text-2xs opacity-50">{{ t('project.year') }}</span>
 								<span class="text-md">{{ project.year }}</span>
 						</div>
 						<div 
 							data-project-metadata
-							class="d-flex gap-2 items-baseline"
+							class="d-flex gap-1 flex-column"
 						>
 							<span class="eyebrow text-2xs opacity-50">{{ t('project.job') }}</span>
 							<span class="text-md">{{ project.job }}</span>
 						</div>
 						<div 
 							data-project-metadata
-							class="d-flex gap-2 items-baseline"
+							class="d-flex gap-1 flex-column"
 						>
 							<span class="eyebrow text-2xs opacity-50">{{ t('project.role') }}</span>
 							<span class="text-md">{{ project.role }}</span>
 						</div>
 						<div 
-							class="project-layer-prototype__intro d-flex gap-2 items-baseline" 
+							class="d-flex gap-1 flex-column"
 							data-project-metadata
 						>
 							<span class="eyebrow text-2xs opacity-50">{{ t('project.type') }}</span>
 							<span class="text-md">{{ project.type }}</span>
+						</div>
+						<div
+							v-if="project.live"
+							class="d-flex gap-1 flex-column"
+							data-project-metadata
+						>
+							<span class="eyebrow text-2xs opacity-50">{{ t('project.live') }}</span>
+							<a
+								class="text-md text-primary"
+								:href="project.live"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								{{ displayLiveUrl }}
+							</a>
 						</div>
 					</div>
 				</div>
@@ -77,54 +92,27 @@
 				loading="eager"
 			/>
 		</div>
-
-		<div class="container">
-			<div class="row">
-				<div class="col-12 lg:col-8 lg:offset-2 mb-3">
-					<div
-						ref="metadata"
-						class="project-layer-prototype__copy project-layer-prototype__metadata"
-					>
-						<p ref="year" data-project-shared="year" data-project-metadata>{{ project.year }}</p>
-						<p data-project-metadata>{{ project.job }}</p>
-						<p data-project-metadata>{{ project.role }}</p>
-						<p class="project-layer-prototype__intro text-2xl" data-project-metadata>
-							{{ project.type }}
-						</p>
-						<div class="project-layer-prototype__body">
-							<div
-								ref="tags"
-								class="project-layer-prototype__tags"
-								data-project-shared="tags"
-							>
-								<Tag
-									v-for="tag in project.tags"
-									:key="tag"
-								>
-									{{ tag }}
-								</Tag>
-							</div>
-						</div>
-					</div>
-				</div>
-				</div>
-			</div>
-
-		</div>
+	</div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Project } from '../../content'
 import BaseImage from '../base/BaseImage.vue'
 import Tag from '../ui/Tag.vue'
 
-defineProps<{
+const props = defineProps<{
 	project: Project
 }>()
 
 const { t } = useI18n()
+const displayLiveUrl = computed(() => (
+	props.project.live
+		?.replace(/^https?:\/\//, '')
+		.replace(/\/$/, '')
+	?? ''
+))
 const media = ref<HTMLElement | null>(null)
 const year = ref<HTMLElement | null>(null)
 const title = ref<HTMLElement | null>(null)

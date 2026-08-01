@@ -11,7 +11,7 @@ export const projectMedia = [
 			'dot3'
 		],
 		overlayBackground: '#efff90',
-		link: 'https://muzimatch.nl'
+		live: 'https://muzimatch.nl'
 	},
 	{
 		id: '2',
@@ -22,21 +22,19 @@ export const projectMedia = [
 			'dehoop'
 		],
 		overlayBackground: '#aae8f7',
-		link: 'https://recranet.com'
+		live: 'https://recranet.com'
 	},
 	{
 		id: '3',
 		slug: 'undrift',
 		image: 'hz-university',
-		overlayBackground: '#FFD87F',
-		link: '#'
+		overlayBackground: '#FFD87F'
 	},
 	{
 		id: '4',
 		slug: 'charlie',
 		image: 'hz-university',
-		overlayBackground: '#c3c7ff',
-		link: '#'
+		overlayBackground: '#c3c7ff'
 	},
 	{
 		id: '5',
@@ -47,6 +45,6 @@ export const projectMedia = [
 			'hz-university'
 		],
 		overlayBackground: '#C9EFD8',
-		link: 'https://sfvonline.nl'
+		live: 'https://sfvonline.nl'
 	}
 ] as const satisfies readonly ProjectMedia[]

@@ -87,10 +87,11 @@
 					</div>
 
 					<a
+						v-if="surface.project.live"
 						class="project-overlay__link"
-						:href="surface.project.link"
+						:href="surface.project.live"
 						target="_blank"
-						rel="noreferrer"
+						rel="noopener noreferrer"
 					>
 						{{ t('project.visit') }}
 					</a>
