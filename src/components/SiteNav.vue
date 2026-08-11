@@ -5,6 +5,7 @@
 				:to="{ name: 'home', params: getLocaleParams(currentLocale) }"
 				class="site-logo"
 				:aria-label="t('navigation.homeLabel')"
+				@click="handleLogoClick"
 			>
 				<figure ref="avatar" class="avatar">
 					<BaseImage
@@ -35,7 +36,10 @@
 					:class="{ 'is-active': currentLocale === 'en' }"
 					:aria-label="t('languageSwitcher.english')"
 					:aria-current="currentLocale === 'en' ? 'page' : undefined"
-					data-stagger-link
+					:aria-disabled="currentLocale === 'en' ? 'true' : undefined"
+					:tabindex="currentLocale === 'en' ? -1 : undefined"
+					:data-stagger-link="currentLocale !== 'en' ? '' : undefined"
+					@click="preventActiveLocaleNavigation($event, 'en')"
 				>
 					<span lang="en" data-stagger-link-container>EN</span>
 				</router-link>
@@ -46,7 +50,10 @@
 					:class="{ 'is-active': currentLocale === 'nl' }"
 					:aria-label="t('languageSwitcher.dutch')"
 					:aria-current="currentLocale === 'nl' ? 'page' : undefined"
-					data-stagger-link
+					:aria-disabled="currentLocale === 'nl' ? 'true' : undefined"
+					:tabindex="currentLocale === 'nl' ? -1 : undefined"
+					:data-stagger-link="currentLocale !== 'nl' ? '' : undefined"
+					@click="preventActiveLocaleNavigation($event, 'nl')"
 				>
 					<span lang="nl" data-stagger-link-container>NL</span>
 				</router-link>
@@ -58,6 +65,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import BaseImage from './base/BaseImage.vue'
 import { useLocalizedRoute } from '../composables/useLocalizedRoute'
 import { getLocaleParams } from '../i18n'
@@ -71,7 +79,16 @@ import {
 } from '../utils/animations/gsap'
 
 const { t } = useI18n()
+const route = useRoute()
 const { currentLocale, getLocalizedRoute } = useLocalizedRoute()
+const props = withDefaults(defineProps<{
+	overlayActive?: boolean
+}>(), {
+	overlayActive: false
+})
+const emit = defineEmits<{
+	'overlay-scroll-top': []
+}>()
 const HEADER_COPY_REVEAL_SCROLL_RATIO = 0.7
 const root = ref<HTMLElement | null>(null)
 const avatar = ref<HTMLElement | null>(null)
@@ -81,6 +98,60 @@ let revealContext: gsap.Context | undefined
 let nameSplit: SplitText | undefined
 let roleSplits: SplitText[] = []
 let headerRefreshId = 0
+let logoScrollTween: gsap.core.Tween | undefined
+
+async function refreshStaggerLinks() {
+	await nextTick()
+	staggerLinks?.destroy()
+
+	if (!root.value) return
+
+	staggerLinks = initStaggerLinks(root.value)
+}
+
+function preventActiveLocaleNavigation(event: MouseEvent, locale: 'en' | 'nl') {
+	if (currentLocale.value === locale) {
+		event.preventDefault()
+	}
+}
+
+function handleLogoClick(event: MouseEvent) {
+	const isModifiedClick = event.button !== 0
+		|| event.metaKey
+		|| event.ctrlKey
+		|| event.shiftKey
+		|| event.altKey
+
+	if (isModifiedClick || route.name !== 'home') return
+
+	event.preventDefault()
+
+	if (props.overlayActive) {
+		emit('overlay-scroll-top')
+		return
+	}
+
+	logoScrollTween?.kill()
+
+	if (prefersReducedMotion()) {
+		window.scrollTo(0, 0)
+		return
+	}
+
+	const scrollPosition = { y: window.scrollY }
+
+	logoScrollTween = gsap.to(scrollPosition, {
+		y: 0,
+		duration: 0.9,
+		ease: 'power2.inOut',
+		onUpdate() {
+			window.scrollTo(0, scrollPosition.y)
+		},
+		onComplete() {
+			logoScrollTween = undefined
+		}
+	})
+}
 
 function wrapSplitChar(char: Element, className: string) {
 	const wrapper = document.createElement('span')
@@ -180,7 +251,7 @@ async function refreshHeaderCopyReveal() {
 onMounted(async () => {
 	if (!root.value) return
 
-	staggerLinks = initStaggerLinks(root.value)
+	await refreshStaggerLinks()
 	await refreshHeaderCopyReveal()
 })
 
@@ -190,8 +261,11 @@ watch(
 	{ flush: 'pre' }
 )
 
+watch(currentLocale, refreshStaggerLinks, { flush: 'post' })
+
 onUnmounted(() => {
 	headerRefreshId += 1
+	logoScrollTween?.kill()
 	staggerLinks?.destroy()
 	cleanupHeaderCopyReveal()
 })

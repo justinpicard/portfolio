@@ -25,7 +25,7 @@
 					<div ref="caseContent" class="project-layer-prototype__copy">
 						<ProjectCaseContent
 							:key="displayedProject.slug"
-							:case-study="displayedProject.caseStudy"
+							:project="displayedProject"
 						/>
 					</div>
 
@@ -286,6 +286,7 @@ let cardRestoreSplits: SplitText[] = []
 let cardRestoreTargets: HTMLElement[] = []
 let contextTransitionRunId = 0
 let isBottomScrimVisible: boolean | undefined
+let scrollToTopTween: gsap.core.Tween | undefined
 let sharedRepresentations: SharedElementRepresentation[] = []
 let previousDocumentOverflow = ''
 let closeRequestedDuringOpen = false
@@ -1495,6 +1496,26 @@ function handleProjectContentScroll() {
 	updateBottomScrim()
 }
 
+function scrollToTop() {
+	if (!content.value) return
+
+	scrollToTopTween?.kill()
+
+	if (prefersReducedMotion()) {
+		content.value.scrollTop = 0
+		return
+	}
+
+	scrollToTopTween = gsap.to(content.value, {
+		scrollTop: 0,
+		duration: 0.9,
+		ease: animationEases.inOut,
+		onComplete() {
+			scrollToTopTween = undefined
+		}
+	})
+}
+
 function killContextTransition() {
 	contextTransitionRunId += 1
 	transitionTimeline?.kill()
@@ -2591,6 +2612,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
 	timeline?.kill()
+	scrollToTopTween?.kill()
 	cleanupHeroReveal()
 	cleanupCardRestore()
 	killContextTransition()
@@ -2601,6 +2623,7 @@ onBeforeUnmount(() => {
 })
 
 defineExpose({
-	animateClose
+	animateClose,
+	scrollToTop
 })
 </script>

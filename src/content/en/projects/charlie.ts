@@ -15,7 +15,9 @@ const charlie = {
 	role: 'Product designer & developer',
 	type: 'Product experiments',
 	caseStudy: {
-		layout: 'plain',
+		introduction: [
+			'Exploring how thoughtful product design, AI and modern web technologies can simplify everyday meal planning.'
+		],
 		sections: []
 	}
 } satisfies ProjectContent

@@ -15,7 +15,9 @@ const sfvonline = {
 	role: 'UX/UI designer',
 	type: 'SaaS application',
 	caseStudy: {
-		layout: 'plain',
+		introduction: [
+			'Transforming complex safety and compliance workflows into a clear, approachable SaaS experience.'
+		],
 		sections: [
 			{
 				id: 'overview',

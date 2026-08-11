@@ -7,7 +7,10 @@
 			'site-header--overlay-active': overlayActive
 		}"
 	>
-		<SiteNav />
+		<SiteNav
+			:overlay-active="overlayActive"
+			@overlay-scroll-top="emit('overlay-scroll-top')"
+		/>
 	</header>
 	<div class="logo-trigger"></div>
 </template>
@@ -24,6 +27,9 @@ const props = withDefaults(defineProps<{
 	visible: true,
 	overlayActive: false
 })
+const emit = defineEmits<{
+	'overlay-scroll-top': []
+}>()
 
 const header = ref<HTMLElement | null>(null)
 const isInitiallyHidden = ref(!props.visible)

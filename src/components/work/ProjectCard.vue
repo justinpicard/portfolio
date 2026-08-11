@@ -41,9 +41,9 @@
 
 			<div class="project-card__visual" data-project-shared="media">
 				<BaseImage
-					:src="`/images/${project.image}`"
+					:src="`/images/${project.thumbnailImage}`"
 					:alt="project.title"
-					:fallback-format="project.imageFormat"
+					:fallback-format="project.thumbnailImageFormat"
 					aspect-ratio="16 / 7"
 				/>
 			</div>

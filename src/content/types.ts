@@ -50,7 +50,7 @@ export type ProjectSection = {
 }
 
 export type ProjectCaseStudy = {
-	layout: 'contained' | 'plain'
+	introduction: string[]
 	sections: ProjectSection[]
 }
 
@@ -73,8 +73,10 @@ export type ProjectContentOverride = {
 export type ProjectMedia = {
 	id: string
 	slug: ProjectSlug
-	image: string
-	imageFormat?: 'jpg' | 'jpeg' | 'png'
+	thumbnailImage: string
+	thumbnailImageFormat?: 'jpg' | 'jpeg' | 'png'
+	heroImage: string
+	heroImageFormat?: 'jpg' | 'jpeg' | 'png'
 	secondaryImages?: string[]
 	overlayBackground?: string
 	live?: string

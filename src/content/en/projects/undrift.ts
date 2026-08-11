@@ -15,7 +15,9 @@ const undrift = {
 	role: 'Product designer & developer',
 	type: 'Product experiments',
 	caseStudy: {
-		layout: 'plain',
+		introduction: [
+			'Making design system quality visible through continuous reviews, tracking and collaboration.'
+		],
 		sections: [
 			{
 				id: 'overview',

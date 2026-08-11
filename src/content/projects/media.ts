@@ -4,19 +4,22 @@ export const projectMedia = [
 	{
 		id: '1',
 		slug: 'muzimatch',
-		image: 'projects/muzimatch/muzimatch-thumb',
-		imageFormat: 'png',
+		thumbnailImage: 'projects/muzimatch/muzimatch-thumb',
+		thumbnailImageFormat: 'png',
+		heroImage: 'projects/muzimatch/muzimatch-hero',
+		heroImageFormat: 'jpg',
 		secondaryImages: [
 			'hz-university',
 			'dot3'
 		],
-		overlayBackground: '#efff90',
+		overlayBackground: '#B0B0FE',
 		live: 'https://muzimatch.nl'
 	},
 	{
 		id: '2',
 		slug: 'recranet',
-		image: 'hz-university',
+		thumbnailImage: 'hz-university',
+		heroImage: 'hz-university',
 		secondaryImages: [
 			'projects/recranet/vodatent',
 			'dehoop'
@@ -27,19 +30,22 @@ export const projectMedia = [
 	{
 		id: '3',
 		slug: 'undrift',
-		image: 'hz-university',
+		thumbnailImage: 'hz-university',
+		heroImage: 'hz-university',
 		overlayBackground: '#FFD87F'
 	},
 	{
 		id: '4',
 		slug: 'charlie',
-		image: 'hz-university',
+		thumbnailImage: 'hz-university',
+		heroImage: 'hz-university',
 		overlayBackground: '#c3c7ff'
 	},
 	{
 		id: '5',
 		slug: 'sfvonline',
-		image: 'projects/sfvonline/sfvonline',
+		thumbnailImage: 'projects/sfvonline/sfvonline',
+		heroImage: 'projects/sfvonline/sfvonline',
 		secondaryImages: [
 			'dot3',
 			'hz-university'

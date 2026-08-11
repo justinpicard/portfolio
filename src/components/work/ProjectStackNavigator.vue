@@ -28,9 +28,9 @@
 			>
 				<span class="project-stack-navigator__visual" aria-hidden="true">
 					<BaseImage
-						:src="`/images/${projects[projectIndex].image}`"
+						:src="`/images/${projects[projectIndex].thumbnailImage}`"
 						:alt="projects[projectIndex].title"
-						:fallback-format="projects[projectIndex].imageFormat"
+						:fallback-format="projects[projectIndex].thumbnailImageFormat"
 						aspect-ratio="16 / 10"
 					/>
 				</span>

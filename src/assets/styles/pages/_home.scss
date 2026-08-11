@@ -24,7 +24,7 @@ main:has(> .page-surface) {
 	position: relative;
 	background-color: var(--color-primary);
 	background-position: 50%;
-	background-image: url("/images/dot3.png");
+	background-image: url("/images/dot-pattern.png");
 	background-attachment: fixed;
 	transform-origin: center center;
 	overflow-x: clip;

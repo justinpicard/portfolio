@@ -131,6 +131,10 @@ async function closeProject() {
 	sourceElement.focus({ preventScroll: true })
 }
 
+function scrollProjectToTop() {
+	projectLayer.value?.scrollToTop()
+}
+
 function changeProject(nextIndex: number) {
 	if (
 		nextIndex < 0
@@ -520,6 +524,10 @@ watch(
 	},
 	{ flush: 'pre' }
 )
+
+defineExpose({
+	scrollProjectToTop
+})
 
 onUnmounted(() => {
 	titleRefreshId += 1

@@ -8,7 +8,7 @@
 			<div ref="heroPhoto" class="hero-photo">
 				<BaseImage
 					class-name="home-hero__image"
-					src="/images/justin-6"
+					src="/images/justin-picard-hero"
 					alt=""
 					loading="eager"
 				/>

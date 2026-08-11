@@ -28,9 +28,9 @@
 					>
 						<BaseImage
 							class-name="project-overlay__image"
-							:src="`/images/${surface.project.image}`"
+							:src="`/images/${surface.project.thumbnailImage}`"
 							:alt="surface.project.title"
-							:fallback-format="surface.project.imageFormat"
+							:fallback-format="surface.project.thumbnailImageFormat"
 							aspect-ratio="3 / 3.75"
 						/>
 					</div>

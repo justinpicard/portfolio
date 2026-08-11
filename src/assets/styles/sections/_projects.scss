@@ -189,18 +189,21 @@
 
 	&__visual {
 		position: absolute;
-		bottom: clamp(1rem, 3vw, 2rem);
-		right: clamp(1rem, 3vw, 2rem);
-		left: clamp(1rem, 3vw, 2rem);
-		height: 44%;
+		//bottom: clamp(1rem, 3vw, 2rem);
+		//right: clamp(1rem, 3vw, 2rem);
+		//left: clamp(1rem, 3vw, 2rem);
+		bottom: 0;
+		right: 0;
+		left: 0;
+		height: 50%;
 		overflow: hidden;
-		border-radius: clamp(1rem, 1vw, 1.75rem);
-		background:
-			linear-gradient(
-				145deg,
-				color-mix(in srgb, var(--project-card-accent) 82%, transparent),
-				color-mix(in srgb, var(--project-card-color) 66%, var(--color-primary))
-			);
+		//border-radius: clamp(1rem, 1vw, 1.75rem);
+		//background:
+		//	linear-gradient(
+		//		145deg,
+		//		color-mix(in srgb, var(--project-card-accent) 82%, transparent),
+		//		color-mix(in srgb, var(--project-card-color) 66%, var(--color-primary))
+		//	);
 
 		.base-image,
 		img {

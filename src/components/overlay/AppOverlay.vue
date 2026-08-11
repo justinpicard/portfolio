@@ -142,6 +142,13 @@ function handleKeydown(event: KeyboardEvent) {
 	}
 }
 
+function scrollToTop() {
+	scrollContainer.value?.scrollTo({
+		top: 0,
+		behavior: prefersReducedMotion() ? 'auto' : 'smooth'
+	})
+}
+
 function getAnimationTargets() {
 	return [
 		overlay.value,
@@ -329,6 +336,7 @@ onUnmounted(() => {
 
 defineExpose({
 	backdrop,
-	scrollContainer
+	scrollContainer,
+	scrollToTop
 })
 </script>

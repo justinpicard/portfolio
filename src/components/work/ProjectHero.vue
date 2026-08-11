@@ -86,9 +86,9 @@
 		>
 			<BaseImage
 				:key="project.id"
-				:src="`/images/${project.image}`"
+				:src="`/images/${project.heroImage}`"
 				:alt="project.title"
-				:fallback-format="project.imageFormat"
+				:fallback-format="project.heroImageFormat"
 				loading="eager"
 			/>
 		</div>

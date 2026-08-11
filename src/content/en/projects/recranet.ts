@@ -8,14 +8,16 @@ const recranet = {
 		'Enterprise SaaS',
 		'Product Design',
 		'Design System',
-		'Booking'
+		'Online booking management'
 	],
 	year: '2023',
 	job: 'Recranet',
 	role: 'Product designer',
 	type: 'Design system & SaaS product design',
 	caseStudy: {
-		layout: 'plain',
+		introduction: [
+			'Designing a scalable booking platform that helps holiday parks manage reservations and guest experiences.'
+		],
 		sections: [
 			{
 				id: 'overview',

@@ -7,13 +7,17 @@
 		<AppHeader
 			:visible="isHeaderVisible"
 			:overlay-active="activeOverlay !== null || isWorkOverlayOpen"
+			@overlay-scroll-top="scrollActiveOverlayToTop"
 		/>
 		<SectionHomeHero
 			ref="hero"
 			@intro-start="showHeader"
 		/>
 		<SectionHomeAbout />
-		<SectionHomeWork @overlay-change="isWorkOverlayOpen = $event" />
+		<SectionHomeWork
+			ref="workSection"
+			@overlay-change="isWorkOverlayOpen = $event"
+		/>
 		<HomePhotoStackSection />
 		<AppFooter />
 	</div>
@@ -70,6 +74,7 @@ type OverlayState =
 	| null
 
 const hero = ref<InstanceType<typeof SectionHomeHero> | null>(null)
+const workSection = ref<InstanceType<typeof SectionHomeWork> | null>(null)
 const pageSurface = ref<HTMLElement | null>(null)
 const pageSurfaceScrims = ref<HTMLElement | null>(null)
 const pageSurfaceScrimTop = ref<HTMLElement | null>(null)
@@ -84,6 +89,15 @@ const overlayFirstMediaHidden = ref(false)
 const projectOpeningTransitionActive = ref(false)
 const { projects } = usePortfolioContent()
 let closeOverlayTimeout: ReturnType<typeof window.setTimeout> | undefined
+
+function scrollActiveOverlayToTop() {
+	if (isWorkOverlayOpen.value) {
+		workSection.value?.scrollProjectToTop()
+		return
+	}
+
+	appOverlay.value?.scrollToTop()
+}
 
 const overlayLabelledBy = computed(() => {
 	if (renderedOverlay.value?.type === 'project') return 'project-overlay-title'
