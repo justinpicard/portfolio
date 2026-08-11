@@ -10,4 +10,9 @@
 	font-weight: var(--font-weight-medium);
 	line-height: var(--line-height-tight);
 	white-space: nowrap;
+
+	&--sm {
+		padding: var(--space-1) var(--space-2);
+		font-size: var(--font-size-2xs);
+	}
 }

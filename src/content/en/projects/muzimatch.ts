@@ -17,7 +17,7 @@ const muzimatch = {
 	year: '2026',
 	job: 'Sideproject',
 	role: 'Product designer & developer',
-	type: 'Musicians classifieds platform',
+	type: 'Privacy-first musicians classifieds platform',
 	caseStudy: {
 		introduction: [
 			'What started as a side project to learn Nuxt evolved into an ongoing product with real users. Building MuziMatch challenged me to think beyond interfaces, through user feedback, analytics and continuous iteration to continuously improve the experience.'

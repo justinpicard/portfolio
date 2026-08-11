@@ -75,6 +75,7 @@ export type ProjectMedia = {
 	slug: ProjectSlug
 	thumbnailImage: string
 	thumbnailImageFormat?: 'jpg' | 'jpeg' | 'png'
+	thumbnailImagePosition?: string
 	heroImage: string
 	heroImageFormat?: 'jpg' | 'jpeg' | 'png'
 	secondaryImages?: string[]

@@ -5,7 +5,7 @@ export const projectMedia = [
 		id: '1',
 		slug: 'muzimatch',
 		thumbnailImage: 'projects/muzimatch/muzimatch-thumb',
-		thumbnailImageFormat: 'png',
+		thumbnailImageFormat: 'jpg',
 		heroImage: 'projects/muzimatch/muzimatch-hero',
 		heroImageFormat: 'jpg',
 		secondaryImages: [
@@ -18,7 +18,7 @@ export const projectMedia = [
 	{
 		id: '2',
 		slug: 'recranet',
-		thumbnailImage: 'hz-university',
+		thumbnailImage: 'projects/recranet/recranet-thumb',
 		heroImage: 'hz-university',
 		secondaryImages: [
 			'projects/recranet/vodatent',

@@ -23,6 +23,15 @@
 		@keydown.space.prevent="handleOpen"
 	>
 		<div ref="hoverSurface" class="project-card__hover-surface">
+			<div class="project-card__visual" data-project-shared="media" aria-hidden="true">
+				<BaseImage
+					:src="`/images/${project.thumbnailImage}`"
+					alt=""
+					:fallback-format="project.thumbnailImageFormat"
+					:position="project.thumbnailImagePosition ?? 'center center'"
+				/>
+			</div>
+
 			<div class="project-card__content">
 				<p class="project-card__year" data-project-shared="year">{{ project.year }}</p>
 				<h3 class="project-card__title" data-project-shared="title">{{ project.title }}</h3>
@@ -37,15 +46,6 @@
 						{{ tag }}
 					</Tag>
 				</div>
-			</div>
-
-			<div class="project-card__visual" data-project-shared="media">
-				<BaseImage
-					:src="`/images/${project.thumbnailImage}`"
-					:alt="project.title"
-					:fallback-format="project.thumbnailImageFormat"
-					aspect-ratio="16 / 7"
-				/>
 			</div>
 
 			<CircularScrollIndicator
