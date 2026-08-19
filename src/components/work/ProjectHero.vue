@@ -84,12 +84,9 @@
 			class="project-layer-prototype__media"
 			data-project-shared="media"
 		>
-			<BaseImage
+			<ProjectHeroMedia
 				:key="project.id"
-				:src="`/images/${project.heroImage}`"
-				:alt="project.title"
-				:fallback-format="project.heroImageFormat"
-				loading="eager"
+				:project="project"
 			/>
 		</div>
 	</div>
@@ -99,8 +96,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Project } from '../../content'
-import BaseImage from '../base/BaseImage.vue'
-import Tag from '../ui/Tag.vue'
+import ProjectHeroMedia from './ProjectHeroMedia.vue'
 
 const props = defineProps<{
 	project: Project

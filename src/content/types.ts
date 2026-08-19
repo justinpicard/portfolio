@@ -76,8 +76,19 @@ export type ProjectMedia = {
 	thumbnailImage: string
 	thumbnailImageFormat?: 'jpg' | 'jpeg' | 'png'
 	thumbnailImagePosition?: string
+	landscapeThumbnailImage?: string
+	landscapeThumbnailImageFormat?: 'jpg' | 'jpeg' | 'png'
+	landscapeThumbnailImagePosition?: string
+	landscapeMediaPosition?: 'left' | 'right'
 	heroImage: string
 	heroImageFormat?: 'jpg' | 'jpeg' | 'png'
+	heroImagePosition?: string
+	heroPosterImage?: string
+	heroPosterImageFormat?: 'jpg' | 'jpeg' | 'png'
+	heroVideo?: {
+		webm: string
+		mp4: string
+	}
 	secondaryImages?: string[]
 	overlayBackground?: string
 	live?: string

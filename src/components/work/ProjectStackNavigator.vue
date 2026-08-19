@@ -12,7 +12,9 @@
 				class="project-stack-navigator__card"
 				:class="{
 					'project-stack-navigator__card--front': position === 0,
-					'project-stack-navigator__card--hidden': position > visibleRearCardCount + 1
+					'project-stack-navigator__card--hidden': position > visibleRearCardCount + 1,
+					'project-stack-navigator__card--media-right':
+						projects[projectIndex].landscapeMediaPosition === 'right'
 				}"
 				:style="getCardStyles(projectIndex, position)"
 				type="button"
@@ -28,9 +30,20 @@
 			>
 				<span class="project-stack-navigator__visual" aria-hidden="true">
 					<BaseImage
-						:src="`/images/${projects[projectIndex].thumbnailImage}`"
+						:src="`/images/${
+							projects[projectIndex].landscapeThumbnailImage
+							?? projects[projectIndex].thumbnailImage
+						}`"
 						:alt="projects[projectIndex].title"
-						:fallback-format="projects[projectIndex].thumbnailImageFormat"
+						:fallback-format="
+							projects[projectIndex].landscapeThumbnailImageFormat
+							?? projects[projectIndex].thumbnailImageFormat
+						"
+						:position="
+							projects[projectIndex].landscapeThumbnailImagePosition
+							?? projects[projectIndex].thumbnailImagePosition
+							?? 'center center'
+						"
 						aspect-ratio="16 / 10"
 					/>
 				</span>
