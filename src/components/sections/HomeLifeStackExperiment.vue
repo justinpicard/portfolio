@@ -272,7 +272,7 @@ async function initAnimations() {
 					ease: animationEases.strongOut,
 					scrollTrigger: {
 						trigger: root.value,
-						// On desktop, reveal only after the copy reaches its pinned center position.
+						// Desktop copy reveals once the overlapping section reaches its pin position.
 						start: () => window.matchMedia('(min-width: 64rem)').matches
 							? 'top top'
 							: 'top 75%',

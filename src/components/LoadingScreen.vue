@@ -79,19 +79,37 @@
 				/>
 			</svg>
 		</svg>
+		<div
+			ref="signatureCaptionGroup"
+			class="intro-screen__signature-caption-group"
+		>
+			<p
+				ref="signatureCaption"
+				class="intro-screen__signature-caption"
+			>
+				Justin Picard <span class="star">✦</span> Digital Product Designer
+			</p>
+		</div>
 		<slot />
 	</div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-import { gsap, prefersReducedMotion } from '../utils/animations/gsap'
+import {
+	gsap,
+	prefersReducedMotion,
+	registerGsapPlugins,
+	SplitText
+} from '../utils/animations/gsap'
 
 const intro = ref<HTMLElement | null>(null)
 const monogramMask = ref<SVGSVGElement | null>(null)
 const monogramLine = ref<SVGPathElement | null>(null)
 const whiteDotLayer = ref<SVGSVGElement | null>(null)
 const whiteDot = ref<SVGCircleElement | null>(null)
+const signatureCaptionGroup = ref<HTMLElement | null>(null)
+const signatureCaption = ref<HTMLParagraphElement | null>(null)
 const SIGNATURE_DRAW_DURATION = 2.4
 const SIGNATURE_DOT_DURATION = 0.125
 const SIGNATURE_ZOOM_DELAY = 0.15
@@ -102,14 +120,19 @@ const SIGNATURE_ZOOM_OVERSCAN = 20
 const SIGNATURE_MONOGRAM_WIDTH = 200
 const SIGNATURE_MONOGRAM_HEIGHT = 134.7
 let signatureDrawTimeline: gsap.core.Timeline | undefined
+let signatureCaptionSplit: SplitText | undefined
 
 onMounted(() => {
+	registerGsapPlugins()
+
 	const introElement = intro.value
 	const mask = monogramMask.value
 	const line = monogramLine.value
 	const dotLayer = whiteDotLayer.value
 	const dot = whiteDot.value
-	if (!introElement || !mask || !line || !dotLayer || !dot) return
+	const captionGroup = signatureCaptionGroup.value
+	const caption = signatureCaption.value
+	if (!introElement || !mask || !line || !dotLayer || !dot || !captionGroup || !caption) return
 
 	const layout = getSignatureLayout()
 	const initialBox = getSignatureBox(layout, 1)
@@ -140,6 +163,20 @@ onMounted(() => {
 		return
 	}
 
+	signatureCaptionSplit = new SplitText(caption, {
+		type: 'chars',
+		charsClass: 'intro-screen__signature-caption-char'
+	})
+	signatureCaptionSplit.chars.forEach(wrapSplitChar)
+	gsap.set(signatureCaptionSplit.chars, {
+		autoAlpha: 0,
+		yPercent: 115
+	})
+	gsap.set(captionGroup, {
+		scale: 1,
+		visibility: 'visible'
+	})
+
 	const lineLength = line.getTotalLength()
 
 	gsap.set(line, {
@@ -153,6 +190,13 @@ onMounted(() => {
 			duration: SIGNATURE_DRAW_DURATION,
 			ease: 'power2.inOut'
 		})
+		.to(signatureCaptionSplit.chars, {
+			autoAlpha: 1,
+			yPercent: 0,
+			duration: 0.7,
+			ease: 'back.out(1.7)',
+			stagger: 0.015
+		}, 0.3)
 		.set(dot, {
 			opacity: 0,
 			attr: {
@@ -167,9 +211,16 @@ onMounted(() => {
 			duration: SIGNATURE_DOT_DURATION,
 			ease: 'power2.out'
 		}, SIGNATURE_DRAW_DURATION)
+
+	signatureDrawTimeline
 		.to([mask, dotLayer], {
 			// Keep both SVG coordinate spaces aligned during the existing zoom.
 			attr: getSignatureBox(layout, SIGNATURE_ZOOM_BOUNCE_SCALE),
+			duration: SIGNATURE_ZOOM_BOUNCE_DURATION,
+			ease: 'sine.inOut'
+		}, SIGNATURE_DRAW_DURATION + SIGNATURE_ZOOM_DELAY)
+		.to(captionGroup, {
+			scale: SIGNATURE_ZOOM_BOUNCE_SCALE,
 			duration: SIGNATURE_ZOOM_BOUNCE_DURATION,
 			ease: 'sine.inOut'
 		}, SIGNATURE_DRAW_DURATION + SIGNATURE_ZOOM_DELAY)
@@ -178,6 +229,11 @@ onMounted(() => {
 			duration: SIGNATURE_ZOOM_DURATION,
 			ease: 'expo.in'
 		})
+		.to(captionGroup, {
+			scale: layout.zoomScale,
+			duration: SIGNATURE_ZOOM_DURATION,
+			ease: 'expo.in'
+		}, '<')
 		.set(introElement, {
 			autoAlpha: 0,
 			pointerEvents: 'none',
@@ -187,7 +243,15 @@ onMounted(() => {
 
 onUnmounted(() => {
 	signatureDrawTimeline?.kill()
+	signatureCaptionSplit?.revert()
 })
+
+function wrapSplitChar(char: Element) {
+	const wrapper = document.createElement('span')
+	wrapper.classList.add('intro-screen__signature-caption-char-mask')
+	char.parentNode?.insertBefore(wrapper, char)
+	wrapper.appendChild(char)
+}
 
 function getSignatureDrawTimeline() {
 	return signatureDrawTimeline

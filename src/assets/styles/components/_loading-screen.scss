@@ -33,6 +33,45 @@
 		fill: var(--color-white);
 	}
 
+	&__signature-caption-group {
+		--signature-caption-offset: calc(67.35px + var(--space-3));
+
+		position: absolute;
+		top: 50%;
+		inset-inline: 0;
+		display: grid;
+		justify-items: center;
+		width: 100%;
+		visibility: hidden;
+		translate: 0 var(--signature-caption-offset);
+		transform-origin: 50% calc(-67.35px - var(--space-3));
+		will-change: transform;
+	}
+
+	&__signature-caption {
+		margin-top: 1rem;
+		font-size: var(--font-size-md);
+		font-weight: var(--font-weight-medium);
+		line-height: var(--line-height-tight);
+		letter-spacing: var(--letter-spacing-wide);
+		text-align: center;
+		white-space: nowrap;
+	}
+
+	&__signature-caption-char-mask,
+	&__signature-caption-char {
+		display: inline-block;
+	}
+
+	&__signature-caption-char-mask {
+		overflow: hidden;
+		vertical-align: bottom;
+	}
+
+	&__signature-caption-char {
+		will-change: transform, opacity;
+	}
+
 	.container {
 		min-height: 100svh;
 	}

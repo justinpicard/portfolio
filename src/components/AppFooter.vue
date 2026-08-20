@@ -2,7 +2,7 @@
 	<footer class="site-footer section pb-16">
 		<div class="container site-footer__container">
 			<div class="site-footer__grid d-grid grid-cols-1 md:grid-cols-3">
-				<p class="site-footer__eyebrow eyebrow text-secondary mb-8">{{ t('footer.eyebrow') }}</p>
+				<!--<p class="site-footer__eyebrow eyebrow text-secondary mb-8">{{ t('footer.eyebrow') }}</p>-->
 
 				<div
 					ref="footerMarquee"
@@ -84,7 +84,20 @@
 							</li>
 						</ul>
 					</nav>
-					<p class="site-footer__copyright">&copy; {{ new Date().getFullYear() }} Justin Picard</p>
+					<div class="site-footer__credits">
+						<p class="site-footer__copyright">Hero portrait by
+							<a
+								href="https://percys.nl"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								Percy's
+							</a>
+						</p>
+						<p class="site-footer__copyright">
+							&copy; {{ new Date().getFullYear() }} Justin Picard
+						</p>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -145,11 +158,20 @@ async function setupFooterMarquee() {
 			ease: animationEases.none,
 			repeat: -1
 		})
+		let marqueeDirection = 1
 
 		ScrollTrigger.create({
+			trigger: footerMarquee.value,
+			start: 'top bottom',
+			end: 'bottom top',
 			onUpdate(self) {
+				const nextDirection = self.direction > 0 ? 1 : -1
+
+				if (nextDirection === marqueeDirection) return
+
+				marqueeDirection = nextDirection
 				gsap.to(loop, {
-					timeScale: self.direction > 0 ? 1 : -1,
+					timeScale: marqueeDirection,
 					duration: 0.18,
 					ease: animationEases.inOut,
 					overwrite: true
