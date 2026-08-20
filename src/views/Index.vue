@@ -18,7 +18,7 @@
 			ref="workSection"
 			@overlay-change="isWorkOverlayOpen = $event"
 		/>
-		<HomePhotoStackSection />
+		<HomeLifeStackExperiment />
 		<AppFooter />
 	</div>
 	<AppOverlay
@@ -52,7 +52,7 @@ import AppHeader from "../components/AppHeader.vue"
 import AppOverlay from "../components/overlay/AppOverlay.vue"
 import CvOverlayContent from "../components/overlay/CvOverlayContent.vue"
 import ProjectOverlayContent from "../components/overlay/ProjectOverlayContent.vue"
-import HomePhotoStackSection from "../components/sections/HomePhotoStackSection.vue"
+import HomeLifeStackExperiment from "../components/sections/HomeLifeStackExperiment.vue"
 import SectionHomeHero from "../components/sections/SectionHomeHero.vue";
 import SectionHomeAbout from "../components/sections/SectionHomeAbout.vue";
 import SectionHomeWork from "../components/sections/SectionHomeWork.vue";

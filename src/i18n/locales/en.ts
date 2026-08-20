@@ -12,7 +12,21 @@ export default {
 		aboutLabel: 'About',
 		workLabel: 'Work.',
 		workExhibitionLabel: 'Selected work exhibition',
-		lifeLabel: 'Life.'
+		lifeLabel: 'Life.',
+		lifeIntro: 'There’s a lot more to life than work and side projects. Here’s a little glimpse into mine.',
+		lifePhotoCaptions: {
+			nancyPortrait: 'This is me, spotted in the wild 👋🏼',
+			bassist: 'Fun fact: in another life, I used to be a rockstar 🤘🏼',
+			pretzel: 'I’m quite easy to convince when good food, drinks or a plane ticket are involved 🥨🍺',
+			empireStateBuilding: 'Speaking of plane tickets, I love exploring new places. 🛫',
+			learningSpanish: 'My latest challenge: Spanish 🇪🇸 Starting with the basics',
+			pintxos: '(secretly the real reason I\'m learing spanish)',
+			randomPhoto: 'Random photo: …',
+			berlinArchitecture: 'I have a thing for photographing buildings from weird angles',
+			mirrorSelfie: 'Like I said… weird angles',
+			middelburg: 'Middelburg is where the ❤️ is',
+			cats: 'These rascals run the place 🐈🐈‍⬛'
+		}
 	},
 	project: {
 		year: 'Year',
@@ -51,23 +65,17 @@ export default {
 		closeOverlay: 'Close overlay',
 		avatarAlt: 'Portrait of Justin Picard',
 		lifePhotoAlts: {
-			newYorkSelfie: 'Selfie in New York',
-			family: 'Justin Picard with his family',
-			berlinArchitecture: 'Architecture in Berlin',
+			nancyPortrait: 'Portrait of Justin Picard',
 			bassist: 'Justin Picard playing bass guitar',
-			valenciaArchitecture: 'Architecture in Valencia',
-			madisonSquareGarden: 'Madison Square Garden',
-			newYorkArt: 'Artwork in New York',
-			empireStateBuilding: 'Empire State Building in New York',
-			pintxosBilbao: 'Pintxos in Bilbao',
-			cats: 'Cats',
-			graffiti: 'Graffiti',
-			oktoberfest: 'Oktoberfest',
-			paris: 'Paris',
-			freshPasta: 'Fresh pasta',
-			perfume: 'Perfume',
-			spanishMoment: 'A Spanish moment',
-			starWars: 'Star Wars'
+			pretzel: 'Justin Picard eating a pretzel while holding two glasses of beer in Germany',
+			empireStateBuilding: 'View from the Empire State Building in New York',
+			learningSpanish: 'A spanish childrens book',
+			pintxos: 'Pitxos in a bar in Bilbao',
+			randomPhoto: '...',
+			berlinArchitecture: 'Photo of the Fernsehturm in Berlin, taken from a low perspective angle',
+			mirrorSelfie: 'Selfie from below in The Summit in New York',
+			middelburg: 'Lange Jan church tower in Middelburg, Zeeland',
+			cats: 'Cats'
 		}
 	},
 	errors: {

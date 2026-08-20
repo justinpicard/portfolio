@@ -1,0 +1,149 @@
+.home-life-section {
+	min-height: 100vh;
+	padding-block: var(--section-padding-sm);
+	overflow: clip;
+
+	&__layout {
+		display: grid;
+		gap: var(--space-16);
+	}
+
+	&__intro {
+		max-width: 34rem;
+	}
+
+	&__title {
+		margin-block-end: var(--space-6);
+		font-size: clamp(4.5rem, 18vw, 8rem);
+		line-height: 0.85;
+		letter-spacing: var(--letter-spacing-tight);
+	}
+
+	&__text {
+		max-width: 31ch;
+		font-size: var(--font-size-lead);
+		line-height: var(--line-height-normal);
+	}
+
+	&__stack {
+		display: grid;
+		gap: var(--space-10);
+		min-width: 0;
+	}
+
+	&__card {
+		width: min(100%, 30rem);
+		padding: clamp(0.625rem, 1.2vw, 0.875rem);
+		margin: 0;
+		color: var(--color-primary);
+		background: var(--color-white);
+		box-shadow: 0 1rem 2.75rem color-mix(in srgb, var(--color-black) 19%, transparent);
+
+		&:nth-child(even) {
+			justify-self: end;
+		}
+	}
+
+	&__caption {
+		padding: var(--space-4) var(--space-2) var(--space-2);
+		font-size: var(--font-size-sm);
+		font-weight: var(--font-weight-medium);
+		line-height: var(--line-height-tight);
+	}
+}
+
+@media (min-width: 48rem) and (max-width: 63.98rem) {
+	.home-life-section {
+		&__stack {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			align-items: start;
+		}
+
+		&__card {
+			width: 100%;
+
+			&:nth-child(even) {
+				margin-block-start: var(--space-16);
+			}
+		}
+	}
+}
+
+@media (min-width: 64rem) {
+	.home-life-section {
+		padding-block: 0;
+
+		&__layout {
+			grid-template-columns: minmax(0, 5fr) minmax(28rem, 7fr);
+			align-items: center;
+			gap: clamp(3rem, 8vw, 9rem);
+			height: 100vh;
+		}
+
+		&__intro {
+			align-self: center;
+			justify-self: end;
+		}
+
+		&__title {
+			font-size: clamp(6rem, 10vw, 10rem);
+		}
+
+		&__stack {
+			position: relative;
+			height: min(76vh, 49rem);
+		}
+
+		&__card {
+			position: absolute;
+			inset: 50% auto auto 50%;
+			width: min(28vw, 27rem);
+			will-change: transform, opacity;
+
+			&--landscape {
+				width: min(34vw, 32rem);
+			}
+
+			&--square {
+				width: min(30vw, 28rem);
+			}
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.home-life-section {
+		padding-block: var(--section-padding-sm);
+
+		&__layout {
+			height: auto;
+		}
+
+		&__stack {
+			position: static;
+			display: grid;
+			height: auto;
+		}
+
+		&__card {
+			position: static;
+			inset: auto;
+			width: min(100%, 30rem);
+			translate: none;
+			transform: none;
+			will-change: auto;
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) and (min-width: 64rem) {
+	.home-life-section {
+		&__layout {
+			align-items: start;
+		}
+
+		&__stack {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+}

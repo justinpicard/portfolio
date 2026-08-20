@@ -338,3 +338,10 @@ When in doubt:
 Follow the existing architecture instead of introducing a new one.
 
 Consistency is more valuable than novelty.
+
+
+---
+
+# Codex behavior
+
+Follow the communication, working style, decision-making, and verification instructions in `CODEX.md`.
