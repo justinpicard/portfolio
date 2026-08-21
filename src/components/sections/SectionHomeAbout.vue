@@ -28,8 +28,13 @@
 import { nextTick, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePortfolioContent } from '../../composables/usePortfolioContent'
-import { gsap, ScrollTrigger, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
-import { animationDurations, animationEases, animationStaggers } from '../../utils/animations/presets'
+import {
+	gsap,
+	prefersReducedMotion,
+	ScrollTrigger,
+	SplitText,
+	registerGsapPlugins
+} from '../../utils/animations/gsap'
 
 const { locale, t } = useI18n()
 const { about } = usePortfolioContent()
@@ -37,35 +42,25 @@ const root = ref<HTMLElement | null>(null)
 const aboutText = ref<HTMLElement | null>(null)
 const aboutEyebrow = ref<HTMLParagraphElement | null>(null)
 const aboutTitle = ref<HTMLHeadingElement | null>(null)
-let eyebrowSplit: SplitText | undefined
-let titleSplit: SplitText | undefined
-let bodySplit: SplitText | undefined
+let aboutSplit: SplitText | undefined
 let ctx: gsap.Context | undefined
 let isMounted = false
-let hasRevealCompleted = false
 let revealRequestId = 0
 const ABOUT_NAVIGATION_TEXT_VIEWPORT_POSITION = 0.2
+const ABOUT_WORD_INITIAL_BLUR = 10
+const ABOUT_WORD_INITIAL_OPACITY = 0.55
+const ABOUT_WORD_REVEAL_STAGGER = 0.1
+const ABOUT_REVEAL_START = 'top 55%'
+const ABOUT_REVEAL_END = 'bottom 35%'
 
 function cleanupAboutReveal() {
 	revealRequestId += 1
 	ctx?.revert()
 	ctx = undefined
-	eyebrowSplit?.revert()
-	titleSplit?.revert()
-	bodySplit?.revert()
+	aboutSplit?.revert()
+	aboutSplit = undefined
+	if (aboutText.value) gsap.set(aboutText.value, { clearProps: 'visibility' })
 	if (root.value) delete root.value.dataset.sectionNavigationScrollY
-	eyebrowSplit = undefined
-	titleSplit = undefined
-	bodySplit = undefined
-}
-
-function wrapSplitLines(lines: Element[]) {
-	lines.forEach((line: Element) => {
-		const wrapper = document.createElement('div')
-		wrapper.classList.add('split-line-wrapper')
-		line.parentNode?.insertBefore(wrapper, line)
-		wrapper.appendChild(line)
-	})
 }
 
 function waitForFonts() {
@@ -82,8 +77,13 @@ function waitForFrame() {
 
 async function initAboutReveal() {
 	const requestId = ++revealRequestId
+	const reduceMotion = prefersReducedMotion()
 
 	registerGsapPlugins()
+	if (aboutText.value && !reduceMotion) {
+		// Avoid flashing the sharp state while fonts and word boundaries settle.
+		gsap.set(aboutText.value, { visibility: 'hidden' })
+	}
 
 	await waitForFonts()
 	await nextTick()
@@ -107,47 +107,47 @@ async function initAboutReveal() {
 		const aboutBody = gsap.utils.toArray<HTMLParagraphElement>(
 			aboutText.value.querySelectorAll('p:not(.about-section__eyebrow)')
 		)
-
-		eyebrowSplit = new SplitText(aboutEyebrow.value, { type: 'lines', linesClass: 'split-line' })
-		titleSplit = new SplitText(aboutTitle.value, { type: 'lines', linesClass: 'split-line' })
-		bodySplit = new SplitText(aboutBody, { type: 'lines', linesClass: 'split-line' })
-
-		wrapSplitLines(eyebrowSplit.lines)
-		wrapSplitLines(titleSplit.lines)
-		wrapSplitLines(bodySplit.lines)
-
-		const revealLines = [
-			...eyebrowSplit.lines,
-			...titleSplit.lines,
-			...bodySplit.lines
+		const aboutCopy = [
+			aboutEyebrow.value,
+			aboutTitle.value,
+			...aboutBody
 		]
 
-		if (hasRevealCompleted) {
-			gsap.set(revealLines, { y: 0, opacity: 1 })
+		if (reduceMotion) {
+			gsap.set(aboutText.value, { clearProps: 'visibility' })
 			return
 		}
 
-		const timeline = gsap.timeline({
+		aboutSplit = new SplitText(aboutCopy, {
+			type: 'words',
+			wordsClass: 'about-section__word'
+		})
+
+		gsap.set(aboutSplit.words, {
+			filter: `blur(${ABOUT_WORD_INITIAL_BLUR}px)`,
+			opacity: ABOUT_WORD_INITIAL_OPACITY
+		})
+		gsap.set(aboutText.value, { visibility: 'visible' })
+
+		gsap.to(aboutSplit.words, {
+			filter: 'blur(0px)',
+			opacity: 1,
+			duration: 1,
+			stagger: {
+				each: ABOUT_WORD_REVEAL_STAGGER,
+				from: 'start'
+			},
+			ease: 'none',
 			scrollTrigger: {
-				trigger: root.value,
-				start: 'top 50%',
-				toggleActions: 'play none none none'
+				trigger: aboutText.value,
+				start: ABOUT_REVEAL_START,
+				end: ABOUT_REVEAL_END,
+				scrub: true,
+				invalidateOnRefresh: true
 			}
 		})
 
-		timeline.fromTo(revealLines, {
-			y: 90,
-			opacity: 1
-		}, {
-			y: 0,
-			opacity: 1,
-			duration: animationDurations.reveal,
-			stagger: animationStaggers.lines,
-			ease: animationEases.strongOut,
-			onComplete: () => {
-				hasRevealCompleted = true
-			}
-		})
+		ScrollTrigger.refresh()
 	}, root.value ?? undefined)
 }
 
