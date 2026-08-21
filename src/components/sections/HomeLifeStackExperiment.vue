@@ -276,7 +276,7 @@ async function initAnimations() {
 						start: () => window.matchMedia('(min-width: 64rem)').matches
 							? 'top top'
 							: 'top 75%',
-						toggleActions: 'play none none none',
+						toggleActions: 'play none none reverse',
 						invalidateOnRefresh: true
 					}
 				})

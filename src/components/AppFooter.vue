@@ -161,9 +161,10 @@ async function setupFooterMarquee() {
 		let marqueeDirection = 1
 
 		ScrollTrigger.create({
-			trigger: footerMarquee.value,
-			start: 'top bottom',
-			end: 'bottom top',
+			start: 0,
+			end: 'max',
+			// Refresh after pinned sections so the global direction range stays accurate.
+			refreshPriority: -1,
 			onUpdate(self) {
 				const nextDirection = self.direction > 0 ? 1 : -1
 
