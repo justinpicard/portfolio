@@ -1,6 +1,6 @@
 import {
 	DEFAULT_LOCALE,
-	SUPPORTED_LOCALES,
+	PUBLIC_LOCALES,
 	type Locale
 } from '../i18n'
 
@@ -8,7 +8,7 @@ export const siteConfig = {
 	name: 'Justin Picard',
 	baseUrl: 'https://justinpicard.nl',
 	defaultLocale: DEFAULT_LOCALE,
-	supportedLocales: SUPPORTED_LOCALES,
+	supportedLocales: PUBLIC_LOCALES,
 	defaultSocialImage: {
 		path: '/justin-picard-portfolio.png',
 		width: 1200,

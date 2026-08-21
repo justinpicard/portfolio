@@ -3,13 +3,36 @@ import {
 	PREFIXED_LOCALES,
 	resolveLocale
 } from './i18n'
+import { MULTILINGUAL_ENABLED } from './config/features'
 import Index from './views/Index.vue'
 
 const localePattern = PREFIXED_LOCALES.join('|')
-const localePrefix = `/:locale(${localePattern})?`
+const localePrefix = MULTILINGUAL_ENABLED ? `/:locale(${localePattern})?` : ''
 const localizedPath = (path = '') => `${localePrefix}${path}`
 
+const disabledLocaleRedirects = MULTILINGUAL_ENABLED
+	? []
+	: [
+		{
+			path: `/:locale(${localePattern})/:pathMatch(.*)*`,
+			redirect: (to) => {
+				const pathSegments = Array.isArray(to.params.pathMatch)
+					? to.params.pathMatch
+					: to.params.pathMatch
+						? [to.params.pathMatch]
+						: []
+
+				return {
+					path: `/${pathSegments.join('/')}`,
+					query: to.query,
+					hash: to.hash
+				}
+			}
+		}
+	]
+
 export const routes = [
+	...disabledLocaleRedirects,
 	{
 		path: localizedPath(),
 		name: 'home',

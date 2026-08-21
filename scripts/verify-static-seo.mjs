@@ -1,23 +1,25 @@
 import { readFile } from 'node:fs/promises'
+import { MULTILINGUAL_ENABLED } from '../src/config/features.js'
 
-const pages = [
-	{
-		file: 'dist/index.html',
-		lang: 'en',
-		title: 'Justin Picard ✦ Digital Product Designer',
-		description: 'Digital Product Designer based in Middelburg, focused on product design, design systems and code.',
-		canonical: 'https://justinpicard.nl/',
-		ogLocale: 'en_US'
-	},
-	{
-		file: 'dist/nl/index.html',
-		lang: 'nl',
-		title: 'Justin Picard ✦ Digital Product Designer',
-		description: 'Digital Product Designer uit Middelburg, met focus op productdesign, design systems en code.',
-		canonical: 'https://justinpicard.nl/nl',
-		ogLocale: 'nl_NL'
-	}
-]
+const englishPage = {
+	file: 'dist/index.html',
+	lang: 'en',
+	title: 'Justin Picard ✦ Digital Product Designer',
+	description: 'Digital Product Designer based in Middelburg, focused on product design, design systems and code.',
+	canonical: 'https://justinpicard.nl/',
+	ogLocale: 'en_US'
+}
+const dutchPage = {
+	file: 'dist/nl/index.html',
+	lang: 'nl',
+	title: 'Justin Picard ✦ Digital Product Designer',
+	description: 'Digital Product Designer uit Middelburg, met focus op productdesign, design systems en code.',
+	canonical: 'https://justinpicard.nl/nl',
+	ogLocale: 'nl_NL'
+}
+const pages = MULTILINGUAL_ENABLED
+	? [englishPage, dutchPage]
+	: [englishPage]
 
 function assert(condition, message) {
 	if (!condition) {
@@ -51,7 +53,10 @@ for (const page of pages) {
 		`${page.file}: incorrect Open Graph locale`
 	)
 	assert(html.includes('hreflang="en"'), `${page.file}: missing English alternate`)
-	assert(html.includes('hreflang="nl"'), `${page.file}: missing Dutch alternate`)
+	assert(
+		MULTILINGUAL_ENABLED === html.includes('hreflang="nl"'),
+		`${page.file}: Dutch alternate availability is incorrect`
+	)
 	assert(html.includes('hreflang="x-default"'), `${page.file}: missing x-default alternate`)
 	assert(html.includes('name="twitter:card"'), `${page.file}: missing Twitter card`)
 	assert(html.includes('type="application/ld+json"'), `${page.file}: missing JSON-LD`)
@@ -66,7 +71,10 @@ const sitemap = await readFile('dist/sitemap.xml', 'utf8')
 const robots = await readFile('dist/robots.txt', 'utf8')
 
 assert(sitemap.includes('<loc>https://justinpicard.nl/</loc>'), 'sitemap: missing English route')
-assert(sitemap.includes('<loc>https://justinpicard.nl/nl</loc>'), 'sitemap: missing Dutch route')
+assert(
+	MULTILINGUAL_ENABLED === sitemap.includes('<loc>https://justinpicard.nl/nl</loc>'),
+	'sitemap: Dutch route availability is incorrect'
+)
 assert(!sitemap.includes('/en'), 'sitemap: unexpected English prefix')
 assert(robots.includes('Allow: /'), 'robots.txt: crawling is not allowed')
 assert(
@@ -74,4 +82,4 @@ assert(
 	'robots.txt: sitemap reference is missing'
 )
 
-console.log('Static SEO verification passed for / and /nl.')
+console.log(`Static SEO verification passed for ${MULTILINGUAL_ENABLED ? '/ and /nl' : '/'}.`)

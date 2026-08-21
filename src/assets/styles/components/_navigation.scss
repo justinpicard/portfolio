@@ -175,6 +175,10 @@
 	}
 
 	.site-lang-switcher {
+		.lang-switcher__placeholder {
+			line-height: var(--line-height-tight);
+			user-select: none;
+		}
 
 		.lang-switcher,
 		.nav-link {

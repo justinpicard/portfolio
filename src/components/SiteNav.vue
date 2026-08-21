@@ -29,7 +29,11 @@
 			</span>
 		</div>
 		<div class="site-lang-switcher position-fixed top-0 right-0 mr-8 mt-8">
-			<nav class="lang-switcher" :aria-label="t('languageSwitcher.label')">
+			<nav
+				v-if="MULTILINGUAL_ENABLED"
+				class="lang-switcher"
+				:aria-label="t('languageSwitcher.label')"
+			>
 				<router-link
 					:to="getLocalizedRoute('en')"
 					class="lang-switcher__option nav-link text-lg"
@@ -58,6 +62,9 @@
 					<span lang="nl" data-stagger-link-container>NL</span>
 				</router-link>
 			</nav>
+			<span v-else class="lang-switcher__placeholder nav-link text-lg">
+				Menu
+			</span>
 		</div>
 	</div>
 </template>
@@ -69,6 +76,7 @@ import { useRoute } from 'vue-router'
 import BaseImage from './base/BaseImage.vue'
 import { useLocalizedRoute } from '../composables/useLocalizedRoute'
 import { getLocaleParams } from '../i18n'
+import { MULTILINGUAL_ENABLED } from '../config/features'
 import { initStaggerLinks, type StaggerLinksController } from '../utils/animations/staggerLinks'
 import {
 	gsap,

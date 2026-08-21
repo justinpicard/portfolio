@@ -11,6 +11,7 @@ import {
 	resolveLocale,
 	type Locale
 } from '../i18n'
+import { MULTILINGUAL_ENABLED } from '../config/features'
 
 export function localizePath(path: string, locale: Locale) {
 	const localePattern = PREFIXED_LOCALES.join('|')
@@ -18,7 +19,7 @@ export function localizePath(path: string, locale: Locale) {
 	const pathWithoutLocale = path.replace(localePrefixPattern, '') || '/'
 	const localeParams = getLocaleParams(locale)
 
-	return locale === DEFAULT_LOCALE
+	return !MULTILINGUAL_ENABLED || locale === DEFAULT_LOCALE
 		? pathWithoutLocale
 		: pathWithoutLocale === '/'
 			? `/${localeParams.locale}`
