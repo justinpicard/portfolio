@@ -4,8 +4,8 @@ export const projectMedia = [
 	{
 		id: '1',
 		slug: 'muzimatch',
-		thumbnailImage: 'projects/muzimatch/muzimatch-thumb-mobile-vertical',
-		landscapeThumbnailImage: 'projects/muzimatch/muzimatch-thumb',
+		thumbnailImage: 'projects/muzimatch/muzimatch-thumb-mobile-vertical@2x',
+		landscapeThumbnailImage: 'projects/muzimatch/muzimatch-thumb-mobile-horizontal@2x',
 		thumbnailImageFormat: 'jpg',
 		landscapeMediaPosition: 'left',
 		heroImage: 'projects/muzimatch/muzimatch-hero',
@@ -24,7 +24,7 @@ export const projectMedia = [
 	{
 		id: '2',
 		slug: 'recranet',
-		thumbnailImage: 'projects/recranet/recranet-thumb-vertical',
+		thumbnailImage: 'projects/recranet/recranet-thumb-vertical@2x',
 		landscapeThumbnailImage: 'projects/recranet/recranet-thumb-horizontal',
 		landscapeThumbnailImagePosition: 'left center',
 		landscapeMediaPosition: 'right',

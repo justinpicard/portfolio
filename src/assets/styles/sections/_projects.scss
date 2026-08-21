@@ -90,6 +90,7 @@
 
 .project-card {
 	--project-card-color: var(--color-secondary);
+	--project-card-media-start: 40%;
 	--project-card-accent: color-mix(
 		in srgb,
 		var(--project-card-color) 28%,
@@ -189,10 +190,11 @@
 
 	&__visual {
 		position: absolute;
-		inset: 0;
+		inset: var(--project-card-media-start) 0 0;
 		z-index: 0;
-		border-radius: inherit;
+		border-radius: 0;
 		overflow: hidden;
+		background: var(--project-card-color);
 		pointer-events: none;
 
 		.base-image,
@@ -657,11 +659,6 @@
 
 	.project-card {
 		border-radius: 1.5rem;
-
-		&__visual {
-			inset: var(--space-4);
-			border-radius: 0.5rem;
-		}
 
 		&__number {
 			top: var(--space-6);
