@@ -1,7 +1,12 @@
 <template>
-	<footer class="site-footer section pb-16">
+	<footer ref="footerRoot" class="site-footer section pb-16">
 		<div class="container site-footer__container">
 			<div class="site-footer__grid d-grid grid-cols-1 md:grid-cols-3">
+				<div
+					ref="footerDivider"
+					class="site-footer__divider divider col-span-1 md:col-span-3"
+					aria-hidden="true"
+				/>
 				<!--<p class="site-footer__eyebrow eyebrow text-secondary mb-8">{{ t('footer.eyebrow') }}</p>-->
 
 				<div
@@ -124,9 +129,14 @@ const { locale, t } = useI18n()
 const { footer } = usePortfolioContent()
 const { currentLocale } = useLocalizedRoute()
 const linkList = ref<HTMLUListElement | null>(null)
+const footerRoot = ref<HTMLElement | null>(null)
+const footerDivider = ref<HTMLElement | null>(null)
 const footerMarquee = ref<HTMLElement | null>(null)
 let staggerLinks: StaggerLinksController | undefined
-let marqueeContext: gsap.Context | undefined
+let footerAnimationContext: gsap.Context | undefined
+
+// Starting at 70% viewport height means roughly 30% of the footer is in view.
+const FOOTER_DIVIDER_REVEAL_START = 'top 70%'
 
 async function setupStaggerLinks() {
 	await nextTick()
@@ -137,20 +147,38 @@ async function setupStaggerLinks() {
 	staggerLinks = initStaggerLinks(linkList.value)
 }
 
-async function setupFooterMarquee() {
+async function setupFooterAnimations() {
 	await nextTick()
-	marqueeContext?.revert()
+	footerAnimationContext?.revert()
 
-	if (!footerMarquee.value || prefersReducedMotion()) return
+	if (
+		!footerRoot.value
+		|| !footerDivider.value
+		|| !footerMarquee.value
+		|| prefersReducedMotion()
+	) return
 
 	registerGsapPlugins()
 
-	marqueeContext = gsap.context(() => {
+	footerAnimationContext = gsap.context(() => {
 		const track = footerMarquee.value?.querySelector<HTMLElement>(
 			'.site-footer__marquee-track'
 		)
 
 		if (!track) return
+
+		gsap.fromTo(footerDivider.value, {
+			width: '0%'
+		}, {
+			width: '100%',
+			duration: 0.9,
+			ease: animationEases.strongInOut,
+			scrollTrigger: {
+				trigger: footerRoot.value,
+				start: FOOTER_DIVIDER_REVEAL_START,
+				toggleActions: 'play none none none'
+			}
+		})
 
 		const loop = gsap.to(track, {
 			xPercent: -50,
@@ -179,21 +207,21 @@ async function setupFooterMarquee() {
 				})
 			}
 		})
-	}, footerMarquee.value)
+	}, footerRoot.value)
 }
 
 onMounted(() => {
 	setupStaggerLinks()
-	setupFooterMarquee()
+	setupFooterAnimations()
 })
 
 watch(locale, () => {
 	setupStaggerLinks()
-	setupFooterMarquee()
+	setupFooterAnimations()
 }, { flush: 'post' })
 
 onUnmounted(() => {
 	staggerLinks?.destroy()
-	marqueeContext?.revert()
+	footerAnimationContext?.revert()
 })
 </script>

@@ -13,7 +13,7 @@ const sfvonline = {
 	year: '2020',
 	job: 'Dondr ⚡ Web & design',
 	role: 'UX/UI designer',
-	type: 'SaaS application',
+	type: 'SaaS for insolvency management',
 	caseStudy: {
 		introduction: [
 			'Transforming complex safety and compliance workflows into a clear, approachable SaaS experience.'

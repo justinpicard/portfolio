@@ -28,7 +28,7 @@ export const projectMedia = [
 		landscapeThumbnailImage: 'projects/recranet/recranet-thumb-horizontal',
 		landscapeThumbnailImagePosition: 'left center',
 		landscapeMediaPosition: 'right',
-		heroImage: 'hz-university',
+		heroImage: 'projects/recranet/recranet-hero',
 		secondaryImages: [
 			'projects/recranet/vodatent',
 			'dehoop'
@@ -39,7 +39,8 @@ export const projectMedia = [
 	{
 		id: '3',
 		slug: 'undrift',
-		thumbnailImage: 'hz-university',
+		caseStatus: 'coming-soon',
+		thumbnailImage: 'projects/undrift/undrift-thumb-vertical@2x',
 		landscapeMediaPosition: 'left',
 		heroImage: 'hz-university',
 		overlayBackground: '#FFD87F'
@@ -47,15 +48,16 @@ export const projectMedia = [
 	{
 		id: '4',
 		slug: 'charlie',
-		thumbnailImage: 'hz-university',
+		caseStatus: 'coming-soon',
+		thumbnailImage: 'projects/charlie/charlie-thumb-vertical@2x',
 		landscapeMediaPosition: 'right',
 		heroImage: 'hz-university',
-		overlayBackground: '#c3c7ff'
+		overlayBackground: '#FFC29F'
 	},
 	{
 		id: '5',
 		slug: 'sfvonline',
-		thumbnailImage: 'projects/sfvonline/sfvonline',
+		thumbnailImage: 'projects/sfvonline/sfvonline-thumb-vertical@2x',
 		heroImage: 'projects/sfvonline/sfvonline',
 		secondaryImages: [
 			'dot3',

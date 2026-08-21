@@ -46,7 +46,8 @@ function buildContent(
 		return {
 			...media,
 			...englishProject,
-			...override
+			...override,
+			caseStatus: 'caseStatus' in media ? media.caseStatus : 'published'
 		}
 	})
 
@@ -117,12 +118,17 @@ export function getProjectBySlug(locale: unknown, slug: string) {
 	return getContent(locale).projects.find((project) => project.slug === slug)
 }
 
+export function isProjectPublished(project: Pick<Project, 'caseStatus'>) {
+	return project.caseStatus === 'published'
+}
+
 export type {
 	AboutContent,
 	HeroContent,
 	LocaleCode,
 	PortfolioContent,
 	Project,
+	ProjectCaseStatus,
 	ProjectCaseStudy,
 	ProjectContent,
 	PageSeoContent,

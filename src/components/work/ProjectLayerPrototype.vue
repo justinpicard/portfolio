@@ -94,7 +94,7 @@ import {
 	animationEases,
 	animationStaggers
 } from '../../utils/animations/presets'
-import type { Project } from '../../content'
+import { isProjectPublished, type Project } from '../../content'
 import Button from '../Button.vue'
 import ProjectCaseContent from './ProjectCaseContent.vue'
 import ProjectHero from './ProjectHero.vue'
@@ -1579,6 +1579,7 @@ async function navigateToProject(nextIndex: number, restoreFocus = false) {
 		nextIndex < 0
 		|| nextIndex >= props.projects.length
 		|| nextIndex === displayedIndex.value
+		|| !isProjectPublished(props.projects[nextIndex])
 	) return
 
 	isTransitioning.value = true
@@ -1787,7 +1788,7 @@ function cleanupHeroReveal() {
 	if (heroRevealTargets.length > 0) {
 		gsap.killTweensOf(heroRevealTargets)
 		gsap.set(heroRevealTargets, {
-			clearProps: 'clipPath,opacity,transform,visibility'
+			clearProps: 'clipPath,opacity,transform,visibility,width'
 		})
 		heroRevealTargets = []
 	}
@@ -1875,6 +1876,8 @@ function createCaseHeroReveal() {
 
 	const titleLines = titleReveal.lines
 	const eyebrow = heroElements.intro
+	const divider = projectHero.value?.getDividerElement()
+	const dividerTargets = divider ? [divider] : []
 	const metadata = getHeroMetadataElements(heroElements)
 		.filter((element) => element !== eyebrow)
 	const metadataReveals = metadata.flatMap((element) => (
@@ -1891,6 +1894,7 @@ function createCaseHeroReveal() {
 		content.value,
 		heroElements.media,
 		eyebrow,
+		...dividerTargets,
 		...titleLines,
 		...metadata,
 		...metadataLines,
@@ -1916,6 +1920,9 @@ function createCaseHeroReveal() {
 	gsap.set(eyebrow, {
 		autoAlpha: 0,
 		y: 10
+	})
+	gsap.set(dividerTargets, {
+		width: '0%'
 	})
 	gsap.set(metadata, {
 		autoAlpha: 1,
@@ -1966,6 +1973,11 @@ function createCaseHeroReveal() {
 			duration: animationDurations.base,
 			ease: animationEases.strongOut,
 			stagger: animationStaggers.lines
+		}, 0.16)
+		.to(dividerTargets, {
+			width: '100%',
+			duration: 0.9,
+			ease: 'power3.inOut'
 		}, 0.16)
 		.to(metadataLines, {
 			yPercent: 0,

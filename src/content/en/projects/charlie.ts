@@ -10,10 +10,10 @@ const charlie = {
 		'Nuxt',
 		'Work in progress'
 	],
-	year: '2026',
+	year: '2025 - Current',
 	job: 'Side project',
 	role: 'Product designer & developer',
-	type: 'Product experiments',
+	type: 'Household planning for everyday life',
 	caseStudy: {
 		introduction: [
 			'Exploring how thoughtful product design, AI and modern web technologies can simplify everyday meal planning.'

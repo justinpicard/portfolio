@@ -13,7 +13,7 @@ const undrift = {
 	year: '2026',
 	job: 'Side project',
 	role: 'Product designer & developer',
-	type: 'Product experiments',
+	type: 'Design system quality & governance tool',
 	caseStudy: {
 		introduction: [
 			'Making design system quality visible through continuous reviews, tracking and collaboration.'

@@ -15,6 +15,12 @@
 		container-type: inline-size;
 	}
 
+	&__divider {
+		justify-self: start;
+		background-color: currentColor;
+		will-change: width;
+	}
+
 	&__title {
 		flex: none;
 		margin: 0;

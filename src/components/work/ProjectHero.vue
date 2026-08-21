@@ -6,10 +6,10 @@
 					<div class="project-layer-prototype__copy">
 						<span
 							ref="intro"
-							class="eyebrow"
+							class="eyebrow d-flex items-center"
 							data-project-shared="intro"
 						>
-							{{ project.title }}
+							{{ t('project.caseStudyEyebrowLabel') }}<span class="star mx-2">✦</span>{{ project.title }}
 						</span>
 						<h2
 							ref="title"
@@ -21,6 +21,14 @@
 							{{ project.summary }}
 						</h2>
 					</div>
+				</div>
+			</div>
+			<div class="row" aria-hidden="true">
+				<div class="col-12">
+					<div
+						ref="divider"
+						class="project-layer-prototype__divider"
+					/>
 				</div>
 			</div>
 			<div class="row">
@@ -115,6 +123,7 @@ const title = ref<HTMLElement | null>(null)
 const intro = ref<HTMLElement | null>(null)
 const tags = ref<HTMLElement | null>(null)
 const metadata = ref<HTMLElement | null>(null)
+const divider = ref<HTMLElement | null>(null)
 
 defineExpose({
 	getMediaElement: () => media.value,
@@ -131,11 +140,14 @@ defineExpose({
 		) ?? []
 	).concat(intro.value ? [intro.value] : []),
 	getDetailElements: () => [
+		divider.value,
 		metadata.value
 	].filter(Boolean) as HTMLElement[],
 	getContextBodyElements: () => [
 		tags.value,
+		divider.value,
 		metadata.value
-	].filter(Boolean) as HTMLElement[]
+	].filter(Boolean) as HTMLElement[],
+	getDividerElement: () => divider.value
 })
 </script>

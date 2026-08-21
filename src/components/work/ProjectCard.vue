@@ -7,13 +7,13 @@
 			{
 				'project-card--active': active,
 				'project-card--interactive': interactive,
+				'project-card--coming-soon': !casePublished,
 				'project-card--transition-hidden': transitionHidden
 			}
 		]"
-		:aria-label="project.title"
-		:aria-disabled="!interactive"
-		:tabindex="interactive ? 0 : -1"
-		:role="interactive ? 'button' : undefined"
+		:aria-label="cardAriaLabel"
+		:tabindex="canNavigate ? 0 : -1"
+		:role="canNavigate ? 'button' : undefined"
 		:style="cardStyles"
 		data-project-card
 		@click="handleOpen"
@@ -33,7 +33,12 @@
 			</div>
 
 			<div class="project-card__content">
-				<p class="project-card__year" data-project-shared="year">{{ project.year }}</p>
+				<div class="project-card__meta">
+					<p class="project-card__year" data-project-shared="year">{{ project.year }}</p>
+					<Tag v-if="!casePublished" size="sm">
+						{{ t('project.caseComingSoon') }}
+					</Tag>
+				</div>
 				<h3 class="project-card__title" data-project-shared="title">{{ project.title }}</h3>
 				<p class="project-card__description" data-project-shared="intro">
 					{{ project.type }}
@@ -51,7 +56,7 @@
 			<CircularScrollIndicator
 				ref="projectIndicator"
 				variant="project"
-				:text="t('project.viewProjectIndicator')"
+				:text="cursorIndicatorText"
 				:href="undefined"
 				aria-label=""
 				:show-icon="false"
@@ -83,7 +88,7 @@ import {
 } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCursorFollowIndicator } from '../../composables/useCursorFollowIndicator'
-import type { Project } from '../../content'
+import { isProjectPublished, type Project } from '../../content'
 import { gsap } from '../../utils/animations/gsap'
 import { animationEases } from '../../utils/animations/presets'
 import BaseImage from '../base/BaseImage.vue'
@@ -106,6 +111,18 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const casePublished = computed(() => isProjectPublished(props.project))
+const canNavigate = computed(() => Boolean(props.interactive) && casePublished.value)
+const cardAriaLabel = computed(() => (
+	casePublished.value
+		? props.project.title
+		: `${props.project.title}: ${t('project.caseComingSoon')}`
+))
+const cursorIndicatorText = computed(() => (
+	casePublished.value
+		? t('project.viewProjectIndicator')
+		: t('project.caseComingSoonIndicator')
+))
 const cardStyles = computed<CSSProperties>(() => (
 	props.project.overlayBackground
 		? {
@@ -128,7 +145,7 @@ const projectIndicatorVisual = computed(
 let cursorFollowIndicator: ReturnType<typeof useCursorFollowIndicator> | undefined
 
 function handleOpen() {
-	if (!props.interactive || !card.value) return
+	if (!canNavigate.value || !card.value) return
 
 	emit('open', {
 		projectIndex: props.index,

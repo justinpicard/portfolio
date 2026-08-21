@@ -44,6 +44,7 @@
 import { nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePortfolioContent } from '../../composables/usePortfolioContent'
+import { isProjectPublished } from '../../content'
 import { gsap, prefersReducedMotion, ScrollTrigger, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
 import ProjectCard from '../work/ProjectCard.vue'
 import ProjectLayerPrototype from '../work/ProjectLayerPrototype.vue'
@@ -101,7 +102,10 @@ function getElementOrigin(element: HTMLElement): LayerOrigin {
 }
 
 function openProject(payload: { projectIndex: number; sourceElement: HTMLElement }) {
-	if (interactiveProjectIndex.value !== payload.projectIndex) return
+	if (
+		interactiveProjectIndex.value !== payload.projectIndex
+		|| !isProjectPublished(projects.value[payload.projectIndex])
+	) return
 
 	layerOrigin.value = getElementOrigin(payload.sourceElement)
 	openSourceCard.value = payload.sourceElement

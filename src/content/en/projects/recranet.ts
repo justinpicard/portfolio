@@ -10,7 +10,7 @@ const recranet = {
 		'Design System',
 		'Online booking management'
 	],
-	year: '2023',
+	year: '2023 - Current',
 	job: 'Recranet',
 	role: 'Product designer',
 	type: 'Design system & SaaS product design',

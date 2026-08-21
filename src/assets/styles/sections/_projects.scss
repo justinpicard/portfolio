@@ -115,6 +115,10 @@
 		cursor: pointer;
 	}
 
+	&--interactive#{&}--coming-soon {
+		cursor: default;
+	}
+
 	&--transition-hidden {
 		visibility: hidden;
 	}
@@ -157,6 +161,13 @@
 	&__title,
 	&__description {
 		margin: 0;
+	}
+
+	&__meta {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-3);
 	}
 
 	&__year {
@@ -365,6 +376,14 @@
 		}
 	}
 
+	&__divider {
+		width: 100%;
+		height: 1px;
+		margin-block-end: var(--space-6);
+		background-color: currentColor;
+		will-change: width;
+	}
+
 	&__close {
 		position: absolute;
 		bottom: clamp(1rem, 5vh, 2rem);
@@ -498,6 +517,10 @@
 			}
 		}
 
+		&--front#{&}--coming-soon {
+			cursor: default;
+		}
+
 		&--hidden {
 			visibility: hidden;
 		}
@@ -567,6 +590,11 @@
 		height: 100%;
 		padding-inline: clamp(var(--space-4), 3vw, var(--space-12));
 		overflow: hidden;
+	}
+
+	&__status {
+		display: block;
+		margin-block-end: var(--space-3);
 	}
 
 	&__type,

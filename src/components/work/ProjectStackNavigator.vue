@@ -12,6 +12,8 @@
 				class="project-stack-navigator__card"
 				:class="{
 					'project-stack-navigator__card--front': position === 0,
+					'project-stack-navigator__card--coming-soon':
+						!isProjectPublished(projects[projectIndex]),
 					'project-stack-navigator__card--hidden': position > visibleRearCardCount + 1,
 					'project-stack-navigator__card--media-right':
 						projects[projectIndex].landscapeMediaPosition === 'right'
@@ -19,11 +21,12 @@
 				:style="getCardStyles(projectIndex, position)"
 				type="button"
 				:disabled="position !== 0 || interactionDisabled"
-				:tabindex="position === 0 && !interactionDisabled ? 0 : -1"
-				:aria-hidden="position === 0 ? undefined : 'true'"
-				:aria-label="position === 0
-					? t('project.openProject', { title: projects[projectIndex].title })
+				:tabindex="canOpenProject(projectIndex, position) ? 0 : -1"
+				:aria-disabled="position === 0 && !isProjectPublished(projects[projectIndex])
+					? 'true'
 					: undefined"
+				:aria-hidden="position === 0 ? undefined : 'true'"
+				:aria-label="getCardAriaLabel(projectIndex, position)"
 				@click="openProject(projectIndex)"
 				@pointerenter="animateCardHover($event, position, true)"
 				@pointerleave="animateCardHover($event, position, false)"
@@ -49,6 +52,12 @@
 				</span>
 
 				<span class="project-stack-navigator__content">
+					<span
+						v-if="!isProjectPublished(projects[projectIndex])"
+						class="project-stack-navigator__status"
+					>
+						<Tag size="sm">{{ t('project.caseComingSoon') }}</Tag>
+					</span>
 					<span class="project-stack-navigator__year eyebrow">
 						{{ projects[projectIndex].year }}
 					</span>
@@ -77,7 +86,7 @@
 			<CircularScrollIndicator
 				ref="projectIndicator"
 				variant="project"
-				:text="t('project.viewProjectIndicator')"
+				:text="cursorIndicatorText"
 				:href="undefined"
 				aria-label=""
 				:show-icon="false"
@@ -113,7 +122,7 @@ import {
 } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCursorFollowIndicator } from '../../composables/useCursorFollowIndicator'
-import type { Project } from '../../content'
+import { isProjectPublished, type Project } from '../../content'
 import {
 	gsap,
 	prefersReducedMotion,
@@ -159,6 +168,18 @@ const projectIndicatorWrapper = computed(
 const projectIndicatorVisual = computed(
 	() => projectIndicator.value?.indicator ?? null
 )
+const frontProject = computed(() => {
+	const frontProjectIndex = orderedProjectIndices.value[0]
+
+	return frontProjectIndex === undefined
+		? undefined
+		: props.projects[frontProjectIndex]
+})
+const cursorIndicatorText = computed(() => (
+	frontProject.value && !isProjectPublished(frontProject.value)
+		? t('project.caseComingSoonIndicator')
+		: t('project.viewProjectIndicator')
+))
 
 const interactionDisabled = computed(() => (
 	Boolean(props.disabled)
@@ -176,6 +197,22 @@ function buildCircularOrder(currentProjectIndex: number) {
 
 function resetOrder() {
 	orderedProjectIndices.value = buildCircularOrder(props.currentProjectIndex)
+}
+
+function canOpenProject(projectIndex: number, position: number) {
+	return position === 0
+		&& !interactionDisabled.value
+		&& isProjectPublished(props.projects[projectIndex])
+}
+
+function getCardAriaLabel(projectIndex: number, position: number) {
+	if (position !== 0) return undefined
+
+	const project = props.projects[projectIndex]
+
+	return isProjectPublished(project)
+		? t('project.openProject', { title: project.title })
+		: `${project.title}: ${t('project.caseComingSoon')}`
 }
 
 function syncActiveCard() {
@@ -366,7 +403,10 @@ function shuffle() {
 }
 
 function openProject(projectIndex: number) {
-	if (interactionDisabled.value) return
+	if (
+		interactionDisabled.value
+		|| !isProjectPublished(props.projects[projectIndex])
+	) return
 
 	emit('select', projectIndex)
 }

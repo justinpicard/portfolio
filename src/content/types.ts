@@ -9,6 +9,8 @@ export type ProjectSlug =
 	| 'charlie'
 	| 'sfvonline'
 
+export type ProjectCaseStatus = 'published' | 'coming-soon'
+
 export type AboutContent = {
 	title: string
 	greeting: string
@@ -73,6 +75,7 @@ export type ProjectContentOverride = {
 export type ProjectMedia = {
 	id: string
 	slug: ProjectSlug
+	caseStatus?: ProjectCaseStatus
 	thumbnailImage: string
 	thumbnailImageFormat?: 'jpg' | 'jpeg' | 'png'
 	thumbnailImagePosition?: string
@@ -94,7 +97,9 @@ export type ProjectMedia = {
 	live?: string
 }
 
-export type Project = ProjectMedia & ProjectContent
+export type Project = Omit<ProjectMedia, 'caseStatus'> & ProjectContent & {
+	caseStatus: ProjectCaseStatus
+}
 
 export type PortfolioContent = {
 	home: HomeContent
