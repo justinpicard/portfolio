@@ -254,6 +254,26 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 		}
 	}
 
+	function handleViewportScroll() {
+		if (
+			!isEnabled
+			|| latestPointerX === undefined
+			|| latestPointerY === undefined
+		) return
+
+		const isInsideTrigger = isPointerInsideTrigger(latestPointerX, latestPointerY)
+		const isSuppressed = isPointerSuppressed(latestPointerX, latestPointerY)
+
+		if (isInsideTrigger && !isSuppressed) {
+			if (!isVisible) showIndicator(latestPointerX, latestPointerY)
+			return
+		}
+
+		// Scrolling can move the trigger away from a stationary pointer without
+		// dispatching the pointerleave event that normally hides the indicator.
+		if (isVisible) handlePointerLeave()
+	}
+
 	function handlePointerLeave() {
 		const elements = getElements()
 		if (!elements) return
@@ -304,6 +324,7 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 		elements.triggerElement.addEventListener('pointermove', handlePointerMove)
 		elements.triggerElement.addEventListener('pointerleave', handlePointerLeave)
 		window.addEventListener('pointermove', handleSuppressedPointerMove)
+		window.addEventListener('scroll', handleViewportScroll, { passive: true })
 
 		if (
 			latestPointerX !== undefined
@@ -329,6 +350,7 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 		}
 
 		window.removeEventListener('pointermove', handleSuppressedPointerMove)
+		window.removeEventListener('scroll', handleViewportScroll)
 		isEnabled = false
 		isRevealPending = false
 		handlePointerLeave()
@@ -348,6 +370,7 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 
 		window.removeEventListener('pointermove', handleTrackingPointerMove)
 		window.removeEventListener('pointermove', handleSuppressedPointerMove)
+		window.removeEventListener('scroll', handleViewportScroll)
 		stopTicker()
 		isInitialized = false
 		isEnabled = false

@@ -28,7 +28,7 @@
 import { nextTick, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePortfolioContent } from '../../composables/usePortfolioContent'
-import { gsap, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
+import { gsap, ScrollTrigger, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
 import { animationDurations, animationEases, animationStaggers } from '../../utils/animations/presets'
 
 const { locale, t } = useI18n()
@@ -44,6 +44,7 @@ let ctx: gsap.Context | undefined
 let isMounted = false
 let hasRevealCompleted = false
 let revealRequestId = 0
+const ABOUT_NAVIGATION_TEXT_VIEWPORT_POSITION = 0.2
 
 function cleanupAboutReveal() {
 	revealRequestId += 1
@@ -52,6 +53,7 @@ function cleanupAboutReveal() {
 	eyebrowSplit?.revert()
 	titleSplit?.revert()
 	bodySplit?.revert()
+	if (root.value) delete root.value.dataset.sectionNavigationScrollY
 	eyebrowSplit = undefined
 	titleSplit = undefined
 	bodySplit = undefined
@@ -91,6 +93,16 @@ async function initAboutReveal() {
 
 	ctx = gsap.context(() => {
 		if (!aboutText.value || !aboutEyebrow.value || !aboutTitle.value) return
+
+		ScrollTrigger.create({
+			trigger: aboutText.value,
+			start: () => `top ${ABOUT_NAVIGATION_TEXT_VIEWPORT_POSITION * 100}%`,
+			onRefresh(self) {
+				if (root.value) {
+					root.value.dataset.sectionNavigationScrollY = String(self.start)
+				}
+			}
+		})
 
 		const aboutBody = gsap.utils.toArray<HTMLParagraphElement>(
 			aboutText.value.querySelectorAll('p:not(.about-section__eyebrow)')

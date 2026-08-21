@@ -28,7 +28,10 @@
 				{{ t('navigation.role') }}
 			</span>
 		</div>
-		<div class="site-lang-switcher position-fixed top-0 right-0 mr-8 mt-8">
+		<div
+			class="site-lang-switcher position-fixed top-0 right-0 mr-8 mt-8"
+			:class="{ 'site-lang-switcher--section-nav': !MULTILINGUAL_ENABLED }"
+		>
 			<nav
 				v-if="MULTILINGUAL_ENABLED"
 				class="lang-switcher"
@@ -62,9 +65,7 @@
 					<span lang="nl" data-stagger-link-container>NL</span>
 				</router-link>
 			</nav>
-			<span v-else class="lang-switcher__placeholder nav-link text-lg">
-				Menu
-			</span>
+			<SectionNavigation v-else />
 		</div>
 	</div>
 </template>
@@ -74,6 +75,7 @@ import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import BaseImage from './base/BaseImage.vue'
+import SectionNavigation from './navigation/SectionNavigation.vue'
 import { useLocalizedRoute } from '../composables/useLocalizedRoute'
 import { getLocaleParams } from '../i18n'
 import { MULTILINGUAL_ENABLED } from '../config/features'
@@ -111,8 +113,11 @@ let logoScrollTween: gsap.core.Tween | undefined
 async function refreshStaggerLinks() {
 	await nextTick()
 	staggerLinks?.destroy()
+	staggerLinks = undefined
 
-	if (!root.value) return
+	// SectionNavigation owns its dynamic label splits; this controller is only
+	// needed for the language switcher when multilingual navigation is enabled.
+	if (!root.value || !MULTILINGUAL_ENABLED) return
 
 	staggerLinks = initStaggerLinks(root.value)
 }

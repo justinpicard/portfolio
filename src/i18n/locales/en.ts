@@ -8,6 +8,14 @@ export default {
 		english: 'English',
 		dutch: 'Dutch'
 	},
+	sectionNavigation: {
+		label: 'Page sections',
+		intro: 'Welcome',
+		about: 'About',
+		work: 'Work',
+		life: 'Life',
+		sayHi: 'Say hi'
+	},
 	home: {
 		aboutLabel: 'About',
 		workLabel: 'Work.',

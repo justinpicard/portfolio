@@ -1,5 +1,5 @@
 <template>
-	<section ref="root" class="section home-life-section" aria-labelledby="home-life-title">
+	<section id="life" ref="root" class="section home-life-section" aria-labelledby="home-life-title">
 		<div ref="layout" class="container home-life-section__layout">
 			<div ref="introRef" class="home-life-section__intro">
 				<h2 id="home-life-title" ref="titleRef" class="home-life-section__title">
@@ -61,6 +61,8 @@ const aspectRatios: Record<PhotoRatio, string> = {
 	landscape: '4 / 3',
 	square: '1 / 1'
 }
+
+const FIRST_PHOTO_SETTLED_LABEL = 'first-photo-settled'
 
 const photos: LifePhoto[] = [
 	{
@@ -206,6 +208,7 @@ function cleanupAnimations() {
 	context?.revert()
 	titleSplit?.revert()
 	textSplit?.revert()
+	if (root.value) delete root.value.dataset.sectionNavigationScrollY
 	mediaContext = undefined
 	context = undefined
 	titleSplit = undefined
@@ -313,7 +316,21 @@ async function initAnimations() {
 						scrub: 0.8,
 						pin: layout.value,
 						anticipatePin: 1,
-						invalidateOnRefresh: true
+						invalidateOnRefresh: true,
+						onRefresh(self) {
+							const animation = self.animation as gsap.core.Timeline | undefined
+							const labelPosition = animation?.labels[FIRST_PHOTO_SETTLED_LABEL]
+							const duration = animation?.duration() ?? 0
+
+							if (!root.value || labelPosition === undefined || duration === 0) return
+
+							// Keep section navigation tied to the actual photo timing as the
+							// timeline or viewport-driven scroll distance changes.
+							const labelProgress = labelPosition / duration
+							root.value.dataset.sectionNavigationScrollY = String(
+								self.start + (self.end - self.start) * labelProgress
+							)
+						}
 					}
 				})
 
@@ -328,6 +345,11 @@ async function initAnimations() {
 						duration: 1,
 						ease: 'power3.out'
 					})
+
+					if (index === 0) {
+						timeline.addLabel(FIRST_PHOTO_SETTLED_LABEL)
+					}
+
 					timeline.to({}, { duration: 0.35 })
 				})
 

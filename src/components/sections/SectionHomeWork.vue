@@ -77,6 +77,7 @@ let exhibitionTimeline: gsap.core.Timeline | undefined
 let exhibitionTrigger: ReturnType<typeof ScrollTrigger.create> | undefined
 let projectCards: HTMLElement[] = []
 let reducedMotionActivationEnabled = false
+const TITLE_REVEAL_SCROLL_DISTANCE = 1.6
 
 const DEBUG_EXHIBITION_ACTIVATION = import.meta.env.DEV
 	&& new URLSearchParams(window.location.search).has('debugExhibitionActivation')
@@ -185,6 +186,7 @@ function cleanupTitleReveal() {
 	titleRevealTween = undefined
 	splitTitle?.revert()
 	splitTitle = undefined
+	if (root.value) delete root.value.dataset.sectionNavigationScrollY
 }
 
 function setupTitleReveal() {
@@ -213,9 +215,14 @@ function setupTitleReveal() {
 		scrollTrigger: {
 			trigger: root.value,
 			start: 'top bottom',
-			end: () => `+=${window.innerHeight * 1.6}`,
+			end: () => `+=${window.innerHeight * TITLE_REVEAL_SCROLL_DISTANCE}`,
 			scrub: true,
-			invalidateOnRefresh: true
+			invalidateOnRefresh: true,
+			onRefresh(self) {
+				if (root.value) {
+					root.value.dataset.sectionNavigationScrollY = String(self.end)
+				}
+			}
 		}
 	})
 }
