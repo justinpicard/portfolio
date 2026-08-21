@@ -49,9 +49,10 @@ let revealRequestId = 0
 const ABOUT_NAVIGATION_TEXT_VIEWPORT_POSITION = 0.2
 const ABOUT_WORD_INITIAL_BLUR = 10
 const ABOUT_WORD_INITIAL_OPACITY = 0.55
-const ABOUT_WORD_REVEAL_STAGGER = 0.1
-const ABOUT_REVEAL_START = 'top 55%'
-const ABOUT_REVEAL_END = 'bottom 35%'
+const ABOUT_WORD_REVEAL_DURATION = 0.06
+const ABOUT_WORD_REVEAL_STAGGER_AMOUNT = 0.7
+const ABOUT_REVEAL_START = 'top 62%'
+const ABOUT_REVEAL_END = 'bottom 58%'
 
 function cleanupAboutReveal() {
 	revealRequestId += 1
@@ -132,9 +133,9 @@ async function initAboutReveal() {
 		gsap.to(aboutSplit.words, {
 			filter: 'blur(0px)',
 			opacity: 1,
-			duration: 1,
+			duration: ABOUT_WORD_REVEAL_DURATION,
 			stagger: {
-				each: ABOUT_WORD_REVEAL_STAGGER,
+				amount: ABOUT_WORD_REVEAL_STAGGER_AMOUNT,
 				from: 'start'
 			},
 			ease: 'none',
