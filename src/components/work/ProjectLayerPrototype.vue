@@ -82,7 +82,6 @@ import {
 	gsap,
 	prefersReducedMotion,
 	registerGsapPlugins,
-	ScrollTrigger,
 	SplitText
 } from '../../utils/animations/gsap'
 import {
@@ -90,6 +89,7 @@ import {
 	animationEases,
 	animationStaggers
 } from '../../utils/animations/presets'
+import { lockPortfolioScrollSmoothing } from '../../utils/animations/portfolioScrollSmoother'
 import { isProjectPublished, type Project } from '../../content'
 import ProjectCaseContent from './ProjectCaseContent.vue'
 import ProjectHeader from './ProjectHeader.vue'
@@ -279,6 +279,7 @@ let contextTransitionRunId = 0
 let isBottomScrimVisible: boolean | undefined
 let sharedRepresentations: SharedElementRepresentation[] = []
 let previousDocumentOverflow = ''
+let unlockScrollSmoothing: (() => void) | undefined
 let closeRequestedDuringOpen = false
 const typographyFrameWidths = new WeakMap<
 	HTMLElement,
@@ -381,9 +382,9 @@ function getDetailElements() {
 	].filter(Boolean) as HTMLElement[]
 }
 
-function getOverlayControls() {
+function getOverlayControls(includeProjectHeader = true) {
 	return [
-		projectHeader.value?.element,
+		...(includeProjectHeader ? [projectHeader.value?.element] : []),
 		projectNavigator.value?.element
 	].filter(Boolean) as HTMLElement[]
 }
@@ -1568,7 +1569,6 @@ async function navigateToProject(nextIndex: number, restoreFocus = false) {
 		gsap.set(content.value, {
 			clearProps: 'opacity,transform,visibility'
 		})
-		ScrollTrigger.refresh()
 		announcement.value = `${displayedProject.value.title} project loaded`
 		isTransitioning.value = false
 		if (restoreFocus) projectNavigator.value?.focusActiveCard()
@@ -1640,7 +1640,7 @@ async function navigateToProject(nextIndex: number, restoreFocus = false) {
 	)
 	if (runId !== contextTransitionRunId) return
 
-	const caseHeroReveal = createCaseHeroReveal()
+	const caseHeroReveal = createCaseHeroReveal(false)
 	if (caseHeroReveal) {
 		transitionTimeline.add(caseHeroReveal, transitionTimeline.time())
 		caseHeroReveal.paused(false)
@@ -1655,7 +1655,6 @@ async function navigateToProject(nextIndex: number, restoreFocus = false) {
 
 	cleanupHeroReveal()
 	transitionTimeline = undefined
-	ScrollTrigger.refresh()
 	announcement.value = `${displayedProject.value.title} project loaded`
 	isTransitioning.value = false
 
@@ -1821,7 +1820,7 @@ async function waitForHeroRevealLayout() {
 	await nextTick()
 }
 
-function createCaseHeroReveal() {
+function createCaseHeroReveal(includeProjectHeader = true) {
 	const heroElements = getHeroElements()
 	if (!heroElements || !content.value || !scrims.value) return undefined
 
@@ -1844,7 +1843,7 @@ function createCaseHeroReveal() {
 	const metadataLines = metadataReveals.flatMap(({ lines }) => lines)
 	heroRevealSplits.push(...metadataReveals.map(({ split }) => split))
 	const image = heroElements.media.querySelector<HTMLElement>('img')
-	const controls = getOverlayControls()
+	const controls = getOverlayControls(includeProjectHeader)
 
 	heroRevealTargets = [
 		content.value,
@@ -1991,7 +1990,6 @@ async function animateSimpleOpen() {
 		gsap.set(destinationElements, { autoAlpha: 1 })
 		gsap.set(content.value, { clearProps: 'width,height' })
 		projectHeader.value?.focusClose()
-		ScrollTrigger.refresh()
 		return
 	}
 
@@ -2039,7 +2037,6 @@ async function animateSimpleOpen() {
 	isOpening.value = false
 	cleanupHeroReveal()
 	gsap.set(content.value, { clearProps: 'width,height' })
-	ScrollTrigger.refresh()
 	projectHeader.value?.focusClose()
 
 	if (closeRequestedDuringOpen) {
@@ -2552,6 +2549,7 @@ watch(
 
 onMounted(async () => {
 	previousDocumentOverflow = document.documentElement.style.overflow
+	unlockScrollSmoothing = lockPortfolioScrollSmoothing()
 	document.documentElement.style.overflow = 'hidden'
 	window.addEventListener('keydown', handleKeydown)
 	await nextTick()
@@ -2566,6 +2564,8 @@ onBeforeUnmount(() => {
 	killContextTransition()
 	cleanupBottomScrim()
 	document.documentElement.style.overflow = previousDocumentOverflow
+	unlockScrollSmoothing?.()
+	unlockScrollSmoothing = undefined
 	window.removeEventListener('keydown', handleKeydown)
 })
 

@@ -2,7 +2,6 @@ import type { AboutContent } from '../types'
 
 // English placeholder copy; replace these values with the final Dutch translation.
 const about = {
-	title: 'Ik heb een fascinatie voor goede digitale producten. Niet alleen om hoe ze eruitzien, maar vooral om hoe alles achter de schermen samenkomt.',
 	greeting: 'Hey',
 	introduction: 'Ik ben Justin, Digital Product Designer uit Middelburg. Al meer dan tien jaar ontwerp ik websites en digitale producten. In die tijd verschoof mijn interesse vanzelf van visual design naar productdenken, design systems en hoe digitale producten meegroeien met de behoeften van gebruikers en teams.',
 	paragraphs: [

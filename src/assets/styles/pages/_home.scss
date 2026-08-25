@@ -2,7 +2,7 @@
 
 // Homepage section styling lives in src/assets/styles/sections.
 
-main:has(> .page-surface) {
+main:has(.page-surface) {
 	background-color: var(--color-black);
 
 	&.scrolled {
@@ -22,12 +22,24 @@ main:has(> .page-surface) {
 
 .page-surface {
 	position: relative;
+	transform-origin: center center;
+	overflow-x: clip;
+}
+
+.page-surface__background {
+	position: fixed;
+	inset: 0;
+	z-index: 0;
 	background-color: var(--color-primary);
 	background-position: 50%;
 	background-image: url("/images/dot-pattern.png");
-	background-attachment: fixed;
-	transform-origin: center center;
-	overflow-x: clip;
+	transform-origin: center top;
+	pointer-events: none;
+}
+
+#smooth-wrapper {
+	position: relative;
+	z-index: 1;
 }
 
 .page-surface__scrims {

@@ -45,6 +45,10 @@ import { useI18n } from 'vue-i18n'
 import { usePortfolioContent } from '../../composables/usePortfolioContent'
 import { isProjectPublished } from '../../content'
 import { gsap, prefersReducedMotion, ScrollTrigger, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
+import {
+	getPortfolioScrollY,
+	setPortfolioScrollY
+} from '../../utils/animations/portfolioScrollSmoother'
 import ProjectCard from '../work/ProjectCard.vue'
 import ProjectLayerPrototype from '../work/ProjectLayerPrototype.vue'
 
@@ -72,6 +76,8 @@ let exhibitionTimeline: gsap.core.Timeline | undefined
 let exhibitionTrigger: ReturnType<typeof ScrollTrigger.create> | undefined
 let projectCards: HTMLElement[] = []
 let reducedMotionActivationEnabled = false
+let projectOpenScrollY: number | undefined
+let projectOpenIndex: number | undefined
 const TITLE_REVEAL_SCROLL_DISTANCE = 1.6
 
 const DEBUG_EXHIBITION_ACTIVATION = import.meta.env.DEV
@@ -105,6 +111,8 @@ function openProject(payload: { projectIndex: number; sourceElement: HTMLElement
 
 	layerOrigin.value = getElementOrigin(payload.sourceElement)
 	openSourceCard.value = payload.sourceElement
+	projectOpenScrollY = getPortfolioScrollY()
+	projectOpenIndex = payload.projectIndex
 	activeProjectIndex.value = payload.projectIndex
 	hiddenProjectIndex.value = null
 	isProjectOpen.value = true
@@ -119,40 +127,69 @@ function showActiveProjectCard() {
 }
 
 async function closeProject() {
-	const sourceElement = projectCards[activeProjectIndex.value]
+	const closingProjectIndex = activeProjectIndex.value
+	const sourceElement = projectCards[closingProjectIndex]
 	if (!sourceElement || !projectLayer.value) return
 
+	syncExhibitionProject(closingProjectIndex)
 	await projectLayer.value.animateClose(sourceElement)
 	isProjectOpen.value = false
 	hiddenProjectIndex.value = null
 	layerOrigin.value = null
 	openSourceCard.value = null
 	await nextTick()
+
+	const closingProjectScrollY = projectOpenIndex === closingProjectIndex
+		? projectOpenScrollY
+		: getExhibitionProjectScrollY(closingProjectIndex) ?? projectOpenScrollY
+
+	if (closingProjectScrollY !== undefined) {
+		setPortfolioScrollY(closingProjectScrollY)
+		ScrollTrigger.update()
+	}
+	projectOpenScrollY = undefined
+	projectOpenIndex = undefined
+
+	// Keep the visual state exact after ScrollTrigger resumes from the overlay.
+	syncExhibitionProject(closingProjectIndex)
 	sourceElement.focus({ preventScroll: true })
 }
 
-function changeProject(nextIndex: number) {
+function getExhibitionProjectScrollY(projectIndex: number) {
+	if (!exhibitionTimeline || !exhibitionTrigger) return undefined
+
+	const labelPosition = exhibitionTimeline.labels[`project-${projectIndex}`]
+	if (labelPosition === undefined) return undefined
+
+	const progress = labelPosition / exhibitionTimeline.duration()
+
+	return exhibitionTrigger.start
+		+ (exhibitionTrigger.end - exhibitionTrigger.start) * progress
+}
+
+function syncExhibitionProject(projectIndex: number) {
 	if (
-		nextIndex < 0
-		|| nextIndex >= projectCount
+		projectIndex < 0
+		|| projectIndex >= projectCount
 		|| !exhibitionTimeline
-		|| !exhibitionTrigger
 	) return
 
-	const labelPosition = exhibitionTimeline.labels[`project-${nextIndex}`]
+	const labelPosition = exhibitionTimeline.labels[`project-${projectIndex}`]
 	const progress = labelPosition / exhibitionTimeline.duration()
+
+	activeProjectIndex.value = projectIndex
+	interactiveProjectIndex.value = projectIndex
+
+	// Align the exhibition with the selected case without moving the page.
+	exhibitionTimeline.progress(progress)
+}
+
+function changeProject(nextIndex: number) {
+	if (nextIndex < 0 || nextIndex >= projectCount) return
 
 	activeProjectIndex.value = nextIndex
 	interactiveProjectIndex.value = nextIndex
 	hiddenProjectIndex.value = nextIndex
-
-	// The fullscreen layer completely covers this direct gallery synchronization.
-	exhibitionTimeline.progress(progress)
-	exhibitionTrigger.scroll(
-		exhibitionTrigger.start
-		+ (exhibitionTrigger.end - exhibitionTrigger.start) * progress
-	)
-	ScrollTrigger.update()
 }
 
 function wrapSplitElements(elements: Element[], className: string, tagName: 'span' = 'span') {
@@ -256,6 +293,10 @@ function getShadowState(cardIndex: number, activeIndex: number) {
 }
 
 function updateVisualProjectActivation(cards: HTMLElement[], useVerticalAxis = false) {
+	// The open project layer owns the active index. Ignore delayed scrub/snap
+	// updates from the covered exhibition after synchronizing another project.
+	if (isProjectOpen.value) return
+
 	if (cards.length === 0) {
 		interactiveProjectIndex.value = null
 		return

@@ -114,6 +114,10 @@ import {
 	initStaggerLinks,
 	type StaggerLinksController
 } from '../../utils/animations/staggerLinks'
+import {
+	getPortfolioScrollY,
+	setPortfolioScrollY
+} from '../../utils/animations/portfolioScrollSmoother'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -121,8 +125,10 @@ const router = useRouter()
 const { currentLocale } = useLocalizedRoute()
 const props = withDefaults(defineProps<{
 	disabled?: boolean
+	fixedSectionId?: SectionNavigationId
 }>(), {
-	disabled: false
+	disabled: false,
+	fixedSectionId: undefined
 })
 const root = ref<HTMLElement | null>(null)
 const panel = ref<HTMLElement | null>(null)
@@ -133,8 +139,9 @@ const incomingLabel = ref<HTMLElement | null>(null)
 const list = ref<HTMLUListElement | null>(null)
 const isOpen = ref(false)
 const isClosing = ref(false)
-const activeSectionId = ref<SectionNavigationId>('intro')
-const displayedSectionId = ref<SectionNavigationId>('intro')
+const initialSectionId = props.fixedSectionId ?? 'intro'
+const activeSectionId = ref<SectionNavigationId>(initialSectionId)
+const displayedSectionId = ref<SectionNavigationId>(initialSectionId)
 const incomingSectionId = ref<SectionNavigationId | null>(null)
 const listId = `section-navigation-${useId()}`
 const itemElements = new Map<SectionNavigationId, HTMLLIElement>()
@@ -553,6 +560,11 @@ function updateLocationHash(sectionId: SectionNavigationId) {
 }
 
 function updateActiveSection() {
+	if (props.fixedSectionId) {
+		setActiveSection(props.fixedSectionId)
+		return
+	}
+
 	if (route.name !== 'home' || isProgrammaticScrolling) return
 
 	const threshold = window.innerHeight * SECTION_NAVIGATION_ACTIVE_THRESHOLD
@@ -582,21 +594,21 @@ function scrollToSection(sectionId: SectionNavigationId) {
 	)
 	const targetY = Number.isFinite(configuredScrollY)
 		? configuredScrollY
-		: window.scrollY + section.getBoundingClientRect().top
+		: getPortfolioScrollY() + section.getBoundingClientRect().top
 	if (prefersReducedMotion()) {
-		window.scrollTo(0, targetY)
+		setPortfolioScrollY(targetY)
 		isProgrammaticScrolling = false
 		updateActiveSection()
 		return
 	}
 
-	const scrollPosition = { y: window.scrollY }
+	const scrollPosition = { y: getPortfolioScrollY() }
 	scrollTween = gsap.to(scrollPosition, {
 		y: targetY,
 		duration: 0.9,
 		ease: animationEases.inOut,
 		onUpdate() {
-			window.scrollTo(0, scrollPosition.y)
+			setPortfolioScrollY(scrollPosition.y)
 		},
 		onComplete() {
 			scrollTween = undefined
@@ -636,6 +648,11 @@ function handleItemClick(event: MouseEvent, sectionId: SectionNavigationId) {
 function setupActiveSectionDetection() {
 	activeSectionTrigger?.kill()
 	activeSectionTrigger = undefined
+
+	if (props.fixedSectionId) {
+		setActiveSection(props.fixedSectionId)
+		return
+	}
 
 	if (route.name !== 'home') return
 
@@ -686,6 +703,10 @@ watch(() => props.disabled, (disabled) => {
 
 	triggerPointerType = undefined
 	closeNavigation()
+})
+
+watch(() => props.fixedSectionId, () => {
+	setupActiveSectionDetection()
 })
 
 watch(navigationLabelSignature, async () => {

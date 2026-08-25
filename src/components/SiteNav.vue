@@ -90,6 +90,10 @@ import {
 	ScrollTrigger,
 	SplitText
 } from '../utils/animations/gsap'
+import {
+	getPortfolioScrollY,
+	setPortfolioScrollY
+} from '../utils/animations/portfolioScrollSmoother'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -150,18 +154,18 @@ function handleLogoClick(event: MouseEvent) {
 	logoScrollTween?.kill()
 
 	if (prefersReducedMotion()) {
-		window.scrollTo(0, 0)
+		setPortfolioScrollY(0)
 		return
 	}
 
-	const scrollPosition = { y: window.scrollY }
+	const scrollPosition = { y: getPortfolioScrollY() }
 
 	logoScrollTween = gsap.to(scrollPosition, {
 		y: 0,
 		duration: 0.9,
 		ease: 'power2.inOut',
 		onUpdate() {
-			window.scrollTo(0, scrollPosition.y)
+			setPortfolioScrollY(scrollPosition.y)
 		},
 		onComplete() {
 			logoScrollTween = undefined

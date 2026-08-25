@@ -15,8 +15,6 @@
 			</div>
 		</div>
 
-		<LoadingScreen ref="loadingScreen" />
-
 		<CircularScrollIndicator
 			ref="scrollIndicator"
 			:text="t('accessibility.scrollDown')"
@@ -46,8 +44,10 @@ import { useCursorFollowIndicator } from '../../composables/useCursorFollowIndic
 
 const { t } = useI18n()
 const { hero } = usePortfolioContent()
+const props = defineProps<{
+	loadingScreen: InstanceType<typeof LoadingScreen> | null
+}>()
 const root = ref<HTMLElement | null>(null)
-const loadingScreen = ref<InstanceType<typeof LoadingScreen> | null>(null)
 const heroPhotoPositioner = ref<HTMLElement | null>(null)
 const heroPhoto = ref<HTMLElement | null>(null)
 const scrollIndicator = ref<InstanceType<typeof CircularScrollIndicator> | null>(null)
@@ -242,7 +242,7 @@ function cleanupScrollIndicatorVelocity() {
 function linkHeroIntroTimeline() {
 	if (isHeroIntroLinked || !heroTimeline) return
 
-	const loadingTimeline = loadingScreen.value?.getSignatureDrawTimeline()
+	const loadingTimeline = props.loadingScreen?.getSignatureDrawTimeline()
 	heroTimeline.pause(0)
 
 	if (!loadingTimeline) {
@@ -256,10 +256,11 @@ function linkHeroIntroTimeline() {
 	isHeroIntroLinked = true
 }
 
-onMounted(() => {
+onMounted(async () => {
+	await nextTick()
 	registerGsapPlugins()
 
-	const loadingScreenElement = loadingScreen.value?.element
+	const loadingScreenElement = props.loadingScreen?.element
 	const heroPhotoPositionerElement = heroPhotoPositioner.value
 	const heroPhotoElement = heroPhoto.value
 	const scrollIndicatorVisualElement = scrollIndicatorElement.value

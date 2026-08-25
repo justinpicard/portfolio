@@ -311,14 +311,14 @@
 	&__title {
 		left: 50%;
 		display: flex;
+		width: calc(100vw - 17rem);
 		height: 2.5rem;
 		align-items: center;
 		justify-content: center;
-		max-width: calc(100vw - 17rem);
 		transform: translateX(-50%);
 
 		@include respond(sm) {
-			max-width: calc(100vw - 24rem);
+			width: calc(100vw - 24rem);
 		}
 
 		.role {
@@ -328,6 +328,29 @@
 			text-overflow: ellipsis;
 			white-space: nowrap;
 		}
+	}
+
+	&__title-window {
+		position: relative;
+		display: block;
+		width: 100%;
+		text-align: center;
+	}
+
+	&__title-layer {
+		display: block;
+		width: 100%;
+		white-space: nowrap;
+
+		&--incoming {
+			position: absolute;
+			top: 0;
+			left: 0;
+		}
+	}
+
+	&__title-char {
+		display: inline-block;
 	}
 
 	&__section-nav {

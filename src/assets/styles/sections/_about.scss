@@ -32,8 +32,9 @@ section.about {
 	}
 }
 
-.about-text > p:not(.about-section__eyebrow) {
-	font-size: var(--font-size-body);
+.about-section__continuation {
+	display: block;
+	margin-block-start: 1em;
 }
 
 .wave {

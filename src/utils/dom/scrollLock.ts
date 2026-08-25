@@ -1,8 +1,11 @@
+import { lockPortfolioScrollSmoothing } from '../animations/portfolioScrollSmoother'
+
 type ScrollLockState = {
 	bodyOverflow: string
 	scrollX: number
 	scrollY: number
 	count: number
+	unlockSmoothing: () => void
 }
 
 let scrollLockState: ScrollLockState | undefined
@@ -18,12 +21,14 @@ export function lockPageScroll() {
 	}
 
 	const body = document.body
+	const unlockSmoothing = lockPortfolioScrollSmoothing()
 
 	scrollLockState = {
 		bodyOverflow: body.style.overflow,
 		scrollX: window.scrollX,
 		scrollY: window.scrollY,
-		count: 1
+		count: 1,
+		unlockSmoothing
 	}
 
 	body.style.overflow = 'hidden'
@@ -42,10 +47,16 @@ function createUnlock() {
 
 		if (scrollLockState.count > 0) return
 
-		const { bodyOverflow, scrollX, scrollY } = scrollLockState
+		const {
+			bodyOverflow,
+			scrollX,
+			scrollY,
+			unlockSmoothing
+		} = scrollLockState
 
 		document.body.style.overflow = bodyOverflow
 		window.scrollTo(scrollX, scrollY)
+		unlockSmoothing()
 		scrollLockState = undefined
 	}
 }

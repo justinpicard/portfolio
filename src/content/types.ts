@@ -12,7 +12,6 @@ export type ProjectSlug =
 export type ProjectCaseStatus = 'published' | 'coming-soon'
 
 export type AboutContent = {
-	title: string
 	greeting: string
 	introduction: string
 	paragraphs: string[]

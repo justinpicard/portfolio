@@ -1,22 +1,29 @@
 <template>
-	<div ref="pageSurface" class="page-surface">
-		<div ref="pageSurfaceScrims" class="page-surface__scrims" aria-hidden="true">
-			<div ref="pageSurfaceScrimTop" class="page-surface__scrim page-surface__scrim--top" />
-			<div ref="pageSurfaceScrimBottom" class="page-surface__scrim page-surface__scrim--bottom" />
+	<div ref="pageSurfaceScrims" class="page-surface__scrims" aria-hidden="true">
+		<div ref="pageSurfaceScrimTop" class="page-surface__scrim page-surface__scrim--top" />
+		<div ref="pageSurfaceScrimBottom" class="page-surface__scrim page-surface__scrim--bottom" />
+	</div>
+	<AppHeader
+		:visible="isHeaderVisible"
+		:overlay-active="activeOverlay !== null"
+		@overlay-scroll-top="scrollActiveOverlayToTop"
+	/>
+	<LoadingScreen ref="loadingScreen" />
+	<div ref="pageSurfaceBackground" class="page-surface__background" aria-hidden="true" />
+	<div id="smooth-wrapper" ref="smoothWrapper">
+		<div id="smooth-content" ref="smoothContent">
+			<div ref="pageSurface" class="page-surface">
+				<SectionHomeHero
+					ref="hero"
+					:loading-screen="loadingScreen"
+					@intro-start="showHeader"
+				/>
+				<SectionHomeAbout />
+				<SectionHomeWork />
+				<HomeLifeStackExperiment />
+				<AppFooter />
+			</div>
 		</div>
-		<AppHeader
-			:visible="isHeaderVisible"
-			:overlay-active="activeOverlay !== null"
-			@overlay-scroll-top="scrollActiveOverlayToTop"
-		/>
-		<SectionHomeHero
-			ref="hero"
-			@intro-start="showHeader"
-		/>
-		<SectionHomeAbout />
-		<SectionHomeWork />
-		<HomeLifeStackExperiment />
-		<AppFooter />
 	</div>
 	<AppOverlay
 		ref="appOverlay"
@@ -43,9 +50,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onUnmounted, shallowRef, ref, watch } from "vue"
+import { computed, nextTick, onMounted, onUnmounted, shallowRef, ref, watch } from "vue"
 import type { CSSProperties } from "vue"
 import AppHeader from "../components/AppHeader.vue"
+import LoadingScreen from "../components/LoadingScreen.vue"
 import AppOverlay from "../components/overlay/AppOverlay.vue"
 import CvOverlayContent from "../components/overlay/CvOverlayContent.vue"
 import ProjectOverlayContent from "../components/overlay/ProjectOverlayContent.vue"
@@ -57,6 +65,7 @@ import { usePortfolioContent } from "../composables/usePortfolioContent"
 import { gsap, prefersReducedMotion, ScrollTrigger } from "../utils/animations/gsap"
 import AppFooter from "../components/AppFooter.vue"
 import { usePageSeo } from '../composables/usePageSeo'
+import { initPortfolioScrollSmoother } from '../utils/animations/portfolioScrollSmoother'
 
 usePageSeo('home')
 
@@ -71,7 +80,11 @@ type OverlayState =
 	| null
 
 const hero = ref<InstanceType<typeof SectionHomeHero> | null>(null)
+const loadingScreen = ref<InstanceType<typeof LoadingScreen> | null>(null)
+const smoothWrapper = ref<HTMLElement | null>(null)
+const smoothContent = ref<HTMLElement | null>(null)
 const pageSurface = ref<HTMLElement | null>(null)
+const pageSurfaceBackground = ref<HTMLElement | null>(null)
 const pageSurfaceScrims = ref<HTMLElement | null>(null)
 const pageSurfaceScrimTop = ref<HTMLElement | null>(null)
 const pageSurfaceScrimBottom = ref<HTMLElement | null>(null)
@@ -84,6 +97,7 @@ const overlayFirstMediaHidden = ref(false)
 const projectOpeningTransitionActive = ref(false)
 const { projects } = usePortfolioContent()
 let closeOverlayTimeout: ReturnType<typeof window.setTimeout> | undefined
+let destroyScrollSmoother: (() => void) | undefined
 
 function scrollActiveOverlayToTop() {
 	appOverlay.value?.scrollToTop()
@@ -113,17 +127,19 @@ const projectOverlayStyle = computed<ProjectOverlayStyle | undefined>(() => {
 
 function setPageSurfaceDepth(isOpen: boolean, isProjectOverlay = false) {
 	if (!pageSurface.value) return
+	const surfaceLayers = [pageSurface.value, pageSurfaceBackground.value]
+		.filter(Boolean) as HTMLElement[]
 	const scrimLayers = [
 		pageSurfaceScrimTop.value,
 		pageSurfaceScrimBottom.value
 	].filter(Boolean) as HTMLElement[]
 
-	gsap.killTweensOf(pageSurface.value)
+	gsap.killTweensOf(surfaceLayers)
 	gsap.killTweensOf(pageSurfaceScrims.value)
 	gsap.killTweensOf(scrimLayers)
 
 	if (prefersReducedMotion()) {
-		gsap.set(pageSurface.value, {
+		gsap.set(surfaceLayers, {
 			clearProps: 'transform,opacity,borderRadius,transformOrigin'
 		})
 		gsap.set(pageSurfaceScrims.value, {
@@ -154,7 +170,7 @@ function setPageSurfaceDepth(isOpen: boolean, isProjectOverlay = false) {
 		})
 	}
 
-	gsap.to(pageSurface.value, {
+	gsap.to(surfaceLayers, {
 		scale: isOpen ? 0.88 : 1,
 		y: isOpen ? '-12vh' : 0,
 		opacity: isOpen ? 0.45 : 1,
@@ -168,7 +184,7 @@ function setPageSurfaceDepth(isOpen: boolean, isProjectOverlay = false) {
 			if (isOpen || !pageSurface.value) return
 
 			// Remove the transformed containing block before recalculating pinned sections.
-			gsap.set(pageSurface.value, {
+			gsap.set(surfaceLayers, {
 				clearProps: 'transform,opacity,borderRadius,transformOrigin'
 			})
 			ScrollTrigger.refresh()
@@ -249,13 +265,27 @@ watch(
 	}
 )
 
+onMounted(async () => {
+	await nextTick()
+	if (!smoothWrapper.value || !smoothContent.value) return
+
+	destroyScrollSmoother = initPortfolioScrollSmoother({
+		wrapper: smoothWrapper.value,
+		content: smoothContent.value
+	})
+})
+
 onUnmounted(() => {
+	destroyScrollSmoother?.()
+	destroyScrollSmoother = undefined
 	if (closeOverlayTimeout) {
 		window.clearTimeout(closeOverlayTimeout)
 	}
 	if (pageSurface.value) {
-		gsap.killTweensOf(pageSurface.value)
-		gsap.set(pageSurface.value, {
+		const surfaceLayers = [pageSurface.value, pageSurfaceBackground.value]
+			.filter(Boolean) as HTMLElement[]
+		gsap.killTweensOf(surfaceLayers)
+		gsap.set(surfaceLayers, {
 			clearProps: 'transform,opacity,borderRadius,transformOrigin'
 		})
 	}

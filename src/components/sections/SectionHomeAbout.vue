@@ -9,15 +9,17 @@
 				>
 					<p class="about-section__eyebrow eyebrow mb-8 text-secondary" ref="aboutEyebrow">{{ t('home.aboutLabel') }}</p>
 					<h2 class="about-section__title heading-font mb-8 md:mb-16" ref="aboutTitle">
-						{{ about.title }}
+						{{ about.greeting }}.
+						<span class="wave">👋🏼</span>
+						{{ about.introduction }}
+						<span
+							v-for="(paragraph, index) in about.paragraphs"
+							:key="index"
+							class="about-section__continuation"
+						>
+							{{ paragraph }}
+						</span>
 					</h2>
-					<p>{{ about.greeting }} <span class="wave">👋🏼</span> {{ about.introduction }}</p>
-					<p
-						v-for="(paragraph, index) in about.paragraphs"
-						:key="index"
-					>
-						{{ paragraph }}
-					</p>
 				</div>
 			</div>
 		</div>
@@ -47,20 +49,16 @@ let ctx: gsap.Context | undefined
 let isMounted = false
 let revealRequestId = 0
 const ABOUT_NAVIGATION_TEXT_VIEWPORT_POSITION = 0.2
-const ABOUT_WORD_INITIAL_BLUR = 10
-const ABOUT_WORD_INITIAL_OPACITY = 0.55
+const ABOUT_WORD_INITIAL_BLUR = 15
+const ABOUT_WORD_INITIAL_OPACITY = 0
 const ABOUT_EYEBROW_REVEAL_DURATION = 0.06
 const ABOUT_EYEBROW_REVEAL_STAGGER_AMOUNT = 0.12
 const ABOUT_EYEBROW_REVEAL_START = 'top 72%'
 const ABOUT_EYEBROW_REVEAL_END = 'bottom 60%'
-const ABOUT_HEADING_REVEAL_DURATION = 0.08
+const ABOUT_HEADING_REVEAL_DURATION = 0.1
 const ABOUT_HEADING_REVEAL_STAGGER_AMOUNT = 1.1
 const ABOUT_HEADING_REVEAL_START = 'top 72%'
-const ABOUT_HEADING_REVEAL_END = 'bottom 30%'
-const ABOUT_BODY_REVEAL_DURATION = 0.06
-const ABOUT_BODY_REVEAL_STAGGER_AMOUNT = 0.7
-const ABOUT_BODY_REVEAL_START = 'top 72%'
-const ABOUT_BODY_REVEAL_END = 'bottom 55%'
+const ABOUT_HEADING_REVEAL_END = 'bottom 60%'
 
 function cleanupAboutReveal() {
 	revealRequestId += 1
@@ -113,9 +111,6 @@ async function initAboutReveal() {
 			}
 		})
 
-		const aboutBody = gsap.utils.toArray<HTMLParagraphElement>(
-			aboutText.value.querySelectorAll('p:not(.about-section__eyebrow)')
-		)
 		if (reduceMotion) {
 			gsap.set(aboutText.value, { clearProps: 'visibility' })
 			return
@@ -129,11 +124,7 @@ async function initAboutReveal() {
 			type: 'words',
 			wordsClass: 'about-section__word'
 		})
-		const bodySplit = new SplitText(aboutBody, {
-			type: 'words',
-			wordsClass: 'about-section__word'
-		})
-		aboutSplits = [eyebrowSplit, headingSplit, bodySplit]
+		aboutSplits = [eyebrowSplit, headingSplit]
 		const allWords = aboutSplits.flatMap((split) => split.words)
 
 		gsap.set(allWords, {
@@ -177,26 +168,6 @@ async function initAboutReveal() {
 				invalidateOnRefresh: true
 			}
 		})
-
-		gsap.to(bodySplit.words, {
-			filter: 'blur(0px)',
-			opacity: 1,
-			duration: ABOUT_BODY_REVEAL_DURATION,
-			stagger: {
-				amount: ABOUT_BODY_REVEAL_STAGGER_AMOUNT,
-				from: 'start'
-			},
-			ease: 'none',
-			scrollTrigger: {
-				trigger: aboutBody[0],
-				endTrigger: aboutBody[aboutBody.length - 1],
-				start: ABOUT_BODY_REVEAL_START,
-				end: ABOUT_BODY_REVEAL_END,
-				scrub: true,
-				invalidateOnRefresh: true
-			}
-		})
-
 		ScrollTrigger.refresh()
 	}, root.value ?? undefined)
 }
