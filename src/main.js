@@ -20,6 +20,7 @@ export const createApp = ViteSSG(
 		})
 	},
 	{
-		hydration: true
+		// Development starts from an empty shell; production hydrates prerendered HTML.
+		hydration: import.meta.env.PROD
 	}
 )

@@ -1,6 +1,7 @@
 <template>
 	<Teleport to="body" :disabled="!useViewportLayer">
 		<div
+			v-bind="$attrs"
 			ref="root"
 			:class="[
 				'circular-scroll-indicator-wrapper',
@@ -53,6 +54,10 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, useId } from 'vue'
+
+defineOptions({
+	inheritAttrs: false
+})
 
 const props = withDefaults(defineProps<{
 	variant?: 'hero' | 'project'
