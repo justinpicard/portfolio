@@ -42,24 +42,32 @@ const root = ref<HTMLElement | null>(null)
 const aboutText = ref<HTMLElement | null>(null)
 const aboutEyebrow = ref<HTMLParagraphElement | null>(null)
 const aboutTitle = ref<HTMLHeadingElement | null>(null)
-let aboutSplit: SplitText | undefined
+let aboutSplits: SplitText[] = []
 let ctx: gsap.Context | undefined
 let isMounted = false
 let revealRequestId = 0
 const ABOUT_NAVIGATION_TEXT_VIEWPORT_POSITION = 0.2
 const ABOUT_WORD_INITIAL_BLUR = 10
 const ABOUT_WORD_INITIAL_OPACITY = 0.55
-const ABOUT_WORD_REVEAL_DURATION = 0.06
-const ABOUT_WORD_REVEAL_STAGGER_AMOUNT = 0.7
-const ABOUT_REVEAL_START = 'top 62%'
-const ABOUT_REVEAL_END = 'bottom 58%'
+const ABOUT_EYEBROW_REVEAL_DURATION = 0.06
+const ABOUT_EYEBROW_REVEAL_STAGGER_AMOUNT = 0.12
+const ABOUT_EYEBROW_REVEAL_START = 'top 72%'
+const ABOUT_EYEBROW_REVEAL_END = 'bottom 60%'
+const ABOUT_HEADING_REVEAL_DURATION = 0.08
+const ABOUT_HEADING_REVEAL_STAGGER_AMOUNT = 1.1
+const ABOUT_HEADING_REVEAL_START = 'top 72%'
+const ABOUT_HEADING_REVEAL_END = 'bottom 30%'
+const ABOUT_BODY_REVEAL_DURATION = 0.06
+const ABOUT_BODY_REVEAL_STAGGER_AMOUNT = 0.7
+const ABOUT_BODY_REVEAL_START = 'top 72%'
+const ABOUT_BODY_REVEAL_END = 'bottom 55%'
 
 function cleanupAboutReveal() {
 	revealRequestId += 1
 	ctx?.revert()
 	ctx = undefined
-	aboutSplit?.revert()
-	aboutSplit = undefined
+	aboutSplits.forEach((split) => split.revert())
+	aboutSplits = []
 	if (aboutText.value) gsap.set(aboutText.value, { clearProps: 'visibility' })
 	if (root.value) delete root.value.dataset.sectionNavigationScrollY
 }
@@ -108,41 +116,82 @@ async function initAboutReveal() {
 		const aboutBody = gsap.utils.toArray<HTMLParagraphElement>(
 			aboutText.value.querySelectorAll('p:not(.about-section__eyebrow)')
 		)
-		const aboutCopy = [
-			aboutEyebrow.value,
-			aboutTitle.value,
-			...aboutBody
-		]
-
 		if (reduceMotion) {
 			gsap.set(aboutText.value, { clearProps: 'visibility' })
 			return
 		}
 
-		aboutSplit = new SplitText(aboutCopy, {
+		const eyebrowSplit = new SplitText(aboutEyebrow.value, {
 			type: 'words',
 			wordsClass: 'about-section__word'
 		})
+		const headingSplit = new SplitText(aboutTitle.value, {
+			type: 'words',
+			wordsClass: 'about-section__word'
+		})
+		const bodySplit = new SplitText(aboutBody, {
+			type: 'words',
+			wordsClass: 'about-section__word'
+		})
+		aboutSplits = [eyebrowSplit, headingSplit, bodySplit]
+		const allWords = aboutSplits.flatMap((split) => split.words)
 
-		gsap.set(aboutSplit.words, {
+		gsap.set(allWords, {
 			filter: `blur(${ABOUT_WORD_INITIAL_BLUR}px)`,
 			opacity: ABOUT_WORD_INITIAL_OPACITY
 		})
 		gsap.set(aboutText.value, { visibility: 'visible' })
 
-		gsap.to(aboutSplit.words, {
+		gsap.to(eyebrowSplit.words, {
 			filter: 'blur(0px)',
 			opacity: 1,
-			duration: ABOUT_WORD_REVEAL_DURATION,
+			duration: ABOUT_EYEBROW_REVEAL_DURATION,
 			stagger: {
-				amount: ABOUT_WORD_REVEAL_STAGGER_AMOUNT,
+				amount: ABOUT_EYEBROW_REVEAL_STAGGER_AMOUNT,
 				from: 'start'
 			},
 			ease: 'none',
 			scrollTrigger: {
-				trigger: aboutText.value,
-				start: ABOUT_REVEAL_START,
-				end: ABOUT_REVEAL_END,
+				trigger: aboutEyebrow.value,
+				start: ABOUT_EYEBROW_REVEAL_START,
+				end: ABOUT_EYEBROW_REVEAL_END,
+				scrub: true,
+				invalidateOnRefresh: true
+			}
+		})
+
+		gsap.to(headingSplit.words, {
+			filter: 'blur(0px)',
+			opacity: 1,
+			duration: ABOUT_HEADING_REVEAL_DURATION,
+			stagger: {
+				amount: ABOUT_HEADING_REVEAL_STAGGER_AMOUNT,
+				from: 'start'
+			},
+			ease: 'none',
+			scrollTrigger: {
+				trigger: aboutTitle.value,
+				start: ABOUT_HEADING_REVEAL_START,
+				end: ABOUT_HEADING_REVEAL_END,
+				scrub: true,
+				invalidateOnRefresh: true
+			}
+		})
+
+		gsap.to(bodySplit.words, {
+			filter: 'blur(0px)',
+			opacity: 1,
+			duration: ABOUT_BODY_REVEAL_DURATION,
+			stagger: {
+				amount: ABOUT_BODY_REVEAL_STAGGER_AMOUNT,
+				from: 'start'
+			},
+			ease: 'none',
+			scrollTrigger: {
+				trigger: aboutBody[0],
+				endTrigger: aboutBody[aboutBody.length - 1],
+				start: ABOUT_BODY_REVEAL_START,
+				end: ABOUT_BODY_REVEAL_END,
 				scrub: true,
 				invalidateOnRefresh: true
 			}
