@@ -1,3 +1,5 @@
+@use "../abstracts" as *;
+
 .home-photo-stack-section {
 	position: relative;
 	min-height: 100vh;
@@ -68,10 +70,8 @@
 		max-width: 44ch;
 		margin-inline: auto;
 	}
-}
 
-@media (max-width: 47.98rem) {
-	.home-photo-stack-section {
+	@include respond(md, down) {
 		&__card {
 			width: clamp(8.5rem, 42vw, 13rem);
 

@@ -1,7 +1,7 @@
 <template>
 	<div class="project-case-study">
 		<section
-			class="project-case-study__introduction"
+			class="section-layout section-layout--case project-case-study__introduction"
 			:class="`${projectSlug}-case__introduction`"
 		>
 			<div class="container">
@@ -23,7 +23,8 @@
 			v-for="section in renderedSections"
 			:key="section.id"
 			:id="section.id"
-			class="project-case-study__section"
+			class="section-layout section-layout--case project-case-study__section"
+			:class="`section-layout--case-${section.spacing}`"
 		>
 			<div class="container">
 				<div class="row project-case-study__section-row">
@@ -62,6 +63,7 @@ const props = defineProps<{
 const renderedSections = computed(() => props.caseStudy.sections.map((section) => ({
 	id: section.id,
 	title: section.title,
+	spacing: section.spacing ?? 'default',
 	blocks: section.blocks ?? [{
 		type: 'text',
 		paragraphs: section.paragraphs

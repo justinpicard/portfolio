@@ -26,6 +26,7 @@ const muzimatch = {
 			{
 				id: 'overview',
 				title: 'Finding the right musicians is harder than it should be',
+				spacing: 'spacious',
 				blocks: [
 					{
 						type: 'text',
@@ -77,31 +78,21 @@ const muzimatch = {
 					},
 					
 					{
-						type: 'columns',
+						type: 'feature',
 						width: 'full',
-						columns: [
-							{
-								emphasis: 'narrow',
-								blocks: [{
-									type: 'text',
-									paragraphs: [
-										paragraphThree,
-										paragraphOne,
-										paragraphTwo,
-										paragraphThree
-									]
-								}]
-							},
-							{
-								emphasis: 'wide',
-								blocks: [{
-									type: 'media',
-									src: 'projects/muzimatch/muzimatch-hero',
-									alt: 'MuziMatch project artwork',
-									presentation: 'landscape'
-								}]
-							}
-						]
+						direction: 'text-media',
+						text: {
+							type: 'text',
+							paragraphs: [
+								paragraphThree
+							]
+						},
+						media: {
+							type: 'media',
+							src: 'projects/muzimatch/muzimatch-hero',
+							alt: 'MuziMatch project artwork',
+							presentation: 'landscape'
+						}
 					}
 				]
 			}

@@ -1,5 +1,5 @@
 <template>
-	<section id="about" class="section about" ref="root">
+	<section id="about" class="section-layout section-layout--editorial about" ref="root">
 		<div class="container">
 			<div class="row">
 				<div

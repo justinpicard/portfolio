@@ -1,6 +1,10 @@
+@use "../abstracts" as *;
+
 .home-life-section {
+	--home-life-flow-space: clamp(5em, 12vh, 12em);
+
 	min-height: 100vh;
-	padding-block: var(--section-padding-sm);
+	padding-block: var(--home-life-flow-space);
 	overflow: clip;
 
 	&__layout {
@@ -20,9 +24,9 @@
 	}
 
 	&__text {
+		@include type-role(lead);
+
 		max-width: 31ch;
-		font-size: var(--font-size-lead);
-		line-height: var(--line-height-normal);
 	}
 
 	&__stack {
@@ -45,32 +49,31 @@
 	}
 
 	&__caption {
+		@include type-role(label);
+
 		padding: var(--space-4) var(--space-2) var(--space-2);
-		font-size: var(--font-size-sm);
 		font-weight: var(--font-weight-medium);
 		line-height: var(--line-height-tight);
 	}
-}
 
-@media (min-width: 48rem) and (max-width: 63.98rem) {
-	.home-life-section {
-		&__stack {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-			align-items: start;
-		}
+	@include respond(md) {
+		@include respond(lg, down) {
+			&__stack {
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				align-items: start;
+			}
 
-		&__card {
-			width: 100%;
+			&__card {
+				width: 100%;
 
-			&:nth-child(even) {
-				margin-block-start: var(--space-16);
+				&:nth-child(even) {
+					margin-block-start: var(--space-16);
+				}
 			}
 		}
 	}
-}
 
-@media (min-width: 64rem) {
-	.home-life-section {
+	@include respond(lg) {
 		margin-block-start: -100svh;
 		padding-block: 0;
 
@@ -114,7 +117,7 @@
 
 @media (prefers-reduced-motion: reduce) {
 	.home-life-section {
-		padding-block: var(--section-padding-sm);
+		padding-block: var(--home-life-flow-space);
 
 		&__layout {
 			height: auto;
@@ -134,17 +137,15 @@
 			transform: none;
 			will-change: auto;
 		}
-	}
-}
 
-@media (prefers-reduced-motion: reduce) and (min-width: 64rem) {
-	.home-life-section {
-		&__layout {
-			align-items: start;
-		}
+		@include respond(lg) {
+			&__layout {
+				align-items: start;
+			}
 
-		&__stack {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
+			&__stack {
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+			}
 		}
 	}
 }

@@ -38,15 +38,15 @@ h6, .h6 {
 }
 
 h2, .h2 {
-	font-size: var(--font-size-4xl);
+	@include type-role(heading-large);
 }
 
 h3, .h3 {
-	font-size: var(--font-size-3xl);
+	@include type-role(heading-medium);
 }
 
 h4, .h4 {
-	font-size: var(--font-size-xl);
+	@include type-role(heading-small);
 }
 
 .lead-block {
@@ -54,8 +54,9 @@ h4, .h4 {
 }
 
 .lead-heading {
+	@include type-role(ui);
+
 	text-transform: uppercase;
-	font-size: var(--font-size-md);
 	font-weight: $font-weight-bold;
 	letter-spacing: 0;
 	margin-right: 8em;
@@ -65,8 +66,9 @@ h4, .h4 {
 }
 
 .lead-paragraph {
+	@include type-role(heading-large);
+
 	display: inline;
-	font-size: var(--font-size-4xl);
 }
 
 a {
@@ -123,7 +125,8 @@ p {
 }
 
 .eyebrow {
-	font-size: var(--font-size-sm);
+	@include type-role(label);
+
 	font-weight: var(--font-weight-semibold);
 	line-height: var(--line-height-none);
 	text-transform: uppercase;
@@ -187,12 +190,10 @@ p {
 		white-space: nowrap;
 		animation: marquee 12s linear infinite;
 		line-height: 1;
-		font-size: 5rem;
+		font-size: clamp(5rem, calc(-4.375rem + 46.875vw), 12.5rem);
 		pointer-events: none;
 
-		// Extra Styling
-		@media (min-width: 576px) {
-			font-size: 12.5rem;
+		@include respond(sm) {
 			animation: marquee 20s linear infinite;
 		}
 	}
@@ -200,7 +201,7 @@ p {
 	&.name {
 		margin-bottom: 2rem;
 
-		@media (min-width: 576px) {
+		@include respond(sm) {
 			margin-bottom: 4rem;
 		}
 	}
@@ -210,11 +211,10 @@ p {
 
 	.star {
 		margin: 0 2rem;
-		font-size: 2.5rem;
+		font-size: clamp(2.5rem, calc(-1.875rem + 21.875vw), 6rem);
 
-		@media (min-width: 576px) {
+		@include respond(sm) {
 			margin: 0 4rem;
-			font-size: 6rem;
 		}
 	}
 }

@@ -1,5 +1,5 @@
 <template>
-	<section id="intro" ref="root" class="home-hero home-hero--intro-pending">
+	<section id="intro" ref="root" class="section-layout section-layout--stage home-hero home-hero--intro-pending">
 		<div class="container hero-copy-container hero-copy-container--final">
 			<HomeHeroCopy class="hero-copy-layer hero-copy-layer--final" />
 		</div>

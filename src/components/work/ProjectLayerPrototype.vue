@@ -34,7 +34,16 @@
 						/>
 					</div>
 
-					<section class="project-nav py-32">
+					<section
+						ref="projectNav"
+						class="section-layout section-layout--case section-layout--case-spacious project-nav"
+					>
+						<div class="container" aria-hidden="true">
+							<div
+								ref="projectNavDivider"
+								class="project-nav__divider divider"
+							/>
+						</div>
 						<div class="project-nav__title">
 							<div class="container">
 								<div class="col-12 lg:col-8 lg:offset-2">
@@ -82,6 +91,7 @@ import {
 	gsap,
 	prefersReducedMotion,
 	registerGsapPlugins,
+	ScrollTrigger,
 	SplitText
 } from '../../utils/animations/gsap'
 import {
@@ -168,6 +178,8 @@ const scrims = ref<HTMLElement | null>(null)
 const bottomScrim = ref<HTMLElement | null>(null)
 const projectHeader = ref<InstanceType<typeof ProjectHeader> | null>(null)
 const projectNavigator = ref<InstanceType<typeof ProjectStackNavigator> | null>(null)
+const projectNav = ref<HTMLElement | null>(null)
+const projectNavDivider = ref<HTMLElement | null>(null)
 const sharedTransitionLayer = ref<HTMLElement | null>(null)
 const displayedIndex = ref(props.projectIndex)
 const isTransitioning = ref(false)
@@ -184,6 +196,7 @@ const HERO_REVEAL_START = 0.64
 const CLOSE_DURATION = 0.9
 const TEXT_OUT_DURATION = 0.24
 const CONTEXT_FADE_DURATION = 0.48
+const PROJECT_NAV_DIVIDER_REVEAL_START = 'top 70%'
 const SHARED_ELEMENT_TRANSITIONS_ENABLED = false
 const DEBUG_SHARED_TRANSITION = import.meta.env.DEV
 	&& new URLSearchParams(window.location.search).has('debugSharedTransition')
@@ -281,6 +294,7 @@ let sharedRepresentations: SharedElementRepresentation[] = []
 let previousDocumentOverflow = ''
 let unlockScrollSmoothing: (() => void) | undefined
 let closeRequestedDuringOpen = false
+let projectNavDividerTween: gsap.core.Tween | undefined
 const typographyFrameWidths = new WeakMap<
 	HTMLElement,
 	{ scrollWidth: number; clientWidth: number; offsetWidth: number }
@@ -1469,6 +1483,41 @@ function cleanupBottomScrim() {
 	isBottomScrimVisible = undefined
 }
 
+function cleanupProjectNavDivider() {
+	projectNavDividerTween?.scrollTrigger?.kill()
+	projectNavDividerTween?.kill()
+	projectNavDividerTween = undefined
+
+	if (projectNavDivider.value) {
+		gsap.set(projectNavDivider.value, { clearProps: 'width' })
+	}
+}
+
+function setupProjectNavDivider() {
+	cleanupProjectNavDivider()
+
+	if (
+		!content.value
+		|| !projectNav.value
+		|| !projectNavDivider.value
+		|| prefersReducedMotion()
+	) return
+
+	projectNavDividerTween = gsap.fromTo(projectNavDivider.value, {
+		width: '0%'
+	}, {
+		width: '100%',
+		duration: 0.9,
+		ease: animationEases.strongInOut,
+		scrollTrigger: {
+			trigger: projectNav.value,
+			scroller: content.value,
+			start: PROJECT_NAV_DIVIDER_REVEAL_START,
+			toggleActions: 'play none none none'
+		}
+	})
+}
+
 function handleProjectContentScroll() {
 	updateBottomScrim()
 }
@@ -2547,6 +2596,11 @@ watch(
 	}
 )
 
+watch(displayedIndex, async () => {
+	await nextTick()
+	setupProjectNavDivider()
+}, { flush: 'post' })
+
 onMounted(async () => {
 	previousDocumentOverflow = document.documentElement.style.overflow
 	unlockScrollSmoothing = lockPortfolioScrollSmoothing()
@@ -2555,6 +2609,7 @@ onMounted(async () => {
 	await nextTick()
 	setupBottomScrim()
 	await animateOpen()
+	setupProjectNavDivider()
 })
 
 onBeforeUnmount(() => {
@@ -2563,6 +2618,7 @@ onBeforeUnmount(() => {
 	cleanupCardRestore()
 	killContextTransition()
 	cleanupBottomScrim()
+	cleanupProjectNavDivider()
 	document.documentElement.style.overflow = previousDocumentOverflow
 	unlockScrollSmoothing?.()
 	unlockScrollSmoothing = undefined

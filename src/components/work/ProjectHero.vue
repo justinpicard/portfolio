@@ -16,7 +16,7 @@
 							id="project-layer-title"
 							data-project-transition-text
 							data-project-shared="title"
-							class="text-4xl"
+							class="type-heading-large"
 						>
 							{{ project.summary }}
 						</h2>
@@ -43,38 +43,38 @@
 							data-project-metadata 
 							class="d-flex gap-1 flex-column"
 						>
-								<span class="eyebrow text-2xs opacity-50">{{ t('project.year') }}</span>
-								<span class="text-md">{{ project.year }}</span>
+								<span class="eyebrow type-label opacity-50">{{ t('project.year') }}</span>
+								<span class="type-body-small">{{ project.year }}</span>
 						</div>
 						<div 
 							data-project-metadata
 							class="d-flex gap-1 flex-column"
 						>
-							<span class="eyebrow text-2xs opacity-50">{{ t('project.job') }}</span>
-							<span class="text-md">{{ project.job }}</span>
+							<span class="eyebrow type-label opacity-50">{{ t('project.job') }}</span>
+							<span class="type-body-small">{{ project.job }}</span>
 						</div>
 						<div 
 							data-project-metadata
 							class="d-flex gap-1 flex-column"
 						>
-							<span class="eyebrow text-2xs opacity-50">{{ t('project.role') }}</span>
-							<span class="text-md">{{ project.role }}</span>
+							<span class="eyebrow type-label opacity-50">{{ t('project.role') }}</span>
+							<span class="type-body-small">{{ project.role }}</span>
 						</div>
 						<div 
 							class="d-flex gap-1 flex-column"
 							data-project-metadata
 						>
-							<span class="eyebrow text-2xs opacity-50">{{ t('project.type') }}</span>
-							<span class="text-md">{{ project.type }}</span>
+							<span class="eyebrow type-label opacity-50">{{ t('project.type') }}</span>
+							<span class="type-body-small">{{ project.type }}</span>
 						</div>
 						<div
 							v-if="project.live"
 							class="d-flex gap-1 flex-column"
 							data-project-metadata
 						>
-							<span class="eyebrow text-2xs opacity-50">{{ t('project.live') }}</span>
+							<span class="eyebrow type-label opacity-50">{{ t('project.live') }}</span>
 							<a
-								class="text-md text-primary"
+								class="type-body-small text-primary"
 								:href="project.live"
 								target="_blank"
 								rel="noopener noreferrer"

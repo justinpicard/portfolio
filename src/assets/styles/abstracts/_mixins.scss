@@ -9,6 +9,7 @@ https://css-tricks.com/easing-linear-gradients/
 @use "sass:math";
 @use "sass:string";
 @use "breakpoints" as *;
+@use "tokens" as *;
 @use "variables" as *;
 
 @mixin scrimGradient($startColor: $black, $direction: 'to bottom') {
@@ -48,7 +49,7 @@ https://css-tricks.com/easing-linear-gradients/
 	}
 
 	@each $breakpoint, $width in $breakpoints {
-		@media (min-width: #{$width}) {
+		@include respond($breakpoint) {
 			$prefix: $breakpoint;
 
 			@if $breakpoint == 2xl {
@@ -60,4 +61,14 @@ https://css-tricks.com/easing-linear-gradients/
 			}
 		}
 	}
+}
+
+@mixin type-role($role) {
+	@if not list.index($semantic-type-roles, $role) {
+		@error "Unknown semantic typography role `#{$role}`.";
+	}
+
+	font-size: var(--font-size-#{$role});
+	line-height: var(--line-height-#{$role});
+	letter-spacing: var(--letter-spacing-#{$role});
 }

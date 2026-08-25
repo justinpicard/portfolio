@@ -1,8 +1,9 @@
 @use "../abstracts" as *;
 
 .site-footer {
+	--section-space-end: var(--space-16);
+
 	min-height: 100svh;
-	//padding-block: var(--space-8) var(--section-padding-sm);
 
 	&__container {
 		display: block;
@@ -66,9 +67,10 @@
 	}
 
 	&__copy {
+		@include type-role(body);
+
 		max-width: 32ch;
 		margin: 0;
-		font-size: var(--font-size-body);
 	}
 
 	&__intro {
@@ -96,25 +98,21 @@
 		list-style: none;
 
 		a {
+			@include type-role(body-small);
+
 			color: currentColor;
-			font-size: var(--font-size-md);
 			text-decoration: none;
 		}
 	}
 
 	&__copyright {
+		@include type-role(label);
+
 		margin: 0;
-		font-size: $font-size-xs;
 		opacity: 0.6;
-
-		@include respond(sm) {
-			font-size: $font-size-sm;
-		}
 	}
-}
 
-@media (max-width: 47.98rem) {
-	.site-footer {
+	@include respond(md, down) {
 		&__grid {
 			row-gap: var(--space-12);
 		}
@@ -122,6 +120,5 @@
 		&__title {
 			font-size: 36cqw;
 		}
-
 	}
 }

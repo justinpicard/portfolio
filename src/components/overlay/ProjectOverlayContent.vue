@@ -73,8 +73,8 @@
 						>
 							{{ surface.project.year }}<span class="star mx-2">✦</span>{{ surface.project.type }}<span class="star mx-2">✦</span>{{ surface.project.job }}
 							<div class="role d-flex flex-column mt-8">
-								<span class="role-label text-xs font-bold uppercase tracking-extrawide">{{ t('project.role') }}</span>
-								<span class="role-title text-sm">{{ surface.project.role }}</span>
+								<span class="role-label type-label font-bold uppercase tracking-extrawide">{{ t('project.role') }}</span>
+								<span class="role-title type-label">{{ surface.project.role }}</span>
 							</div>
 						</div>
 					</header>

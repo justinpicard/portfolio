@@ -8,14 +8,25 @@ $breakpoints: (
 	2xl: 96rem
 );
 
-@mixin respond($breakpoint) {
+// Keep adjacent up/down ranges mutually exclusive at the shared breakpoint.
+$breakpoint-boundary-offset: 0.001rem;
+
+@mixin respond($breakpoint, $direction: up) {
 	$width: map.get($breakpoints, $breakpoint);
 
 	@if $width == null {
 		@error "Unknown breakpoint `#{$breakpoint}`.";
 	}
 
-	@media (min-width: #{$width}) {
-		@content;
+	@if $direction == up {
+		@media (min-width: #{$width}) {
+			@content;
+		}
+	} @else if $direction == down {
+		@media (max-width: #{$width - $breakpoint-boundary-offset}) {
+			@content;
+		}
+	} @else {
+		@error "Unknown responsive direction `#{$direction}`.";
 	}
 }

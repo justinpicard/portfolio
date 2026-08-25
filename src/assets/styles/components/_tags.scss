@@ -1,4 +1,8 @@
+@use "../abstracts" as *;
+
 .tag {
+	@include type-role(label);
+
 	display: inline-flex;
 	align-items: center;
 	//border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
@@ -6,7 +10,6 @@
 	padding: var(--space-2) var(--space-3);
 	background: color-mix(in srgb, var(--color-dark) 7%, transparent);
 	color: inherit;
-	font-size: var(--font-size-xs);
 	font-weight: var(--font-weight-medium);
 	line-height: var(--line-height-tight);
 	white-space: nowrap;

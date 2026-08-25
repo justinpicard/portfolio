@@ -72,6 +72,61 @@ $letter-spacing-values: (
 	extrawide: $letter-spacing-extrawide
 );
 
+$semantic-type-role-values: (
+	label: (
+		size: clamp(0.75rem, calc(0.7143rem + 0.1786vw), 0.875rem),
+		line-height: var(--line-height-tight),
+		letter-spacing: var(--letter-spacing-wide)
+	),
+	ui: (
+		size: clamp(1rem, calc(0.9643rem + 0.1786vw), 1.125rem),
+		line-height: var(--line-height-tight),
+		letter-spacing: var(--letter-spacing-normal)
+	),
+	body-small: (
+		size: clamp(1.125rem, calc(1.0536rem + 0.3571vw), 1.375rem),
+		line-height: var(--line-height-normal),
+		letter-spacing: var(--letter-spacing-normal)
+	),
+	body: (
+		size: clamp(21px, calc(20.1429px + 0.2679vw), 24px),
+		line-height: var(--line-height-normal),
+		letter-spacing: var(--letter-spacing-normal)
+	),
+	lead: (
+		size: clamp(1.375rem, calc(1.2679rem + 0.5357vw), 1.75rem),
+		line-height: var(--line-height-normal),
+		letter-spacing: var(--letter-spacing-normal)
+	),
+	heading-small: (
+		size: clamp(1.75rem, calc(1.6071rem + 0.7143vw), 2.25rem),
+		line-height: var(--line-height-tight),
+		letter-spacing: var(--letter-spacing-tight)
+	),
+	heading-medium: (
+		size: clamp(2.25rem, calc(2.1071rem + 0.7143vw), 2.75rem),
+		line-height: var(--line-height-tight),
+		letter-spacing: var(--letter-spacing-tight)
+	),
+	heading-large: (
+		size: clamp(2.75rem, calc(2.5357rem + 1.0714vw), 3.5rem),
+		line-height: var(--line-height-tight),
+		letter-spacing: var(--letter-spacing-tight)
+	),
+	display-medium: (
+		size: clamp(2.25rem, 8.333vw, 4rem),
+		line-height: var(--line-height-none),
+		letter-spacing: var(--letter-spacing-tight)
+	),
+	display-large: (
+		size: clamp(3rem, 10vw, 9rem),
+		line-height: var(--line-height-none),
+		letter-spacing: var(--letter-spacing-tight)
+	)
+);
+
+$semantic-type-roles: map.keys($semantic-type-role-values);
+
 @function css-token-map($prefix, $values) {
 	$tokens: ();
 
@@ -150,15 +205,12 @@ $shadows: (
 		--font-size-#{$name}: #{$value};
 	}
 
-	// Semantic roles sit above the reusable scale. Body copy is intentionally
-	// fluid so editorial rhythm can evolve without resizing UI typography.
-	--font-size-ui: var(--font-size-base);
-	--font-size-lead: var(--font-size-lg);
-	--font-size-body: clamp(21px, calc(20.1429px + 0.2679vw), 24px);
-	--line-height-body: var(--line-height-normal);
-
-	--font-size-display-project-card: 4rem;
-	--font-size-display-overlay-title: 4rem;
+	// Semantic roles remain fluid while the raw scale stays available to utilities.
+	@each $role, $values in $semantic-type-role-values {
+		--font-size-#{$role}: #{map.get($values, size)};
+		--line-height-#{$role}: #{map.get($values, line-height)};
+		--letter-spacing-#{$role}: #{map.get($values, letter-spacing)};
+	}
 
 	@each $name, $value in $line-height-values {
 		--line-height-#{$name}: #{$value};
@@ -168,9 +220,15 @@ $shadows: (
 		--letter-spacing-#{$name}: #{$value};
 	}
 
-	--container-padding: 1.5rem;
-	--section-padding-sm: clamp(5em, 12vh, 12em);
-	--section-padding: clamp(5em, 21vh, 12em);
+	// Preserve the compact page edge while allowing a small increase on wide screens.
+	--page-gutter: clamp(1.5rem, 2vw, 2rem);
+
+	// Section archetypes own their rhythm instead of sharing one global padding rule.
+	--section-space-editorial: clamp(5em, calc(3em + 10vw), 12em);
+	--section-space-editorial-compact: clamp(5em, calc(3em + 4vw), 8em);
+	--section-space-case-tight: clamp(var(--space-8), 3vw, var(--space-10));
+	--section-space-case-default: clamp(var(--space-10), 5vw, var(--space-16));
+	--section-space-case-spacious: clamp(var(--space-16), calc(2rem + 8vw), var(--space-32));
 
 	--radius-sm: 0.125rem;
 	--radius: 0.25rem;

@@ -20,7 +20,7 @@ $display-values: (
 
 // Legacy Bootstrap-like max-width helper kept for compatibility.
 .d-sm-none {
-	@media (max-width: 36rem) {
+	@include respond(sm, down) {
 		display: none !important;
 	}
 }

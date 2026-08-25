@@ -1,5 +1,5 @@
 <template>
-	<section class="section home-photo-stack-section" ref="root">
+	<section class="section-layout section-layout--stage home-photo-stack-section" ref="root">
 		<div class="home-photo-stack-section__content">
 			<div class="container">
 				<div class="row">

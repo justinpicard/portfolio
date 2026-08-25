@@ -13,6 +13,13 @@
 	font-family: var(--body-font) !important;
 }
 
+// Semantic roles are fluid and include their shared vertical and tracking rhythm.
+@each $role in $semantic-type-roles {
+	.type-#{$role} {
+		@include type-role($role);
+	}
+}
+
 // Font-size utilities are emitted in two phases so responsive variants always
 // follow base variants without relying on !important or extra specificity.
 @each $name, $value in $font-sizes {
@@ -22,7 +29,7 @@
 }
 
 @each $breakpoint, $width in $breakpoints {
-	@media (min-width: #{$width}) {
+	@include respond($breakpoint) {
 		$prefix: $breakpoint;
 
 		@if $breakpoint == 2xl {

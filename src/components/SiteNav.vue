@@ -1,6 +1,6 @@
 <template>
 	<div ref="root" class="main-nav position-relative">
-		<div class="position-fixed top-0 left-0 ml-4 sm:ml-8 mt-4 sm:mt-8">
+		<div class="site-nav__identity position-fixed top-0 left-0 mt-4 sm:mt-8">
 			<router-link
 				:to="{ name: 'home', params: getLocaleParams(currentLocale) }"
 				class="site-logo"
@@ -14,22 +14,22 @@
 					/>
 				</figure>
 				<span class="site-title d-flex flex-column ml-4">
-					<span ref="name" class="name site-nav__reveal-copy text-lg">
+					<span ref="name" class="name site-nav__reveal-copy type-body-small">
 						Justin Picard
 					</span>
-					<span class="role site-nav__reveal-copy d-block sm:d-none text-xs">
+					<span class="role site-nav__reveal-copy d-block sm:d-none type-label">
 						{{ t('navigation.role') }}
 					</span>
 				</span>
 			</router-link>
 		</div>
 		<div class="site-role position-fixed top-0 horizontal-center mt-8">
-			<span class="role site-nav__reveal-copy text-lg d-none sm:d-block">
+			<span class="role site-nav__reveal-copy type-body-small d-none sm:d-block">
 				{{ t('navigation.role') }}
 			</span>
 		</div>
 		<div
-			class="site-lang-switcher position-fixed top-0 right-0 mr-4 sm:mr-8 mt-4 sm:mt-8"
+			class="site-lang-switcher position-fixed top-0 right-0 mt-4 sm:mt-8"
 			:class="{ 'site-lang-switcher--section-nav': !MULTILINGUAL_ENABLED }"
 		>
 			<nav
@@ -39,7 +39,7 @@
 			>
 				<router-link
 					:to="getLocalizedRoute('en')"
-					class="lang-switcher__option nav-link text-lg"
+					class="lang-switcher__option nav-link type-body-small"
 					:class="{ 'is-active': currentLocale === 'en' }"
 					:aria-label="t('languageSwitcher.english')"
 					:aria-current="currentLocale === 'en' ? 'page' : undefined"
@@ -53,7 +53,7 @@
 				<span class="lang-switcher__separator mx-1 text-secondary" aria-hidden="true">✦</span>
 				<router-link
 					:to="getLocalizedRoute('nl')"
-					class="lang-switcher__option nav-link text-lg"
+					class="lang-switcher__option nav-link type-body-small"
 					:class="{ 'is-active': currentLocale === 'nl' }"
 					:aria-label="t('languageSwitcher.dutch')"
 					:aria-current="currentLocale === 'nl' ? 'page' : undefined"

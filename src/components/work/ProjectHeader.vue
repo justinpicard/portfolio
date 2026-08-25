@@ -22,7 +22,7 @@
 		<div class="project-header__title">
 			<span
 				ref="titleWindow"
-				class="project-header__title-window role text-lg"
+				class="project-header__title-window role type-body-small"
 				aria-live="polite"
 			>
 				<span

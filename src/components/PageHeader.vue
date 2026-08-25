@@ -1,5 +1,5 @@
 <template>
-	<section class="page-header" ref="root">
+	<section class="section-layout section-layout--editorial page-header" ref="root">
 	  <div class="limits"></div>
 	  <div class="half"></div>
 	  <div class="marquee-container">

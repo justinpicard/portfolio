@@ -58,7 +58,7 @@
 					<span class="project-stack-navigator__year eyebrow">
 						{{ projects[projectIndex].year }}
 					</span>
-					<span class="project-stack-navigator__title text-2xl">
+					<span class="project-stack-navigator__title">
 						{{ projects[projectIndex].title }}
 					</span>
 					<span class="project-stack-navigator__summary">

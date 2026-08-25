@@ -1,5 +1,28 @@
-.section {
+.section-layout {
 	display: block;
 	position: relative;
-	padding-block: var(--section-padding);
+}
+
+.section-layout--editorial {
+	padding-block:
+		var(--section-space-start, var(--section-space-editorial))
+		var(--section-space-end, var(--section-space-editorial));
+}
+
+.section-layout--stage,
+.section-layout--case {
+	padding-block: 0;
+}
+
+.section-layout--case,
+.section-layout--case-default {
+	--case-section-space: var(--section-space-case-default);
+}
+
+.section-layout--case-tight {
+	--case-section-space: var(--section-space-case-tight);
+}
+
+.section-layout--case-spacious {
+	--case-section-space: var(--section-space-case-spacious);
 }

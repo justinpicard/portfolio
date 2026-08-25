@@ -1,5 +1,5 @@
 <template>
-	<section id="life" ref="root" class="section home-life-section" aria-labelledby="home-life-title">
+	<section id="life" ref="root" class="section-layout section-layout--stage home-life-section" aria-labelledby="home-life-title">
 		<div ref="layout" class="container home-life-section__layout">
 			<div ref="introRef" class="home-life-section__intro">
 				<h2 id="home-life-title" ref="titleRef" class="home-life-section__title">

@@ -7,7 +7,7 @@
 			{{ hero.name }}
 		</component>
 		<div class="hero-divider d-none sm:d-block" aria-hidden="true"></div>
-		<p class="hero-figure__role text-2xl font-body font-regular mb-0">
+		<p class="hero-figure__role type-heading-small font-body font-regular mb-0">
 			{{ hero.role }}
 		</p>
 		<div class="hero-figure">

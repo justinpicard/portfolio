@@ -55,6 +55,8 @@ export type CaseBlockLayout = {
 
 export type CaseMediaPosition = 'center' | 'top' | 'right' | 'bottom' | 'left'
 
+export type CaseFeatureDirection = 'text-media' | 'media-text'
+
 export type CaseTextBlock = CaseBlockLayout & {
 	type: 'text'
 	title?: string
@@ -83,16 +85,33 @@ export type CaseColumnsBlock = CaseBlockLayout & {
 	columns: [CaseColumn, ...CaseColumn[]]
 }
 
-export type CaseBlock = CaseTextBlock | CaseMediaBlock | CaseColumnsBlock
+export type CaseFeatureBlock = CaseBlockLayout & {
+	type: 'feature'
+	direction?: CaseFeatureDirection
+	text: CaseTextBlock
+	media: CaseMediaBlock
+}
 
-export type LegacyProjectSection = {
+export type CaseBlock =
+	| CaseTextBlock
+	| CaseMediaBlock
+	| CaseColumnsBlock
+	| CaseFeatureBlock
+
+export type CaseSectionSpacing = 'tight' | 'default' | 'spacious'
+
+export type CaseSectionLayout = {
+	spacing?: CaseSectionSpacing
+}
+
+export type LegacyProjectSection = CaseSectionLayout & {
 	id: string
 	title?: string
 	paragraphs: [string, ...string[]]
 	blocks?: never
 }
 
-export type BlockProjectSection = {
+export type BlockProjectSection = CaseSectionLayout & {
 	id: string
 	title?: string
 	blocks: CaseBlock[]

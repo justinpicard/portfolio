@@ -1,5 +1,5 @@
 <template>
-	<section class="work-section" id="work" ref="root">
+	<section class="section-layout section-layout--stage work-section" id="work" ref="root">
 		<div class="work-section__stage" ref="stage">
 			<div class="work-section__title-wrapper" aria-hidden="true">
 				<div class="work-section__title-inner">

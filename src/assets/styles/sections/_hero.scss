@@ -110,11 +110,12 @@
 	}
 
 	.hero-figure__intro {
+		@include type-role(body);
+
 		grid-column: 1;
 		grid-row: 5;
 		justify-self: start;
 		max-width: 28ch;
-		font-size: var(--font-size-body);
 	}
 
 	.hero-copy-layer {

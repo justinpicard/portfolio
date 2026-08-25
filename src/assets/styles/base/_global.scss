@@ -1,8 +1,9 @@
 @use "../abstracts" as *;
 
 body {
+	@include type-role(ui);
+
 	font-family: var(--font-body);
-	font-size: var(--font-size-ui);
 	overflow-x: hidden;
 }
 
@@ -21,7 +22,7 @@ figure {
 }
 
 .page-content {
-	padding-block-end: var(--section-padding);
+	padding-block-end: var(--section-space-editorial);
 }
 
 .divider {

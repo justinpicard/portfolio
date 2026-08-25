@@ -7,7 +7,7 @@ $columns: 12;
 @for $width from 1 through $columns {
 	.col-#{$width} {
 		flex-basis: math.div($width, $columns) * 100%;
-		padding-inline: var(--container-padding);
+		padding-inline: var(--page-gutter);
 	}
 
 	.offset-#{$width} {
@@ -27,7 +27,7 @@ $columns: 12;
 		@for $width from 1 through $columns {
 			.#{$prefix}\:col-#{$width} {
 				flex-basis: math.div($width, $columns) * 100%;
-				padding-inline: var(--container-padding);
+				padding-inline: var(--page-gutter);
 			}
 
 			.#{$prefix}\:offset-#{$width} {

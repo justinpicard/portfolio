@@ -3,14 +3,14 @@
 	flex-wrap: wrap;
 	width: 100%;
 	margin-inline: auto;
-	padding-inline: var(--container-padding);
+	padding-inline: var(--page-gutter);
 }
 
 .row {
 	display: flex;
 	flex: 100%;
 	flex-wrap: wrap;
-	margin-inline: calc(-1 * var(--container-padding));
+	margin-inline: calc(-1 * var(--page-gutter));
 }
 
 .column {

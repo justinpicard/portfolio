@@ -16,6 +16,10 @@
 	min-height: 100svh;
 	background-color: var(--project-surface-background, var(--color-secondary));
 	transform-origin: center top;
+
+	@include respond(md, down) {
+		display: block;
+	}
 }
 
 .project-overlay__surface--outgoing {
@@ -39,6 +43,10 @@
 	align-items: flex-start;
 	width: 100%;
 	min-height: 100svh;
+
+	@include respond(md, down) {
+		display: block;
+	}
 }
 
 .project-overlay__media-column {
@@ -47,6 +55,11 @@
 	flex: 0 0 60%;
 	width: 60%;
 	min-width: 0;
+
+	@include respond(md, down) {
+		width: 100%;
+		flex-basis: auto;
+	}
 }
 
 .project-overlay__sidebar {
@@ -61,6 +74,15 @@
 	min-height: 100svh;
 	padding: clamp(2rem, 5vw, 6rem);
 	align-content: start;
+
+	@include respond(md, down) {
+		position: static;
+		width: 100%;
+		min-height: 0;
+		flex-basis: auto;
+		margin-top: clamp(2rem, 8vw, 4rem);
+		padding-inline: var(--page-gutter);
+	}
 }
 
 .project-overlay__header {
@@ -78,26 +100,28 @@
 }
 
 .project-overlay__number {
+	@include type-role(label);
+
 	color: var(--color-secondary);
-	font-size: var(--font-size-sm);
 	font-weight: var(--font-weight-semibold);
 	line-height: var(--line-height-none);
 }
 
 .project-overlay__title {
+	@include type-role(display-medium);
+
 	margin: 0;
 	font-family: var(--heading-font);
-	font-size: var(--font-size-display-overlay-title);
 	font-weight: var(--font-weight-bold);
 	line-height: 0.86;
 	letter-spacing: -0.055em;
 }
 
 .project-overlay__meta {
+	@include type-role(label);
+
 	max-width: 48rem;
 	//color: color-mix(in srgb, var(--color-white) 76%, transparent);
-	font-size: var(--font-size-xs);
-	line-height: var(--line-height-normal);
 }
 
 .project-overlay__media {
@@ -138,16 +162,16 @@
 	//color: color-mix(in srgb, var(--color-white) 78%, transparent);
 
 	p {
-		font-size: var(--font-size-body);
-		line-height: var(--line-height-body);
+		@include type-role(body);
 	}
 }
 
 .project-overlay__link {
+	@include type-role(label);
+
 	justify-self: start;
 	color: var(--color-white);
 	font-family: var(--body-font);
-	font-size: var(--font-size-sm);
 	font-weight: var(--font-weight-semibold);
 	line-height: var(--line-height-none);
 	text-transform: uppercase;
@@ -165,6 +189,10 @@
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: var(--space-4);
 	padding-top: clamp(2rem, 5vw, 5rem);
+
+	@include respond(md, down) {
+		grid-template-columns: 1fr;
+	}
 }
 
 .project-overlay__nav-button {
@@ -181,6 +209,10 @@
 
 .project-overlay__nav-button--next {
 	text-align: right;
+
+	@include respond(md, down) {
+		text-align: left;
+	}
 }
 
 .project-overlay__nav-button:disabled {
@@ -194,8 +226,9 @@
 }
 
 .project-overlay__nav-label {
+	@include type-role(label);
+
 	color: var(--color-secondary);
-	font-size: var(--font-size-xs);
 	font-weight: var(--font-weight-semibold);
 	line-height: var(--line-height-none);
 	text-transform: uppercase;
@@ -217,45 +250,18 @@
 }
 
 .cv-overlay__title {
+	@include type-role(display-large);
+
 	margin: 0;
 	font-family: var(--heading-font);
-	font-size: clamp(3rem, 10vw, 9rem);
 	font-weight: var(--font-weight-bold);
 	line-height: 0.9;
 	letter-spacing: -0.04em;
 }
 
 .cv-overlay__text {
+	@include type-role(body);
+
 	margin: 0;
 	color: color-mix(in srgb, var(--color-white) 78%, transparent);
-	font-size: var(--font-size-body);
-	line-height: var(--line-height-body);
-}
-
-@media (max-width: 47.999rem) {
-	.project-overlay__surface,
-	.project-overlay__surface-content {
-		display: block;
-	}
-
-	.project-overlay__media-column,
-	.project-overlay__sidebar {
-		width: 100%;
-		flex-basis: auto;
-	}
-
-	.project-overlay__sidebar {
-		position: static;
-		min-height: 0;
-		margin-top: clamp(2rem, 8vw, 4rem);
-		padding-left: 0;
-	}
-
-	.project-overlay__nav {
-		grid-template-columns: 1fr;
-	}
-
-	.project-overlay__nav-button--next {
-		text-align: left;
-	}
 }

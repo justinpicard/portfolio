@@ -9,6 +9,11 @@
 		:block="block"
 		:class="layoutClasses"
 	/>
+	<CaseFeatureBlock
+		v-else-if="block.type === 'feature'"
+		:block="block"
+		:class="layoutClasses"
+	/>
 	<CaseColumnsBlock
 		v-else
 		:block="block"
@@ -20,6 +25,7 @@
 import { computed } from 'vue'
 import type { CaseBlock } from '../../../content'
 import CaseColumnsBlock from './CaseColumnsBlock.vue'
+import CaseFeatureBlock from './CaseFeatureBlock.vue'
 import CaseMediaBlock from './CaseMediaBlock.vue'
 import CaseTextBlock from './CaseTextBlock.vue'
 

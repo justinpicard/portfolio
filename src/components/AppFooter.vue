@@ -1,5 +1,5 @@
 <template>
-	<footer id="say-hi" ref="footerRoot" class="site-footer section pb-16">
+	<footer id="say-hi" ref="footerRoot" class="section-layout section-layout--editorial site-footer">
 		<div class="container site-footer__container">
 			<div class="site-footer__grid d-grid grid-cols-1 md:grid-cols-3">
 				<div

@@ -49,8 +49,9 @@
 	}
 
 	&__signature-caption {
-		margin-top: 1rem;
-		font-size: var(--font-size-md);
+		@include type-role(body-small);
+
+		margin-top: var(--space-4);
 		font-weight: var(--font-weight-medium);
 		line-height: var(--line-height-tight);
 		letter-spacing: var(--letter-spacing-wide);

@@ -1,20 +1,24 @@
 @use "../abstracts" as *;
 
 .project-case-study {
+	--case-feature-text-max-width: 30rem;
+	--case-feature-media-max-width: 40rem;
+
 	&__introduction-content,
 	&__section-heading,
 	.case-block {
 		flex: 0 0 100%;
 		min-width: 0;
-		padding-inline: var(--container-padding);
+		padding-inline: var(--page-gutter);
 	}
 
 	&__introduction-content {
-		margin-block-end: var(--space-16);
+		margin-block-end: var(--case-section-space);
 	}
 
 	&__introduction-content &__introduction-text {
-		font-size: var(--font-size-xl);
+		@include type-role(lead);
+
 		font-weight: var(--font-weight-medium);
 	}
 
@@ -27,7 +31,7 @@
 	}
 
 	.case-block {
-		margin-block-end: var(--space-16);
+		margin-block-end: var(--case-section-space);
 	}
 
 	.case-block--contained {
@@ -38,7 +42,58 @@
 	}
 }
 
+.case-feature-block {
+	display: grid;
+	grid-template-areas:
+		"text"
+		"media";
+	gap: var(--space-8);
+	align-items: start;
+
+	&__text {
+		grid-area: text;
+		width: 100%;
+		max-width: var(--case-feature-text-max-width);
+	}
+
+	&__media {
+		grid-area: media;
+		width: 100%;
+		max-width: var(--case-feature-media-max-width);
+	}
+
+	@include respond(md) {
+		grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+		grid-template-areas: "text media";
+
+		&__text {
+			justify-self: start;
+		}
+
+		&__media {
+			width: calc(100% - var(--space-8));
+			justify-self: end;
+		}
+
+		&--media-text {
+			grid-template-areas: "media text";
+
+			.case-feature-block__text {
+				justify-self: end;
+			}
+
+			.case-feature-block__media {
+				justify-self: start;
+			}
+		}
+	}
+}
+
 .case-text-block {
+	p {
+		@include type-role(body);
+	}
+
 	&__title {
 		margin-block-end: var(--space-4);
 	}
@@ -83,10 +138,10 @@
 	}
 
 	&__caption {
+		@include type-role(label);
+
 		display: block;
 		margin-block-start: var(--space-3);
-		font-size: var(--font-size-sm);
-		line-height: var(--line-height-normal);
 		opacity: 0.65;
 	}
 }
@@ -108,8 +163,8 @@
 	}
 }
 
-@include respond(md) {
-	.case-columns-block {
+.case-columns-block {
+	@include respond(md) {
 		&__grid {
 			flex-direction: row;
 		}
@@ -132,8 +187,8 @@
 	}
 }
 
-@include respond(lg) {
-	.project-case-study {
+.project-case-study {
+	@include respond(lg) {
 		&__introduction-content,
 		&__section-heading,
 		.case-block--width-content {

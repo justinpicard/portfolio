@@ -1,14 +1,16 @@
 @use "../abstracts" as *;
 
-section.about {
+.about {
+	--section-space-start: calc(var(--section-space-editorial) * 2);
+	--section-space-end: var(--section-space-editorial-compact);
+
 	z-index: 1;
-	padding-top: calc(var(--section-padding) * 2);
-	padding-bottom: var(--section-padding-sm);
 
 	.obviously {
+		@include type-role(heading-small);
+
 		position: relative;
 		z-index: 1;
-		font-size: $font-size-2xl;
 		text-decoration: underline;
 		user-select: none;
 		mix-blend-mode: difference;
@@ -25,11 +27,7 @@ section.about {
 }
 
 .about-section__title {
-	font-size: 2.25rem;
-
-	@include respond(md) {
-		font-size: 4rem;
-	}
+	@include type-role(display-medium);
 }
 
 .about-section__continuation {

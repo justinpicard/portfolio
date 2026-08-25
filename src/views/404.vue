@@ -1,7 +1,7 @@
 <template>
   <AppHeader />
 	<PageTitle :key="locale"/>
-  <div class="page-intro mt-3 text-lg">
+  <div class="page-intro mt-3 type-body-small">
     <div class="container">
       <div class="row">
         <div class="col-10">
