@@ -271,24 +271,20 @@
 .project-layer-prototype {
 	position: fixed;
 	inset: 0;
-	z-index: 950;
+	z-index: 1000;
 	overflow: hidden;
 	pointer-events: auto;
 
 	&--opening {
 		.project-layer-prototype__content,
-		.project-layer-prototype__close,
+		.project-header,
 		.project-layer-prototype__nav {
 			visibility: hidden;
 		}
 	}
 
 	&__surface {
-		--project-layer-background: color-mix(
-			in srgb,
-			var(--project-card-color) 92%,
-			var(--color-white)
-		);
+		--project-layer-background: var(--project-card-color);
 
 		position: fixed;
 		overflow: hidden;
@@ -384,14 +380,6 @@
 		will-change: width;
 	}
 
-	&__close {
-		position: absolute;
-		bottom: clamp(1rem, 5vh, 2rem);
-		left: 50%;
-		transform: translateX(-50%);
-		z-index: 7;
-	}
-
 	&__copy {
 		//width: min(100%, 760px);
 		//margin-inline: auto;
@@ -484,8 +472,8 @@
 		position: absolute;
 		inset: 3rem 0 auto;
 		display: grid;
-		grid-template-columns: minmax(0, 42fr) minmax(0, 58fr);
-		grid-template-areas: "media content";
+		grid-template-columns: minmax(0, 1fr) auto;
+		grid-template-areas: "content media";
 		width: 100%;
 		height: var(--project-stack-card-height);
 		min-height: 0;
@@ -525,11 +513,6 @@
 			visibility: hidden;
 		}
 
-		&--media-right {
-			grid-template-columns: minmax(0, 58fr) minmax(0, 42fr);
-			grid-template-areas: "content media";
-		}
-
 		&:focus-visible {
 			outline: 2px solid currentColor;
 			outline-offset: 4px;
@@ -559,6 +542,7 @@
 		min-width: 0;
 		min-height: 0;
 		height: 100%;
+		aspect-ratio: 6 / 5;
 		border-radius: 0;
 		overflow: hidden;
 		background: color-mix(
@@ -710,6 +694,7 @@
 		}
 
 		&__visual {
+			aspect-ratio: auto;
 			border-radius: clamp(1rem, 1.5vw, 1.75rem);
 		}
 

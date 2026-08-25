@@ -91,6 +91,10 @@ import { useCursorFollowIndicator } from '../../composables/useCursorFollowIndic
 import { isProjectPublished, type Project } from '../../content'
 import { gsap } from '../../utils/animations/gsap'
 import { animationEases } from '../../utils/animations/presets'
+import {
+	playUnavailableCardShake,
+	resetUnavailableCardShake
+} from '../../utils/animations/unavailableCardShake'
 import BaseImage from '../base/BaseImage.vue'
 import CircularScrollIndicator from '../ui/CircularScrollIndicator.vue'
 import Tag from '../ui/Tag.vue'
@@ -143,14 +147,40 @@ const projectIndicatorVisual = computed(
 	() => projectIndicator.value?.indicator ?? null
 )
 let cursorFollowIndicator: ReturnType<typeof useCursorFollowIndicator> | undefined
+let unavailableShakeTimeline: gsap.core.Timeline | undefined
 
 function handleOpen() {
-	if (!canNavigate.value || !card.value) return
+	if (!props.interactive || !card.value) return
+
+	if (!casePublished.value) {
+		animateUnavailableCard()
+		return
+	}
 
 	emit('open', {
 		projectIndex: props.index,
 		sourceElement: card.value
 	})
+}
+
+function animateUnavailableCard() {
+	if (!hoverSurface.value) return
+
+	unavailableShakeTimeline = playUnavailableCardShake(
+		hoverSurface.value,
+		unavailableShakeTimeline,
+		() => {
+			unavailableShakeTimeline = undefined
+		}
+	)
+}
+
+function clearUnavailableCardShake() {
+	resetUnavailableCardShake(
+		hoverSurface.value,
+		unavailableShakeTimeline
+	)
+	unavailableShakeTimeline = undefined
 }
 
 function animateHover(isHovered: boolean) {
@@ -185,11 +215,13 @@ watch(() => props.interactive, (interactive) => {
 	}
 
 	cursorFollowIndicator?.disable()
+	clearUnavailableCardShake()
 	animateHover(false)
 })
 
 onUnmounted(() => {
 	cursorFollowIndicator?.cleanup()
+	unavailableShakeTimeline?.kill()
 	gsap.killTweensOf(hoverSurface.value)
 })
 </script>

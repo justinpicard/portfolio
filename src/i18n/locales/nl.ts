@@ -56,6 +56,7 @@ export default {
 		previewAnnouncement: 'Volgend project: {title}',
 		visit: 'Bezoek project',
 		close: '✕ Sluiten',
+		closeText: 'Sluiten',
 		closeLabel: 'Project sluiten',
 		imageAlt: '{title} projectafbeelding {number}'
 	},

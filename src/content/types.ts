@@ -45,11 +45,62 @@ export type HomeContent = {
 	footer: FooterContent
 }
 
-export type ProjectSection = {
+export type CaseBlockWidth = 'full' | 'content' | 'narrow'
+
+export type CaseBlockAlign = 'start' | 'center' | 'end'
+
+export type CaseBlockLayout = {
+	width?: CaseBlockWidth
+	align?: CaseBlockAlign
+}
+
+export type CaseMediaPosition = 'center' | 'top' | 'right' | 'bottom' | 'left'
+
+export type CaseTextBlock = CaseBlockLayout & {
+	type: 'text'
+	title?: string
+	paragraphs: [string, ...string[]]
+}
+
+export type CaseMediaBlock = CaseBlockLayout & {
+	type: 'media'
+	src: string
+	alt: string
+	caption?: string
+	format?: 'jpg' | 'jpeg' | 'png'
+	presentation?: 'natural' | 'wide' | 'landscape' | 'portrait' | 'square'
+	position?: CaseMediaPosition
+}
+
+export type CaseColumnEmphasis = 'equal' | 'narrow' | 'wide'
+
+export type CaseColumn = {
+	emphasis?: CaseColumnEmphasis
+	blocks: [CaseTextBlock | CaseMediaBlock, ...(CaseTextBlock | CaseMediaBlock)[]]
+}
+
+export type CaseColumnsBlock = CaseBlockLayout & {
+	type: 'columns'
+	columns: [CaseColumn, ...CaseColumn[]]
+}
+
+export type CaseBlock = CaseTextBlock | CaseMediaBlock | CaseColumnsBlock
+
+export type LegacyProjectSection = {
 	id: string
 	title?: string
-	paragraphs: string[]
+	paragraphs: [string, ...string[]]
+	blocks?: never
 }
+
+export type BlockProjectSection = {
+	id: string
+	title?: string
+	blocks: CaseBlock[]
+	paragraphs?: never
+}
+
+export type ProjectSection = LegacyProjectSection | BlockProjectSection
 
 export type ProjectCaseStudy = {
 	introduction: string[]
@@ -82,7 +133,6 @@ export type ProjectMedia = {
 	landscapeThumbnailImage?: string
 	landscapeThumbnailImageFormat?: 'jpg' | 'jpeg' | 'png'
 	landscapeThumbnailImagePosition?: string
-	landscapeMediaPosition?: 'left' | 'right'
 	heroImage: string
 	heroImageFormat?: 'jpg' | 'jpeg' | 'png'
 	heroImagePosition?: string

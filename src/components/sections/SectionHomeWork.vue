@@ -35,7 +35,6 @@
 			@change-project="changeProject"
 			@source-ready="hideActiveProjectCard"
 			@target-ready="showActiveProjectCard"
-			@header-contrast-change="emit('overlay-change', $event)"
 		/>
 	</section>
 </template>
@@ -48,10 +47,6 @@ import { isProjectPublished } from '../../content'
 import { gsap, prefersReducedMotion, ScrollTrigger, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
 import ProjectCard from '../work/ProjectCard.vue'
 import ProjectLayerPrototype from '../work/ProjectLayerPrototype.vue'
-
-const emit = defineEmits<{
-	'overlay-change': [isOpen: boolean]
-}>()
 
 const { t } = useI18n()
 const { projects } = usePortfolioContent()
@@ -134,10 +129,6 @@ async function closeProject() {
 	openSourceCard.value = null
 	await nextTick()
 	sourceElement.focus({ preventScroll: true })
-}
-
-function scrollProjectToTop() {
-	projectLayer.value?.scrollToTop()
 }
 
 function changeProject(nextIndex: number) {
@@ -536,13 +527,8 @@ watch(
 	{ flush: 'pre' }
 )
 
-defineExpose({
-	scrollProjectToTop
-})
-
 onUnmounted(() => {
 	titleRefreshId += 1
-	emit('overlay-change', false)
 	window.removeEventListener('scroll', updateReducedMotionActivation)
 	window.removeEventListener('resize', updateReducedMotionActivation)
 	reducedMotionActivationEnabled = false

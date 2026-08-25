@@ -4,10 +4,9 @@ export const projectMedia = [
 	{
 		id: '1',
 		slug: 'muzimatch',
-		thumbnailImage: 'projects/muzimatch/muzimatch-thumb-mobile-vertical@2x',
-		landscapeThumbnailImage: 'projects/muzimatch/muzimatch-thumb-mobile-horizontal@2x',
+		thumbnailImage: 'projects/muzimatch/muzimatch-thumb-vertical@2x',
+		landscapeThumbnailImage: 'projects/muzimatch/muzimatch-thumb-horizontal@2x',
 		thumbnailImageFormat: 'jpg',
-		landscapeMediaPosition: 'left',
 		heroImage: 'projects/muzimatch/muzimatch-hero',
 		heroImageFormat: 'jpg',
 		heroVideo: {
@@ -27,7 +26,6 @@ export const projectMedia = [
 		thumbnailImage: 'projects/recranet/recranet-thumb-vertical@2x',
 		landscapeThumbnailImage: 'projects/recranet/recranet-thumb-horizontal',
 		landscapeThumbnailImagePosition: 'left center',
-		landscapeMediaPosition: 'right',
 		heroImage: 'projects/recranet/recranet-hero',
 		secondaryImages: [
 			'projects/recranet/vodatent',
@@ -41,7 +39,7 @@ export const projectMedia = [
 		slug: 'undrift',
 		caseStatus: 'coming-soon',
 		thumbnailImage: 'projects/undrift/undrift-thumb-vertical@2x',
-		landscapeMediaPosition: 'left',
+		landscapeThumbnailImage: 'projects/undrift/undrift-thumb-horizontal@2x',
 		heroImage: 'hz-university',
 		overlayBackground: '#FFD87F'
 	},
@@ -50,7 +48,7 @@ export const projectMedia = [
 		slug: 'charlie',
 		caseStatus: 'coming-soon',
 		thumbnailImage: 'projects/charlie/charlie-thumb-vertical@2x',
-		landscapeMediaPosition: 'right',
+		landscapeThumbnailImage: 'projects/charlie/charlie-thumb-horizontal@2x',
 		heroImage: 'hz-university',
 		overlayBackground: '#FFC29F'
 	},

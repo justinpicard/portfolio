@@ -104,7 +104,7 @@
 	.site-lang-switcher {
 		height: 2.5rem;
 		display: flex;
-		align-items: center;
+		//align-items: center;
 		justify-content: center;
 	}
 
@@ -135,7 +135,7 @@
 		}
 
 			.name {
-				padding-left: 1rem;
+				//padding-left: 1rem;
 			}
 
 			.site-title {
@@ -229,6 +229,110 @@
 		[data-stagger-link-container] {
 			--stagger-link-descender-space: 0em;
 		}
+	}
+}
+
+.project-header {
+	position: absolute;
+	inset: 0 0 auto;
+	z-index: 7;
+	height: 0;
+	color: var(--color-primary);
+	pointer-events: none;
+
+	&__close,
+	&__title,
+	&__section-nav {
+		position: absolute;
+		top: var(--space-8);
+	}
+
+	&__close {
+		top: var(--space-6);
+		left: var(--space-6);
+		pointer-events: auto;
+
+		@include respond(sm) {
+			top: var(--space-8);
+			left: var(--space-8);
+		}
+	}
+
+	&__close-control {
+		appearance: none;
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-3);
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		font-size: var(--font-size-ui);
+		font-weight: var(--font-weight-medium);
+		line-height: var(--line-height-tight);
+		cursor: pointer;
+		user-select: none;
+
+		&:focus-visible {
+			outline: 2px solid currentColor;
+			outline-offset: 0.25rem;
+			border-radius: var(--radius-full);
+		}
+	}
+
+	&__close-icon {
+		display: grid;
+		place-items: center;
+		flex: 0 0 48px;
+		width: 48px;
+		height: 48px;
+		border: 1px solid color-mix(in srgb, currentcolor 30%, transparent);
+		border-radius: 50%;
+		background-color: color-mix(in srgb, currentcolor 7%, transparent);
+		font-size: 1.25rem;
+		line-height: 1;
+		backdrop-filter: blur(10px);
+		transition:
+			background-color 300ms cubic-bezier(0.165, 0.84, 0.44, 1),
+			border-color 300ms cubic-bezier(0.165, 0.84, 0.44, 1);
+	}
+
+	&__close-label {
+		--stagger-link-descender-space: 0em;
+	}
+
+	@media (hover: hover) {
+		&__close-control:hover &__close-icon {
+			border-color: currentColor;
+		}
+	}
+
+	&__title {
+		left: 50%;
+		display: flex;
+		height: 2.5rem;
+		align-items: center;
+		justify-content: center;
+		max-width: calc(100vw - 17rem);
+		transform: translateX(-50%);
+
+		@include respond(sm) {
+			max-width: calc(100vw - 24rem);
+		}
+
+		.role {
+			min-width: 0;
+			max-width: 100%;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
+	&__section-nav {
+		right: var(--space-8);
+		pointer-events: auto;
 	}
 }
 
@@ -411,6 +515,10 @@
 		.section-nav__list {
 			pointer-events: auto;
 		}
+	}
+
+	&--disabled {
+		pointer-events: none;
 	}
 }
 

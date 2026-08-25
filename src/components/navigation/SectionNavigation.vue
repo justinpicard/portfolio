@@ -4,7 +4,8 @@
 		class="section-nav"
 		:class="{
 			'section-nav--open': isOpen,
-			'section-nav--closing': isClosing
+			'section-nav--closing': isClosing,
+			'section-nav--disabled': disabled
 		}"
 		:aria-label="t('sectionNavigation.label')"
 		@focusout="handleFocusOut"
@@ -19,6 +20,7 @@
 				type="button"
 				:aria-controls="listId"
 				:aria-expanded="isOpen"
+				:disabled="disabled"
 				@click="handleTriggerClick"
 				@focus="handleTriggerFocus"
 				@pointerdown="handleTriggerPointerDown"
@@ -61,7 +63,7 @@
 						:href="getItemHref(item.id)"
 						class="section-nav__link"
 						:aria-current="item.id === activeSectionId ? 'location' : undefined"
-						:tabindex="isOpen ? 0 : -1"
+						:tabindex="isOpen && !disabled ? 0 : -1"
 						data-stagger-link
 						@click="handleItemClick($event, item.id)"
 					>
@@ -117,6 +119,11 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { currentLocale } = useLocalizedRoute()
+const props = withDefaults(defineProps<{
+	disabled?: boolean
+}>(), {
+	disabled: false
+})
 const root = ref<HTMLElement | null>(null)
 const panel = ref<HTMLElement | null>(null)
 const trigger = ref<HTMLButtonElement | null>(null)
@@ -306,7 +313,7 @@ function animateNavigationItems(open: boolean) {
 }
 
 function openNavigation() {
-	if (isOpen.value) return
+	if (props.disabled || isOpen.value) return
 
 	isClosing.value = false
 	isOpen.value = true
@@ -374,6 +381,8 @@ function focusItem(sectionId: SectionNavigationId) {
 }
 
 function handleKeydown(event: KeyboardEvent) {
+	if (props.disabled) return
+
 	const itemIds = SECTION_NAVIGATION_ITEMS.map((item) => item.id)
 	const focusedItem = document.activeElement?.closest<HTMLLIElement>(
 		'.section-nav__item'
@@ -670,6 +679,13 @@ onMounted(async () => {
 watch(() => route.name, async () => {
 	await nextTick()
 	setupActiveSectionDetection()
+})
+
+watch(() => props.disabled, (disabled) => {
+	if (!disabled) return
+
+	triggerPointerType = undefined
+	closeNavigation()
 })
 
 watch(navigationLabelSignature, async () => {

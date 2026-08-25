@@ -1,6 +1,6 @@
 <template>
 	<div ref="root" class="main-nav position-relative">
-		<div class="position-fixed top-0 left-0 ml-6 sm:ml-8 mt-6 sm:mt-8">
+		<div class="position-fixed top-0 left-0 ml-4 sm:ml-8 mt-4 sm:mt-8">
 			<router-link
 				:to="{ name: 'home', params: getLocaleParams(currentLocale) }"
 				class="site-logo"
@@ -13,7 +13,7 @@
 						:alt="t('accessibility.avatarAlt')"
 					/>
 				</figure>
-				<span class="site-title d-flex flex-column">
+				<span class="site-title d-flex flex-column ml-4">
 					<span ref="name" class="name site-nav__reveal-copy text-lg">
 						Justin Picard
 					</span>
@@ -29,7 +29,7 @@
 			</span>
 		</div>
 		<div
-			class="site-lang-switcher position-fixed top-0 right-0 mr-8 mt-8"
+			class="site-lang-switcher position-fixed top-0 right-0 mr-4 sm:mr-8 mt-4 sm:mt-8"
 			:class="{ 'site-lang-switcher--section-nav': !MULTILINGUAL_ENABLED }"
 		>
 			<nav
@@ -65,7 +65,10 @@
 					<span lang="nl" data-stagger-link-container>NL</span>
 				</router-link>
 			</nav>
-			<SectionNavigation v-else />
+			<SectionNavigation
+				v-else
+				:disabled="overlayActive"
+			/>
 		</div>
 	</div>
 </template>

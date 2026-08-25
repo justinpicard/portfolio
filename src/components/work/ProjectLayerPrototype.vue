@@ -15,6 +15,11 @@
 				class="project-layer-prototype__surface"
 				:class="initialProjectClass"
 			>
+				<ProjectHeader
+					ref="projectHeader"
+					:title="displayedProject.title"
+					@close="requestClose"
+				/>
 
 				<div ref="content" class="project-layer-prototype__content">
 					<ProjectHero
@@ -54,15 +59,6 @@
 					</section>
 				</div>
 
-				<Button
-					:ref="setCloseButtonRef"
-					class="project-layer-prototype__close"
-					:label="t('project.close')"
-					color="primary"
-					:aria-label="t('project.closeLabel')"
-					@click="requestClose"
-				/>
-
 				<p class="sr-only" aria-live="polite" aria-atomic="true">
 					{{ announcement }}
 				</p>
@@ -95,8 +91,8 @@ import {
 	animationStaggers
 } from '../../utils/animations/presets'
 import { isProjectPublished, type Project } from '../../content'
-import Button from '../Button.vue'
 import ProjectCaseContent from './ProjectCaseContent.vue'
+import ProjectHeader from './ProjectHeader.vue'
 import ProjectHero from './ProjectHero.vue'
 import ProjectStackNavigator from './ProjectStackNavigator.vue'
 
@@ -158,7 +154,6 @@ const props = defineProps<{
 const emit = defineEmits<{
 	close: []
 	'change-project': [nextIndex: number]
-	'header-contrast-change': [isActive: boolean]
 	'source-ready': []
 	'target-ready': []
 }>()
@@ -171,7 +166,7 @@ const projectHero = ref<InstanceType<typeof ProjectHero> | null>(null)
 const caseContent = ref<HTMLElement | null>(null)
 const scrims = ref<HTMLElement | null>(null)
 const bottomScrim = ref<HTMLElement | null>(null)
-const closeButton = ref<HTMLButtonElement | null>(null)
+const projectHeader = ref<InstanceType<typeof ProjectHeader> | null>(null)
 const projectNavigator = ref<InstanceType<typeof ProjectStackNavigator> | null>(null)
 const sharedTransitionLayer = ref<HTMLElement | null>(null)
 const displayedIndex = ref(props.projectIndex)
@@ -187,10 +182,6 @@ const displayedProject = computed(() => props.projects[displayedIndex.value])
 const OPEN_DURATION = 1
 const HERO_REVEAL_START = 0.64
 const CLOSE_DURATION = 0.9
-const OPEN_HEADER_CONTRAST_POSITION = 0.58
-const CLOSE_HEADER_CONTRAST_POSITION = CLOSE_DURATION * (
-	1 - OPEN_HEADER_CONTRAST_POSITION / OPEN_DURATION
-)
 const TEXT_OUT_DURATION = 0.24
 const CONTEXT_FADE_DURATION = 0.48
 const SHARED_ELEMENT_TRANSITIONS_ENABLED = false
@@ -286,7 +277,6 @@ let cardRestoreSplits: SplitText[] = []
 let cardRestoreTargets: HTMLElement[] = []
 let contextTransitionRunId = 0
 let isBottomScrimVisible: boolean | undefined
-let scrollToTopTween: gsap.core.Tween | undefined
 let sharedRepresentations: SharedElementRepresentation[] = []
 let previousDocumentOverflow = ''
 let closeRequestedDuringOpen = false
@@ -393,23 +383,9 @@ function getDetailElements() {
 
 function getOverlayControls() {
 	return [
-		closeButton.value,
+		projectHeader.value?.element,
 		projectNavigator.value?.element
 	].filter(Boolean) as HTMLElement[]
-}
-
-function setCloseButtonRef(instance: unknown) {
-	if (instance instanceof HTMLButtonElement) {
-		closeButton.value = instance
-		return
-	}
-
-	const componentElement = (
-		instance as { $el?: unknown } | null
-	)?.$el
-	closeButton.value = componentElement instanceof HTMLButtonElement
-		? componentElement
-		: null
 }
 
 function captureSharedTargets(elements: SharedElementMap) {
@@ -1496,26 +1472,6 @@ function handleProjectContentScroll() {
 	updateBottomScrim()
 }
 
-function scrollToTop() {
-	if (!content.value) return
-
-	scrollToTopTween?.kill()
-
-	if (prefersReducedMotion()) {
-		content.value.scrollTop = 0
-		return
-	}
-
-	scrollToTopTween = gsap.to(content.value, {
-		scrollTop: 0,
-		duration: 0.9,
-		ease: animationEases.inOut,
-		onComplete() {
-			scrollToTopTween = undefined
-		}
-	})
-}
-
 function killContextTransition() {
 	contextTransitionRunId += 1
 	transitionTimeline?.kill()
@@ -2034,8 +1990,7 @@ async function animateSimpleOpen() {
 		isOpening.value = false
 		gsap.set(destinationElements, { autoAlpha: 1 })
 		gsap.set(content.value, { clearProps: 'width,height' })
-		emit('header-contrast-change', true)
-		closeButton.value?.focus()
+		projectHeader.value?.focusClose()
 		ScrollTrigger.refresh()
 		return
 	}
@@ -2070,9 +2025,6 @@ async function animateSimpleOpen() {
 			ease: animationEases.strongInOut
 		})
 		.call(() => {
-			emit('header-contrast-change', true)
-		}, [], OPEN_HEADER_CONTRAST_POSITION)
-		.call(() => {
 			isOpeningVisibilityLocked.value = false
 		}, [], HERO_REVEAL_START)
 
@@ -2088,7 +2040,7 @@ async function animateSimpleOpen() {
 	cleanupHeroReveal()
 	gsap.set(content.value, { clearProps: 'width,height' })
 	ScrollTrigger.refresh()
-	closeButton.value?.focus()
+	projectHeader.value?.focusClose()
 
 	if (closeRequestedDuringOpen) {
 		closeRequestedDuringOpen = false
@@ -2126,8 +2078,7 @@ async function animateOpen() {
 			autoAlpha: 1
 		})
 		isOpening.value = false
-		emit('header-contrast-change', true)
-		closeButton.value?.focus()
+		projectHeader.value?.focusClose()
 		return
 	}
 
@@ -2141,8 +2092,7 @@ async function animateOpen() {
 			autoAlpha: 1
 		})
 		isOpening.value = false
-		emit('header-contrast-change', true)
-		closeButton.value?.focus()
+		projectHeader.value?.focusClose()
 		return
 	}
 
@@ -2168,8 +2118,7 @@ async function animateOpen() {
 			scrims.value
 		], { autoAlpha: 1 })
 		isOpening.value = false
-		emit('header-contrast-change', true)
-		closeButton.value?.focus()
+		projectHeader.value?.focusClose()
 		return
 	}
 
@@ -2187,8 +2136,7 @@ async function animateOpen() {
 			scrims.value
 		], { autoAlpha: 1 })
 		isOpening.value = false
-		emit('header-contrast-change', true)
-		closeButton.value?.focus()
+		projectHeader.value?.focusClose()
 		return
 	}
 
@@ -2244,7 +2192,7 @@ async function animateOpen() {
 			clearSharedRepresentations()
 			gsap.set(Object.values(heroElements), { autoAlpha: 1 })
 			isOpening.value = false
-			closeButton.value?.focus()
+			projectHeader.value?.focusClose()
 
 			if (closeRequestedDuringOpen) {
 				closeRequestedDuringOpen = false
@@ -2318,9 +2266,6 @@ async function animateOpen() {
 			ease: 'power2.out',
 			stagger: 0.035
 		}, 0.86)
-		.call(() => {
-			emit('header-contrast-change', true)
-		}, [], OPEN_HEADER_CONTRAST_POSITION)
 
 	addSharedElementTweens(
 		timeline,
@@ -2391,7 +2336,6 @@ async function animateBackdropClose(targetCard: HTMLElement) {
 			height: target.height,
 			borderRadius: window.getComputedStyle(targetCard).borderRadius
 		})
-		emit('header-contrast-change', false)
 		emit('target-ready')
 		await nextTick()
 		return
@@ -2417,9 +2361,6 @@ async function animateBackdropClose(targetCard: HTMLElement) {
 			duration: CLOSE_DURATION,
 			ease: animationEases.strongInOut
 		})
-		.call(() => {
-			emit('header-contrast-change', false)
-		}, [], CLOSE_HEADER_CONTRAST_POSITION)
 
 	await playTimeline(timeline)
 	const cardRestore = prepareCardRestore(targetCard)
@@ -2475,7 +2416,6 @@ async function animateClose(targetCard: HTMLElement) {
 		|| !scrims.value
 		|| prefersReducedMotion()
 	) {
-		emit('header-contrast-change', false)
 		emit('target-ready')
 		await nextTick()
 		return
@@ -2562,9 +2502,6 @@ async function animateClose(targetCard: HTMLElement) {
 				duration: CLOSE_DURATION,
 				ease: 'power3.inOut'
 			}, 0)
-			.call(() => {
-				emit('header-contrast-change', false)
-			}, [], CLOSE_HEADER_CONTRAST_POSITION)
 
 		addSharedElementTweens(
 			timeline,
@@ -2624,18 +2561,15 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
 	timeline?.kill()
-	scrollToTopTween?.kill()
 	cleanupHeroReveal()
 	cleanupCardRestore()
 	killContextTransition()
 	cleanupBottomScrim()
-	emit('header-contrast-change', false)
 	document.documentElement.style.overflow = previousDocumentOverflow
 	window.removeEventListener('keydown', handleKeydown)
 })
 
 defineExpose({
-	animateClose,
-	scrollToTop
+	animateClose
 })
 </script>

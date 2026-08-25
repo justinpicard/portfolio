@@ -14,9 +14,7 @@
 					'project-stack-navigator__card--front': position === 0,
 					'project-stack-navigator__card--coming-soon':
 						!isProjectPublished(projects[projectIndex]),
-					'project-stack-navigator__card--hidden': position > visibleRearCardCount + 1,
-					'project-stack-navigator__card--media-right':
-						projects[projectIndex].landscapeMediaPosition === 'right'
+					'project-stack-navigator__card--hidden': position > visibleRearCardCount + 1
 				}"
 				:style="getCardStyles(projectIndex, position)"
 				type="button"
@@ -47,7 +45,6 @@
 							?? projects[projectIndex].thumbnailImagePosition
 							?? 'center center'
 						"
-						aspect-ratio="16 / 10"
 					/>
 				</span>
 
@@ -132,6 +129,10 @@ import {
 	animationDurations,
 	animationEases
 } from '../../utils/animations/presets'
+import {
+	playUnavailableCardShake,
+	resetUnavailableCardShake
+} from '../../utils/animations/unavailableCardShake'
 import Button from '../Button.vue'
 import BaseImage from '../base/BaseImage.vue'
 import CircularScrollIndicator from '../ui/CircularScrollIndicator.vue'
@@ -160,6 +161,8 @@ const projectIndicator = ref<InstanceType<typeof CircularScrollIndicator> | null
 const cardElements = new Map<number, HTMLButtonElement>()
 let animationContext: gsap.Context | undefined
 let shuffleTimeline: gsap.core.Timeline | undefined
+let unavailableShakeTimeline: gsap.core.Timeline | undefined
+let unavailableShakeCard: HTMLButtonElement | null = null
 let cursorFollowIndicator: ReturnType<typeof useCursorFollowIndicator> | undefined
 
 const projectIndicatorWrapper = computed(
@@ -332,6 +335,7 @@ async function finishShuffle() {
 
 function shuffle() {
 	if (interactionDisabled.value) return
+	clearUnavailableCardShake()
 
 	const cardOrder = orderedProjectIndices.value
 		.map((projectIndex) => cardElements.get(projectIndex))
@@ -403,12 +407,40 @@ function shuffle() {
 }
 
 function openProject(projectIndex: number) {
-	if (
-		interactionDisabled.value
-		|| !isProjectPublished(props.projects[projectIndex])
-	) return
+	if (interactionDisabled.value) return
+
+	if (!isProjectPublished(props.projects[projectIndex])) {
+		animateUnavailableCard(projectIndex)
+		return
+	}
 
 	emit('select', projectIndex)
+}
+
+function animateUnavailableCard(projectIndex: number) {
+	const card = cardElements.get(projectIndex)
+	if (!card) return
+
+	unavailableShakeCard = card
+	unavailableShakeTimeline = playUnavailableCardShake(
+		card,
+		unavailableShakeTimeline,
+		() => {
+			unavailableShakeTimeline = undefined
+			unavailableShakeCard = null
+		}
+	)
+
+	if (!unavailableShakeTimeline) unavailableShakeCard = null
+}
+
+function clearUnavailableCardShake() {
+	resetUnavailableCardShake(
+		unavailableShakeCard,
+		unavailableShakeTimeline
+	)
+	unavailableShakeTimeline = undefined
+	unavailableShakeCard = null
 }
 
 function animateCardHover(
@@ -441,6 +473,7 @@ watch(
 	() => props.currentProjectIndex,
 	async () => {
 		cleanupCursorIndicator()
+		clearUnavailableCardShake()
 		shuffleTimeline?.kill()
 		shuffleTimeline = undefined
 		isShuffling.value = false
@@ -452,6 +485,7 @@ watch(
 watch(() => props.disabled, (disabled) => {
 	if (disabled) {
 		cursorFollowIndicator?.disable()
+		clearUnavailableCardShake()
 		return
 	}
 
@@ -469,6 +503,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+	clearUnavailableCardShake()
 	shuffleTimeline?.kill()
 	shuffleTimeline = undefined
 	cleanupCursorIndicator()

@@ -1,47 +1,70 @@
 <template>
-	<div>
-		<section :class="`${projectSlug}-case__introduction`">
+	<div class="project-case-study">
+		<section
+			class="project-case-study__introduction"
+			:class="`${projectSlug}-case__introduction`"
+		>
 			<div class="container">
 				<div class="row">
-					<div class="col-12 lg:col-8 lg:offset-2 mb-16">
-						<span
+					<div class="project-case-study__introduction-content">
+						<p
 							v-for="(paragraph, index) in caseStudy.introduction"
 							:key="`introduction-${index}`"
-							class="text-xl"
+							class="project-case-study__introduction-text"
 						>
 							{{ paragraph }}
-						</span>
+						</p>
 					</div>
 				</div>
 			</div>
 		</section>
 
-		<div class="container">
-			<div class="row">
-				<div class="col-12 lg:col-8 lg:offset-2 mb-3">
-					<template
-						v-for="section in caseStudy.sections"
-						:key="section.id"
+		<section
+			v-for="section in renderedSections"
+			:key="section.id"
+			:id="section.id"
+			class="project-case-study__section"
+		>
+			<div class="container">
+				<div class="row project-case-study__section-row">
+					<div
+						v-if="section.title"
+						class="project-case-study__section-heading"
 					>
-						<p v-if="section.title"><strong>{{ section.title }}</strong></p>
-						<p
-							v-for="(paragraph, index) in section.paragraphs"
-							:key="`${section.id}-${index}`"
-						>
-							{{ paragraph }}
-						</p>
-					</template>
+						<h3>{{ section.title }}</h3>
+					</div>
+
+					<CaseBlockRenderer
+						v-for="(block, index) in section.blocks"
+						:key="`${section.id}-${index}`"
+						:block="block"
+					/>
 				</div>
 			</div>
-		</div>
+		</section>
 	</div>
 </template>
 
 <script setup lang="ts">
-import type { ProjectCaseStudy, ProjectSlug } from '../../content'
+import { computed } from 'vue'
+import type {
+	CaseBlock,
+	ProjectCaseStudy,
+	ProjectSlug
+} from '../../content'
+import CaseBlockRenderer from './case-blocks/CaseBlockRenderer.vue'
 
-defineProps<{
+const props = defineProps<{
 	caseStudy: ProjectCaseStudy
 	projectSlug: ProjectSlug
 }>()
+
+const renderedSections = computed(() => props.caseStudy.sections.map((section) => ({
+	id: section.id,
+	title: section.title,
+	blocks: section.blocks ?? [{
+		type: 'text',
+		paragraphs: section.paragraphs
+	} satisfies CaseBlock]
+})))
 </script>
