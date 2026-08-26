@@ -157,6 +157,10 @@ const navigationLabelSignature = computed(() => (
 ))
 let animationContext: gsap.Context | undefined
 let activeSectionTrigger: ReturnType<typeof ScrollTrigger.create> | undefined
+let sectionPositionTriggers: Array<{
+	id: SectionNavigationId
+	trigger: ReturnType<typeof ScrollTrigger.create>
+}> = []
 let panelTween: gsap.core.Tween | undefined
 let itemTimeline: gsap.core.Timeline | undefined
 let labelTimeline: gsap.core.Timeline | undefined
@@ -167,6 +171,10 @@ let isProgrammaticScrolling = false
 let triggerPointerType: string | undefined
 let suppressTriggerFocusOpen = false
 let labelTransitionId = 0
+let sectionActivationPositions: Array<{
+	id: SectionNavigationId
+	scrollY: number
+}> = []
 const LABEL_RESIZE_DURATION = 0.32
 const ITEM_REVEAL_OFFSET = 8
 const ITEM_REVEAL_DURATION = 0.24
@@ -567,17 +575,23 @@ function updateActiveSection() {
 
 	if (route.name !== 'home' || isProgrammaticScrolling) return
 
-	const threshold = window.innerHeight * SECTION_NAVIGATION_ACTIVE_THRESHOLD
+	const scrollThreshold = getPortfolioScrollY()
 	let nextActiveId: SectionNavigationId = SECTION_NAVIGATION_ITEMS[0].id
 
-	SECTION_NAVIGATION_ITEMS.forEach((item) => {
-		const section = document.getElementById(item.id)
-		if (section && section.getBoundingClientRect().top <= threshold) {
-			nextActiveId = item.id
+	sectionActivationPositions.forEach((section) => {
+		if (section.scrollY <= scrollThreshold) {
+			nextActiveId = section.id
 		}
 	})
 
 	setActiveSection(nextActiveId)
+}
+
+function refreshActiveSectionPositions() {
+	sectionActivationPositions = sectionPositionTriggers.map(({ id, trigger }) => ({
+		id,
+		scrollY: trigger.start
+	}))
 }
 
 function scrollToSection(sectionId: SectionNavigationId) {
@@ -648,6 +662,8 @@ function handleItemClick(event: MouseEvent, sectionId: SectionNavigationId) {
 function setupActiveSectionDetection() {
 	activeSectionTrigger?.kill()
 	activeSectionTrigger = undefined
+	sectionPositionTriggers.forEach(({ trigger }) => trigger.kill())
+	sectionPositionTriggers = []
 
 	if (props.fixedSectionId) {
 		setActiveSection(props.fixedSectionId)
@@ -656,13 +672,36 @@ function setupActiveSectionDetection() {
 
 	if (route.name !== 'home') return
 
+	sectionPositionTriggers = SECTION_NAVIGATION_ITEMS.flatMap((item) => {
+		const section = document.getElementById(item.id)
+		if (!section) return []
+
+		return [{
+			id: item.id,
+			trigger: ScrollTrigger.create({
+				trigger: section,
+				start: `top ${SECTION_NAVIGATION_ACTIVE_THRESHOLD * 100}%`,
+				end: 'max',
+				// Measure section starts after all pinned compositions have contributed
+				// their spacing to the document.
+				refreshPriority: -1
+			})
+		}]
+	})
+
 	activeSectionTrigger = ScrollTrigger.create({
 		start: 0,
 		end: 'max',
 		refreshPriority: -2,
-		onRefresh: updateActiveSection,
+		onRefresh: () => {
+			// Cache section geometry after pins have refreshed. Scroll updates then
+			// compare numbers only and never force layout.
+			refreshActiveSectionPositions()
+			updateActiveSection()
+		},
 		onUpdate: updateActiveSection
 	})
+	refreshActiveSectionPositions()
 	updateActiveSection()
 }
 
@@ -717,12 +756,15 @@ watch(navigationLabelSignature, async () => {
 onUnmounted(() => {
 	labelTransitionId += 1
 	activeSectionTrigger?.kill()
+	sectionPositionTriggers.forEach(({ trigger }) => trigger.kill())
+	sectionPositionTriggers = []
 	panelTween?.kill()
 	itemTimeline?.kill()
 	cleanupLabelTransition()
 	staggerLinks?.destroy()
 	scrollTween?.kill()
 	animationContext?.revert()
+	sectionActivationPositions = []
 	itemElements.clear()
 	document.removeEventListener('pointerdown', handleDocumentPointerDown)
 })

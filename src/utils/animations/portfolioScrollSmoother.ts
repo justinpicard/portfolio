@@ -24,10 +24,20 @@ export function initPortfolioScrollSmoother(
 	registerGsapPlugins()
 	const shouldSmooth = window.matchMedia(PORTFOLIO_POINTER_QUERY).matches
 		&& !prefersReducedMotion()
+
+	// Native scrolling is both cheaper and more stable on touch devices. Creating
+	// a zero-duration smoother still installs its scroll proxy and can force
+	// ScrollTrigger pins onto a transformed scrolling layer.
+	if (!shouldSmooth) {
+		smoother = undefined
+		ScrollTrigger.refresh()
+		return () => {}
+	}
+
 	smoother = ScrollSmoother.create({
 		wrapper: options.wrapper,
 		content: options.content,
-		smooth: shouldSmooth ? PORTFOLIO_SCROLL_SMOOTHING : 0,
+		smooth: PORTFOLIO_SCROLL_SMOOTHING,
 		smoothTouch: 0,
 		effects: false
 	})

@@ -182,8 +182,6 @@ async function refreshHeroCopySplits() {
 		opacity: 1,
 		visibility: 'visible'
 	})
-
-	ScrollTrigger.refresh()
 }
 
 function restoreScroll() {

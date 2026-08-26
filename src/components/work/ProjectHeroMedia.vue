@@ -29,13 +29,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, type CSSProperties } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch, type CSSProperties } from 'vue'
 import type { Project } from '../../content'
 import BaseImage from '../base/BaseImage.vue'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
 	project: Project
-}>()
+	videoEnabled?: boolean
+}>(), {
+	videoEnabled: true
+})
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
 const shouldRenderVideo = ref(false)
@@ -56,7 +59,9 @@ const videoStyles = computed<CSSProperties>(() => ({
 
 function updateMotionPreference() {
 	shouldRenderVideo.value = Boolean(
-		props.project.heroVideo && !reducedMotionQuery?.matches
+		props.videoEnabled
+		&& props.project.heroVideo
+		&& !reducedMotionQuery?.matches
 	)
 
 	if (!shouldRenderVideo.value) {
@@ -69,6 +74,8 @@ onMounted(() => {
 	updateMotionPreference()
 	reducedMotionQuery.addEventListener('change', updateMotionPreference)
 })
+
+watch(() => props.videoEnabled, updateMotionPreference)
 
 onUnmounted(() => {
 	reducedMotionQuery?.removeEventListener('change', updateMotionPreference)

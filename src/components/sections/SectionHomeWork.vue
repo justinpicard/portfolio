@@ -74,11 +74,19 @@ let titleRevealTween: gsap.core.Tween | undefined
 let titleRefreshId = 0
 let exhibitionTimeline: gsap.core.Timeline | undefined
 let exhibitionTrigger: ReturnType<typeof ScrollTrigger.create> | undefined
+let exhibitionMediaContext: gsap.MatchMedia | undefined
 let projectCards: HTMLElement[] = []
+let projectCardWidths: number[] = []
+let viewportWidth = 0
+let viewportHeight = 0
+let exhibitionActiveRadius = 140
+let reducedMotionCardCenters: number[] = []
 let reducedMotionActivationEnabled = false
 let projectOpenScrollY: number | undefined
 let projectOpenIndex: number | undefined
 const TITLE_REVEAL_SCROLL_DISTANCE = 1.6
+const DESKTOP_LAYOUT_QUERY = '(min-width: 64rem)'
+const COMPACT_LAYOUT_QUERY = '(max-width: 63.999rem)'
 
 const DEBUG_EXHIBITION_ACTIVATION = import.meta.env.DEV
 	&& new URLSearchParams(window.location.search).has('debugExhibitionActivation')
@@ -214,7 +222,10 @@ function cleanupTitleReveal() {
 	titleRevealTween = undefined
 	splitTitle?.revert()
 	splitTitle = undefined
-	if (root.value) delete root.value.dataset.sectionNavigationScrollY
+	if (root.value) {
+		root.value.classList.remove('work-section--title-active')
+		delete root.value.dataset.sectionNavigationScrollY
+	}
 }
 
 function setupTitleReveal() {
@@ -246,6 +257,10 @@ function setupTitleReveal() {
 			end: () => `+=${window.innerHeight * TITLE_REVEAL_SCROLL_DISTANCE}`,
 			scrub: true,
 			invalidateOnRefresh: true,
+			toggleClass: {
+				targets: root.value,
+				className: 'work-section--title-active'
+			},
 			onRefresh(self) {
 				if (root.value) {
 					root.value.dataset.sectionNavigationScrollY = String(self.end)
@@ -255,12 +270,11 @@ function setupTitleReveal() {
 	})
 }
 
-function getCardState(cardIndex: number, activeIndex: number) {
+function getCardState(cardIndex: number, activeIndex: number, rotation: number) {
 	const relativeIndex = cardIndex - activeIndex
 	const direction = Math.sign(relativeIndex)
 	const distance = Math.abs(relativeIndex)
 	const cardSpacing = readCssNumber('--exhibition-card-spacing', 58)
-	const rotation = readCssNumber('--exhibition-card-rotation', 8)
 	const rotationScale = readCssNumber('--exhibition-rotation-scale', 0.95)
 
 	if (distance === 0) {
@@ -292,7 +306,12 @@ function getShadowState(cardIndex: number, activeIndex: number) {
 	}
 }
 
-function updateVisualProjectActivation(cards: HTMLElement[], useVerticalAxis = false) {
+function getGsapNumber(element: HTMLElement, property: 'x' | 'xPercent') {
+	const value = Number(gsap.getProperty(element, property))
+	return Number.isFinite(value) ? value : 0
+}
+
+function updateVisualProjectActivation(cards: HTMLElement[]) {
 	// The open project layer owns the active index. Ignore delayed scrub/snap
 	// updates from the covered exhibition after synchronizing another project.
 	if (isProjectOpen.value) return
@@ -302,18 +321,16 @@ function updateVisualProjectActivation(cards: HTMLElement[], useVerticalAxis = f
 		return
 	}
 
-	const viewportCenter = useVerticalAxis
-		? window.innerHeight / 2
-		: window.innerWidth / 2
-	const activeRadius = readCssNumber('--exhibition-active-radius', 140)
+	const viewportCenter = viewportWidth / 2
 	let nearestIndex = 0
 	let nearestDistance = Number.POSITIVE_INFINITY
 
 	const measurements = cards.map((card, index) => {
-		const rect = card.getBoundingClientRect()
-		const cardCenter = useVerticalAxis
-			? rect.top + rect.height / 2
-			: rect.left + rect.width / 2
+		const cardCenter = viewportCenter
+			+ getGsapNumber(card, 'x')
+			+ projectCardWidths[index]
+				* (getGsapNumber(card, 'xPercent') + 50)
+				/ 100
 		const distance = Math.abs(cardCenter - viewportCenter)
 
 		if (distance < nearestDistance) {
@@ -330,7 +347,7 @@ function updateVisualProjectActivation(cards: HTMLElement[], useVerticalAxis = f
 	})
 
 	activeProjectIndex.value = nearestIndex
-	interactiveProjectIndex.value = nearestDistance <= activeRadius
+	interactiveProjectIndex.value = nearestDistance <= exhibitionActiveRadius
 		? nearestIndex
 		: null
 
@@ -338,7 +355,7 @@ function updateVisualProjectActivation(cards: HTMLElement[], useVerticalAxis = f
 		console.table(measurements.map((measurement) => ({
 			...measurement,
 			nearestIndex,
-			activeRadius,
+			activeRadius: exhibitionActiveRadius,
 			interactive: interactiveProjectIndex.value === measurement.index
 		})))
 	}
@@ -347,10 +364,36 @@ function updateVisualProjectActivation(cards: HTMLElement[], useVerticalAxis = f
 function updateReducedMotionActivation() {
 	if (!reducedMotionActivationEnabled) return
 
-	updateVisualProjectActivation(projectCards, true)
+	const viewportCenter = getPortfolioScrollY() + viewportHeight / 2
+	let nearestIndex = 0
+	let nearestDistance = Number.POSITIVE_INFINITY
+
+	reducedMotionCardCenters.forEach((cardCenter, index) => {
+		const distance = Math.abs(cardCenter - viewportCenter)
+		if (distance >= nearestDistance) return
+
+		nearestIndex = index
+		nearestDistance = distance
+	})
+
+	activeProjectIndex.value = nearestIndex
+	interactiveProjectIndex.value = nearestDistance <= exhibitionActiveRadius
+		? nearestIndex
+		: null
 }
 
-function setupExhibition() {
+function refreshReducedMotionMeasurements() {
+	viewportHeight = window.innerHeight
+	exhibitionActiveRadius = readCssNumber('--exhibition-active-radius', 140)
+	const scrollY = getPortfolioScrollY()
+	reducedMotionCardCenters = projectCards.map((card) => {
+		const rect = card.getBoundingClientRect()
+		return scrollY + rect.top + rect.height / 2
+	})
+	updateReducedMotionActivation()
+}
+
+function setupExhibition(useNativeSticky = false) {
 	if (
 		!root.value
 		|| !stage.value
@@ -373,9 +416,14 @@ function setupExhibition() {
 	if (prefersReducedMotion()) {
 		reducedMotionActivationEnabled = true
 		window.addEventListener('scroll', updateReducedMotionActivation, { passive: true })
-		window.addEventListener('resize', updateReducedMotionActivation)
-		requestAnimationFrame(updateReducedMotionActivation)
-		return
+		window.addEventListener('resize', refreshReducedMotionMeasurements)
+		requestAnimationFrame(refreshReducedMotionMeasurements)
+		return () => {
+			window.removeEventListener('scroll', updateReducedMotionActivation)
+			window.removeEventListener('resize', refreshReducedMotionMeasurements)
+			reducedMotionActivationEnabled = false
+			reducedMotionCardCenters = []
+		}
 	}
 
 	const transitionDistance = readCssNumber('--exhibition-transition-distance', 1)
@@ -385,12 +433,35 @@ function setupExhibition() {
 	const titleRestDistance = readCssNumber('--exhibition-title-rest-distance', 0.62)
 	const exitDistance = readCssNumber('--exhibition-exit-distance', 0.9)
 	const scrollPerProject = readCssNumber('--exhibition-scroll-per-project', 92)
-	const rotation = readCssNumber('--exhibition-card-rotation', 8)
+	// Compact touch layouts retain the cover-flow spacing, scale and shadows,
+	// but avoid rasterizing every large clipped card into a 3D perspective layer.
+	const rotation = useNativeSticky
+		? 0
+		: readCssNumber('--exhibition-card-rotation', 8)
 	const rotationScale = readCssNumber('--exhibition-rotation-scale', 0.95)
+	const getScrollDistance = () => (
+		timeline.duration() * viewportHeight * (scrollPerProject / 100)
+	)
+	let snapThreshold = 0
+
+	const refreshMeasurements = () => {
+		viewportWidth = window.innerWidth
+		viewportHeight = window.innerHeight
+		exhibitionActiveRadius = readCssNumber('--exhibition-active-radius', 140)
+		projectCardWidths = cards.map((card) => card.offsetWidth)
+		const scrollDistance = getScrollDistance()
+		snapThreshold = readCssNumber('--exhibition-snap-range', 240) / scrollDistance
+		root.value?.style.setProperty('--work-scroll-distance', `${scrollDistance}px`)
+	}
+
+	// Cache all geometry before the scroll-linked timeline starts. Refreshes may
+	// read layout, but normal scroll updates only read GSAP's transform cache.
+	viewportWidth = window.innerWidth
+	viewportHeight = window.innerHeight
 
 	cards.forEach((card, index) => {
 		gsap.set(card, {
-			x: window.innerWidth * (1.05 + index * 0.38),
+			x: () => viewportWidth * (1.05 + index * 0.38),
 			xPercent: -50,
 			yPercent: -50,
 			rotationY: -rotation * Math.min(1 + index * 0.3, 1.8),
@@ -421,10 +492,10 @@ function setupExhibition() {
 		.to({}, { duration: titleRestDistance }, titleRevealDistance)
 		.to(cards, {
 			x: 0,
-			xPercent: (index: number) => getCardState(index, 0).xPercent,
+			xPercent: (index: number) => getCardState(index, 0, rotation).xPercent,
 			yPercent: -50,
-			rotationY: (index: number) => getCardState(index, 0).rotationY,
-			scale: (index: number) => getCardState(index, 0).scale,
+			rotationY: (index: number) => getCardState(index, 0, rotation).rotationY,
+			scale: (index: number) => getCardState(index, 0, rotation).scale,
 			duration: entryDistance,
 			stagger: 0.025
 		}, galleryEntryPosition)
@@ -446,7 +517,7 @@ function setupExhibition() {
 
 		cards.forEach((card, cardIndex) => {
 			timeline.to(card, {
-				...getCardState(cardIndex, activeIndex),
+				...getCardState(cardIndex, activeIndex, rotation),
 				zIndex: projectCount - Math.abs(cardIndex - activeIndex),
 				duration: transitionDistance
 			}, position)
@@ -469,7 +540,7 @@ function setupExhibition() {
 		.to({}, { duration: restDistance }, position)
 		.to(cards, {
 			x: (index: number) => (
-				-window.innerWidth * (1.05 + (projectCount - index - 1) * 0.38)
+				-viewportWidth * (1.05 + (projectCount - index - 1) * 0.38)
 			),
 			xPercent: -50,
 			yPercent: -50,
@@ -492,7 +563,7 @@ function setupExhibition() {
 			duration: exitDistance
 		}, position + restDistance)
 		.to(titleChars, {
-			y: () => -window.innerHeight,
+			y: () => -viewportHeight,
 			duration: exitDistance * 0.78,
 			stagger: 0.06,
 			ease: 'power4.in'
@@ -501,20 +572,25 @@ function setupExhibition() {
 	const snapPoints = Array.from({ length: projectCount }, (_, index) => (
 		timeline.labels[`project-${index}`] / timeline.duration()
 	))
-	const scrollDistance = timeline.duration() * window.innerHeight * (scrollPerProject / 100)
-	const snapRange = readCssNumber('--exhibition-snap-range', 240)
-	const snapThreshold = snapRange / scrollDistance
+	refreshMeasurements()
 
 	exhibitionTrigger = ScrollTrigger.create({
 		trigger: root.value,
 		start: 'top top',
-		end: `+=${scrollDistance}`,
-		pin: root.value,
-		pinSpacing: true,
+		end: () => `+=${getScrollDistance()}`,
+		...(useNativeSticky ? {} : {
+			pin: root.value,
+			pinSpacing: true
+		}),
 		scrub: true,
-		anticipatePin: 1,
+		anticipatePin: useNativeSticky ? 0 : 1,
 		invalidateOnRefresh: true,
 		animation: timeline,
+		toggleClass: {
+			targets: root.value,
+			className: 'work-section--active'
+		},
+		onRefreshInit: refreshMeasurements,
 		onUpdate: () => {
 			updateVisualProjectActivation(cards)
 		},
@@ -536,6 +612,15 @@ function setupExhibition() {
 			ease: 'power1.inOut'
 		}
 	})
+
+	const trigger = exhibitionTrigger
+	return () => {
+		trigger.kill()
+		timeline.kill()
+		root.value?.classList.remove('work-section--active')
+		root.value?.style.removeProperty('--work-scroll-distance')
+		projectCardWidths = []
+	}
 }
 
 onMounted(() => {
@@ -544,12 +629,19 @@ onMounted(() => {
 	ctx = gsap.context(() => {
 		setupTitleReveal()
 
-		setupExhibition()
-	}, root.value ?? undefined)
+		if (prefersReducedMotion()) {
+			setupExhibition()
+			return
+		}
 
-	requestAnimationFrame(() => {
-		ScrollTrigger.refresh()
-	})
+		exhibitionMediaContext = gsap.matchMedia()
+		exhibitionMediaContext.add({
+			desktop: DESKTOP_LAYOUT_QUERY,
+			compact: COMPACT_LAYOUT_QUERY
+		}, (mediaQueryContext) => (
+			setupExhibition(Boolean(mediaQueryContext.conditions?.compact))
+		))
+	}, root.value ?? undefined)
 })
 
 watch(
@@ -571,8 +663,11 @@ watch(
 onUnmounted(() => {
 	titleRefreshId += 1
 	window.removeEventListener('scroll', updateReducedMotionActivation)
-	window.removeEventListener('resize', updateReducedMotionActivation)
+	window.removeEventListener('resize', refreshReducedMotionMeasurements)
 	reducedMotionActivationEnabled = false
+	reducedMotionCardCenters = []
+	exhibitionMediaContext?.revert()
+	exhibitionMediaContext = undefined
 	exhibitionTrigger = undefined
 	exhibitionTimeline = undefined
 	projectCards = []

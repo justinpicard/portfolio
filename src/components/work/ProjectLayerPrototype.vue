@@ -25,10 +25,12 @@
 					<ProjectHero
 						ref="projectHero"
 						:project="displayedProject"
+						:video-enabled="!compactRendering || (!isOpening && !isTransitioning)"
 					/>
 
 					<div ref="caseContent" class="project-layer-prototype__copy">
 						<ProjectCaseContent
+							v-if="!isOpening"
 							:key="displayedProject.slug"
 							:project="displayedProject"
 						/>
@@ -57,6 +59,7 @@
 						<div class="container">
 							<div class="col-12 lg:col-8 lg:offset-2">
 								<ProjectStackNavigator
+									v-if="!isOpening"
 									ref="projectNavigator"
 									:projects="projects"
 									:current-project-index="displayedIndex"
@@ -198,6 +201,12 @@ const TEXT_OUT_DURATION = 0.24
 const CONTEXT_FADE_DURATION = 0.48
 const PROJECT_NAV_DIVIDER_REVEAL_START = 'top 70%'
 const SHARED_ELEMENT_TRANSITIONS_ENABLED = false
+const COMPACT_OR_TOUCH_QUERY = '(max-width: 63.999rem), (hover: none) and (pointer: coarse)'
+const FULLSCREEN_CLIP_PATH = 'inset(0px 0px 0px 0px round 0px)'
+const compactRendering = ref(
+	typeof window !== 'undefined'
+	&& window.matchMedia(COMPACT_OR_TOUCH_QUERY).matches
+)
 const DEBUG_SHARED_TRANSITION = import.meta.env.DEV
 	&& new URLSearchParams(window.location.search).has('debugSharedTransition')
 const DEBUG_TYPOGRAPHY_DRIFT = import.meta.env.DEV
@@ -1746,6 +1755,20 @@ function setFullscreenGeometry() {
 	})
 }
 
+function usesCompactRendering() {
+	return compactRendering.value
+}
+
+function getInsetClipPath(
+	rect: Pick<DOMRect, 'top' | 'left' | 'right' | 'bottom'>,
+	borderRadius: string
+) {
+	const right = Math.max(0, window.innerWidth - rect.right)
+	const bottom = Math.max(0, window.innerHeight - rect.bottom)
+
+	return `inset(${Math.max(0, rect.top)}px ${right}px ${bottom}px ${Math.max(0, rect.left)}px round ${borderRadius})`
+}
+
 function getProjectCardContents(card: HTMLElement) {
 	return Array.from(card.querySelectorAll<HTMLElement>([
 		'.project-card__content',
@@ -1891,6 +1914,7 @@ function createCaseHeroReveal(includeProjectHeader = true) {
 	heroRevealSplits.push(...metadataReveals.map(({ split }) => split))
 	const image = heroElements.media.querySelector<HTMLElement>('img')
 	const controls = getOverlayControls(includeProjectHeader)
+	const useCompactReveal = usesCompactRendering()
 
 	heroRevealTargets = [
 		content.value,
@@ -1911,10 +1935,11 @@ function createCaseHeroReveal(includeProjectHeader = true) {
 		autoAlpha: 0,
 		y: 12
 	})
-	gsap.set(heroElements.media, {
-		clipPath: 'inset(100% 0 0 0)'
-	})
-	if (image) {
+	gsap.set(heroElements.media, useCompactReveal
+		? { autoAlpha: 0 }
+		: { clipPath: 'inset(100% 0 0 0)' }
+	)
+	if (image && !useCompactReveal) {
 		gsap.set(image, {
 			scale: 1.04,
 			transformOrigin: 'center center'
@@ -1949,13 +1974,17 @@ function createCaseHeroReveal(includeProjectHeader = true) {
 			duration: animationDurations.fast,
 			ease: animationEases.out
 		}, 0)
-		.to(heroElements.media, {
+		.to(heroElements.media, useCompactReveal ? {
+			autoAlpha: 1,
+			duration: animationDurations.reveal,
+			ease: animationEases.strongInOut
+		} : {
 			clipPath: 'inset(0% 0 0 0)',
 			duration: animationDurations.reveal,
 			ease: animationEases.strongInOut
 		}, 0)
 
-	if (image) {
+	if (image && !useCompactReveal) {
 		// TODO: Replace this with the future enhanced case-image reveal.
 		heroRevealTimeline.to(image, {
 			scale: 1,
@@ -2017,7 +2046,22 @@ async function animateSimpleOpen() {
 		scrims.value
 	]
 
-	setInitialGeometry()
+	const useCompactTransition = usesCompactRendering()
+	if (useCompactTransition) {
+		setFullscreenGeometry()
+		gsap.set(surface.value, {
+			clipPath: getInsetClipPath({
+				top: props.origin.top,
+				left: props.origin.left,
+				right: props.origin.left + props.origin.width,
+				bottom: props.origin.top + props.origin.height
+			}, props.origin.borderRadius),
+			willChange: 'clip-path',
+			'--project-card-color': getProjectBackground(displayedIndex.value)
+		})
+	} else {
+		setInitialGeometry()
+	}
 	gsap.set(surface.value, { backgroundColor: 'transparent' })
 	gsap.set(destinationElements, { autoAlpha: 0 })
 	// Lay out the hero at its final viewport width while the surface clips it.
@@ -2033,6 +2077,7 @@ async function animateSimpleOpen() {
 		gsap.set(sourceCardContents, { clearProps: 'opacity,visibility' })
 		gsap.set(surface.value, { clearProps: 'backgroundColor' })
 		setFullscreenGeometry()
+		gsap.set(surface.value, { clearProps: 'clipPath,willChange' })
 		isOpeningVisibilityLocked.value = false
 		isOpening.value = false
 		gsap.set(destinationElements, { autoAlpha: 1 })
@@ -2061,7 +2106,11 @@ async function animateSimpleOpen() {
 
 	timeline = gsap.timeline({ paused: true })
 	timeline
-		.to(surface.value, {
+		.to(surface.value, useCompactTransition ? {
+			clipPath: FULLSCREEN_CLIP_PATH,
+			duration: OPEN_DURATION,
+			ease: animationEases.strongInOut
+		} : {
 			top: 0,
 			left: 0,
 			width: '100vw',
@@ -2081,6 +2130,8 @@ async function animateSimpleOpen() {
 	}
 
 	await playTimeline(timeline)
+	gsap.set(surface.value, { clearProps: 'clipPath,willChange' })
+	setFullscreenGeometry()
 	isOpeningVisibilityLocked.value = false
 	isOpening.value = false
 	cleanupHeroReveal()
@@ -2366,6 +2417,8 @@ async function animateBackdropClose(targetCard: HTMLElement) {
 
 	timeline?.kill()
 	const target = targetCard.getBoundingClientRect()
+	const targetBorderRadius = window.getComputedStyle(targetCard).borderRadius
+	const useCompactTransition = usesCompactRendering()
 	const destinationElements = [
 		content.value,
 		...getOverlayControls(),
@@ -2379,7 +2432,7 @@ async function animateBackdropClose(targetCard: HTMLElement) {
 			left: target.left,
 			width: target.width,
 			height: target.height,
-			borderRadius: window.getComputedStyle(targetCard).borderRadius
+			borderRadius: targetBorderRadius
 		})
 		emit('target-ready')
 		await nextTick()
@@ -2396,18 +2449,30 @@ async function animateBackdropClose(targetCard: HTMLElement) {
 	await playTimeline(timeline)
 
 	// TODO: Insert the redesigned destination-page exit animation here.
+	if (useCompactTransition) {
+		setFullscreenGeometry()
+		gsap.set(surface.value, {
+			clipPath: FULLSCREEN_CLIP_PATH,
+			willChange: 'clip-path'
+		})
+	}
 	timeline = gsap.timeline({ paused: true })
-		.to(surface.value, {
+		.to(surface.value, useCompactTransition ? {
+			clipPath: getInsetClipPath(target, targetBorderRadius),
+			duration: CLOSE_DURATION,
+			ease: animationEases.strongInOut
+		} : {
 			top: target.top,
 			left: target.left,
 			width: target.width,
 			height: target.height,
-			borderRadius: window.getComputedStyle(targetCard).borderRadius,
+			borderRadius: targetBorderRadius,
 			duration: CLOSE_DURATION,
 			ease: animationEases.strongInOut
 		})
 
 	await playTimeline(timeline)
+	gsap.set(surface.value, { clearProps: 'willChange' })
 	const cardRestore = prepareCardRestore(targetCard)
 	gsap.set(surface.value, { autoAlpha: 0 })
 	emit('target-ready')

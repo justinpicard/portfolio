@@ -60,6 +60,8 @@ const ABOUT_HEADING_REVEAL_DURATION = 0.1
 const ABOUT_HEADING_REVEAL_STAGGER_AMOUNT = 1.1
 const ABOUT_HEADING_REVEAL_START = 'top 72%'
 const ABOUT_HEADING_REVEAL_END = 'bottom 60%'
+const COMPACT_OR_TOUCH_QUERY = '(max-width: 63.999rem), (hover: none) and (pointer: coarse)'
+const ABOUT_TOUCH_INITIAL_Y_PERCENT = 24
 
 function cleanupAboutReveal() {
 	revealRequestId += 1
@@ -101,6 +103,7 @@ async function initAboutReveal() {
 
 	ctx = gsap.context(() => {
 		if (!aboutText.value || !aboutEyebrow.value || !aboutTitle.value) return
+		const useTouchReveal = window.matchMedia(COMPACT_OR_TOUCH_QUERY).matches
 
 		ScrollTrigger.create({
 			trigger: aboutText.value,
@@ -118,30 +121,37 @@ async function initAboutReveal() {
 		}
 
 		const eyebrowSplit = new SplitText(aboutEyebrow.value, {
-			type: 'words,chars',
+			type: useTouchReveal ? 'words' : 'words,chars',
 			wordsClass: 'about-section__word',
 			charsClass: 'about-section__char'
 		})
 		const headingSplit = new SplitText(aboutTitle.value, {
-			type: 'words,chars',
+			type: useTouchReveal ? 'words' : 'words,chars',
 			wordsClass: 'about-section__word',
 			charsClass: 'about-section__char'
 		})
 		aboutSplits = [eyebrowSplit, headingSplit]
-		const allCharacters = aboutSplits.flatMap((split) => split.chars)
+		const eyebrowTargets = useTouchReveal ? eyebrowSplit.words : eyebrowSplit.chars
+		const headingTargets = useTouchReveal ? headingSplit.words : headingSplit.chars
+		const revealTargets = [...eyebrowTargets, ...headingTargets]
 
-		gsap.set(allCharacters, {
-			filter: `blur(${ABOUT_CHARACTER_INITIAL_BLUR}px)`,
+		gsap.set(revealTargets, {
 			opacity: ABOUT_CHARACTER_INITIAL_OPACITY,
-			scale: ABOUT_CHARACTER_INITIAL_SCALE,
-			transformOrigin: 'center center'
+			...(useTouchReveal
+				? { yPercent: ABOUT_TOUCH_INITIAL_Y_PERCENT }
+				: {
+					filter: `blur(${ABOUT_CHARACTER_INITIAL_BLUR}px)`,
+					scale: ABOUT_CHARACTER_INITIAL_SCALE,
+					transformOrigin: 'center center'
+				})
 		})
 		gsap.set(aboutText.value, { visibility: 'visible' })
 
-		gsap.to(eyebrowSplit.chars, {
-			filter: 'blur(0px)',
+		gsap.to(eyebrowTargets, {
 			opacity: 1,
-			scale: 1,
+			...(useTouchReveal
+				? { yPercent: 0 }
+				: { filter: 'blur(0px)', scale: 1 }),
 			duration: ABOUT_EYEBROW_REVEAL_DURATION,
 			stagger: {
 				amount: ABOUT_EYEBROW_REVEAL_STAGGER_AMOUNT,
@@ -157,10 +167,11 @@ async function initAboutReveal() {
 			}
 		})
 
-		gsap.to(headingSplit.chars, {
-			filter: 'blur(0px)',
+		gsap.to(headingTargets, {
 			opacity: 1,
-			scale: 1,
+			...(useTouchReveal
+				? { yPercent: 0 }
+				: { filter: 'blur(0px)', scale: 1 }),
 			duration: ABOUT_HEADING_REVEAL_DURATION,
 			stagger: {
 				amount: ABOUT_HEADING_REVEAL_STAGGER_AMOUNT,

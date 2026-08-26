@@ -95,6 +95,7 @@
 			<ProjectHeroMedia
 				:key="project.id"
 				:project="project"
+				:video-enabled="videoEnabled"
 			/>
 		</div>
 	</div>
@@ -108,6 +109,7 @@ import ProjectHeroMedia from './ProjectHeroMedia.vue'
 
 const props = defineProps<{
 	project: Project
+	videoEnabled?: boolean
 }>()
 
 const { t } = useI18n()

@@ -107,7 +107,6 @@
 	background: transparent;
 	color: var(--color-primary);
 	backface-visibility: hidden;
-	will-change: transform, opacity;
 	outline: none;
 
 	&--interactive {
@@ -130,7 +129,6 @@
 		overflow: hidden;
 		background: var(--project-card-color);
 		transform-origin: center;
-		will-change: transform;
 	}
 
 	&__number {
@@ -250,7 +248,6 @@
 		display: block;
 		opacity: 0;
 		pointer-events: none;
-		will-change: opacity;
 
 		&--from-left {
 			background-image: linear-gradient(
@@ -267,6 +264,22 @@
 				rgba(0, 0, 0, 0)
 			);
 		}
+	}
+}
+
+.work-section {
+	.split-display-char {
+		will-change: auto;
+	}
+}
+
+// Promote the active desktop composition only. Explicitly promoting every
+// character and large 3D card is counterproductive on compact touch devices,
+// where the browser already composites the transformed elements as needed.
+@media (min-width: 64rem) and (hover: hover) and (pointer: fine) {
+	.work-section--active .project-card,
+	.work-section--title-active .split-display-char {
+		will-change: transform;
 	}
 }
 
@@ -292,7 +305,6 @@
 		overflow: hidden;
 		background: var(--project-card-color);
 		color: var(--color-primary);
-		will-change: top, left, width, height, border-radius;
 	}
 
 	&__card-face {
@@ -477,7 +489,6 @@
 		cursor: default;
 		box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0);
 		transition: box-shadow 0.45s var(--ease-out, ease-out);
-		will-change: transform, scale, opacity;
 
 		&--front {
 			cursor: pointer;
@@ -515,7 +526,6 @@
 		opacity: var(--project-stack-rear-shadow-opacity);
 		pointer-events: none;
 		transition: opacity 0.4s var(--ease-out, ease-out);
-		will-change: opacity;
 	}
 
 	&__visual {
@@ -637,6 +647,24 @@
 
 		&__title {
 			font-size: 38cqw;
+		}
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.work-section {
+		@include respond(lg, down) {
+			height: calc(100svh + var(--work-scroll-distance, 0px));
+			overflow: visible;
+
+			&__stage {
+				position: sticky;
+				top: 0;
+			}
+
+			&__exhibition {
+				perspective: none;
+			}
 		}
 	}
 }
