@@ -4,13 +4,13 @@
 			<div class="row">
 				<div class="col-12 lg:col-8 lg:offset-2">
 					<div class="project-layer-prototype__copy">
-						<span
+						<div
 							ref="intro"
-							class="eyebrow d-flex items-center"
+							class="eyebrow"
 							data-project-shared="intro"
 						>
 							{{ t('project.caseStudyEyebrowLabel') }}<span class="star mx-2">✦</span>{{ project.title }}
-						</span>
+						</div>
 						<h2
 							ref="title"
 							id="project-layer-title"

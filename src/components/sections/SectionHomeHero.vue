@@ -1,18 +1,24 @@
 <template>
 	<section id="intro" ref="root" class="section-layout section-layout--stage home-hero home-hero--intro-pending">
 		<div class="container hero-copy-container hero-copy-container--final">
-			<HomeHeroCopy class="hero-copy-layer hero-copy-layer--final" />
-		</div>
-
-		<div ref="heroPhotoPositioner" class="hero-photo-positioner" aria-hidden="true">
-			<div ref="heroPhoto" class="hero-photo">
-				<BaseImage
-					class-name="home-hero__image"
-					src="/images/justin-picard-hero"
-					alt=""
-					loading="eager"
-				/>
-			</div>
+			<HomeHeroCopy class="hero-copy-layer hero-copy-layer--final">
+				<template #media>
+					<div
+						ref="heroPhotoPositioner"
+						class="hero-photo-positioner"
+						aria-hidden="true"
+					>
+						<div ref="heroPhoto" class="hero-photo">
+							<BaseImage
+								class-name="home-hero__image"
+								src="/images/justin-picard-hero"
+								alt=""
+								loading="eager"
+							/>
+						</div>
+					</div>
+				</template>
+			</HomeHeroCopy>
 		</div>
 
 		<CircularScrollIndicator
@@ -57,7 +63,6 @@ const FINAL_PHOTO_ROTATION = 4
 const HERO_PHOTO_START = 0.2
 const HERO_PHOTO_DURATION = 1.05
 const HERO_INTRO_LOADING_OVERLAP = 0.14
-const HERO_SCROLL_DRIFT = 48
 const CURSOR_FOLLOW_POINTER_QUERY = '(hover: hover) and (pointer: fine)'
 const INDICATOR_MAX_PLAYBACK_RATE = 30
 const INDICATOR_VELOCITY_DIVISOR = 500
@@ -68,6 +73,7 @@ let titleSplit: SplitText | undefined
 let roleSplit: SplitText | undefined
 let introSplit: SplitText | undefined
 let copyRefreshId = 0
+let splitRefreshFrame = 0
 let unlockScroll: (() => void) | undefined
 let scrollIndicatorFollow: ReturnType<typeof useCursorFollowIndicator> | undefined
 let scrollIndicatorRotation: Animation | undefined
@@ -86,13 +92,53 @@ defineExpose({
 	playHeroIntro
 })
 
-function wrapSplitElements(elements: Element[], className: string, tagName: 'div' | 'span' = 'div') {
+function wrapSplitElements(elements: Element[], className: string) {
 	elements.forEach((element) => {
-		const wrapper = document.createElement(tagName)
+		const wrapper = document.createElement('span')
 		wrapper.classList.add(className)
 		element.parentNode?.insertBefore(wrapper, element)
 		wrapper.appendChild(element)
 	})
+}
+
+function waitForFonts() {
+	return 'fonts' in document
+		? document.fonts.ready
+		: Promise.resolve()
+}
+
+function scheduleSplitRefresh() {
+	cancelAnimationFrame(splitRefreshFrame)
+	splitRefreshFrame = requestAnimationFrame(() => {
+		ScrollTrigger.refresh()
+	})
+}
+
+function createResponsiveLineSplit(element: HTMLElement) {
+	return new SplitText(element, {
+		type: 'lines',
+		linesClass: 'split-line',
+		tag: 'span',
+		autoSplit: true,
+		onSplit(split) {
+			wrapSplitElements(split.lines, 'split-line-wrapper')
+			gsap.set(split.lines, {
+				y: 0,
+				yPercent: 0,
+				opacity: 1,
+				visibility: 'visible'
+			})
+			scheduleSplitRefresh()
+		}
+	})
+}
+
+function enableResponsiveLineSplits(finalRole: HTMLElement, finalText: HTMLElement) {
+	// The intro timeline owns its initial line nodes, so responsive splitting starts after that reveal.
+	roleSplit?.revert()
+	introSplit?.revert()
+	roleSplit = createResponsiveLineSplit(finalRole)
+	introSplit = createResponsiveLineSplit(finalText)
 }
 
 async function refreshHeroCopySplits() {
@@ -107,6 +153,7 @@ async function refreshHeroCopySplits() {
 
 	if (prefersReducedMotion()) return
 
+	await waitForFonts()
 	await nextTick()
 
 	if (refreshId !== copyRefreshId) return
@@ -120,18 +167,10 @@ async function refreshHeroCopySplits() {
 		type: 'chars',
 		charsClass: 'split-display-char'
 	})
-	roleSplit = new SplitText(finalRole, {
-		type: 'lines',
-		linesClass: 'split-line'
-	})
-	introSplit = new SplitText(finalText, {
-		type: 'lines',
-		linesClass: 'split-line'
-	})
+	roleSplit = createResponsiveLineSplit(finalRole)
+	introSplit = createResponsiveLineSplit(finalText)
 
-	wrapSplitElements(titleSplit.chars, 'split-display-char-wrapper', 'span')
-	wrapSplitElements(roleSplit.lines, 'split-line-wrapper')
-	wrapSplitElements(introSplit.lines, 'split-line-wrapper')
+	wrapSplitElements(titleSplit.chars, 'split-display-char-wrapper')
 
 	gsap.set([
 		...titleSplit.chars,
@@ -259,6 +298,8 @@ function linkHeroIntroTimeline() {
 onMounted(async () => {
 	await nextTick()
 	registerGsapPlugins()
+	await waitForFonts()
+	await nextTick()
 
 	const loadingScreenElement = props.loadingScreen?.element
 	const heroPhotoPositionerElement = heroPhotoPositioner.value
@@ -285,7 +326,10 @@ onMounted(async () => {
 	if (prefersReducedMotion()) {
 		heroTimeline = gsap.timeline({
 			paused: true,
-			onComplete: restoreScroll
+			onComplete: () => {
+				restoreScroll()
+				enableResponsiveLineSplits(finalRole, finalText)
+			}
 		})
 
 		heroTimeline
@@ -320,10 +364,18 @@ onMounted(async () => {
 
 	ctx = gsap.context(() => {
 		titleSplit = new SplitText(finalTitle, { type: 'chars', charsClass: 'split-display-char' })
-		roleSplit = new SplitText(finalRole, { type: 'lines', linesClass: 'split-line' })
-		introSplit = new SplitText(finalText, { type: 'lines', linesClass: 'split-line' })
+		roleSplit = new SplitText(finalRole, {
+			type: 'lines',
+			linesClass: 'split-line',
+			tag: 'span'
+		})
+		introSplit = new SplitText(finalText, {
+			type: 'lines',
+			linesClass: 'split-line',
+			tag: 'span'
+		})
 
-		wrapSplitElements(titleSplit.chars, 'split-display-char-wrapper', 'span')
+		wrapSplitElements(titleSplit.chars, 'split-display-char-wrapper')
 		wrapSplitElements(roleSplit.lines, 'split-line-wrapper')
 		wrapSplitElements(introSplit.lines, 'split-line-wrapper')
 
@@ -352,21 +404,12 @@ onMounted(async () => {
 			autoAlpha: 0
 		})
 
-		gsap.to([heroPhotoPositionerElement, finalText], {
-			y: HERO_SCROLL_DRIFT,
-			ease: 'none',
-			scrollTrigger: {
-				trigger: root.value,
-				start: 'top top',
-				end: 'bottom top',
-				scrub: true,
-				invalidateOnRefresh: true
-			}
-		})
-
 		heroTimeline = gsap.timeline({
 			paused: true,
-			onComplete: restoreScroll
+			onComplete: () => {
+				restoreScroll()
+				enableResponsiveLineSplits(finalRole, finalText)
+			}
 		})
 
 		heroTimeline
@@ -442,6 +485,7 @@ watch(
 
 onUnmounted(() => {
 	copyRefreshId += 1
+	cancelAnimationFrame(splitRefreshFrame)
 	heroTimeline?.kill()
 	isHeroIntroLinked = false
 	scrollIndicatorFollow?.cleanup()

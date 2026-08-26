@@ -98,6 +98,11 @@ p {
 	}
 }
 
+.split-line-wrapper,
+.split-line {
+	display: block;
+}
+
 .split-line-wrapper {
 	overflow: hidden;
 }

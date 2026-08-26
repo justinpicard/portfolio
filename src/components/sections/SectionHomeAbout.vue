@@ -49,8 +49,9 @@ let ctx: gsap.Context | undefined
 let isMounted = false
 let revealRequestId = 0
 const ABOUT_NAVIGATION_TEXT_VIEWPORT_POSITION = 0.2
-const ABOUT_WORD_INITIAL_BLUR = 15
-const ABOUT_WORD_INITIAL_OPACITY = 0
+const ABOUT_CHARACTER_INITIAL_SCALE = 2
+const ABOUT_CHARACTER_INITIAL_BLUR = 15
+const ABOUT_CHARACTER_INITIAL_OPACITY = 0
 const ABOUT_EYEBROW_REVEAL_DURATION = 0.06
 const ABOUT_EYEBROW_REVEAL_STAGGER_AMOUNT = 0.12
 const ABOUT_EYEBROW_REVEAL_START = 'top 72%'
@@ -88,7 +89,7 @@ async function initAboutReveal() {
 
 	registerGsapPlugins()
 	if (aboutText.value && !reduceMotion) {
-		// Avoid flashing the sharp state while fonts and word boundaries settle.
+		// Avoid flashing the sharp state while fonts and character boundaries settle.
 		gsap.set(aboutText.value, { visibility: 'hidden' })
 	}
 
@@ -117,25 +118,30 @@ async function initAboutReveal() {
 		}
 
 		const eyebrowSplit = new SplitText(aboutEyebrow.value, {
-			type: 'words',
-			wordsClass: 'about-section__word'
+			type: 'words,chars',
+			wordsClass: 'about-section__word',
+			charsClass: 'about-section__char'
 		})
 		const headingSplit = new SplitText(aboutTitle.value, {
-			type: 'words',
-			wordsClass: 'about-section__word'
+			type: 'words,chars',
+			wordsClass: 'about-section__word',
+			charsClass: 'about-section__char'
 		})
 		aboutSplits = [eyebrowSplit, headingSplit]
-		const allWords = aboutSplits.flatMap((split) => split.words)
+		const allCharacters = aboutSplits.flatMap((split) => split.chars)
 
-		gsap.set(allWords, {
-			filter: `blur(${ABOUT_WORD_INITIAL_BLUR}px)`,
-			opacity: ABOUT_WORD_INITIAL_OPACITY
+		gsap.set(allCharacters, {
+			filter: `blur(${ABOUT_CHARACTER_INITIAL_BLUR}px)`,
+			opacity: ABOUT_CHARACTER_INITIAL_OPACITY,
+			scale: ABOUT_CHARACTER_INITIAL_SCALE,
+			transformOrigin: 'center center'
 		})
 		gsap.set(aboutText.value, { visibility: 'visible' })
 
-		gsap.to(eyebrowSplit.words, {
+		gsap.to(eyebrowSplit.chars, {
 			filter: 'blur(0px)',
 			opacity: 1,
+			scale: 1,
 			duration: ABOUT_EYEBROW_REVEAL_DURATION,
 			stagger: {
 				amount: ABOUT_EYEBROW_REVEAL_STAGGER_AMOUNT,
@@ -151,9 +157,10 @@ async function initAboutReveal() {
 			}
 		})
 
-		gsap.to(headingSplit.words, {
+		gsap.to(headingSplit.chars, {
 			filter: 'blur(0px)',
 			opacity: 1,
+			scale: 1,
 			duration: ABOUT_HEADING_REVEAL_DURATION,
 			stagger: {
 				amount: ABOUT_HEADING_REVEAL_STAGGER_AMOUNT,

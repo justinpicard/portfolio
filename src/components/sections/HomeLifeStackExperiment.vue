@@ -1,5 +1,11 @@
 <template>
-	<section id="life" ref="root" class="section-layout section-layout--stage home-life-section" aria-labelledby="home-life-title">
+	<section
+		id="life"
+		ref="root"
+		class="section-layout section-layout--stage home-life-section"
+		:style="{ '--home-life-scroll-steps': photos.length - 1 }"
+		aria-labelledby="home-life-title"
+	>
 		<div ref="layout" class="container home-life-section__layout">
 			<div ref="introRef" class="home-life-section__intro">
 				<h2 id="home-life-title" ref="titleRef" class="home-life-section__title">
@@ -10,27 +16,29 @@
 				</p>
 			</div>
 
-			<div ref="stack" class="home-life-section__stack">
-				<figure
-					v-for="photo in photos"
-					:key="photo.src"
-					ref="cardRefs"
-					:class="[
-						'home-life-section__card',
-						`home-life-section__card--${photo.ratio}`
-					]"
-				>
-					<BaseImage
-						class-name="home-life-section__photo"
-						:src="photo.src"
-						:alt="t(photo.altKey)"
-						:aspect-ratio="aspectRatios[photo.ratio]"
-						:position="photo.position"
-					/>
-					<figcaption class="home-life-section__caption">
-						{{ t(photo.captionKey) }}
-					</figcaption>
-				</figure>
+			<div ref="stackTrack" class="home-life-section__stack-track">
+				<div ref="stack" class="home-life-section__stack">
+					<figure
+						v-for="photo in photos"
+						:key="photo.src"
+						ref="cardRefs"
+						:class="[
+							'home-life-section__card',
+							`home-life-section__card--${photo.ratio}`
+						]"
+					>
+						<BaseImage
+							class-name="home-life-section__photo"
+							:src="photo.src"
+							:alt="t(photo.altKey)"
+							:aspect-ratio="aspectRatios[photo.ratio]"
+							:position="photo.position"
+						/>
+						<figcaption class="home-life-section__caption">
+							{{ t(photo.captionKey) }}
+						</figcaption>
+					</figure>
+				</div>
 			</div>
 		</div>
 	</section>
@@ -63,6 +71,7 @@ const aspectRatios: Record<PhotoRatio, string> = {
 }
 
 const FIRST_PHOTO_SETTLED_LABEL = 'first-photo-settled'
+const DESKTOP_LAYOUT_QUERY = '(min-width: 64rem)'
 
 const photos: LifePhoto[] = [
 	{
@@ -181,6 +190,7 @@ const photos: LifePhoto[] = [
 const { locale, t } = useI18n()
 const root = ref<HTMLElement | null>(null)
 const layout = ref<HTMLElement | null>(null)
+const stackTrack = ref<HTMLElement | null>(null)
 const stack = ref<HTMLElement | null>(null)
 const introRef = ref<HTMLElement | null>(null)
 const titleRef = ref<HTMLHeadingElement | null>(null)
@@ -188,14 +198,13 @@ const textRef = ref<HTMLParagraphElement | null>(null)
 const cardRefs = ref<HTMLElement[]>([])
 let context: gsap.Context | undefined
 let mediaContext: gsap.MatchMedia | undefined
-let titleSplit: SplitText | undefined
-let textSplit: SplitText | undefined
+let introSplit: SplitText | undefined
 let isMounted = false
 let animationRequestId = 0
 
 function wrapSplitLines(lines: Element[]) {
 	lines.forEach((line) => {
-		const wrapper = document.createElement('div')
+		const wrapper = document.createElement('span')
 		wrapper.classList.add('split-line-wrapper')
 		line.parentNode?.insertBefore(wrapper, line)
 		wrapper.appendChild(line)
@@ -206,13 +215,11 @@ function cleanupAnimations() {
 	animationRequestId += 1
 	mediaContext?.revert()
 	context?.revert()
-	titleSplit?.revert()
-	textSplit?.revert()
+	introSplit?.revert()
 	if (root.value) delete root.value.dataset.sectionNavigationScrollY
 	mediaContext = undefined
 	context = undefined
-	titleSplit = undefined
-	textSplit = undefined
+	introSplit = undefined
 }
 
 async function initAnimations() {
@@ -236,6 +243,7 @@ async function initAnimations() {
 		|| requestId !== animationRequestId
 		|| !root.value
 		|| !layout.value
+		|| !stackTrack.value
 		|| !stack.value
 	) return
 
@@ -247,51 +255,59 @@ async function initAnimations() {
 			() => {
 				if (!introRef.value || !titleRef.value || !textRef.value) return
 
-				titleSplit = new SplitText(titleRef.value, {
+				introSplit = new SplitText([titleRef.value, textRef.value], {
 					type: 'lines',
-					linesClass: 'split-line'
-				})
-				textSplit = new SplitText(textRef.value, {
-					type: 'lines',
-					linesClass: 'split-line'
-				})
+					linesClass: 'split-line',
+					tag: 'span',
+					autoSplit: true,
+					onSplit(split) {
+						wrapSplitLines(split.lines)
+						gsap.set(split.lines, {
+							yPercent: 110,
+							opacity: 1
+						})
+						gsap.set(introRef.value, { visibility: 'visible' })
 
-				wrapSplitLines(titleSplit.lines)
-				wrapSplitLines(textSplit.lines)
-
-				const revealLines = [...titleSplit.lines, ...textSplit.lines]
-
-				gsap.set(revealLines, {
-					yPercent: 110,
-					opacity: 1
-				})
-				gsap.set(introRef.value, { visibility: 'visible' })
-
-				gsap.to(revealLines, {
-					yPercent: 0,
-					opacity: 1,
-					duration: animationDurations.reveal,
-					stagger: animationStaggers.lines,
-					ease: animationEases.strongOut,
-					scrollTrigger: {
-						trigger: root.value,
-						// Desktop copy reveals once the overlapping section reaches its pin position.
-						start: () => window.matchMedia('(min-width: 64rem)').matches
-							? 'top top'
-							: 'top 75%',
-						toggleActions: 'play none none reverse',
-						invalidateOnRefresh: true
+						// SplitText restores the returned tween's progress after an automatic re-split.
+						return gsap.to(split.lines, {
+							yPercent: 0,
+							opacity: 1,
+							duration: animationDurations.reveal,
+							stagger: animationStaggers.lines,
+							ease: animationEases.strongOut,
+							scrollTrigger: {
+								trigger: root.value,
+								// Reveal the copy as the stage reaches its pinned position.
+								start: () => window.matchMedia(DESKTOP_LAYOUT_QUERY).matches
+									? 'top top'
+									: 'top 75%',
+								toggleActions: 'play none none reverse',
+								invalidateOnRefresh: true
+							}
+						})
 					}
 				})
 			}
 		)
 
-		// Keep pinning exclusive to roomy layouts; compact and reduced-motion
-		// experiences use the naturally flowing card layout from the stylesheet.
+		// Compact layouts use a CSS-sticky stage to avoid fixed-pin jitter on touch.
+		// Desktop retains the established ScrollTrigger pinning behaviour.
 		mediaContext.add(
-			'(min-width: 64rem) and (prefers-reduced-motion: no-preference)',
-			() => {
+			{
+				motion: '(prefers-reduced-motion: no-preference)',
+				desktop: DESKTOP_LAYOUT_QUERY
+			},
+			(mediaQueryContext) => {
+				if (!mediaQueryContext.conditions?.motion) return
+
 				const cards = cardRefs.value
+				const shouldPinWithScrollTrigger = Boolean(
+					mediaQueryContext.conditions.desktop
+				)
+				const getStageHeight = () => (
+					shouldPinWithScrollTrigger ? layout.value : stack.value
+				)?.clientHeight
+					?? document.documentElement.clientHeight
 
 				gsap.set(cards, {
 					// Keep percentage-based centering inside GSAP so it remains correct
@@ -301,7 +317,7 @@ async function initAnimations() {
 					x: (index: number) => photos[index].x,
 					// A full viewport offset keeps every waiting card below the fold,
 					// even before its lazy-loaded image has established the card height.
-					y: () => window.innerHeight,
+					y: getStageHeight,
 					rotate: (index: number) => photos[index].rotation
 						+ (index % 2 === 0 ? 0.35 : -0.35),
 					autoAlpha: 1,
@@ -310,11 +326,18 @@ async function initAnimations() {
 
 				const timeline = gsap.timeline({
 					scrollTrigger: {
-						trigger: root.value,
+						trigger: shouldPinWithScrollTrigger
+							? root.value
+							: stackTrack.value,
 						start: 'top top',
-						end: () => `+=${window.innerHeight * (cards.length - 1) * 0.75}`,
+						end: shouldPinWithScrollTrigger
+							? () => `+=${getStageHeight() * (cards.length - 1) * 0.75}`
+							: 'bottom bottom',
 						scrub: 0.8,
-						pin: layout.value,
+						...(shouldPinWithScrollTrigger ? {
+							pin: layout.value,
+							pinSpacing: true
+						} : {}),
 						anticipatePin: 1,
 						invalidateOnRefresh: true,
 						onRefresh(self) {

@@ -29,7 +29,7 @@
 		max-width: 31ch;
 	}
 
-	&__stack {
+	&__stack-track {
 		display: grid;
 		gap: var(--space-10);
 		min-width: 0;
@@ -58,7 +58,7 @@
 
 	@include respond(md) {
 		@include respond(lg, down) {
-			&__stack {
+			&__stack-track {
 				grid-template-columns: repeat(2, minmax(0, 1fr));
 				align-items: start;
 			}
@@ -93,9 +93,14 @@
 			font-size: clamp(6rem, 10vw, 10rem);
 		}
 
-		&__stack {
+		&__stack-track {
 			position: relative;
 			height: min(76vh, 49rem);
+		}
+
+		&__stack {
+			position: absolute;
+			inset: 0;
 		}
 
 		&__card {
@@ -115,6 +120,64 @@
 	}
 }
 
+@media (prefers-reduced-motion: no-preference) {
+	.home-life-section {
+		@include respond(lg, down) {
+			height: auto;
+			padding-block: 0;
+			overflow: visible;
+
+			&__layout {
+				display: block;
+				height: auto;
+				padding-block: 0;
+			}
+
+			&__intro {
+				padding-block: var(--home-life-flow-space);
+			}
+
+			&__stack-track {
+				position: relative;
+				display: block;
+				height: calc(
+					100svh
+					+ (var(--home-life-scroll-steps) * 75svh)
+				);
+			}
+
+			&__stack {
+				position: sticky;
+				top: 0;
+				height: 100svh;
+				width: 100vw;
+				margin-inline: calc(50% - 50vw);
+				overflow: hidden;
+			}
+
+			&__card {
+				position: absolute;
+				inset: 50% auto auto 50%;
+				width: min(94vw, 48svh, 22rem);
+				margin: 0;
+				will-change: transform, opacity;
+
+				&:nth-child(even) {
+					margin-block-start: 0;
+				}
+
+				&--landscape {
+					width: min(108vw, 64svh, 28rem);
+				}
+
+				&--square {
+					width: min(100vw, 56svh, 25rem);
+				}
+			}
+		}
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.home-life-section {
 		padding-block: var(--home-life-flow-space);
@@ -123,10 +186,15 @@
 			height: auto;
 		}
 
-		&__stack {
+		&__stack-track {
 			position: static;
 			display: grid;
 			height: auto;
+		}
+
+		&__stack {
+			position: static;
+			display: contents;
 		}
 
 		&__card {
@@ -143,7 +211,7 @@
 				align-items: start;
 			}
 
-			&__stack {
+			&__stack-track {
 				grid-template-columns: repeat(2, minmax(0, 1fr));
 			}
 		}

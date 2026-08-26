@@ -1398,12 +1398,13 @@ function revertTransitionSplits() {
 }
 
 function splitHeroTransitionLines(elements: HeroElementMap) {
+	const introReveal = splitMaskedLines(elements.intro)
 	const titleReveal = splitMaskedLines(elements.title)
-	transitionSplits = [titleReveal.split]
+	transitionSplits = [introReveal.split, titleReveal.split]
 
 	return {
 		titleLines: titleReveal.lines,
-		introLines: [] as HTMLElement[]
+		introLines: introReveal.lines
 	}
 }
 
@@ -1632,6 +1633,7 @@ async function navigateToProject(nextIndex: number, restoreFocus = false) {
 
 	const outgoingLines = splitHeroTransitionLines(outgoingHero)
 	const outgoingMetadata = getHeroMetadataElements(outgoingHero)
+		.filter((element) => element !== outgoingHero.intro)
 
 	transitionTimeline = gsap.timeline({ paused: true })
 	transitionTimeline
@@ -1752,29 +1754,23 @@ function getProjectCardContents(card: HTMLElement) {
 	].join(', ')))
 }
 
-function wrapHeroRevealLines(
-	lines: Element[],
-	tagName: 'div' | 'span' = 'div'
-) {
+function wrapHeroRevealLines(lines: Element[]) {
 	lines.forEach((line) => {
-		const mask = document.createElement(tagName)
+		const mask = document.createElement('span')
 		mask.classList.add('split-line-wrapper')
 		line.parentNode?.insertBefore(mask, line)
 		mask.appendChild(line)
 	})
 }
 
-function splitMaskedLines(
-	element: HTMLElement,
-	tagName: 'div' | 'span' = 'div'
-) {
+function splitMaskedLines(element: HTMLElement) {
 	const split = new SplitText(element, {
 		type: 'lines',
 		linesClass: 'split-line',
-		tag: tagName
+		tag: 'span'
 	})
 	const lines = split.lines as HTMLElement[]
-	wrapHeroRevealLines(lines, tagName)
+	wrapHeroRevealLines(lines)
 
 	return { split, lines }
 }
@@ -1875,9 +1871,11 @@ function createCaseHeroReveal(includeProjectHeader = true) {
 
 	cleanupHeroReveal()
 
+	const eyebrowReveal = splitMaskedLines(heroElements.intro)
 	const titleReveal = splitMaskedLines(heroElements.title)
-	heroRevealSplits = [titleReveal.split]
+	heroRevealSplits = [eyebrowReveal.split, titleReveal.split]
 
+	const eyebrowLines = eyebrowReveal.lines
 	const titleLines = titleReveal.lines
 	const eyebrow = heroElements.intro
 	const divider = projectHero.value?.getDividerElement()
@@ -1887,7 +1885,7 @@ function createCaseHeroReveal(includeProjectHeader = true) {
 	const metadataReveals = metadata.flatMap((element) => (
 		Array.from(element.children)
 			.filter((child): child is HTMLElement => child instanceof HTMLElement)
-			.map((line) => splitMaskedLines(line, 'span'))
+			.map((line) => splitMaskedLines(line))
 	))
 	const metadataLines = metadataReveals.flatMap(({ lines }) => lines)
 	heroRevealSplits.push(...metadataReveals.map(({ split }) => split))
@@ -1898,6 +1896,7 @@ function createCaseHeroReveal(includeProjectHeader = true) {
 		content.value,
 		heroElements.media,
 		eyebrow,
+		...eyebrowLines,
 		...dividerTargets,
 		...titleLines,
 		...metadata,
@@ -1922,8 +1921,8 @@ function createCaseHeroReveal(includeProjectHeader = true) {
 		})
 	}
 	gsap.set(eyebrow, {
-		autoAlpha: 0,
-		y: 10
+		autoAlpha: 1,
+		y: 0
 	})
 	gsap.set(dividerTargets, {
 		width: '0%'
@@ -1932,7 +1931,7 @@ function createCaseHeroReveal(includeProjectHeader = true) {
 		autoAlpha: 1,
 		y: 0
 	})
-	gsap.set([...titleLines, ...metadataLines], {
+	gsap.set([...eyebrowLines, ...titleLines, ...metadataLines], {
 		autoAlpha: 1,
 		yPercent: 110
 	})
@@ -1966,11 +1965,11 @@ function createCaseHeroReveal(includeProjectHeader = true) {
 	}
 
 	heroRevealTimeline
-		.to(eyebrow, {
-			autoAlpha: 1,
-			y: 0,
+		.to(eyebrowLines, {
+			yPercent: 0,
 			duration: animationDurations.fast,
-			ease: animationEases.out
+			ease: animationEases.strongOut,
+			stagger: animationStaggers.lines
 		}, 0.1)
 		.to(titleLines, {
 			yPercent: 0,
