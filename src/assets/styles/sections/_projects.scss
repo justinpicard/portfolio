@@ -381,7 +381,11 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 	}
 
 	&__media {
-		--project-hero-media-ratio: 16 / 7;
+		--project-hero-media-ratio: 2 / 1;
+
+		@include respond(sm, down) {
+			--project-hero-media-ratio: 16 / 9;
+		}
 
 		position: relative;
 		width: 100vw;
@@ -423,7 +427,7 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 	&__divider {
 		width: 100%;
 		height: 1px;
-		margin-block-end: var(--space-6);
+		//margin-block-end: var(--space-6);
 		background-color: currentColor;
 		will-change: width;
 	}
@@ -431,6 +435,10 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 	&__copy {
 		h2 {
 			margin-block: var(--space-6) var(--space-16);
+
+			@include respond(sm, down) {
+				font-size: 2rem;
+			}
 		}
 
 		p {
@@ -666,6 +674,39 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 
 .project-hero {
 	display: contents;
+
+	@include respond(sm, down) {
+		display: flex;
+		flex-direction: column;
+
+		// Promote the existing rows so mobile can place the media before metadata
+		// without duplicating metadata or its animation refs.
+		> .container {
+			display: contents;
+		}
+
+		> .container > .row {
+			flex: none;
+			width: 100%;
+			margin-inline: 0;
+		}
+
+		> .container > .row:first-child {
+			order: 1;
+		}
+
+		> .project-layer-prototype__media {
+			order: 2;
+		}
+
+		> .container > .row:nth-child(2) {
+			order: 4;
+		}
+
+		> .container > .row:nth-child(3) {
+			order: 3;
+		}
+	}
 }
 
 .project-nav {

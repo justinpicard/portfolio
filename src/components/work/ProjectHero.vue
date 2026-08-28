@@ -1,5 +1,5 @@
 <template>
-	<div class="project-hero">
+	<div class="project-hero mb-12 sm:mb-0">
 		<div class="container">
 			<div class="row">
 				<div class="col-12 lg:col-8 lg:offset-2">
@@ -32,7 +32,7 @@
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-12 mb-6">
+				<div class="col-12 my-12 sm:my-6">
 					<div
 						ref="metadata"
 						class="project-layer-prototype__copy project-layer-prototype__metadata d-flex flex-column gap-4 sm:mb-0 sm:flex-row justify-between"
@@ -43,28 +43,28 @@
 							data-project-metadata 
 							class="d-flex gap-1 flex-column"
 						>
-								<span class="eyebrow type-label opacity-50">{{ t('project.year') }}</span>
+								<span class="eyebrow opacity-50">{{ t('project.year') }}</span>
 								<span class="text-md">{{ project.year }}</span>
 						</div>
 						<div 
 							data-project-metadata
 							class="d-flex gap-1 flex-column"
 						>
-							<span class="eyebrow type-label opacity-50">{{ t('project.job') }}</span>
+							<span class="eyebrow opacity-50">{{ t('project.job') }}</span>
 							<span class="text-md">{{ project.job }}</span>
 						</div>
 						<div 
 							data-project-metadata
 							class="d-flex gap-1 flex-column"
 						>
-							<span class="eyebrow type-label opacity-50">{{ t('project.role') }}</span>
+							<span class="eyebrow opacity-50">{{ t('project.role') }}</span>
 							<span class="text-md">{{ project.role }}</span>
 						</div>
 						<div 
 							class="d-flex gap-1 flex-column"
 							data-project-metadata
 						>
-							<span class="eyebrow type-label opacity-50">{{ t('project.type') }}</span>
+							<span class="eyebrow opacity-50">{{ t('project.type') }}</span>
 							<span class="text-md">{{ project.type }}</span>
 						</div>
 						<div
@@ -72,7 +72,7 @@
 							class="d-flex gap-1 flex-column"
 							data-project-metadata
 						>
-							<span class="eyebrow type-label opacity-50">{{ t('project.live') }}</span>
+							<span class="eyebrow opacity-50">{{ t('project.live') }}</span>
 							<a
 								class="text-md text-primary"
 								:href="project.live"
