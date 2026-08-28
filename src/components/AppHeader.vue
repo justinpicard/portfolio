@@ -7,6 +7,9 @@
 		<SiteNav
 			:overlay-active="overlayActive"
 			:section-tracking-suspended="sectionTrackingSuspended"
+			:copy-visible="copyVisible"
+			:status-number="statusNumber"
+			:status-label="statusLabel"
 			@overlay-scroll-top="emit('overlay-scroll-top')"
 		/>
 	</header>
@@ -22,10 +25,16 @@ const props = withDefaults(defineProps<{
 	visible?: boolean
 	overlayActive?: boolean
 	sectionTrackingSuspended?: boolean
+	copyVisible?: boolean
+	statusNumber?: string
+	statusLabel?: string
 }>(), {
 	visible: true,
 	overlayActive: false,
-	sectionTrackingSuspended: false
+	sectionTrackingSuspended: false,
+	copyVisible: false,
+	statusNumber: undefined,
+	statusLabel: undefined
 })
 const emit = defineEmits<{
 	'overlay-scroll-top': []

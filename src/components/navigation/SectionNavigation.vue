@@ -1,20 +1,33 @@
 <template>
-	<nav
+	<component
+		:is="isStatic ? 'div' : 'nav'"
 		ref="root"
 		class="section-nav"
 		:class="{
 			'section-nav--open': isOpen,
 			'section-nav--closing': isClosing,
-			'section-nav--disabled': disabled
+			'section-nav--disabled': disabled,
+			'section-nav--static': isStatic
 		}"
-		:aria-label="t('sectionNavigation.label')"
+		:aria-label="isStatic ? undefined : t('sectionNavigation.label')"
+		:role="isStatic ? 'status' : undefined"
 		@focusout="handleFocusOut"
 		@keydown="handleKeydown"
 		@pointerenter="handlePointerEnter"
 		@pointerleave="handlePointerLeave"
 	>
 		<div ref="panel" class="section-nav__panel">
+			<div
+				v-if="isStatic"
+				class="section-nav__trigger section-nav__trigger--static"
+			>
+				<span class="section-nav__label-layer">
+					<span class="section-nav__number">{{ staticNumber }}</span>
+					<span>{{ staticLabel }}</span>
+				</span>
+			</div>
 			<button
+				v-else
 				ref="trigger"
 				class="section-nav__trigger"
 				type="button"
@@ -47,6 +60,7 @@
 			</button>
 
 			<ul
+				v-if="!isStatic"
 				:id="listId"
 				ref="list"
 				class="section-nav__list"
@@ -75,7 +89,7 @@
 				</li>
 			</ul>
 		</div>
-	</nav>
+	</component>
 </template>
 
 <script setup lang="ts">
@@ -127,10 +141,14 @@ const props = withDefaults(defineProps<{
 	disabled?: boolean
 	trackingSuspended?: boolean
 	fixedSectionId?: SectionNavigationId
+	staticNumber?: string
+	staticLabel?: string
 }>(), {
 	disabled: false,
 	trackingSuspended: false,
-	fixedSectionId: undefined
+	fixedSectionId: undefined,
+	staticNumber: undefined,
+	staticLabel: undefined
 })
 const root = ref<HTMLElement | null>(null)
 const panel = ref<HTMLElement | null>(null)
@@ -141,6 +159,7 @@ const incomingLabel = ref<HTMLElement | null>(null)
 const list = ref<HTMLUListElement | null>(null)
 const isOpen = ref(false)
 const isClosing = ref(false)
+const isStatic = computed(() => Boolean(props.staticNumber && props.staticLabel))
 const initialSectionId = props.fixedSectionId ?? 'intro'
 const activeSectionId = ref<SectionNavigationId>(initialSectionId)
 const displayedSectionId = ref<SectionNavigationId>(initialSectionId)
@@ -331,7 +350,7 @@ function animateNavigationItems(open: boolean) {
 }
 
 function openNavigation() {
-	if (props.disabled || isOpen.value) return
+	if (isStatic.value || props.disabled || isOpen.value) return
 
 	isClosing.value = false
 	isOpen.value = true
@@ -690,6 +709,8 @@ function setupActiveSectionDetection() {
 	activeSectionTrigger = undefined
 	sectionPositionTriggers.forEach(({ trigger }) => trigger.kill())
 	sectionPositionTriggers = []
+
+	if (isStatic.value) return
 
 	if (props.fixedSectionId) {
 		setActiveSection(props.fixedSectionId)

@@ -1,0 +1,36 @@
+@use "../abstracts" as *;
+
+.error-state {
+	display: flex;
+	align-items: center;
+	min-height: var(--viewport-height-dynamic);
+	padding-block: clamp(8rem, 18vh, 14rem);
+	overflow: hidden;
+	background-color: var(--color-primary);
+	background-image: url("/images/dot-pattern.png");
+	background-position: 50%;
+	color: var(--color-white);
+
+	&__eyebrow {
+		margin-block-end: var(--space-4);
+		color: var(--color-secondary);
+	}
+
+	&__title {
+		max-width: 10ch;
+		margin-block-end: var(--space-6);
+	}
+
+	&__message {
+		max-width: 42rem;
+		margin-block-end: 0;
+		//opacity: 0.72;
+	}
+
+	&__actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-3);
+		margin-block-start: var(--space-8);
+	}
+}

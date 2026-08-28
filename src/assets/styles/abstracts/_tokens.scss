@@ -120,7 +120,7 @@ $semantic-type-role-values: (
 	),
 	display-large: (
 		size: clamp(3rem, 10vw, 9rem),
-		line-height: var(--line-height-none),
+		line-height: 1.2,
 		letter-spacing: var(--letter-spacing-tight)
 	)
 );

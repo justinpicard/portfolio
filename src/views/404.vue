@@ -1,25 +1,30 @@
 <template>
-  <AppHeader />
-	<PageTitle :key="locale"/>
-  <div class="page-intro mt-3 type-body-small">
-    <div class="container">
-      <div class="row">
-        <div class="col-10">
-          {{ t('errors.notFoundMessage') }}<br>
-          {{ t('errors.backToHomepageBefore') }}
-          <router-link :to="homeRoute">{{ t('errors.homepage') }}</router-link>{{ t('errors.backToHomepageAfter') }}
-        </div>
-      </div>
-    </div>
-  </div>
+	<AppHeader
+		copy-visible
+		status-number="404"
+		:status-label="t('errors.notFoundHeading')"
+	/>
+	<ErrorState
+		eyebrow="404"
+		:title="t('errors.notFoundHeading')"
+		:message="t('errors.notFoundMessage')"
+	>
+		<template #actions>
+			<Button
+				:label="t('errors.backToHomepage')"
+				:to="homeRoute"
+			/>
+		</template>
+	</ErrorState>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useHead } from '@unhead/vue'
 import { useI18n } from 'vue-i18n'
-import PageTitle from '../components/PageHeader.vue'
 import AppHeader from '../components/AppHeader.vue'
+import Button from '../components/Button.vue'
+import ErrorState from '../components/ErrorState.vue'
 import { getLocaleParams, resolveLocale } from '../i18n'
 
 const { locale, t } = useI18n()

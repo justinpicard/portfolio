@@ -92,10 +92,13 @@ export default {
 	},
 	errors: {
 		notFoundTitle: '404 — Pagina niet gevonden',
-		notFoundMessage: 'Oeps! Het lijkt erop dat deze pagina niet (meer) bestaat 😰',
-		backToHomepageBefore: 'Ga terug naar de',
-		homepage: 'homepage',
-		backToHomepageAfter: '.'
+		notFoundHeading: 'Pagina niet gevonden',
+		notFoundMessage: 'De pagina die je zoekt bestaat niet of is mogelijk verplaatst.',
+		backToHomepage: 'Terug naar de homepage',
+		unexpectedEyebrow: 'Fout',
+		unexpectedTitle: 'Er ging iets mis',
+		unexpectedMessage: 'Het portfolio kon niet worden weergegeven. Probeer het opnieuw of ga terug naar de homepage.',
+		retry: 'Opnieuw proberen'
 	},
 	pages: {
 		resumeTitle: 'Mijn cv'

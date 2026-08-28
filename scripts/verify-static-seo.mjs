@@ -69,6 +69,9 @@ for (const page of pages) {
 
 const sitemap = await readFile('dist/sitemap.xml', 'utf8')
 const robots = await readFile('dist/robots.txt', 'utf8')
+const notFoundPage = await readFile('dist/404.html', 'utf8')
+const resumePage = await readFile('dist/resume/index.html', 'utf8')
+const htaccess = await readFile('dist/.htaccess', 'utf8')
 
 assert(sitemap.includes('<loc>https://justinpicard.nl/</loc>'), 'sitemap: missing English route')
 assert(
@@ -76,6 +79,24 @@ assert(
 	'sitemap: Dutch route availability is incorrect'
 )
 assert(!sitemap.includes('/en'), 'sitemap: unexpected English prefix')
+assert(!sitemap.includes('/404'), 'sitemap: 404 route must not be indexed')
+assert(
+	notFoundPage.includes('<meta name="robots" content="noindex,nofollow">'),
+	'dist/404.html: missing noindex directive'
+)
+assert(notFoundPage.includes('<h1'), 'dist/404.html: missing rendered error content')
+assert(
+	resumePage.includes('<meta name="robots" content="noindex,nofollow">'),
+	'dist/resume/index.html: missing noindex directive'
+)
+assert(
+	htaccess.includes('ErrorDocument 404 /404.html'),
+	'dist/.htaccess: missing custom 404 mapping'
+)
+assert(
+	MULTILINGUAL_ENABLED !== htaccess.includes('RewriteRule ^nl/?$ / [R=302,L]'),
+	'dist/.htaccess: disabled-locale redirect is incorrect'
+)
 assert(robots.includes('Allow: /'), 'robots.txt: crawling is not allowed')
 assert(
 	robots.includes('Sitemap: https://justinpicard.nl/sitemap.xml'),

@@ -55,7 +55,6 @@
 							ref="linkList"
 							class="site-footer__link-list d-flex flex-column"
 						>
-							<!--<li><a href="mailto:hallo@justinpicard.nl">hallo@justinpicard.nl</a></li>-->
 							<li>
 								<a
 									href="https://www.linkedin.com/in/picardjustin/"

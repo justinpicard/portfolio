@@ -92,10 +92,13 @@ export default {
 	},
 	errors: {
 		notFoundTitle: '404 — Page not found',
-		notFoundMessage: "Whoops! Looks like this page doesn't exist (anymore) 😰",
-		backToHomepageBefore: 'Go back to the',
-		homepage: 'homepage',
-		backToHomepageAfter: '.'
+		notFoundHeading: 'Page not found',
+		notFoundMessage: "The page you're looking for doesn't exist or may have moved.",
+		backToHomepage: 'Back to homepage',
+		unexpectedEyebrow: 'Error',
+		unexpectedTitle: 'Something went wrong',
+		unexpectedMessage: 'The portfolio could not be displayed. Please try again or return to the homepage.',
+		retry: 'Try again'
 	},
 	pages: {
 		resumeTitle: 'My resume'

@@ -1,5 +1,9 @@
 <template>
-	<div ref="root" class="main-nav position-relative">
+	<div
+		ref="root"
+		class="main-nav position-relative"
+		:class="{ 'main-nav--copy-visible': copyVisible }"
+	>
 		<div class="site-nav__identity position-fixed top-0 left-0 mt-4 sm:mt-8">
 			<router-link
 				:to="{ name: 'home', params: getLocaleParams(currentLocale) }"
@@ -29,8 +33,11 @@
 			</span>
 		</div>
 		<div
-			class="site-lang-switcher position-fixed top-0 right-0 mt-4 sm:mt-8"
-			:class="{ 'site-lang-switcher--section-nav': !MULTILINGUAL_ENABLED }"
+			class="site-nav__utility position-fixed top-0 right-0 mt-4 sm:mt-8"
+			:class="{
+				'site-nav__utility--section-nav': !MULTILINGUAL_ENABLED,
+				'site-nav__utility--error': Boolean(statusNumber && statusLabel)
+			}"
 		>
 			<nav
 				v-if="MULTILINGUAL_ENABLED"
@@ -69,6 +76,8 @@
 				v-else
 				:disabled="overlayActive"
 				:tracking-suspended="sectionTrackingSuspended"
+				:static-number="statusNumber"
+				:static-label="statusLabel"
 			/>
 		</div>
 	</div>
@@ -102,9 +111,15 @@ const { currentLocale, getLocalizedRoute } = useLocalizedRoute()
 const props = withDefaults(defineProps<{
 	overlayActive?: boolean
 	sectionTrackingSuspended?: boolean
+	copyVisible?: boolean
+	statusNumber?: string
+	statusLabel?: string
 }>(), {
 	overlayActive: false,
-	sectionTrackingSuspended: false
+	sectionTrackingSuspended: false,
+	copyVisible: false,
+	statusNumber: undefined,
+	statusLabel: undefined
 })
 const emit = defineEmits<{
 	'overlay-scroll-top': []
@@ -190,6 +205,14 @@ function setupHeaderCopyReveal() {
 
 	revealContext = gsap.context(() => {
 		const roles = gsap.utils.toArray<HTMLElement>('.role', root.value)
+		if (props.copyVisible) {
+			gsap.set([name.value, ...roles], {
+				autoAlpha: 1,
+				yPercent: 0,
+				visibility: 'visible'
+			})
+			return
+		}
 
 		nameSplit = new SplitText(name.value, {
 			type: 'chars',

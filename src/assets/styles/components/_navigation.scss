@@ -101,7 +101,7 @@
 
 	.site-title,
 	.site-role,
-	.site-lang-switcher {
+	.site-nav__utility {
 		height: 2.5rem;
 		display: flex;
 		//align-items: center;
@@ -151,6 +151,10 @@
 		visibility: hidden;
 	}
 
+	&.main-nav--copy-visible .site-nav__reveal-copy {
+		visibility: visible;
+	}
+
 	.site-nav__role-char-mask {
 		display: inline-block;
 		overflow: hidden;
@@ -184,8 +188,14 @@
 		}
 	}
 
-	.site-lang-switcher {
+	.site-nav__utility {
 		margin-inline-end: var(--page-gutter);
+
+		&--error {
+			@include respond(sm, down) {
+				display: none;
+			}
+		}
 
 		&--section-nav {
 			height: auto;
@@ -474,6 +484,13 @@
 		}
 	}
 
+	&__trigger--static {
+		position: relative;
+		inset: auto;
+		cursor: default;
+		pointer-events: none;
+	}
+
 	&__label-window {
 		position: relative;
 		display: block;
@@ -523,6 +540,16 @@
 
 	&--disabled {
 		pointer-events: none;
+	}
+
+	&--static {
+		visibility: visible;
+		pointer-events: none;
+
+		.section-nav__panel {
+			width: max-content;
+			will-change: auto;
+		}
 	}
 }
 

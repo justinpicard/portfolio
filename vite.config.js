@@ -6,6 +6,7 @@ import {
 	prerenderRoutes,
 	siteConfig
 } from './src/config/site'
+import { MULTILINGUAL_ENABLED } from './src/config/features.js'
 
 function createSitemap() {
 	const urls = indexableRoutePaths.flatMap(routePaths => (
@@ -58,6 +59,20 @@ function staticSeoFiles() {
 					''
 				].join('\n')
 			})
+			this.emitFile({
+				type: 'asset',
+				fileName: '.htaccess',
+				source: [
+					'ErrorDocument 404 /404.html',
+					'RewriteEngine On',
+					'RewriteRule ^home/?$ / [R=302,L]',
+					...(MULTILINGUAL_ENABLED ? [] : [
+						'RewriteRule ^nl/?$ / [R=302,L]',
+						'RewriteRule ^nl/(.*)$ /$1 [R=302,L]'
+					]),
+					''
+				].join('\n')
+			})
 		}
 	}
 }
@@ -78,6 +93,11 @@ export default defineConfig({
   ssgOptions: {
     entry: 'src/main.js',
     dirStyle: 'nested',
-    includedRoutes: () => [...prerenderRoutes]
+    includedRoutes: () => [...prerenderRoutes],
+    // Most static hosts recognize this conventional file and serve it with a
+    // real 404 status while Vue Router handles subsequent client navigation.
+    htmlFileName: filename => filename === '404/index.html'
+      ? '404.html'
+      : undefined
   }
 })
