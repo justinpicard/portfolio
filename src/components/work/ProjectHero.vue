@@ -35,7 +35,7 @@
 				<div class="col-12 mb-6">
 					<div
 						ref="metadata"
-						class="project-layer-prototype__copy project-layer-prototype__metadata d-flex flex-row justify-between"
+						class="project-layer-prototype__copy project-layer-prototype__metadata d-flex flex-column gap-4 sm:mb-0 sm:flex-row justify-between"
 					>
 						<div 
 							ref="year" 
@@ -44,28 +44,28 @@
 							class="d-flex gap-1 flex-column"
 						>
 								<span class="eyebrow type-label opacity-50">{{ t('project.year') }}</span>
-								<span class="type-body-small">{{ project.year }}</span>
+								<span class="text-md">{{ project.year }}</span>
 						</div>
 						<div 
 							data-project-metadata
 							class="d-flex gap-1 flex-column"
 						>
 							<span class="eyebrow type-label opacity-50">{{ t('project.job') }}</span>
-							<span class="type-body-small">{{ project.job }}</span>
+							<span class="text-md">{{ project.job }}</span>
 						</div>
 						<div 
 							data-project-metadata
 							class="d-flex gap-1 flex-column"
 						>
 							<span class="eyebrow type-label opacity-50">{{ t('project.role') }}</span>
-							<span class="type-body-small">{{ project.role }}</span>
+							<span class="text-md">{{ project.role }}</span>
 						</div>
 						<div 
 							class="d-flex gap-1 flex-column"
 							data-project-metadata
 						>
 							<span class="eyebrow type-label opacity-50">{{ t('project.type') }}</span>
-							<span class="type-body-small">{{ project.type }}</span>
+							<span class="text-md">{{ project.type }}</span>
 						</div>
 						<div
 							v-if="project.live"
@@ -74,7 +74,7 @@
 						>
 							<span class="eyebrow type-label opacity-50">{{ t('project.live') }}</span>
 							<a
-								class="type-body-small text-primary"
+								class="text-md text-primary"
 								:href="project.live"
 								target="_blank"
 								rel="noopener noreferrer"

@@ -18,21 +18,27 @@
 					:index="projectIndex - 1"
 					:project="projects[projectIndex - 1]"
 					:active="activeProjectIndex === projectIndex - 1"
-					:interactive="interactiveProjectIndex === projectIndex - 1"
+					:interactive="overlayLifecycle === 'closed'
+						&& interactiveProjectIndex === projectIndex - 1"
 					:transition-hidden="hiddenProjectIndex === projectIndex - 1"
 					@open="openProject"
 				/>
 			</div>
 		</div>
 		<ProjectLayerPrototype
-			v-if="isProjectOpen && layerOrigin && openSourceCard"
+			v-if="isProjectLayerMounted && layerOrigin && openSourceCard"
 			ref="projectLayer"
 			:projects="projects"
-			:project-index="activeProjectIndex"
+			:project-index="selectedProjectIndex"
 			:origin="layerOrigin"
 			:source-card="openSourceCard"
 			@close="closeProject"
-			@change-project="changeProject"
+			@request-project-change="handleProjectChangeRequest"
+			@project-change-commit="commitProjectChange"
+			@opened="handleProjectOpened"
+			@switch-complete="debugProjectClose('switch-complete')"
+			@content-hidden="debugProjectClose('outgoing content fade complete')"
+			@close-complete="debugProjectClose('animateClose resolved')"
 			@source-ready="hideActiveProjectCard"
 			@target-ready="showActiveProjectCard"
 		/>
@@ -44,9 +50,11 @@ import { nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePortfolioContent } from '../../composables/usePortfolioContent'
 import { isProjectPublished } from '../../content'
+import type { WorkCloseTarget, WorkOverlayLifecycle } from '../../config/workOverlay'
 import { gsap, prefersReducedMotion, ScrollTrigger, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
 import {
 	getPortfolioScrollY,
+	lockPortfolioScrollSmoothing,
 	setPortfolioScrollY
 } from '../../utils/animations/portfolioScrollSmoother'
 import ProjectCard from '../work/ProjectCard.vue'
@@ -55,6 +63,9 @@ import ProjectLayerPrototype from '../work/ProjectLayerPrototype.vue'
 const { t } = useI18n()
 const { projects } = usePortfolioContent()
 const projectCount = projects.value.length
+const emit = defineEmits<{
+	'overlay-lifecycle-change': [lifecycle: WorkOverlayLifecycle]
+}>()
 
 const root = ref<HTMLElement | null>(null)
 const stage = ref<HTMLElement | null>(null)
@@ -62,11 +73,13 @@ const exhibition = ref<HTMLElement | null>(null)
 const titleRef = ref<HTMLHeadingElement | null>(null)
 const projectLayer = ref<InstanceType<typeof ProjectLayerPrototype> | null>(null)
 const activeProjectIndex = ref(0)
+const selectedProjectIndex = ref(0)
 const interactiveProjectIndex = ref<number | null>(null)
-const isProjectOpen = ref(false)
+const isProjectLayerMounted = ref(false)
 const hiddenProjectIndex = ref<number | null>(null)
 const layerOrigin = ref<LayerOrigin | null>(null)
 const openSourceCard = shallowRef<HTMLElement | null>(null)
+const overlayLifecycle = ref<WorkOverlayLifecycle>('closed')
 
 let ctx: gsap.Context | undefined
 let splitTitle: SplitText | undefined
@@ -82,14 +95,19 @@ let viewportHeight = 0
 let exhibitionActiveRadius = 140
 let reducedMotionCardCenters: number[] = []
 let reducedMotionActivationEnabled = false
-let projectOpenScrollY: number | undefined
-let projectOpenIndex: number | undefined
+let isRestoringProjectClose = false
+let openingHomepageScrollY: number | undefined
+let openingProjectIndex: number | undefined
+let previousDocumentOverflow = ''
+let unlockHomepageScrollSmoothing: (() => void) | undefined
 const TITLE_REVEAL_SCROLL_DISTANCE = 1.6
 const DESKTOP_LAYOUT_QUERY = '(min-width: 64rem)'
 const COMPACT_LAYOUT_QUERY = '(max-width: 63.999rem)'
 
 const DEBUG_EXHIBITION_ACTIVATION = import.meta.env.DEV
 	&& new URLSearchParams(window.location.search).has('debugExhibitionActivation')
+const DEBUG_PROJECT_CLOSE = import.meta.env.DEV
+	&& new URLSearchParams(window.location.search).has('debugProjectClose')
 
 type LayerOrigin = {
 	top: number
@@ -111,6 +129,17 @@ function getElementOrigin(element: HTMLElement): LayerOrigin {
 	}
 }
 
+function debugProjectClose(message: string, detail?: unknown) {
+	if (!DEBUG_PROJECT_CLOSE) return
+
+	if (detail === undefined) {
+		console.debug(`[Project close] ${message}`)
+		return
+	}
+
+	console.debug(`[Project close] ${message}`, detail)
+}
+
 function openProject(payload: { projectIndex: number; sourceElement: HTMLElement }) {
 	if (
 		interactiveProjectIndex.value !== payload.projectIndex
@@ -119,11 +148,140 @@ function openProject(payload: { projectIndex: number; sourceElement: HTMLElement
 
 	layerOrigin.value = getElementOrigin(payload.sourceElement)
 	openSourceCard.value = payload.sourceElement
-	projectOpenScrollY = getPortfolioScrollY()
-	projectOpenIndex = payload.projectIndex
 	activeProjectIndex.value = payload.projectIndex
+	selectedProjectIndex.value = payload.projectIndex
 	hiddenProjectIndex.value = null
-	isProjectOpen.value = true
+	openingHomepageScrollY = getPortfolioScrollY()
+	openingProjectIndex = payload.projectIndex
+	debugProjectClose('homepage scroll captured at open', {
+		projectIndex: payload.projectIndex,
+		homepageScrollY: openingHomepageScrollY,
+		viewport: {
+			width: window.innerWidth,
+			height: window.innerHeight,
+			visualHeight: window.visualViewport?.height
+		},
+		sourceRect: layerOrigin.value
+	})
+	suspendExhibitionTracking()
+	lockHomepageScroll()
+	setOverlayLifecycle('opening')
+	isProjectLayerMounted.value = true
+}
+
+function lockHomepageScroll() {
+	if (unlockHomepageScrollSmoothing) return
+
+	previousDocumentOverflow = document.documentElement.style.overflow
+	unlockHomepageScrollSmoothing = lockPortfolioScrollSmoothing()
+	document.documentElement.style.overflow = 'hidden'
+	debugProjectClose('homepage scroll locked', {
+		homepageScrollY: getPortfolioScrollY(),
+		documentOverflow: document.documentElement.style.overflow
+	})
+}
+
+function unlockHomepageScroll() {
+	if (!unlockHomepageScrollSmoothing) return
+
+	document.documentElement.style.overflow = previousDocumentOverflow
+	unlockHomepageScrollSmoothing()
+	unlockHomepageScrollSmoothing = undefined
+	debugProjectClose('scroll unlocked', {
+		homepageScrollY: getPortfolioScrollY(),
+		documentOverflow: document.documentElement.style.overflow
+	})
+}
+
+function suspendExhibitionTracking() {
+	if (!exhibitionTrigger) return
+
+	const hadActiveSnap = Boolean(exhibitionTrigger.getTween(true))
+	// Keep the current pin and card transforms, but stop the delayed/active snap
+	// from owning the window scroll while the fixed project layer is active.
+	exhibitionTrigger.disable(false, false)
+	debugProjectClose('Work ScrollTrigger suspended', { hadActiveSnap })
+}
+
+function resumeExhibitionTracking() {
+	if (!exhibitionTrigger) return
+
+	exhibitionTrigger.enable(false, false)
+	debugProjectClose('Work ScrollTrigger resumed')
+}
+
+function synchronizeExhibitionScroll(scrollY: number) {
+	resumeExhibitionTracking()
+	setPortfolioScrollY(scrollY)
+	ScrollTrigger.update()
+	// update() applies the timeline synchronously. Suspend immediately afterward
+	// so its snap delay cannot reclaim the homepage scroll during the overlay.
+	suspendExhibitionTracking()
+}
+
+function setOverlayLifecycle(lifecycle: WorkOverlayLifecycle) {
+	if (overlayLifecycle.value === lifecycle) return
+
+	overlayLifecycle.value = lifecycle
+	emit('overlay-lifecycle-change', lifecycle)
+}
+
+function handleProjectOpened() {
+	if (overlayLifecycle.value === 'opening') setOverlayLifecycle('open')
+	validateFrozenHomepageScroll('open')
+}
+
+async function handleProjectChangeRequest(nextIndex: number) {
+	const layer = projectLayer.value
+	if (
+		overlayLifecycle.value !== 'open'
+		|| !layer
+		|| nextIndex < 0
+		|| nextIndex >= projectCount
+		|| nextIndex === selectedProjectIndex.value
+		|| !isProjectPublished(projects.value[nextIndex])
+	) return
+
+	debugProjectClose('homepage scroll before project switch', {
+		homepageScrollY: getPortfolioScrollY(),
+		openingHomepageScrollY
+	})
+	validateFrozenHomepageScroll('switching')
+	setOverlayLifecycle('switching')
+	try {
+		await layer.navigateToProject(nextIndex, true)
+	} catch (error) {
+		if (DEBUG_PROJECT_CLOSE) {
+			console.error('[Project close] caught exception', {
+				transaction: 'project switch coordinator',
+				error
+			})
+		}
+	} finally {
+		if ((overlayLifecycle.value as WorkOverlayLifecycle) === 'switching') {
+			setOverlayLifecycle('open')
+		}
+		debugProjectClose('homepage scroll after project switch', {
+			homepageScrollY: getPortfolioScrollY(),
+			openingHomepageScrollY
+		})
+		validateFrozenHomepageScroll('open')
+	}
+}
+
+function validateFrozenHomepageScroll(phase: 'open' | 'switching') {
+	if (openingHomepageScrollY === undefined) return
+
+	const homepageScrollY = getPortfolioScrollY()
+	if (Math.abs(homepageScrollY - openingHomepageScrollY) <= 0.5) return
+
+	if (DEBUG_PROJECT_CLOSE) {
+		console.warn('[Project close] homepage scroll changed while overlay owns scroll', {
+			phase,
+			openingHomepageScrollY,
+			homepageScrollY
+		})
+	}
 }
 
 function hideActiveProjectCard() {
@@ -134,36 +292,109 @@ function showActiveProjectCard() {
 	hiddenProjectIndex.value = null
 }
 
-async function closeProject() {
-	const closingProjectIndex = activeProjectIndex.value
-	const sourceElement = projectCards[closingProjectIndex]
-	if (!sourceElement || !projectLayer.value) return
+async function closeProject(source: 'button' | 'escape') {
+	const selectedClosingProjectIndex = selectedProjectIndex.value
+	const closeTargetProjectIndex = selectedClosingProjectIndex
+	const layer = projectLayer.value
+	let closeCompleted = false
+	let resolvedCloseTarget: WorkCloseTarget | null = null
+	debugProjectClose('close intent received by coordinator', {
+		source,
+		lifecycle: overlayLifecycle.value,
+		selectedClosingProjectIndex,
+		closeTargetProjectIndex,
+		hasProjectLayer: Boolean(layer),
+		isProjectLayerMounted: isProjectLayerMounted.value
+	})
 
-	syncExhibitionProject(closingProjectIndex)
-	await projectLayer.value.animateClose(sourceElement)
-	isProjectOpen.value = false
-	hiddenProjectIndex.value = null
-	layerOrigin.value = null
-	openSourceCard.value = null
-	await nextTick()
-
-	const closingProjectScrollY = projectOpenIndex === closingProjectIndex
-		? projectOpenScrollY
-		: getExhibitionProjectScrollY(closingProjectIndex) ?? projectOpenScrollY
-
-	if (closingProjectScrollY !== undefined) {
-		setPortfolioScrollY(closingProjectScrollY)
-		ScrollTrigger.update()
+	if (!layer || overlayLifecycle.value !== 'open') {
+		if (DEBUG_PROJECT_CLOSE) {
+			console.warn('[Project close] close rejected by lifecycle', {
+				source,
+				selectedClosingProjectIndex,
+				closeTargetProjectIndex,
+				hasProjectLayer: Boolean(layer),
+				lifecycle: overlayLifecycle.value
+			})
+		}
+		return
 	}
-	projectOpenScrollY = undefined
-	projectOpenIndex = undefined
 
-	// Keep the visual state exact after ScrollTrigger resumes from the overlay.
-	syncExhibitionProject(closingProjectIndex)
-	sourceElement.focus({ preventScroll: true })
+	debugProjectClose('final selected project on close', {
+		selectedClosingProjectIndex,
+		closeTargetProjectIndex
+	})
+	setOverlayLifecycle('closing')
+	debugProjectClose('lifecycle → closing')
+	debugProjectClose('animateClose start')
+
+	try {
+		debugProjectClose('hideCloseContent start')
+		const contentHidden = await layer.hideCloseContent()
+		if (!contentHidden) {
+			debugProjectClose('hideCloseContent interrupted')
+			return
+		}
+
+		resolvedCloseTarget = await reconcileAndResolveCloseTarget(closeTargetProjectIndex)
+		if (!resolvedCloseTarget) return
+
+		debugProjectClose('finishClose start', { rect: resolvedCloseTarget.rect })
+		closeCompleted = await layer.finishClose(resolvedCloseTarget)
+	} catch (error) {
+		if (DEBUG_PROJECT_CLOSE) {
+			console.error('[Project close] caught exception', {
+				transaction: 'project close',
+				error
+			})
+		}
+	} finally {
+		if (!closeCompleted) {
+			await restoreOpeningWorkState()
+			layer.cancelClose()
+			setOverlayLifecycle('open')
+			return
+		}
+
+		// ScrollTrigger normally establishes the centred card. Use the selected
+		// project only when the resulting geometry cannot identify one.
+		if (interactiveProjectIndex.value === null) {
+			activeProjectIndex.value = closeTargetProjectIndex
+			interactiveProjectIndex.value = closeTargetProjectIndex
+		}
+
+		isProjectLayerMounted.value = false
+		hiddenProjectIndex.value = null
+		layerOrigin.value = null
+		openSourceCard.value = null
+
+		await nextTick()
+		debugProjectClose('overlay unmounted')
+		unlockHomepageScroll()
+		resumeExhibitionTracking()
+		if (resolvedCloseTarget) {
+			setPortfolioScrollY(resolvedCloseTarget.homepageScrollY)
+			ScrollTrigger.update()
+			debugProjectClose('final homepage scroll restored', {
+				expectedScrollY: resolvedCloseTarget.homepageScrollY,
+				actualScrollY: getPortfolioScrollY()
+			})
+		}
+		setOverlayLifecycle('closed')
+		debugProjectClose('lifecycle → closed')
+		openingHomepageScrollY = undefined
+		openingProjectIndex = undefined
+		await nextTick()
+		projectCards[closeTargetProjectIndex]?.focus({ preventScroll: true })
+	}
 }
 
 function getExhibitionProjectScrollY(projectIndex: number) {
+	if (reducedMotionActivationEnabled) {
+		const cardCenter = reducedMotionCardCenters[projectIndex]
+		return cardCenter === undefined ? undefined : cardCenter - viewportHeight / 2
+	}
+
 	if (!exhibitionTimeline || !exhibitionTrigger) return undefined
 
 	const labelPosition = exhibitionTimeline.labels[`project-${projectIndex}`]
@@ -175,29 +406,141 @@ function getExhibitionProjectScrollY(projectIndex: number) {
 		+ (exhibitionTrigger.end - exhibitionTrigger.start) * progress
 }
 
-function syncExhibitionProject(projectIndex: number) {
-	if (
-		projectIndex < 0
-		|| projectIndex >= projectCount
-		|| !exhibitionTimeline
-	) return
-
-	const labelPosition = exhibitionTimeline.labels[`project-${projectIndex}`]
-	const progress = labelPosition / exhibitionTimeline.duration()
-
-	activeProjectIndex.value = projectIndex
-	interactiveProjectIndex.value = projectIndex
-
-	// Align the exhibition with the selected case without moving the page.
-	exhibitionTimeline.progress(progress)
+function waitForAnimationFrame() {
+	return new Promise<void>((resolve) => {
+		requestAnimationFrame(() => resolve())
+	})
 }
 
-function changeProject(nextIndex: number) {
+async function restoreOpeningWorkState() {
+	if (openingHomepageScrollY === undefined) return
+
+	isRestoringProjectClose = true
+	try {
+		hiddenProjectIndex.value = openingProjectIndex ?? null
+		synchronizeExhibitionScroll(openingHomepageScrollY)
+		await waitForAnimationFrame()
+
+		if (exhibitionTrigger) {
+			updateVisualProjectActivation(projectCards)
+		} else if (reducedMotionActivationEnabled) {
+			updateReducedMotionActivation()
+		}
+	} finally {
+		isRestoringProjectClose = false
+	}
+}
+
+async function reconcileAndResolveCloseTarget(projectIndex: number) {
+	const targetScrollY = projectIndex === openingProjectIndex
+		? openingHomepageScrollY
+		: getExhibitionProjectScrollY(projectIndex)
+	if (targetScrollY === undefined) {
+		if (DEBUG_PROJECT_CLOSE) {
+			console.warn('[Project close] Work scroll target could not be resolved', {
+				projectIndex
+			})
+		}
+		return null
+	}
+
+	isRestoringProjectClose = true
+	try {
+		debugProjectClose('Work scroll reconciliation start', {
+			projectIndex,
+			targetScrollY
+		})
+		debugProjectClose('hidden close reconciliation target scroll', {
+			projectIndex,
+			targetScrollY
+		})
+		hiddenProjectIndex.value = projectIndex
+		synchronizeExhibitionScroll(targetScrollY)
+		// Work card transforms are ScrollTrigger-driven. One centralized frame wait
+		// lets those transforms settle before capturing the collapse geometry.
+		await waitForAnimationFrame()
+
+		if (exhibitionTrigger) {
+			updateVisualProjectActivation(projectCards)
+		} else if (reducedMotionActivationEnabled) {
+			updateReducedMotionActivation()
+		}
+
+		debugProjectClose('actual scroll after reconciliation', {
+			homepageScrollY: getPortfolioScrollY()
+		})
+
+		const targetCard = projectCards[projectIndex]
+		const targetRect = targetCard?.getBoundingClientRect()
+		const hasValidTarget = Boolean(
+			targetCard?.isConnected
+			&& targetRect
+			&& targetRect.width > 0
+			&& targetRect.height > 0
+			&& Number.isFinite(targetRect.left)
+			&& Number.isFinite(targetRect.top)
+		)
+
+		if (!hasValidTarget || !targetCard || !targetRect) {
+			if (DEBUG_PROJECT_CLOSE) {
+				console.warn('[Project close] missing target/source card', {
+					projectIndex,
+					interactiveProjectIndex: interactiveProjectIndex.value
+				})
+			}
+			return null
+		}
+
+		debugProjectClose('target card rect after reconciliation', {
+			projectIndex,
+			top: targetRect.top,
+			left: targetRect.left,
+			width: targetRect.width,
+			height: targetRect.height
+		})
+		debugProjectClose('source card resolved', { projectIndex })
+		if (interactiveProjectIndex.value === null) {
+			activeProjectIndex.value = projectIndex
+			interactiveProjectIndex.value = projectIndex
+		}
+		debugProjectClose('Work scroll reconciliation complete', {
+			projectIndex,
+			interactiveProjectIndex: interactiveProjectIndex.value
+		})
+
+		return {
+			card: targetCard,
+			homepageScrollY: targetScrollY,
+			rect: {
+				top: targetRect.top,
+				left: targetRect.left,
+				right: targetRect.right,
+				bottom: targetRect.bottom,
+				width: targetRect.width,
+				height: targetRect.height
+			},
+			borderRadius: window.getComputedStyle(targetCard).borderRadius
+		} satisfies WorkCloseTarget
+	} finally {
+		isRestoringProjectClose = false
+	}
+}
+
+function commitProjectChange(nextIndex: number) {
 	if (nextIndex < 0 || nextIndex >= projectCount) return
 
-	activeProjectIndex.value = nextIndex
-	interactiveProjectIndex.value = nextIndex
-	hiddenProjectIndex.value = nextIndex
+	debugProjectClose('canonical project commit', {
+		fromIndex: selectedProjectIndex.value,
+		toIndex: nextIndex,
+		homepageScrollY: getPortfolioScrollY(),
+		openingHomepageScrollY
+	})
+	selectedProjectIndex.value = nextIndex
+	validateFrozenHomepageScroll('switching')
+}
+
+function scrollProjectToTop() {
+	projectLayer.value?.scrollToTop()
 }
 
 function wrapSplitElements(elements: Element[], className: string, tagName: 'span' = 'span') {
@@ -314,7 +657,7 @@ function getGsapNumber(element: HTMLElement, property: 'x' | 'xPercent') {
 function updateVisualProjectActivation(cards: HTMLElement[]) {
 	// The open project layer owns the active index. Ignore delayed scrub/snap
 	// updates from the covered exhibition after synchronizing another project.
-	if (isProjectOpen.value) return
+	if (isProjectLayerMounted.value && !isRestoringProjectClose) return
 
 	if (cards.length === 0) {
 		interactiveProjectIndex.value = null
@@ -661,6 +1004,8 @@ watch(
 )
 
 onUnmounted(() => {
+	setOverlayLifecycle('closed')
+	unlockHomepageScroll()
 	titleRefreshId += 1
 	window.removeEventListener('scroll', updateReducedMotionActivation)
 	window.removeEventListener('resize', refreshReducedMotionMeasurements)
@@ -673,5 +1018,9 @@ onUnmounted(() => {
 	projectCards = []
 	cleanupTitleReveal()
 	ctx?.revert()
+})
+
+defineExpose({
+	scrollProjectToTop
 })
 </script>

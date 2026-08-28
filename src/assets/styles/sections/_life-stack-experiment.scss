@@ -3,7 +3,7 @@
 .home-life-section {
 	--home-life-flow-space: clamp(5em, 12vh, 12em);
 
-	min-height: 100vh;
+	min-height: var(--viewport-height-dynamic);
 	padding-block: var(--home-life-flow-space);
 	overflow: clip;
 
@@ -74,14 +74,14 @@
 	}
 
 	@include respond(lg) {
-		margin-block-start: -100svh;
+		margin-block-start: calc(var(--viewport-height-dynamic) * -1);
 		padding-block: 0;
 
 		&__layout {
 			grid-template-columns: minmax(0, 5fr) minmax(28rem, 7fr);
 			align-items: center;
 			gap: clamp(3rem, 8vw, 9rem);
-			height: 100vh;
+			height: var(--viewport-height-dynamic);
 		}
 
 		&__intro {
@@ -141,7 +141,7 @@
 				position: relative;
 				display: block;
 				height: calc(
-					100svh
+					var(--viewport-height-dynamic)
 					+ (var(--home-life-scroll-steps) * 75svh)
 				);
 			}
@@ -149,7 +149,7 @@
 			&__stack {
 				position: sticky;
 				top: 0;
-				height: 100svh;
+				height: var(--viewport-height-dynamic);
 				width: 100vw;
 				margin-inline: calc(50% - 50vw);
 				overflow: hidden;
@@ -172,6 +172,24 @@
 
 				&--square {
 					width: min(100vw, 56svh, 25rem);
+				}
+			}
+
+			@include respond(md, down) {
+				// Keep the copy within the same native scroll range as the sticky photo stage.
+				&__intro {
+					position: sticky;
+					top: 0;
+					z-index: 0;
+					display: flex;
+					flex-direction: column;
+					justify-content: center;
+					height: var(--viewport-height-dynamic);
+					padding-block: 0;
+				}
+
+				&__stack-track {
+					z-index: 1;
 				}
 			}
 		}

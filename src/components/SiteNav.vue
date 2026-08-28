@@ -68,6 +68,7 @@
 			<SectionNavigation
 				v-else
 				:disabled="overlayActive"
+				:tracking-suspended="sectionTrackingSuspended"
 			/>
 		</div>
 	</div>
@@ -100,8 +101,10 @@ const route = useRoute()
 const { currentLocale, getLocalizedRoute } = useLocalizedRoute()
 const props = withDefaults(defineProps<{
 	overlayActive?: boolean
+	sectionTrackingSuspended?: boolean
 }>(), {
-	overlayActive: false
+	overlayActive: false,
+	sectionTrackingSuspended: false
 })
 const emit = defineEmits<{
 	'overlay-scroll-top': []

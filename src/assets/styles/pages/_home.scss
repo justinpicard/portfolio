@@ -47,8 +47,8 @@ main:has(.page-surface) {
 	top: 0;
 	z-index: 900;
 	width: 100%;
-	height: 100svh;
-	margin-block-end: -100svh;
+	height: var(--viewport-height-dynamic);
+	margin-block-end: calc(var(--viewport-height-dynamic) * -1);
 	pointer-events: none;
 }
 

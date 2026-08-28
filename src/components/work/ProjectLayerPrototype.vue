@@ -18,7 +18,8 @@
 				<ProjectHeader
 					ref="projectHeader"
 					:title="displayedProject.title"
-					@close="requestClose"
+					:project-index="displayedIndex"
+					@close="requestClose('button')"
 				/>
 
 				<div ref="content" class="project-layer-prototype__content">
@@ -48,24 +49,28 @@
 						</div>
 						<div class="project-nav__title">
 							<div class="container">
-								<div class="col-12 lg:col-8 lg:offset-2">
-									<div class="project-nav-title__inner d-flex flex-1 justify-center">
-										<h2>{{ t('project.wantToSeeMore') }}</h2>
+								<div class="row project-nav__row">
+									<div class="col-12 lg:col-8 lg:offset-2">
+										<div class="project-nav-title__inner d-flex flex-1 justify-center">
+											<h2>{{ t('project.wantToSeeMore') }}</h2>
+										</div>
 									</div>
 								</div>
 							</div>
 						</div>
 
 						<div class="container">
-							<div class="col-12 lg:col-8 lg:offset-2">
-								<ProjectStackNavigator
-									v-if="!isOpening"
-									ref="projectNavigator"
-									:projects="projects"
-									:current-project-index="displayedIndex"
-									:disabled="isOpening || isTransitioning || isClosing"
-									@select="navigateToProject($event, true)"
-								/>
+							<div class="row project-nav__row">
+								<div class="col-12 lg:col-8 lg:offset-2">
+									<ProjectStackNavigator
+										v-if="!isOpening"
+										ref="projectNavigator"
+										:projects="projects"
+										:current-project-index="displayedIndex"
+										:disabled="isOpening || isTransitioning || isClosing"
+										@select="emit('request-project-change', $event)"
+									/>
+								</div>
 							</div>
 						</div>
 					</section>
@@ -102,7 +107,7 @@ import {
 	animationEases,
 	animationStaggers
 } from '../../utils/animations/presets'
-import { lockPortfolioScrollSmoothing } from '../../utils/animations/portfolioScrollSmoother'
+import type { WorkCloseTarget } from '../../config/workOverlay'
 import { isProjectPublished, type Project } from '../../content'
 import ProjectCaseContent from './ProjectCaseContent.vue'
 import ProjectHeader from './ProjectHeader.vue'
@@ -156,6 +161,7 @@ type SharedElementTiming = {
 }
 
 type OpenTimingVariant = 'a' | 'b' | 'c'
+type CloseSource = 'button' | 'escape'
 
 const props = defineProps<{
 	projects: Project[]
@@ -165,8 +171,13 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-	close: []
-	'change-project': [nextIndex: number]
+	close: [source: CloseSource]
+	'request-project-change': [nextIndex: number]
+	'project-change-commit': [nextIndex: number]
+	opened: []
+	'switch-complete': []
+	'content-hidden': []
+	'close-complete': []
 	'source-ready': []
 	'target-ready': []
 }>()
@@ -215,6 +226,8 @@ const DEBUG_SHARED_GEOMETRY = import.meta.env.DEV
 	&& new URLSearchParams(window.location.search).has('debugSharedGeometry')
 const DEBUG_SURFACE_CLONE_SYNC = import.meta.env.DEV
 	&& new URLSearchParams(window.location.search).has('debugSurfaceCloneSync')
+const DEBUG_PROJECT_CLOSE = import.meta.env.DEV
+	&& new URLSearchParams(window.location.search).has('debugProjectClose')
 const SLOW_SHARED_TRANSITION = import.meta.env.DEV
 	&& new URLSearchParams(window.location.search).has('slowSharedTransition')
 const STATIC_SHARED_TRANSITION = import.meta.env.DEV
@@ -300,9 +313,7 @@ let cardRestoreTargets: HTMLElement[] = []
 let contextTransitionRunId = 0
 let isBottomScrimVisible: boolean | undefined
 let sharedRepresentations: SharedElementRepresentation[] = []
-let previousDocumentOverflow = ''
-let unlockScrollSmoothing: (() => void) | undefined
-let closeRequestedDuringOpen = false
+let closeRequestedDuringOpen: CloseSource | undefined
 let projectNavDividerTween: gsap.core.Tween | undefined
 const typographyFrameWidths = new WeakMap<
 	HTMLElement,
@@ -1294,20 +1305,6 @@ function waitForStaticSharedDebug() {
 	})
 }
 
-function isHeroContextVisible(elements: SharedElementMap) {
-	// The media and textual anchors are vertically distributed through the hero
-	// and will rarely all intersect the viewport at once. One visible shared
-	// anchor is enough to establish that the user is still viewing the hero.
-	return Object.values(elements).some((element) => {
-		const rect = element.getBoundingClientRect()
-
-		return rect.bottom > 0
-			&& rect.top < window.innerHeight
-			&& rect.right > 0
-			&& rect.left < window.innerWidth
-	})
-}
-
 function addSharedElementTweens(
 	animation: gsap.core.Timeline,
 	representations: SharedElementRepresentation[],
@@ -1394,9 +1391,36 @@ function addSharedElementTweens(
 	})
 }
 
-function playTimeline(animation: gsap.core.Timeline) {
-	return new Promise<void>((resolve) => {
-		animation.eventCallback('onComplete', resolve)
+function debugProjectClose(message: string, detail?: unknown) {
+	if (!DEBUG_PROJECT_CLOSE) return
+
+	if (detail === undefined) {
+		console.debug(`[Project close] ${message}`)
+		return
+	}
+
+	console.debug(`[Project close] ${message}`, detail)
+}
+
+function playTimeline(
+	animation: gsap.core.Timeline,
+	debugClosePhase?: string
+) {
+	return new Promise<'complete' | 'interrupted'>((resolve) => {
+		let hasResolved = false
+		const finish = (status: 'complete' | 'interrupted') => {
+			if (hasResolved) return
+			hasResolved = true
+			if (status === 'interrupted' && DEBUG_PROJECT_CLOSE) {
+				console.warn('[Project close] timeline interruption', {
+					phase: debugClosePhase ?? 'unspecified'
+				})
+			}
+			resolve(status)
+		}
+
+		animation.eventCallback('onComplete', () => finish('complete'))
+		animation.eventCallback('onInterrupt', () => finish('interrupted'))
 		animation.play(0)
 	})
 }
@@ -1576,16 +1600,39 @@ function continueTimeline(animation: gsap.core.Timeline) {
 	})
 }
 
-function requestClose() {
-	if (isClosing.value) return
+function requestClose(source: CloseSource) {
+	if (isClosing.value || isTransitioning.value) return
 
 	if (isOpening.value) {
-		closeRequestedDuringOpen = true
+		closeRequestedDuringOpen = source
+		debugProjectClose('close requested during opening; queued', { source })
 		return
 	}
 
-	isClosing.value = true
-	emit('close')
+	debugProjectClose('close requested', { source })
+	emit('close', source)
+}
+
+function cancelClose() {
+	restoreClosePresentation()
+	isClosing.value = false
+	debugProjectClose('close aborted; overlay restored to open state')
+}
+
+function completeProjectSwitch() {
+	isTransitioning.value = false
+}
+
+function isStaleContextTransition(runId: number) {
+	const isStale = runId !== contextTransitionRunId
+	if (isStale) {
+		debugProjectClose('stale runId cancellation', {
+			runId,
+			activeRunId: contextTransitionRunId
+		})
+	}
+
+	return isStale
 }
 
 async function navigateToProject(nextIndex: number, restoreFocus = false) {
@@ -1599,134 +1646,144 @@ async function navigateToProject(nextIndex: number, restoreFocus = false) {
 	) return
 
 	isTransitioning.value = true
-	announcement.value = ''
-	killContextTransition()
-	const runId = contextTransitionRunId
+	let shouldRestoreFocus = false
 
-	if (prefersReducedMotion()) {
-		gsap.set(content.value, { autoAlpha: 0 })
-		displayedIndex.value = nextIndex
-		emit('change-project', nextIndex)
-		await nextTick()
-		if (runId !== contextTransitionRunId) return
-		if (content.value) {
-			content.value.scrollTop = 0
+	try {
+		announcement.value = ''
+		killContextTransition()
+		const runId = contextTransitionRunId
+
+		if (prefersReducedMotion()) {
+			gsap.set(content.value, { autoAlpha: 0 })
+			displayedIndex.value = nextIndex
+			emit('project-change-commit', nextIndex)
+			await nextTick()
+			if (isStaleContextTransition(runId)) return
+			if (content.value) {
+				content.value.scrollTop = 0
+			}
+			isBottomScrimVisible = undefined
+			updateBottomScrim(true)
+			gsap.set(surface.value, {
+				'--project-card-color': getProjectBackground(nextIndex)
+			})
+			await waitForAnimationFrame()
+			if (isStaleContextTransition(runId)) return
+			gsap.set([
+				...Object.values(getHeroElements() ?? {}),
+				...getTransitionBodies()
+			], {
+				clearProps: 'clipPath,opacity,transform,visibility'
+			})
+			gsap.set(content.value, {
+				clearProps: 'opacity,transform,visibility'
+			})
+			announcement.value = `${displayedProject.value.title} project loaded`
+			shouldRestoreFocus = restoreFocus
+			return
 		}
+
+		const outgoingHero = getHeroElements()
+		if (!outgoingHero || !content.value) return
+
+		const outgoingLines = splitHeroTransitionLines(outgoingHero)
+		const outgoingMetadata = getHeroMetadataElements(outgoingHero)
+			.filter((element) => element !== outgoingHero.intro)
+
+		transitionTimeline = gsap.timeline({ paused: true })
+		transitionTimeline
+			.to([...outgoingLines.titleLines, ...outgoingLines.introLines], {
+				yPercent: -110,
+				duration: 0.34,
+				ease: 'power2.in',
+				stagger: 0.045
+			}, 0)
+			.to(outgoingMetadata, {
+				autoAlpha: 0,
+				y: -8,
+				duration: TEXT_OUT_DURATION,
+				ease: 'power2.in',
+				stagger: 0.025
+			}, 0)
+			.to(content.value, {
+				autoAlpha: 0,
+				y: -12,
+				duration: TEXT_OUT_DURATION,
+				ease: 'power2.in'
+			}, 0.08)
+			.to(surface.value, {
+				'--project-card-color': getProjectBackground(nextIndex),
+				duration: CONTEXT_FADE_DURATION,
+				ease: 'power2.inOut'
+			}, 0.18)
+
+		await playUntil(transitionTimeline, 0.34)
+		if (isStaleContextTransition(runId)) return
+
+		revertTransitionSplits()
+
+		displayedIndex.value = nextIndex
+		emit('project-change-commit', nextIndex)
+		await nextTick()
+		if (isStaleContextTransition(runId) || !content.value) return
+
+		content.value.scrollTop = 0
 		isBottomScrimVisible = undefined
 		updateBottomScrim(true)
-		gsap.set(surface.value, {
-			'--project-card-color': getProjectBackground(nextIndex)
-		})
+		const incomingHero = getHeroElements()
+		if (!incomingHero) {
+			gsap.set(content.value, {
+				clearProps: 'opacity,transform,visibility'
+			})
+			return
+		}
+
 		await waitForAnimationFrame()
-		if (runId !== contextTransitionRunId) return
-		gsap.set([
-			...Object.values(getHeroElements() ?? {}),
-			...getTransitionBodies()
-		], {
-			clearProps: 'clipPath,opacity,transform,visibility'
-		})
-		gsap.set(content.value, {
-			clearProps: 'opacity,transform,visibility'
-		})
+		if (isStaleContextTransition(runId)) return
+		await waitForImageReady(
+			incomingHero.media.querySelector<HTMLImageElement>('img')
+		)
+		if (isStaleContextTransition(runId)) return
+
+		const caseHeroReveal = createCaseHeroReveal(false)
+		if (caseHeroReveal) {
+			transitionTimeline.add(caseHeroReveal, transitionTimeline.time())
+			caseHeroReveal.paused(false)
+			await continueTimeline(transitionTimeline)
+		} else {
+			gsap.set(content.value, {
+				clearProps: 'opacity,transform,visibility'
+			})
+			await continueTimeline(transitionTimeline)
+		}
+		if (isStaleContextTransition(runId)) return
+
+		cleanupHeroReveal()
+		transitionTimeline = undefined
 		announcement.value = `${displayedProject.value.title} project loaded`
-		isTransitioning.value = false
-		if (restoreFocus) projectNavigator.value?.focusActiveCard()
-		return
-	}
+		shouldRestoreFocus = restoreFocus
+	} catch (error) {
+		killContextTransition()
+		if (DEBUG_PROJECT_CLOSE) {
+			console.error('[Project close] caught exception', {
+				transaction: 'project switch',
+				error
+			})
+		}
+	} finally {
+		completeProjectSwitch()
 
-	const outgoingHero = getHeroElements()
-	if (!outgoingHero || !content.value) {
-		isTransitioning.value = false
-		return
-	}
-
-	const outgoingLines = splitHeroTransitionLines(outgoingHero)
-	const outgoingMetadata = getHeroMetadataElements(outgoingHero)
-		.filter((element) => element !== outgoingHero.intro)
-
-	transitionTimeline = gsap.timeline({ paused: true })
-	transitionTimeline
-		.to([...outgoingLines.titleLines, ...outgoingLines.introLines], {
-			yPercent: -110,
-			duration: 0.34,
-			ease: 'power2.in',
-			stagger: 0.045
-		}, 0)
-		.to(outgoingMetadata, {
-			autoAlpha: 0,
-			y: -8,
-			duration: TEXT_OUT_DURATION,
-			ease: 'power2.in',
-			stagger: 0.025
-		}, 0)
-		.to(content.value, {
-			autoAlpha: 0,
-			y: -12,
-			duration: TEXT_OUT_DURATION,
-			ease: 'power2.in'
-		}, 0.08)
-		.to(surface.value, {
-			'--project-card-color': getProjectBackground(nextIndex),
-			duration: CONTEXT_FADE_DURATION,
-			ease: 'power2.inOut'
-		}, 0.18)
-
-	await playUntil(transitionTimeline, 0.34)
-	if (runId !== contextTransitionRunId) return
-
-	revertTransitionSplits()
-
-	displayedIndex.value = nextIndex
-	emit('change-project', nextIndex)
-	await nextTick()
-	if (runId !== contextTransitionRunId || !content.value) return
-
-	content.value.scrollTop = 0
-	isBottomScrimVisible = undefined
-	updateBottomScrim(true)
-	const incomingHero = getHeroElements()
-	if (!incomingHero) {
-		gsap.set(content.value, {
-			clearProps: 'opacity,transform,visibility'
-		})
-		isTransitioning.value = false
-		return
-	}
-
-	await waitForAnimationFrame()
-	if (runId !== contextTransitionRunId) return
-	await waitForImageReady(
-		incomingHero.media.querySelector<HTMLImageElement>('img')
-	)
-	if (runId !== contextTransitionRunId) return
-
-	const caseHeroReveal = createCaseHeroReveal(false)
-	if (caseHeroReveal) {
-		transitionTimeline.add(caseHeroReveal, transitionTimeline.time())
-		caseHeroReveal.paused(false)
-		await continueTimeline(transitionTimeline)
-	} else {
-		gsap.set(content.value, {
-			clearProps: 'opacity,transform,visibility'
-		})
-		await continueTimeline(transitionTimeline)
-	}
-	if (runId !== contextTransitionRunId) return
-
-	cleanupHeroReveal()
-	transitionTimeline = undefined
-	announcement.value = `${displayedProject.value.title} project loaded`
-	isTransitioning.value = false
-
-	if (restoreFocus) {
-		await nextTick()
-		projectNavigator.value?.focusActiveCard()
+		if (shouldRestoreFocus) {
+			await nextTick()
+			projectNavigator.value?.focusActiveCard()
+		}
+		emit('switch-complete')
 	}
 }
 
 function handleKeydown(event: KeyboardEvent) {
 	if (event.key === 'Escape') {
-		requestClose()
+		requestClose('escape')
 	}
 }
 
@@ -1763,10 +1820,71 @@ function getInsetClipPath(
 	rect: Pick<DOMRect, 'top' | 'left' | 'right' | 'bottom'>,
 	borderRadius: string
 ) {
-	const right = Math.max(0, window.innerWidth - rect.right)
-	const bottom = Math.max(0, window.innerHeight - rect.bottom)
+	// Insets must use the rendered 100dvh surface as their coordinate space;
+	// window.innerHeight can represent a different viewport while mobile chrome moves.
+	const surfaceRect = surface.value?.getBoundingClientRect()
+	const surfaceTop = surfaceRect?.top ?? 0
+	const surfaceLeft = surfaceRect?.left ?? 0
+	const surfaceRight = surfaceRect?.right ?? window.innerWidth
+	const surfaceBottom = surfaceRect?.bottom ?? window.innerHeight
+	const top = Math.max(0, rect.top - surfaceTop)
+	const right = Math.max(0, surfaceRight - rect.right)
+	const bottom = Math.max(0, surfaceBottom - rect.bottom)
+	const left = Math.max(0, rect.left - surfaceLeft)
 
-	return `inset(${Math.max(0, rect.top)}px ${right}px ${bottom}px ${Math.max(0, rect.left)}px round ${borderRadius})`
+	return `inset(${top}px ${right}px ${bottom}px ${left}px round ${borderRadius})`
+}
+
+function getCompactSourceGeometry() {
+	// Scroll locking and dynamic viewport changes can invalidate the pre-mount snapshot.
+	const sourceRect = props.sourceCard.getBoundingClientRect()
+	const hasLiveGeometry = props.sourceCard.isConnected
+		&& sourceRect.width > 0
+		&& sourceRect.height > 0
+
+	if (hasLiveGeometry) {
+		return {
+			rect: sourceRect,
+			borderRadius: window.getComputedStyle(props.sourceCard).borderRadius
+		}
+	}
+
+	return {
+		rect: {
+			top: props.origin.top,
+			left: props.origin.left,
+			right: props.origin.left + props.origin.width,
+			bottom: props.origin.top + props.origin.height
+		},
+		borderRadius: props.origin.borderRadius
+	}
+}
+
+function debugCompactGeometry(
+	phase: 'open' | 'close',
+	targetRect: Pick<DOMRect, 'top' | 'left' | 'right' | 'bottom'>,
+	clipPath: string
+) {
+	if (!DEBUG_PROJECT_CLOSE) return
+
+	const visualViewport = window.visualViewport
+	debugProjectClose(`mobile ${phase} geometry`, {
+		homepageScrollY: window.scrollY,
+		layerScrollY: content.value?.scrollTop ?? 0,
+		windowViewport: {
+			width: window.innerWidth,
+			height: window.innerHeight
+		},
+		visualViewport: visualViewport ? {
+			width: visualViewport.width,
+			height: visualViewport.height,
+			offsetTop: visualViewport.offsetTop,
+			offsetLeft: visualViewport.offsetLeft
+		} : null,
+		surfaceRect: surface.value?.getBoundingClientRect(),
+		targetRect,
+		clipPath
+	})
 }
 
 function getProjectCardContents(card: HTMLElement) {
@@ -2049,13 +2167,14 @@ async function animateSimpleOpen() {
 	const useCompactTransition = usesCompactRendering()
 	if (useCompactTransition) {
 		setFullscreenGeometry()
+		const sourceGeometry = getCompactSourceGeometry()
+		const sourceClipPath = getInsetClipPath(
+			sourceGeometry.rect,
+			sourceGeometry.borderRadius
+		)
+		debugCompactGeometry('open', sourceGeometry.rect, sourceClipPath)
 		gsap.set(surface.value, {
-			clipPath: getInsetClipPath({
-				top: props.origin.top,
-				left: props.origin.left,
-				right: props.origin.left + props.origin.width,
-				bottom: props.origin.top + props.origin.height
-			}, props.origin.borderRadius),
+			clipPath: sourceClipPath,
 			willChange: 'clip-path',
 			'--project-card-color': getProjectBackground(displayedIndex.value)
 		})
@@ -2079,7 +2198,6 @@ async function animateSimpleOpen() {
 		setFullscreenGeometry()
 		gsap.set(surface.value, { clearProps: 'clipPath,willChange' })
 		isOpeningVisibilityLocked.value = false
-		isOpening.value = false
 		gsap.set(destinationElements, { autoAlpha: 1 })
 		gsap.set(content.value, { clearProps: 'width,height' })
 		projectHeader.value?.focusClose()
@@ -2133,15 +2251,10 @@ async function animateSimpleOpen() {
 	gsap.set(surface.value, { clearProps: 'clipPath,willChange' })
 	setFullscreenGeometry()
 	isOpeningVisibilityLocked.value = false
-	isOpening.value = false
 	cleanupHeroReveal()
 	gsap.set(content.value, { clearProps: 'width,height' })
 	projectHeader.value?.focusClose()
 
-	if (closeRequestedDuringOpen) {
-		closeRequestedDuringOpen = false
-		requestClose()
-	}
 }
 
 async function animateOpen() {
@@ -2173,7 +2286,6 @@ async function animateOpen() {
 		], {
 			autoAlpha: 1
 		})
-		isOpening.value = false
 		projectHeader.value?.focusClose()
 		return
 	}
@@ -2187,7 +2299,6 @@ async function animateOpen() {
 		gsap.set([...getDetailElements(), ...getOverlayControls(), scrims.value], {
 			autoAlpha: 1
 		})
-		isOpening.value = false
 		projectHeader.value?.focusClose()
 		return
 	}
@@ -2213,7 +2324,6 @@ async function animateOpen() {
 			...getOverlayControls(),
 			scrims.value
 		], { autoAlpha: 1 })
-		isOpening.value = false
 		projectHeader.value?.focusClose()
 		return
 	}
@@ -2231,7 +2341,6 @@ async function animateOpen() {
 			...getOverlayControls(),
 			scrims.value
 		], { autoAlpha: 1 })
-		isOpening.value = false
 		projectHeader.value?.focusClose()
 		return
 	}
@@ -2287,13 +2396,8 @@ async function animateOpen() {
 			)
 			clearSharedRepresentations()
 			gsap.set(Object.values(heroElements), { autoAlpha: 1 })
-			isOpening.value = false
 			projectHeader.value?.focusClose()
 
-			if (closeRequestedDuringOpen) {
-				closeRequestedDuringOpen = false
-				requestClose()
-			}
 		}
 	})
 
@@ -2383,42 +2487,36 @@ async function animateOpen() {
 	}
 }
 
-function animateSimpleClose(targetCard: HTMLElement) {
-	if (!surface.value || !content.value) return Promise.resolve()
+function restoreClosePresentation() {
+	if (content.value && scrims.value) {
+		gsap.set([
+			content.value,
+			...getOverlayControls(),
+			scrims.value
+		], {
+			clearProps: 'opacity,transform,visibility'
+		})
+	}
 
-	const target = targetCard.getBoundingClientRect()
-
-	return new Promise<void>((resolve) => {
-		timeline = gsap.timeline({ onComplete: resolve })
-		timeline
-			.to(content.value, {
-				autoAlpha: 0,
-				duration: 0.22,
-				ease: 'power2.in'
-			})
-			.to(surface.value, {
-				top: target.top,
-				left: target.left,
-				width: target.width,
-				height: target.height,
-				borderRadius: window.getComputedStyle(targetCard).borderRadius,
-				duration: CLOSE_DURATION,
-				ease: 'power3.inOut'
-			}, 0)
-	})
+	if (surface.value) {
+		setFullscreenGeometry()
+		gsap.set(surface.value, {
+			autoAlpha: 1,
+			clearProps: 'clipPath,willChange'
+		})
+	}
 }
 
-async function animateBackdropClose(targetCard: HTMLElement) {
+async function hideCloseContent() {
 	if (
-		!surface.value
-		|| !content.value
+		!content.value
 		|| !scrims.value
-	) return
+	) return false
 
+	isClosing.value = true
+	killContextTransition()
+	isTransitioning.value = false
 	timeline?.kill()
-	const target = targetCard.getBoundingClientRect()
-	const targetBorderRadius = window.getComputedStyle(targetCard).borderRadius
-	const useCompactTransition = usesCompactRendering()
 	const destinationElements = [
 		content.value,
 		...getOverlayControls(),
@@ -2427,16 +2525,8 @@ async function animateBackdropClose(targetCard: HTMLElement) {
 
 	if (prefersReducedMotion()) {
 		gsap.set(destinationElements, { autoAlpha: 0 })
-		gsap.set(surface.value, {
-			top: target.top,
-			left: target.left,
-			width: target.width,
-			height: target.height,
-			borderRadius: targetBorderRadius
-		})
-		emit('target-ready')
-		await nextTick()
-		return
+		emit('content-hidden')
+		return true
 	}
 
 	timeline = gsap.timeline({ paused: true })
@@ -2446,39 +2536,93 @@ async function animateBackdropClose(targetCard: HTMLElement) {
 			ease: 'power2.in'
 		})
 
-	await playTimeline(timeline)
+	const fadeStatus = await playTimeline(timeline, 'fade phase')
+	if (fadeStatus !== 'complete') {
+		restoreClosePresentation()
+		return false
+	}
+	emit('content-hidden')
+	return true
+}
 
-	// TODO: Insert the redesigned destination-page exit animation here.
+async function finishClose(target: WorkCloseTarget) {
+	if (!surface.value) return false
+
+	const useCompactTransition = usesCompactRendering()
+	const { card: targetCard, rect, borderRadius: targetBorderRadius } = target
+
+	if (prefersReducedMotion()) {
+		gsap.set(surface.value, {
+			top: rect.top,
+			left: rect.left,
+			width: rect.width,
+			height: rect.height,
+			borderRadius: targetBorderRadius
+		})
+		debugProjectClose('surface collapse start', { reducedMotion: true })
+		debugProjectClose('collapse start', { reducedMotion: true })
+		debugProjectClose('surface collapse complete', { reducedMotion: true })
+		debugProjectClose('collapse end', { reducedMotion: true })
+		debugProjectClose('card restoration start', { reducedMotion: true })
+		emit('target-ready')
+		await nextTick()
+		debugProjectClose('card restoration complete', { reducedMotion: true })
+		emit('close-complete')
+		return true
+	}
+
+	debugProjectClose('surface collapse start')
+	debugProjectClose('collapse start')
 	if (useCompactTransition) {
 		setFullscreenGeometry()
+		const targetClipPath = getInsetClipPath(rect, targetBorderRadius)
+		debugCompactGeometry('close', rect, targetClipPath)
 		gsap.set(surface.value, {
 			clipPath: FULLSCREEN_CLIP_PATH,
 			willChange: 'clip-path'
 		})
+		timeline = gsap.timeline({ paused: true })
+			.to(surface.value, {
+				clipPath: targetClipPath,
+				duration: CLOSE_DURATION,
+				ease: animationEases.strongInOut
+			})
+	} else {
+		timeline = gsap.timeline({ paused: true })
+			.to(surface.value, {
+				top: rect.top,
+				left: rect.left,
+				width: rect.width,
+				height: rect.height,
+				borderRadius: targetBorderRadius,
+				duration: CLOSE_DURATION,
+				ease: animationEases.strongInOut
+			})
 	}
-	timeline = gsap.timeline({ paused: true })
-		.to(surface.value, useCompactTransition ? {
-			clipPath: getInsetClipPath(target, targetBorderRadius),
-			duration: CLOSE_DURATION,
-			ease: animationEases.strongInOut
-		} : {
-			top: target.top,
-			left: target.left,
-			width: target.width,
-			height: target.height,
-			borderRadius: targetBorderRadius,
-			duration: CLOSE_DURATION,
-			ease: animationEases.strongInOut
-		})
 
-	await playTimeline(timeline)
+	const surfaceCollapseStatus = await playTimeline(
+		timeline,
+		'surface collapse phase'
+	)
+	if (surfaceCollapseStatus !== 'complete') {
+		gsap.set(surface.value, { clearProps: 'willChange' })
+		restoreClosePresentation()
+		return false
+	}
+	debugProjectClose('surface collapse complete')
+	debugProjectClose('collapse end')
 	gsap.set(surface.value, { clearProps: 'willChange' })
 	const cardRestore = prepareCardRestore(targetCard)
 	gsap.set(surface.value, { autoAlpha: 0 })
+	debugProjectClose('card restoration start')
 	emit('target-ready')
 	await nextTick()
 
-	if (!cardRestore) return
+	if (!cardRestore) {
+		debugProjectClose('card restoration complete', { skipped: true })
+		emit('close-complete')
+		return true
+	}
 
 	timeline = gsap.timeline({ paused: true })
 		.to(cardRestore.thumbnail, {
@@ -2507,148 +2651,16 @@ async function animateBackdropClose(targetCard: HTMLElement) {
 			stagger: 0.025
 		}, 0.1)
 
-	await playTimeline(timeline)
+	const cardRestoreStatus = await playTimeline(timeline, 'card restore phase')
+	if (cardRestoreStatus !== 'complete') {
+		cleanupCardRestore()
+		restoreClosePresentation()
+		return false
+	}
+	debugProjectClose('card restoration complete')
 	cleanupCardRestore()
-}
-
-async function animateClose(targetCard: HTMLElement) {
-	killContextTransition()
-	isTransitioning.value = false
-
-	if (!SHARED_ELEMENT_TRANSITIONS_ENABLED) {
-		await animateBackdropClose(targetCard)
-		return
-	}
-
-	if (
-		!surface.value
-		|| !content.value
-		|| !scrims.value
-		|| prefersReducedMotion()
-	) {
-		emit('target-ready')
-		await nextTick()
-		return
-	}
-
-	timeline?.kill()
-	clearSharedRepresentations()
-
-	const heroElements = getHeroSharedElements()
-	const targetElements = getSharedElements(targetCard)
-
-	// Never move the detail scroller to manufacture a shared close transition.
-	if (
-		!heroElements
-		|| !targetElements
-		|| !isHeroContextVisible(heroElements)
-	) {
-		await animateSimpleClose(targetCard)
-		emit('target-ready')
-		await nextTick()
-		return
-	}
-
-	const heroSnapshots = captureSharedTargets(heroElements)
-	const targetSnapshots = captureSharedTargets(targetElements)
-
-	if (
-		!validateSharedTargets('source', heroSnapshots)
-		|| !validateSharedTargets('target', targetSnapshots)
-	) {
-		await animateSimpleClose(targetCard)
-		emit('target-ready')
-		await nextTick()
-		return
-	}
-
-	debugSharedTargets(heroSnapshots, targetSnapshots)
-
-	const representations = createSharedRepresentations(heroElements, heroSnapshots)
-	if (!representations) {
-		await animateSimpleClose(targetCard)
-		emit('target-ready')
-		await nextTick()
-		return
-	}
-
-	const mediaRepresentation = representations.find(({ key }) => key === 'media')
-	if (mediaRepresentation) {
-		startSharedGeometryDebug(
-			'close',
-			surface.value,
-			mediaRepresentation.element,
-			heroElements.media
-		)
-	}
-	debugTypographyMetrics('hero', heroElements, representations, 'card', targetElements)
-	await waitForStaticSharedDebug()
-
-	const target = targetCard.getBoundingClientRect()
-	const contentBackground = window.getComputedStyle(content.value).backgroundColor
-	gsap.set(Object.values(heroElements), { autoAlpha: 0 })
-
-	await new Promise<void>((resolve) => {
-		timeline = gsap.timeline({ onComplete: resolve })
-
-		timeline
-			.to([...getDetailElements(), ...getOverlayControls(), scrims.value], {
-				autoAlpha: 0,
-				duration: 0.18,
-				ease: 'power2.in',
-				stagger: 0.015
-			})
-			.to(content.value, {
-				backgroundColor: 'transparent',
-				duration: 0.38,
-				ease: 'power2.inOut'
-			}, 0.34)
-			.to(surface.value, {
-				top: target.top,
-				left: target.left,
-				width: target.width,
-				height: target.height,
-				borderRadius: window.getComputedStyle(targetCard).borderRadius,
-				duration: CLOSE_DURATION,
-				ease: 'power3.inOut'
-			}, 0)
-
-		addSharedElementTweens(
-			timeline,
-			representations,
-			heroElements,
-			heroSnapshots,
-			targetElements,
-			targetSnapshots,
-			0,
-			CLOSE_DURATION
-		)
-
-		// Preserve the computed value so GSAP can interpolate from the current layer color.
-		gsap.set(content.value, { backgroundColor: contentBackground })
-
-		if (SLOW_SHARED_TRANSITION) {
-			timeline.timeScale(0.5)
-		}
-	})
-
-	// Hand visibility back only after the clones have reached the live card.
-	// Waiting for Vue's render prevents a frame where both representations are hidden.
-	debugTypographyHandoff(
-		'close-before-handoff',
-		representations,
-		heroElements,
-		targetElements
-	)
-	emit('target-ready')
-	await nextTick()
-	debugTypographyHandoff(
-		'close-after-handoff',
-		representations,
-		heroElements,
-		targetElements
-	)
-	clearSharedRepresentations()
+	emit('close-complete')
+	return true
 }
 
 watch(
@@ -2666,14 +2678,20 @@ watch(displayedIndex, async () => {
 }, { flush: 'post' })
 
 onMounted(async () => {
-	previousDocumentOverflow = document.documentElement.style.overflow
-	unlockScrollSmoothing = lockPortfolioScrollSmoothing()
-	document.documentElement.style.overflow = 'hidden'
 	window.addEventListener('keydown', handleKeydown)
 	await nextTick()
 	setupBottomScrim()
 	await animateOpen()
+	emit('opened')
+	isOpening.value = false
 	setupProjectNavDivider()
+
+	// The coordinator must enter `open` before a close queued during opening is emitted.
+	if (closeRequestedDuringOpen) {
+		const closeSource = closeRequestedDuringOpen
+		closeRequestedDuringOpen = undefined
+		requestClose(closeSource)
+	}
 })
 
 onBeforeUnmount(() => {
@@ -2683,13 +2701,16 @@ onBeforeUnmount(() => {
 	killContextTransition()
 	cleanupBottomScrim()
 	cleanupProjectNavDivider()
-	document.documentElement.style.overflow = previousDocumentOverflow
-	unlockScrollSmoothing?.()
-	unlockScrollSmoothing = undefined
 	window.removeEventListener('keydown', handleKeydown)
+	isClosing.value = false
+	isTransitioning.value = false
 })
 
 defineExpose({
-	animateClose
+	hideCloseContent,
+	finishClose,
+	cancelClose,
+	navigateToProject,
+	scrollToTop: () => content.value?.scrollTo({ top: 0 })
 })
 </script>

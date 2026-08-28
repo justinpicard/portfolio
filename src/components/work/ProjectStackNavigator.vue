@@ -29,6 +29,15 @@
 				@pointerenter="animateCardHover($event, position, true)"
 				@pointerleave="animateCardHover($event, position, false)"
 			>
+				<span
+					v-if="!isProjectPublished(projects[projectIndex])"
+					class="project-card__corner-label"
+				>
+					<span class="project-card__corner-label-text">
+						{{ t('project.caseComingSoon') }}
+					</span>
+				</span>
+
 				<span class="project-stack-navigator__visual" aria-hidden="true">
 					<BaseImage
 						:src="`/images/${
@@ -49,12 +58,6 @@
 				</span>
 
 				<span class="project-stack-navigator__content">
-					<span
-						v-if="!isProjectPublished(projects[projectIndex])"
-						class="project-stack-navigator__status"
-					>
-						<Tag size="sm">{{ t('project.caseComingSoon') }}</Tag>
-					</span>
 					<span class="project-stack-navigator__year eyebrow">
 						{{ projects[projectIndex].year }}
 					</span>

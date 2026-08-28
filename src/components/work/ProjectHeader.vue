@@ -11,7 +11,7 @@
 			>
 				<span class="project-header__close-icon" aria-hidden="true">✕</span>
 				<span
-					class="project-header__close-label"
+					class="project-header__close-label d-none sm:d-flex"
 					data-stagger-link-container
 				>
 					{{ t('project.closeText') }}
@@ -19,46 +19,58 @@
 			</button>
 		</div>
 
-		<div class="project-header__title">
-			<span
-				ref="titleWindow"
-				class="project-header__title-window role type-body-small"
+		<div class="project-header__project-pill">
+			<div
+				class="project-header__pill section-nav section-nav--disabled"
 				aria-live="polite"
+				aria-atomic="true"
 			>
-				<span
-					ref="currentTitle"
-					class="project-header__title-layer"
-				>
-					{{ displayedTitle }}
-				</span>
-				<span
-					v-if="incomingTitle"
-					ref="incomingTitleElement"
-					class="project-header__title-layer project-header__title-layer--incoming"
-					aria-hidden="true"
-				>
-					{{ incomingTitle }}
-				</span>
-			</span>
-		</div>
-
-		<div class="project-header__section-nav">
-			<SectionNavigation disabled fixed-section-id="work" />
+				<div ref="pillPanel" class="project-header__pill-panel section-nav__panel">
+					<span ref="pillContent" class="project-header__pill-content section-nav__trigger">
+						<span ref="titleWindow" class="section-nav__label-window">
+							<span
+								:key="displayedProjectIndex"
+								ref="currentLabel"
+								class="section-nav__label-layer"
+							>
+								<span class="section-nav__number">
+									{{ formatProjectNumber(displayedProjectIndex) }}
+								</span>
+								<span class="project-header__pill-title">
+									{{ displayedTitle }}
+								</span>
+							</span>
+							<span
+								v-if="incomingTitle"
+								ref="incomingLabel"
+								class="section-nav__label-layer section-nav__label-layer--incoming"
+								aria-hidden="true"
+							>
+								<span class="section-nav__number">
+									{{ formatProjectNumber(incomingProjectIndex ?? displayedProjectIndex) }}
+								</span>
+								<span class="project-header__pill-title">
+									{{ incomingTitle }}
+								</span>
+							</span>
+						</span>
+					</span>
+				</div>
+			</div>
 		</div>
 	</header>
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import SectionNavigation from '../navigation/SectionNavigation.vue'
 import {
 	gsap,
 	prefersReducedMotion,
 	registerGsapPlugins,
 	SplitText
 } from '../../utils/animations/gsap'
-import { staggerLinkPreset } from '../../utils/animations/presets'
+import { pillLabelTransitionPreset } from '../../utils/animations/presets'
 import {
 	initStaggerLinks,
 	type StaggerLinksController
@@ -66,6 +78,7 @@ import {
 
 const props = defineProps<{
 	title: string
+	projectIndex: number
 }>()
 
 const emit = defineEmits<{
@@ -75,15 +88,36 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const root = ref<HTMLElement | null>(null)
 const closeButton = ref<HTMLButtonElement | null>(null)
+const pillPanel = ref<HTMLElement | null>(null)
+const pillContent = ref<HTMLElement | null>(null)
 const titleWindow = ref<HTMLElement | null>(null)
-const currentTitle = ref<HTMLElement | null>(null)
-const incomingTitleElement = ref<HTMLElement | null>(null)
+const currentLabel = ref<HTMLElement | null>(null)
+const incomingLabel = ref<HTMLElement | null>(null)
 const displayedTitle = ref(props.title)
+const displayedProjectIndex = ref(props.projectIndex)
 const incomingTitle = ref<string | null>(null)
+const incomingProjectIndex = ref<number | null>(null)
 let staggerLinks: StaggerLinksController | undefined
 let titleTimeline: gsap.core.Timeline | undefined
 let titleSplits: SplitText[] = []
 let titleTransitionId = 0
+
+function formatProjectNumber(projectIndex: number) {
+	return String(projectIndex + 1).padStart(2, '0')
+}
+
+function getPillWidth(label: HTMLElement) {
+	if (!pillContent.value || !pillPanel.value) return label.offsetWidth
+
+	const contentStyles = window.getComputedStyle(pillContent.value)
+	const panelStyles = window.getComputedStyle(pillPanel.value)
+
+	return Math.ceil(label.offsetWidth)
+		+ Number.parseFloat(contentStyles.paddingLeft)
+		+ Number.parseFloat(contentStyles.paddingRight)
+		+ Number.parseFloat(panelStyles.borderLeftWidth)
+		+ Number.parseFloat(panelStyles.borderRightWidth)
+}
 
 async function setupCloseAnimation() {
 	await nextTick()
@@ -98,7 +132,16 @@ function cleanupCloseAnimation() {
 	staggerLinks = undefined
 }
 
-function cleanupTitleAnimation(commitIncoming = false) {
+function resetTitleAnimationStyles() {
+	const widthTargets = [pillPanel.value, titleWindow.value]
+		.filter((element): element is HTMLElement => Boolean(element))
+
+	if (widthTargets.length > 0) {
+		gsap.set(widthTargets, { clearProps: 'width' })
+	}
+}
+
+function cleanupTitleAnimation(commitIncoming = false, resetStyles = true) {
 	titleTimeline?.kill()
 	titleTimeline = undefined
 	titleSplits.forEach((split) => split.revert())
@@ -106,42 +149,60 @@ function cleanupTitleAnimation(commitIncoming = false) {
 
 	if (commitIncoming && incomingTitle.value) {
 		displayedTitle.value = incomingTitle.value
+		displayedProjectIndex.value = incomingProjectIndex.value
+			?? displayedProjectIndex.value
 	}
 
 	incomingTitle.value = null
+	incomingProjectIndex.value = null
+	if (resetStyles) resetTitleAnimationStyles()
 }
 
-async function animateTitle(nextTitle: string) {
-	if (nextTitle === displayedTitle.value && !incomingTitle.value) return
+async function animateTitle(nextTitle: string, nextProjectIndex: number) {
+	if (
+		nextTitle === displayedTitle.value
+		&& nextProjectIndex === displayedProjectIndex.value
+		&& !incomingTitle.value
+	) return
 
 	const transitionId = ++titleTransitionId
 	cleanupTitleAnimation(true)
 
 	if (prefersReducedMotion()) {
 		displayedTitle.value = nextTitle
+		displayedProjectIndex.value = nextProjectIndex
 		return
 	}
 
 	incomingTitle.value = nextTitle
+	incomingProjectIndex.value = nextProjectIndex
 	await nextTick()
 
 	if (
 		transitionId !== titleTransitionId
+		|| !pillPanel.value
+		|| !pillContent.value
 		|| !titleWindow.value
-		|| !currentTitle.value
-		|| !incomingTitleElement.value
+		|| !currentLabel.value
+		|| !incomingLabel.value
 	) return
 
-	const outgoingSplit = new SplitText(currentTitle.value, {
+	const currentPanelWidth = pillPanel.value.getBoundingClientRect().width
+	const outgoingLabelWidth = currentLabel.value.offsetWidth
+	const incomingLabelWidth = incomingLabel.value.offsetWidth
+	const incomingPanelWidth = getPillWidth(incomingLabel.value)
+	const outgoingSplit = new SplitText(currentLabel.value, {
 		type: 'chars',
-		charsClass: 'project-header__title-char'
+		charsClass: 'section-nav__label-char'
 	})
-	const incomingSplit = new SplitText(incomingTitleElement.value, {
+	const incomingSplit = new SplitText(incomingLabel.value, {
 		type: 'chars',
-		charsClass: 'project-header__title-char'
+		charsClass: 'section-nav__label-char'
 	})
 	titleSplits = [outgoingSplit, incomingSplit]
 
+	gsap.set(pillPanel.value, { width: currentPanelWidth })
+	gsap.set(titleWindow.value, { width: outgoingLabelWidth })
 	gsap.set(incomingSplit.chars, { yPercent: 110 })
 
 	titleTimeline = gsap.timeline({
@@ -152,19 +213,36 @@ async function animateTitle(nextTitle: string) {
 			titleSplits.forEach((split) => split.revert())
 			titleSplits = []
 			displayedTitle.value = nextTitle
+			displayedProjectIndex.value = nextProjectIndex
 			incomingTitle.value = null
+			incomingProjectIndex.value = null
+			void nextTick(() => {
+				if (transitionId !== titleTransitionId) return
+
+				resetTitleAnimationStyles()
+			})
 		}
 	})
+		.to(pillPanel.value, {
+			width: incomingPanelWidth,
+			...pillLabelTransitionPreset.resize,
+			overwrite: true
+		}, 0)
+		.to(titleWindow.value, {
+			width: incomingLabelWidth,
+			...pillLabelTransitionPreset.resize,
+			overwrite: true
+		}, 0)
 		.to(outgoingSplit.chars, {
 			yPercent: -110,
-			...staggerLinkPreset,
+			...pillLabelTransitionPreset.text,
 			overwrite: true
 		}, 0)
 		.to(incomingSplit.chars, {
 			yPercent: 0,
-			...staggerLinkPreset,
+			...pillLabelTransitionPreset.text,
 			overwrite: true
-		}, 0)
+		}, pillLabelTransitionPreset.resize.duration)
 }
 
 function focusClose() {
@@ -180,14 +258,18 @@ watch(() => t('project.closeText'), () => {
 	setupCloseAnimation()
 })
 
-watch(() => props.title, (title) => {
-	void animateTitle(title)
-})
+watch(
+	() => [props.title, props.projectIndex] as const,
+	([title, projectIndex]) => {
+		void animateTitle(title, projectIndex)
+	}
+)
 
-onUnmounted(() => {
+onBeforeUnmount(() => {
 	titleTransitionId += 1
 	cleanupCloseAnimation()
-	cleanupTitleAnimation()
+	// The DOM is being removed, so only stop animation work and restore SplitText.
+	cleanupTitleAnimation(false, false)
 })
 
 defineExpose({

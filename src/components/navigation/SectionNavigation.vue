@@ -108,7 +108,7 @@ import {
 } from '../../utils/animations/gsap'
 import {
 	animationEases,
-	staggerLinkPreset
+	pillLabelTransitionPreset
 } from '../../utils/animations/presets'
 import {
 	initStaggerLinks,
@@ -125,9 +125,11 @@ const router = useRouter()
 const { currentLocale } = useLocalizedRoute()
 const props = withDefaults(defineProps<{
 	disabled?: boolean
+	trackingSuspended?: boolean
 	fixedSectionId?: SectionNavigationId
 }>(), {
 	disabled: false,
+	trackingSuspended: false,
 	fixedSectionId: undefined
 })
 const root = ref<HTMLElement | null>(null)
@@ -175,13 +177,14 @@ let sectionActivationPositions: Array<{
 	id: SectionNavigationId
 	scrollY: number
 }> = []
-const LABEL_RESIZE_DURATION = 0.32
 const ITEM_REVEAL_OFFSET = 8
 const ITEM_REVEAL_DURATION = 0.24
 const ITEM_REVEAL_STAGGER = 0.045
 const ITEM_REVEAL_DELAY = 0.06
 const PANEL_OPEN_EASE = 'back.out(1.15)'
 const PANEL_CLOSE_EASE = 'back.in(1.15)'
+const DEBUG_PROJECT_CLOSE = import.meta.env.DEV
+	&& new URLSearchParams(window.location.search).has('debugProjectClose')
 
 async function refreshNavigationStaggerLinks() {
 	staggerLinks?.destroy()
@@ -516,8 +519,10 @@ async function animateCollapsedLabel(sectionId: SectionNavigationId) {
 			.to(panel.value, {
 				width: incomingPanelWidth,
 				height: trigger.value.offsetHeight,
-				duration: LABEL_RESIZE_DURATION,
-				ease: wasNavigationOpen ? PANEL_CLOSE_EASE : animationEases.inOut,
+				duration: pillLabelTransitionPreset.resize.duration,
+				ease: wasNavigationOpen
+					? PANEL_CLOSE_EASE
+					: pillLabelTransitionPreset.resize.ease,
 				overwrite: true,
 				onComplete: () => {
 					if (!isOpen.value) isClosing.value = false
@@ -525,8 +530,7 @@ async function animateCollapsedLabel(sectionId: SectionNavigationId) {
 			}, 0)
 			.to(labelWindow.value, {
 				width: incomingLabelWidth,
-				duration: LABEL_RESIZE_DURATION,
-				ease: animationEases.inOut,
+				...pillLabelTransitionPreset.resize,
 				overwrite: true
 			}, 0)
 	}
@@ -534,14 +538,14 @@ async function animateCollapsedLabel(sectionId: SectionNavigationId) {
 	labelTimeline
 		.to(outgoingSplit.chars, {
 			yPercent: -110,
-			...staggerLinkPreset,
+			...pillLabelTransitionPreset.text,
 			overwrite: true
 		}, 0)
 		.to(incomingSplit.chars, {
 			yPercent: 0,
-			...staggerLinkPreset,
+			...pillLabelTransitionPreset.text,
 			overwrite: true
-		}, isOpen.value ? 0 : LABEL_RESIZE_DURATION)
+		}, isOpen.value ? 0 : pillLabelTransitionPreset.resize.duration)
 }
 
 function setActiveSection(sectionId: SectionNavigationId) {
@@ -573,7 +577,19 @@ function updateActiveSection() {
 		return
 	}
 
-	if (route.name !== 'home' || isProgrammaticScrolling) return
+	if (
+		route.name !== 'home'
+		|| props.disabled
+		|| props.trackingSuspended
+	) return
+	if (isProgrammaticScrolling) {
+		if (scrollTween?.isActive()) return
+
+		// Interrupted scroll tweens do not call onComplete. Recover here so a
+		// stale navigation state can never suppress normal section detection.
+		isProgrammaticScrolling = false
+		scrollTween = undefined
+	}
 
 	const scrollThreshold = getPortfolioScrollY()
 	let nextActiveId: SectionNavigationId = SECTION_NAVIGATION_ITEMS[0].id
@@ -617,7 +633,7 @@ function scrollToSection(sectionId: SectionNavigationId) {
 	}
 
 	const scrollPosition = { y: getPortfolioScrollY() }
-	scrollTween = gsap.to(scrollPosition, {
+	const tween = gsap.to(scrollPosition, {
 		y: targetY,
 		duration: 0.9,
 		ease: animationEases.inOut,
@@ -625,11 +641,21 @@ function scrollToSection(sectionId: SectionNavigationId) {
 			setPortfolioScrollY(scrollPosition.y)
 		},
 		onComplete() {
+			if (scrollTween !== tween) return
+
+			scrollTween = undefined
+			isProgrammaticScrolling = false
+			updateActiveSection()
+		},
+		onInterrupt() {
+			if (scrollTween !== tween) return
+
 			scrollTween = undefined
 			isProgrammaticScrolling = false
 			updateActiveSection()
 		}
 	})
+	scrollTween = tween
 }
 
 async function selectSection(sectionId: SectionNavigationId) {
@@ -743,6 +769,25 @@ watch(() => props.disabled, (disabled) => {
 	triggerPointerType = undefined
 	closeNavigation()
 })
+
+watch(
+	() => props.disabled || props.trackingSuspended,
+	(trackingSuspended) => {
+		if (trackingSuspended) {
+			activeSectionTrigger?.disable(false)
+			sectionPositionTriggers.forEach(({ trigger }) => trigger.disable(false))
+			return
+		}
+
+		sectionPositionTriggers.forEach(({ trigger }) => trigger.enable(false, false))
+		activeSectionTrigger?.enable(false, false)
+		refreshActiveSectionPositions()
+		updateActiveSection()
+		if (DEBUG_PROJECT_CLOSE) {
+			console.debug('[Project close] SectionNavigation resumed')
+		}
+	}
+)
 
 watch(() => props.fixedSectionId, () => {
 	setupActiveSectionDetection()

@@ -27,3 +27,11 @@ export const staggerLinkPreset = {
 		each: animationStaggers.chars
 	}
 } as const
+
+export const pillLabelTransitionPreset = {
+	resize: {
+		duration: 0.32,
+		ease: animationEases.inOut
+	},
+	text: staggerLinkPreset
+} as const

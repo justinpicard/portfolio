@@ -5,7 +5,7 @@ import {
 	ScrollTrigger
 } from './gsap'
 
-export const PORTFOLIO_SCROLL_SMOOTHING = 0.3
+export const PORTFOLIO_SCROLL_SMOOTHING = 0.5
 const PORTFOLIO_POINTER_QUERY = '(hover: hover) and (pointer: fine)'
 
 let smoother: ScrollSmoother | undefined

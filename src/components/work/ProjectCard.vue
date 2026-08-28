@@ -1,4 +1,4 @@
-<template>
+x<template>
 	<article
 		ref="card"
 		class="project-card"
@@ -31,13 +31,15 @@
 					:position="project.thumbnailImagePosition ?? 'center center'"
 				/>
 			</div>
+			<span v-if="!casePublished" class="project-card__corner-label">
+				<span class="project-card__corner-label-text">
+					{{ t('project.caseComingSoon') }}
+				</span>
+			</span>
 
 			<div class="project-card__content">
 				<div class="project-card__meta">
 					<p class="project-card__year" data-project-shared="year">{{ project.year }}</p>
-					<Tag v-if="!casePublished" size="sm">
-						{{ t('project.caseComingSoon') }}
-					</Tag>
 				</div>
 				<h3 class="project-card__title" data-project-shared="title">{{ project.title }}</h3>
 				<p class="project-card__description" data-project-shared="intro">
@@ -222,6 +224,6 @@ watch(() => props.interactive, (interactive) => {
 onUnmounted(() => {
 	cursorFollowIndicator?.cleanup()
 	unavailableShakeTimeline?.kill()
-	gsap.killTweensOf(hoverSurface.value)
+	if (hoverSurface.value) gsap.killTweensOf(hoverSurface.value)
 })
 </script>

@@ -2,13 +2,11 @@
 	<header
 		ref="header"
 		class="site-header fixed fixed-nav"
-		:class="{
-			'site-header--hidden': isInitiallyHidden,
-			'site-header--overlay-active': overlayActive
-		}"
+		:class="{ 'site-header--hidden': isInitiallyHidden }"
 	>
 		<SiteNav
 			:overlay-active="overlayActive"
+			:section-tracking-suspended="sectionTrackingSuspended"
 			@overlay-scroll-top="emit('overlay-scroll-top')"
 		/>
 	</header>
@@ -23,9 +21,11 @@ import SiteNav from './SiteNav.vue'
 const props = withDefaults(defineProps<{
 	visible?: boolean
 	overlayActive?: boolean
+	sectionTrackingSuspended?: boolean
 }>(), {
 	visible: true,
-	overlayActive: false
+	overlayActive: false,
+	sectionTrackingSuspended: false
 })
 const emit = defineEmits<{
 	'overlay-scroll-top': []

@@ -1,5 +1,11 @@
 @use "../abstracts" as *;
 
+$project-card-content-share: 40%;
+$mobile-project-card-width: min(84vw, calc(72svh * 0.72));
+$mobile-project-card-height: min(72svh, 680px);
+$mobile-project-card-radius: 1.5rem;
+$mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
+
 .work-section {
 	// Exhibition composition controls.
 	--exhibition-card-width: min(42vw, 620px, calc(74svh * 0.72));
@@ -24,13 +30,13 @@
 	--exhibition-active-radius: 140;
 
 	position: relative;
-	height: 100svh;
+	height: var(--viewport-height-dynamic);
 	overflow: clip;
 
 	&__stage {
 		position: relative;
 		width: 100%;
-		height: 100svh;
+		height: var(--viewport-height-dynamic);
 		overflow: hidden;
 		isolation: isolate;
 	}
@@ -90,12 +96,13 @@
 
 .project-card {
 	--project-card-color: var(--color-secondary);
-	--project-card-media-start: 40%;
+	--project-card-media-start: #{$project-card-content-share};
 	--project-card-accent: color-mix(
 		in srgb,
 		var(--project-card-color) 28%,
 		var(--color-white)
 	);
+	--project-card-corner-label: #e32636;
 
 	position: absolute;
 	top: 50%;
@@ -129,6 +136,44 @@
 		overflow: hidden;
 		background: var(--project-card-color);
 		transform-origin: center;
+	}
+
+	&__corner-label {
+		position: absolute;
+		inset-block-start: 0;
+		inset-inline-end: 0;
+		z-index: 4;
+		display: block;
+		width: clamp(6.5rem, 8vw, 7rem);
+		aspect-ratio: 1;
+		overflow: hidden;
+		background: var(--project-card-corner-label);
+		clip-path: polygon(0 0, 100% 0, 100% 100%);
+		pointer-events: none;
+	}
+
+	&__corner-label-text {
+		@include type-role(label);
+
+		position: absolute;
+		inset-block-start: 1.3rem;
+		inset-inline-end: 0.4rem;
+		display: block;
+		width: 3.5rem;
+		color: var(--color-white);
+		font-weight: var(--font-weight-semibold);
+		line-height: var(--line-height-tight);
+		text-align: center;
+
+		transform: rotate(45deg);
+		transform-origin: center;
+
+		@include respond(sm) {
+			inset-block-start: 2.2rem;
+			inset-inline-end: -1rem;
+			width: 7.5rem;
+			white-space: nowrap;
+		}
 	}
 
 	&__number {
@@ -182,12 +227,11 @@
 	}
 
 	&__description {
-		@include type-role(body-small);
-
+		font-size: var(--font-size-md);
 		display: -webkit-box;
 		margin-block-start: var(--space-2);
 		overflow: hidden;
-		line-height: var(--line-height-tight);
+		line-height: var(--line-height-normal);
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 2;
 	}
@@ -325,11 +369,15 @@
 		inset: 0;
 		z-index: 4;
 		overflow-y: auto;
-		padding-block-start: clamp(12rem, 16vh, 12rem);
+		padding-block-start: clamp(8rem, 12vh, 8rem);
 			//clamp(1.5rem, 7vw, 8rem)
 			//clamp(9rem, 16vh, 12rem);
 		background: var(--project-layer-background);
 		color: var(--color-primary);
+
+		@include respond(sm) {
+			padding-block-start: clamp(12rem, 16vh, 12rem);
+		}
 	}
 
 	&__media {
@@ -456,6 +504,7 @@
 
 	&__card {
 		--project-stack-color: var(--color-secondary);
+		--project-card-corner-label: #e32636;
 		--project-stack-offset: 0px;
 		--project-stack-scale: 1;
 		--project-stack-hover-scale: 1;
@@ -568,11 +617,6 @@
 		overflow: hidden;
 	}
 
-	&__status {
-		display: block;
-		margin-block-end: var(--space-3);
-	}
-
 	&__type,
 	&__title,
 	&__summary,
@@ -587,12 +631,12 @@
 	}
 
 	&__summary {
-		@include type-role(body-small);
-
+		//@include type-role(body-small);
+		font-size: var(--font-size-md);
 		display: -webkit-box;
 		//margin-block-start: var(--space-6);
 		overflow: hidden;
-		line-height: var(--line-height-tight);
+		line-height: var(--line-height-normal);
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 3;
 	}
@@ -627,6 +671,12 @@
 .project-nav {
 	padding-block: var(--case-section-space);
 
+	&__row {
+		@include respond(md) {
+			margin-inline: 0;
+		}
+	}
+
 	&__divider {
 		margin-block-end: var(--case-section-space);
 		background-color: var(--color-primary);
@@ -654,7 +704,7 @@
 @media (prefers-reduced-motion: no-preference) {
 	.work-section {
 		@include respond(lg, down) {
-			height: calc(100svh + var(--work-scroll-distance, 0px));
+			height: calc(var(--viewport-height-dynamic) + var(--work-scroll-distance, 0px));
 			overflow: visible;
 
 			&__stage {
@@ -671,9 +721,9 @@
 
 .work-section {
 	@include respond(md, down) {
-		--exhibition-card-width: min(72vw, calc(64svh * 0.72));
-		--exhibition-card-height: min(64svh, 620px);
-		--exhibition-card-spacing: 97;
+		--exhibition-card-width: #{$mobile-project-card-width};
+		--exhibition-card-height: #{$mobile-project-card-height};
+		--exhibition-card-spacing: 102;
 		--exhibition-card-rotation: 14;
 		--exhibition-rotation-scale: 0.97;
 		--exhibition-perspective: 950px;
@@ -690,7 +740,13 @@
 
 .project-card {
 	@include respond(md, down) {
-		border-radius: 1.5rem;
+		border-radius: $mobile-project-card-radius;
+
+		&__content {
+			top: $mobile-project-card-inset;
+			right: $mobile-project-card-inset;
+			left: $mobile-project-card-inset;
+		}
 
 		&__number {
 			top: var(--space-6);
@@ -702,39 +758,60 @@
 
 .project-stack-navigator {
 	@include respond(md, down) {
-		--project-stack-card-height: clamp(30rem, 120vw, 38rem);
+		--project-stack-card-height: #{$mobile-project-card-height};
 
-		width: 100%;
+		width: min(100%, #{$mobile-project-card-width});
 
 		&__card {
 			grid-template-columns: 1fr;
-			grid-template-rows: minmax(0, 1.2fr) minmax(0, 1fr);
+			grid-template-rows:
+				#{$project-card-content-share}
+				minmax(0, 1fr);
 			grid-template-areas:
-				"media"
-				"content";
-			padding: var(--space-4);
+				"content"
+				"media";
+			padding: 0;
+			border-radius: $mobile-project-card-radius;
 		}
 
 		&__visual {
 			aspect-ratio: auto;
-			border-radius: clamp(1rem, 1.5vw, 1.75rem);
+			border-radius: 0;
 		}
 
 		&__content {
-			padding: var(--space-5) var(--space-2) var(--space-2);
+			justify-content: flex-start;
+			padding: $mobile-project-card-inset;
+		}
+
+		&__year {
+			@include type-role(label);
+
+			display: block;
+			font-weight: var(--font-weight-medium);
+			line-height: var(--line-height-label);
+			letter-spacing: var(--letter-spacing-label);
+			text-transform: none;
 		}
 
 		&__title {
-			font-size: clamp(2rem, 12vw, 3.5rem);
+			@include type-role(heading-small);
+
+			margin-block-start: var(--space-1);
+			font-family: var(--heading-font);
+			font-weight: 800;
 		}
 
 		&__summary {
-			margin-block-start: var(--space-4);
+			margin-block-start: var(--space-2);
 			-webkit-line-clamp: 2;
 		}
 
 		&__tags {
-			display: none;
+			display: flex;
+			gap: var(--space-2);
+			margin-block-start: var(--space-4);
+			padding-block-start: 0;
 		}
 	}
 }
@@ -742,19 +819,19 @@
 @media (prefers-reduced-motion: reduce) {
 	.work-section {
 		height: auto;
-		min-height: 100svh;
+		min-height: var(--viewport-height-dynamic);
 		overflow: visible;
 
 		&__stage {
 			height: auto;
-			min-height: 100svh;
+			min-height: var(--viewport-height-dynamic);
 			overflow: visible;
 		}
 
 		&__title-wrapper {
 			position: sticky;
 			top: 0;
-			height: 100svh;
+			height: var(--viewport-height-dynamic);
 		}
 
 		&__exhibition {
@@ -763,7 +840,7 @@
 			flex-direction: column;
 			gap: 20svh;
 			padding-block: 20svh;
-			margin-top: -100svh;
+			margin-top: calc(var(--viewport-height-dynamic) * -1);
 			perspective: none;
 		}
 

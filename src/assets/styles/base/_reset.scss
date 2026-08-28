@@ -27,7 +27,7 @@ ol[role='list'] {
 
 /* Set core body defaults */
 body {
-	min-height: 100vh;
+	min-height: var(--viewport-height-dynamic);
 	line-height: 1.5;
 	margin: 0;
 }

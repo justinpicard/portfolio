@@ -247,20 +247,18 @@
 	pointer-events: none;
 
 	&__close,
-	&__title,
-	&__section-nav {
-		position: absolute;
-		top: var(--space-8);
-	}
-
-	&__close {
+	&__project-pill {
 		top: var(--space-6);
-		left: var(--page-gutter);
-		pointer-events: auto;
+		position: absolute;
 
 		@include respond(sm) {
 			top: var(--space-8);
 		}
+	}
+
+	&__close {
+		left: var(--page-gutter);
+		pointer-events: auto;
 	}
 
 	&__close-control {
@@ -314,54 +312,31 @@
 		}
 	}
 
-	&__title {
-		left: 50%;
-		display: flex;
-		width: calc(100vw - 17rem);
-		height: 2.5rem;
-		align-items: center;
-		justify-content: center;
-		transform: translateX(-50%);
-
-		@include respond(sm) {
-			width: calc(100vw - 24rem);
-		}
-
-		.role {
-			min-width: 0;
-			max-width: 100%;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-		}
-	}
-
-	&__title-window {
-		position: relative;
-		display: block;
-		width: 100%;
-		text-align: center;
-	}
-
-	&__title-layer {
-		display: block;
-		width: 100%;
-		white-space: nowrap;
-
-		&--incoming {
-			position: absolute;
-			top: 0;
-			left: 0;
-		}
-	}
-
-	&__title-char {
-		display: inline-block;
-	}
-
-	&__section-nav {
+	&__project-pill {
 		right: var(--page-gutter);
-		pointer-events: auto;
+		pointer-events: none;
+	}
+
+	&__project-pill &__pill {
+		visibility: visible;
+		pointer-events: none;
+	}
+
+	&__pill &__pill-panel {
+		width: max-content;
+		min-width: 0;
+	}
+
+	&__pill &__pill-content {
+		position: relative;
+		inset: auto;
+		cursor: default;
+		pointer-events: none;
+	}
+
+	&__pill-title {
+		display: block;
+		white-space: nowrap;
 	}
 }
 
