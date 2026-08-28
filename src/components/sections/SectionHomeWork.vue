@@ -1,7 +1,7 @@
 <template>
 	<section class="section-layout section-layout--stage work-section" id="work" ref="root">
 		<div class="work-section__stage" ref="stage">
-			<div class="work-section__title-wrapper" aria-hidden="true">
+			<div class="work-section__title-wrapper">
 				<div class="work-section__title-inner">
 					<h2 class="work-section__title huge-title" ref="titleRef">{{ t('home.workLabel') }}</h2>
 				</div>
@@ -576,7 +576,8 @@ function setupTitleReveal() {
 
 	splitTitle = new SplitText(titleRef.value, {
 		type: 'chars',
-		charsClass: 'split-display-char'
+		charsClass: 'split-display-char',
+		aria: 'auto'
 	})
 
 	wrapSplitElements(splitTitle.chars, 'split-display-char-wrapper')

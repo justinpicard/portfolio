@@ -60,10 +60,6 @@ export default {
 		closeLabel: 'Close project',
 		imageAlt: '{title} project image {number}'
 	},
-	cv: {
-		title: 'Curriculum Vitae',
-		placeholder: 'CV content will be added later.'
-	},
 	footer: {
 		eyebrow: 'Thanks for visiting',
 		title: 'Say hi.',
@@ -74,7 +70,6 @@ export default {
 	accessibility: {
 		scrollDown: 'SCROLL • SCROLL • SCROLL •',
 		scrollToAbout: 'Scroll to the About section',
-		closeOverlay: 'Close overlay',
 		avatarAlt: 'Portrait of Justin Picard',
 		lifePhotoAlts: {
 			nancyPortrait: 'Portrait of Justin Picard',
@@ -83,7 +78,7 @@ export default {
 			empireStateBuilding: 'View from the Empire State Building in New York',
 			learningSpanish: 'A spanish childrens book',
 			pintxos: 'Pitxos in a bar in Bilbao',
-			randomPhoto: '...',
+			randomPhoto: 'Basketball game at the Madison Square Garden in New York',
 			berlinArchitecture: 'Photo of the Fernsehturm in Berlin, taken from a low perspective angle',
 			mirrorSelfie: 'Selfie from below in The Summit in New York',
 			middelburg: 'Lange Jan church tower in Middelburg, Zeeland',
@@ -99,8 +94,5 @@ export default {
 		unexpectedTitle: 'Something went wrong',
 		unexpectedMessage: 'The portfolio could not be displayed. Please try again or return to the homepage.',
 		retry: 'Try again'
-	},
-	pages: {
-		resumeTitle: 'My resume'
 	}
 }

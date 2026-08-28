@@ -50,15 +50,6 @@ export const routes = [
 		})
 	},
 	{
-		path: localizedPath('/resume'),
-		name: "resume",
-		meta: {
-			titleKey: 'pages.resumeTitle',
-			indexable: false
-		},
-		component: () => import('./views/Resume.vue')
-	},
-	{
 		path: localizedPath('/:pathMatch(.*)*'),
 		name: '404notfound',
 		meta: {

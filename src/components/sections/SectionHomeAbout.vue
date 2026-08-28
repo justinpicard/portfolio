@@ -7,8 +7,8 @@
 					class="about-text d-flex flex-column col-12 lg:col-8 lg:offset-2 mb-3"
 					ref="aboutText"
 				>
-					<p class="about-section__eyebrow eyebrow mb-8 text-secondary" ref="aboutEyebrow">{{ t('home.aboutLabel') }}</p>
-					<h2 class="about-section__title heading-font mb-8 md:mb-16" ref="aboutTitle">
+					<h2 class="about-section__eyebrow eyebrow font-body mb-8 text-secondary" ref="aboutLabel">{{ t('home.aboutLabel') }}</h2>
+					<p class="about-section__title heading-font mb-8 md:mb-16" ref="aboutIntro">
 						{{ about.greeting }}.
 						<span class="wave">👋🏼</span>
 						{{ about.introduction }}
@@ -19,7 +19,7 @@
 						>
 							{{ paragraph }}
 						</span>
-					</h2>
+					</p>
 				</div>
 			</div>
 		</div>
@@ -42,8 +42,8 @@ const { locale, t } = useI18n()
 const { about } = usePortfolioContent()
 const root = ref<HTMLElement | null>(null)
 const aboutText = ref<HTMLElement | null>(null)
-const aboutEyebrow = ref<HTMLParagraphElement | null>(null)
-const aboutTitle = ref<HTMLHeadingElement | null>(null)
+const aboutLabel = ref<HTMLHeadingElement | null>(null)
+const aboutIntro = ref<HTMLParagraphElement | null>(null)
 let aboutSplits: SplitText[] = []
 let ctx: gsap.Context | undefined
 let isMounted = false
@@ -56,10 +56,10 @@ const ABOUT_EYEBROW_REVEAL_DURATION = 0.06
 const ABOUT_EYEBROW_REVEAL_STAGGER_AMOUNT = 0.12
 const ABOUT_EYEBROW_REVEAL_START = 'top 72%'
 const ABOUT_EYEBROW_REVEAL_END = 'bottom 60%'
-const ABOUT_HEADING_REVEAL_DURATION = 0.1
-const ABOUT_HEADING_REVEAL_STAGGER_AMOUNT = 1.1
-const ABOUT_HEADING_REVEAL_START = 'top 72%'
-const ABOUT_HEADING_REVEAL_END = 'bottom 60%'
+const ABOUT_INTRO_REVEAL_DURATION = 0.1
+const ABOUT_INTRO_REVEAL_STAGGER_AMOUNT = 1.1
+const ABOUT_INTRO_REVEAL_START = 'top 72%'
+const ABOUT_INTRO_REVEAL_END = 'bottom 60%'
 const COMPACT_OR_TOUCH_QUERY = '(max-width: 63.999rem), (hover: none) and (pointer: coarse)'
 const ABOUT_TOUCH_INITIAL_Y_PERCENT = 24
 
@@ -102,7 +102,7 @@ async function initAboutReveal() {
 	if (!isMounted || requestId !== revealRequestId) return
 
 	ctx = gsap.context(() => {
-		if (!aboutText.value || !aboutEyebrow.value || !aboutTitle.value) return
+		if (!aboutText.value || !aboutLabel.value || !aboutIntro.value) return
 		const useTouchReveal = window.matchMedia(COMPACT_OR_TOUCH_QUERY).matches
 
 		ScrollTrigger.create({
@@ -120,20 +120,20 @@ async function initAboutReveal() {
 			return
 		}
 
-		const eyebrowSplit = new SplitText(aboutEyebrow.value, {
+		const labelSplit = new SplitText(aboutLabel.value, {
 			type: useTouchReveal ? 'words' : 'words,chars',
 			wordsClass: 'about-section__word',
 			charsClass: 'about-section__char'
 		})
-		const headingSplit = new SplitText(aboutTitle.value, {
+		const introSplit = new SplitText(aboutIntro.value, {
 			type: useTouchReveal ? 'words' : 'words,chars',
 			wordsClass: 'about-section__word',
 			charsClass: 'about-section__char'
 		})
-		aboutSplits = [eyebrowSplit, headingSplit]
-		const eyebrowTargets = useTouchReveal ? eyebrowSplit.words : eyebrowSplit.chars
-		const headingTargets = useTouchReveal ? headingSplit.words : headingSplit.chars
-		const revealTargets = [...eyebrowTargets, ...headingTargets]
+		aboutSplits = [labelSplit, introSplit]
+		const labelTargets = useTouchReveal ? labelSplit.words : labelSplit.chars
+		const introTargets = useTouchReveal ? introSplit.words : introSplit.chars
+		const revealTargets = [...labelTargets, ...introTargets]
 
 		gsap.set(revealTargets, {
 			opacity: ABOUT_CHARACTER_INITIAL_OPACITY,
@@ -147,7 +147,7 @@ async function initAboutReveal() {
 		})
 		gsap.set(aboutText.value, { visibility: 'visible' })
 
-		gsap.to(eyebrowTargets, {
+		gsap.to(labelTargets, {
 			opacity: 1,
 			...(useTouchReveal
 				? { yPercent: 0 }
@@ -159,7 +159,7 @@ async function initAboutReveal() {
 			},
 			ease: 'none',
 			scrollTrigger: {
-				trigger: aboutEyebrow.value,
+				trigger: aboutLabel.value,
 				start: ABOUT_EYEBROW_REVEAL_START,
 				end: ABOUT_EYEBROW_REVEAL_END,
 				scrub: true,
@@ -167,21 +167,21 @@ async function initAboutReveal() {
 			}
 		})
 
-		gsap.to(headingTargets, {
+		gsap.to(introTargets, {
 			opacity: 1,
 			...(useTouchReveal
 				? { yPercent: 0 }
 				: { filter: 'blur(0px)', scale: 1 }),
-			duration: ABOUT_HEADING_REVEAL_DURATION,
+			duration: ABOUT_INTRO_REVEAL_DURATION,
 			stagger: {
-				amount: ABOUT_HEADING_REVEAL_STAGGER_AMOUNT,
+				amount: ABOUT_INTRO_REVEAL_STAGGER_AMOUNT,
 				from: 'start'
 			},
 			ease: 'none',
 			scrollTrigger: {
-				trigger: aboutTitle.value,
-				start: ABOUT_HEADING_REVEAL_START,
-				end: ABOUT_HEADING_REVEAL_END,
+				trigger: aboutIntro.value,
+				start: ABOUT_INTRO_REVEAL_START,
+				end: ABOUT_INTRO_REVEAL_END,
 				scrub: true,
 				invalidateOnRefresh: true
 			}

@@ -60,10 +60,6 @@ export default {
 		closeLabel: 'Project sluiten',
 		imageAlt: '{title} projectafbeelding {number}'
 	},
-	cv: {
-		title: 'Curriculum Vitae',
-		placeholder: 'Cv-inhoud wordt later toegevoegd.'
-	},
 	footer: {
 		eyebrow: 'Bedankt voor je bezoek',
 		title: 'Zeg hallo.',
@@ -74,7 +70,6 @@ export default {
 	accessibility: {
 		scrollDown: 'SCROLL • SCROLL • SCROLL •',
 		scrollToAbout: 'Scrol naar het onderdeel Over mij',
-		closeOverlay: 'Overlay sluiten',
 		avatarAlt: 'Portret van Justin Picard',
 		lifePhotoAlts: {
 			nancyPortrait: 'Portrait of Justin Picard',
@@ -99,8 +94,5 @@ export default {
 		unexpectedTitle: 'Er ging iets mis',
 		unexpectedMessage: 'Het portfolio kon niet worden weergegeven. Probeer het opnieuw of ga terug naar de homepage.',
 		retry: 'Opnieuw proberen'
-	},
-	pages: {
-		resumeTitle: 'Mijn cv'
 	}
 }

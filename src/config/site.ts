@@ -33,15 +33,11 @@ export const indexableRoutePaths = [
 ] as const satisfies ReadonlyArray<Record<Locale, string>>
 
 export const errorRoutePath = '/404'
-const nonIndexableRoutePaths = siteConfig.supportedLocales.map(locale => (
-	locale === siteConfig.defaultLocale ? '/resume' : `/${locale}/resume`
-))
 
 export const prerenderRoutes: string[] = [
 	...indexableRoutePaths.flatMap(routePaths => (
 		siteConfig.supportedLocales.map(locale => routePaths[locale])
 	)),
-	...nonIndexableRoutePaths,
 	errorRoutePath
 ]
 

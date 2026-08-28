@@ -78,13 +78,14 @@
 								</a>
 							</li>
 							<li>
-								<router-link
-									:to="{ name: 'resume', params: getLocaleParams(currentLocale) }"
+								<a
+									:href="RESUME_PDF_HREF || undefined"
+									:aria-disabled="RESUME_PDF_HREF ? undefined : 'true'"
 									data-stagger-link
 									class="d-flex items-center"
 								>
 									<span data-stagger-link-container>{{ t('footer.resume') }}</span><span class="ml-1 mt-1">↓</span>
-								</router-link>
+								</a>
 							</li>
 						</ul>
 					</nav>
@@ -112,8 +113,6 @@
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePortfolioContent } from '../composables/usePortfolioContent'
-import { useLocalizedRoute } from '../composables/useLocalizedRoute'
-import { getLocaleParams } from '../i18n'
 import {
 	gsap,
 	prefersReducedMotion,
@@ -126,7 +125,8 @@ import Button from './Button.vue'
 
 const { locale, t } = useI18n()
 const { footer } = usePortfolioContent()
-const { currentLocale } = useLocalizedRoute()
+// Set this to the public PDF path once the standalone resume is available.
+const RESUME_PDF_HREF = ''
 const linkList = ref<HTMLUListElement | null>(null)
 const footerRoot = ref<HTMLElement | null>(null)
 const footerDivider = ref<HTMLElement | null>(null)

@@ -99,7 +99,6 @@ import {
 	gsap,
 	prefersReducedMotion,
 	registerGsapPlugins,
-	ScrollTrigger,
 	SplitText
 } from '../../utils/animations/gsap'
 import {

@@ -7,16 +7,6 @@
 		]"
 		:style="imageStyles"
 	>
-		<source
-			v-if="!useFallbackOnly"
-			:srcset="formatSource('avif')"
-			type="image/avif"
-		>
-		<source
-			v-if="!useFallbackOnly"
-			:srcset="formatSource('webp')"
-			type="image/webp"
-		>
 		<img
 			:src="fallbackSource"
 			:alt="alt"
@@ -24,16 +14,13 @@
 			:height="height"
 			:loading="loading"
 			:decoding="decoding"
-			@error="handleImageError"
 		>
 	</picture>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 import type { CSSProperties } from 'vue'
-
-type ImageFormat = 'avif' | 'webp' | 'jpg' | 'jpeg' | 'png'
 
 const props = withDefaults(defineProps<{
 	src: string
@@ -57,19 +44,7 @@ const props = withDefaults(defineProps<{
 	fallbackFormat: 'jpg'
 })
 
-const formatSource = (format: ImageFormat) => `${props.src}.${format}`
-const fallbackSource = computed(() => formatSource(props.fallbackFormat))
-const useFallbackOnly = ref(false)
-
-watch(() => props.src, () => {
-	useFallbackOnly.value = false
-})
-
-const handleImageError = () => {
-	if (useFallbackOnly.value) return
-
-	useFallbackOnly.value = true
-}
+const fallbackSource = computed(() => `${props.src}.${props.fallbackFormat}`)
 
 const toCssSize = (value?: number | string) => {
 	if (value === undefined) return undefined

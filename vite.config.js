@@ -65,10 +65,10 @@ function staticSeoFiles() {
 				source: [
 					'ErrorDocument 404 /404.html',
 					'RewriteEngine On',
-					'RewriteRule ^home/?$ / [R=302,L]',
+					'RewriteRule ^home/?$ / [R=301,L]',
 					...(MULTILINGUAL_ENABLED ? [] : [
-						'RewriteRule ^nl/?$ / [R=302,L]',
-						'RewriteRule ^nl/(.*)$ /$1 [R=302,L]'
+						'RewriteRule ^nl/?$ / [R=301,L]',
+						'RewriteRule ^nl/(.*)$ /$1 [R=301,L]'
 					]),
 					''
 				].join('\n')

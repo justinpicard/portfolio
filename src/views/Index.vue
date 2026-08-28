@@ -15,7 +15,6 @@
 		<div id="smooth-content" ref="smoothContent">
 			<div class="page-surface">
 				<SectionHomeHero
-					ref="hero"
 					:loading-screen="loadingScreen"
 					@intro-start="showHeader"
 				/>
@@ -46,7 +45,6 @@ import type { WorkOverlayLifecycle } from '../config/workOverlay'
 
 usePageSeo('home')
 
-const hero = ref<InstanceType<typeof SectionHomeHero> | null>(null)
 const loadingScreen = ref<InstanceType<typeof LoadingScreen> | null>(null)
 const smoothWrapper = ref<HTMLElement | null>(null)
 const smoothContent = ref<HTMLElement | null>(null)

@@ -28,8 +28,6 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 	let isTickerActive = false
 	let pointerX = 0
 	let pointerY = 0
-	let previousPointerX = 0
-	let previousPointerY = 0
 	let targetOffsetX = 0
 	let targetOffsetY = 0
 	let offsetX = 0
@@ -117,8 +115,6 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 		centerOffsetY = elements.visualElement.offsetHeight / 2
 		pointerX = pointerPosition.x
 		pointerY = pointerPosition.y
-		previousPointerX = pointerX
-		previousPointerY = pointerY
 		targetOffsetX = 0
 		targetOffsetY = 0
 		offsetX = 0
@@ -218,8 +214,6 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 		const pointerPosition = getPointerPosition(event.clientX, event.clientY)
 		const deltaX = pointerPosition.x - pointerX
 		const deltaY = pointerPosition.y - pointerY
-		previousPointerX = pointerX
-		previousPointerY = pointerY
 		pointerX = pointerPosition.x
 		pointerY = pointerPosition.y
 		targetOffsetX = gsap.utils.clamp(-MAX_OFFSET, MAX_OFFSET, -deltaX * VELOCITY_MULTIPLIER)
