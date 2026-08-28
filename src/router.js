@@ -72,7 +72,12 @@ export const routes = [
 export const routerOptions = {
 	base: import.meta.env.BASE_URL,
 	routes,
-	scrollBehavior() {
+	scrollBehavior(_to, from, savedPosition) {
+		if (savedPosition) return savedPosition
+
+		// Preserve native restoration after reloads and discarded-tab restores.
+		if (!from.name) return false
+
 		return { top: 0 }
 	}
 }
