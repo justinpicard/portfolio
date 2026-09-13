@@ -6,7 +6,7 @@
 		>
 			<div class="container">
 				<div class="row">
-					<div class="project-case-study__introduction-content">
+					<div class="project-case-study__introduction-content case-block--width-narrow case-block--align-center">
 						<p
 							v-for="(paragraph, index) in caseStudy.introduction"
 							:key="`introduction-${index}`"
@@ -31,6 +31,9 @@
 					<div
 						v-if="section.title"
 						class="project-case-study__section-heading"
+						:class="{
+							'case-block--width-narrow case-block--align-center': section.isFirst
+						}"
 					>
 						<h3>{{ section.title }}</h3>
 					</div>
@@ -60,13 +63,30 @@ const props = defineProps<{
 	projectSlug: ProjectSlug
 }>()
 
-const renderedSections = computed(() => props.caseStudy.sections.map((section) => ({
-	id: section.id,
-	title: section.title,
-	spacing: section.spacing ?? 'default',
-	blocks: section.blocks ?? [{
+const renderedSections = computed(() => props.caseStudy.sections.map((section, sectionIndex) => {
+	const isFirst = sectionIndex === 0
+	const blocks: CaseBlock[] = section.blocks ?? [{
 		type: 'text',
 		paragraphs: section.paragraphs
-	} satisfies CaseBlock]
-})))
+	}]
+	const firstTextBlockIndex = isFirst
+		? blocks.findIndex(block => block.type === 'text')
+		: -1
+
+	return {
+		id: section.id,
+		title: section.title,
+		spacing: section.spacing ?? 'default',
+		isFirst,
+		blocks: blocks.map((block, blockIndex) => (
+			blockIndex === firstTextBlockIndex
+				? {
+					...block,
+					width: block.width ?? 'narrow',
+					align: block.align ?? 'center'
+				}
+				: block
+		))
+	}
+}))
 </script>

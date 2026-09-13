@@ -82,6 +82,7 @@ export type CaseColumn = {
 
 export type CaseColumnsBlock = CaseBlockLayout & {
 	type: 'columns'
+	caption?: string
 	columns: [CaseColumn, ...CaseColumn[]]
 }
 

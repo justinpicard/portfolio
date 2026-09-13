@@ -1,5 +1,5 @@
 <template>
-	<div class="case-columns-block">
+	<component :is="block.caption ? 'figure' : 'div'" class="case-columns-block">
 		<div class="case-columns-block__grid">
 			<div
 				v-for="(column, columnIndex) in block.columns"
@@ -19,12 +19,16 @@
 					<CaseMediaBlock
 						v-else
 						:block="columnBlock"
+						:inside-shared-figure="Boolean(block.caption)"
 						class="case-block case-block--contained"
 					/>
 				</template>
 			</div>
 		</div>
-	</div>
+		<figcaption v-if="block.caption" class="case-columns-block__caption case-media-caption">
+			{{ block.caption }}
+		</figcaption>
+	</component>
 </template>
 
 <script setup lang="ts">

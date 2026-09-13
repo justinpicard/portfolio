@@ -1,5 +1,6 @@
 <template>
-	<figure
+	<component
+		:is="rootElement"
 		class="case-media-block"
 		:class="`case-media-block--${block.presentation ?? 'natural'}`"
 	>
@@ -10,10 +11,10 @@
 			:fallback-format="block.format"
 			:position="mediaPosition"
 		/>
-		<figcaption v-if="block.caption" class="case-media-block__caption">
+		<figcaption v-if="block.caption" class="case-media-block__caption case-media-caption">
 			{{ block.caption }}
 		</figcaption>
-	</figure>
+	</component>
 </template>
 
 <script setup lang="ts">
@@ -23,7 +24,12 @@ import BaseImage from '../../base/BaseImage.vue'
 
 const props = defineProps<{
 	block: CaseMediaBlock
+	insideSharedFigure?: boolean
 }>()
+
+const rootElement = computed(() => (
+	props.insideSharedFigure && !props.block.caption ? 'div' : 'figure'
+))
 
 const mediaPositions = {
 	center: 'center center',

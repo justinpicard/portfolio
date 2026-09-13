@@ -103,6 +103,7 @@
 	&__image,
 	&__image img {
 		width: 100%;
+		border-radius: clamp(1rem, 2.5vw, 2rem);
 	}
 
 	&--wide &__image,
@@ -136,14 +137,14 @@
 	&--natural &__image img {
 		height: auto;
 	}
+}
 
-	&__caption {
-		@include type-role(label);
+.case-media-caption {
+	@include type-role(ui);
 
-		display: block;
-		margin-block-start: var(--space-3);
-		opacity: 0.65;
-	}
+	display: block;
+	margin-block-start: var(--space-6);
+	text-align: center;
 }
 
 .case-columns-block {

@@ -1,9 +1,5 @@
 import type { ProjectContent } from '../../types'
 
-const paragraphOne = 'Finding musicians online often means relying on outdated platforms, scattered communities or services that add unnecessary friction to making contact. I saw an opportunity for a simpler approach, focused on helping musicians discover relevant people and get in touch with as little friction as possible.'
-const paragraphTwo = 'Voluptatum ratione dolor cupiditate ipsum praesentium dolor dolore mollitia dolores ut libero laudantium non in aut. Id nisi qui quibusdam velit non a fugit itaque necessitatibus rerum dolorum et enim vel.'
-const paragraphThree = 'Et sit repellat voluptas debitis et iusto quia vero corporis cum in qui nesciunt ipsum. Minima voluptate perspiciatis sapiente deleniti in et et est optio. Consectetur cupiditate sint saepe voluptates corporis enim excepturi. Sunt ad laudantium odio sit necessitatibus cum hic minima velit reprehenderit non ipsa impedit quis. Animi quo qui a neque sequi ut eum distinctio sed eos consequuntur.'
-
 const muzimatch = {
 	slug: 'muzimatch',
 	title: 'MuziMatch',
@@ -24,19 +20,20 @@ const muzimatch = {
 		],
 		sections: [
 			{
-				id: 'overview',
+				id: 'problem',
 				title: 'Finding the right musicians is harder than it should be',
 				spacing: 'spacious',
 				blocks: [
 					{
 						type: 'text',
 						paragraphs: [
-							paragraphOne,
+							'Finding musicians online often means relying on outdated platforms, scattered communities or services that add unnecessary friction to making contact. I saw an opportunity for a simpler approach, focused on helping musicians discover relevant people and get in touch with as little friction as possible.',
 						]
 					},
-					{
+					{ // Images
 						type: 'columns',
 						width: 'full',
+						caption: 'The first version of MuziMatch focused on the core experience: discovering relevant listings and making it easy to get in touch.',
 						columns: [
 							{
 								emphasis: 'equal',
@@ -51,7 +48,7 @@ const muzimatch = {
 								emphasis: 'equal',
 								blocks: [{
 									type: 'media',
-									src: 'projects/muzimatch/muzimatch-thumb-horizontal@2x',
+									src: 'projects/muzimatch/muzimatch-listing-detail-early-version@2x',
 									alt: 'MuziMatch landscape project artwork',
 									presentation: 'landscape'
 								}]
@@ -62,11 +59,12 @@ const muzimatch = {
 						type: 'text',
 						width: 'narrow',
 						align: 'center',
+						title: 'Starting with an empty marketplace',
 						paragraphs: [
-							paragraphOne,
-							paragraphTwo
+							'(Cold start / launch)'
 						]
 					},
+					/**
 					{
 						type: 'media',
 						width: 'full',
@@ -94,8 +92,46 @@ const muzimatch = {
 							presentation: 'landscape'
 						}
 					}
+					**/
 				]
-			}
+			},
+			{
+				id: 'accountless',
+				title: 'Removing the account',
+				spacing: 'spacious',
+				blocks: [
+					{
+						type: 'text',
+						paragraphs: [
+							'(Accountless model + privacy)',
+						]
+					},
+				]
+			},
+			{
+				id: 'experience',
+				title: 'Designing the core experience',
+				spacing: 'spacious',
+				blocks: []
+			},
+			{
+				id: 'iteration',
+				title: 'From assumptions to evidence',
+				spacing: 'spacious',
+				blocks: []
+			},
+			{
+				id: 'outcome',
+				title: 'An evolving product',
+				spacing: 'spacious',
+				blocks: []
+			},
+			{
+				id: 'refelction',
+				title: 'What I\'m taking forward',
+				spacing: 'spacious',
+				blocks: []
+			},
 		]
 	}
 } satisfies ProjectContent
