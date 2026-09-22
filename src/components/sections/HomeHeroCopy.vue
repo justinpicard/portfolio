@@ -7,9 +7,15 @@
 			{{ hero.name }}
 		</component>
 		<div class="hero-divider" aria-hidden="true"></div>
-		<p class="hero-figure__role type-heading-small font-body font-regular mb-0">
-			{{ hero.role }}
-		</p>
+		<div class="hero-figure__role-group">
+			<p class="hero-figure__role type-heading-small font-body font-regular mb-0">
+				{{ hero.role }}
+			</p>
+			<p class="hero-figure__availability eyebrow font-body text-secondary">
+				<span class="hero-figure__availability-dot" aria-hidden="true"></span>
+				{{ hero.availability }}
+			</p>
+		</div>
 		<div class="hero-figure">
 			<slot name="media">
 				<div class="hero-figure__media"></div>

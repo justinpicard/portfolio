@@ -19,7 +19,7 @@
 				:style="getCardStyles(projectIndex, position)"
 				type="button"
 				:disabled="position !== 0 || interactionDisabled"
-				:tabindex="canOpenProject(projectIndex, position) ? 0 : -1"
+				:tabindex="canActivateProject(projectIndex, position) ? 0 : -1"
 				:aria-disabled="position === 0 && !isProjectPublished(projects[projectIndex])
 					? 'true'
 					: undefined"
@@ -30,7 +30,7 @@
 				@pointerleave="animateCardHover($event, position, false)"
 			>
 				<span
-					v-if="!isProjectPublished(projects[projectIndex])"
+					v-if="projects[projectIndex].caseStatus === 'coming-soon'"
 					class="project-card__corner-label"
 				>
 					<span class="project-card__corner-label-text">
@@ -183,7 +183,9 @@ const frontProject = computed(() => {
 })
 const cursorIndicatorText = computed(() => (
 	frontProject.value && !isProjectPublished(frontProject.value)
-		? t('project.caseComingSoonIndicator')
+		? t(frontProject.value.caseStatus === 'experiment'
+			? 'project.experimentIndicator'
+			: 'project.caseComingSoonIndicator')
 		: t('project.viewProjectIndicator')
 ))
 
@@ -205,10 +207,11 @@ function resetOrder() {
 	orderedProjectIndices.value = buildCircularOrder(props.currentProjectIndex)
 }
 
-function canOpenProject(projectIndex: number, position: number) {
+function canActivateProject(projectIndex: number, position: number) {
 	return position === 0
 		&& !interactionDisabled.value
-		&& isProjectPublished(props.projects[projectIndex])
+		&& (isProjectPublished(props.projects[projectIndex])
+			|| props.projects[projectIndex].caseStatus === 'experiment')
 }
 
 function getCardAriaLabel(projectIndex: number, position: number) {
@@ -218,7 +221,9 @@ function getCardAriaLabel(projectIndex: number, position: number) {
 
 	return isProjectPublished(project)
 		? t('project.openProject', { title: project.title })
-		: `${project.title}: ${t('project.caseComingSoon')}`
+		: `${project.title}: ${t(project.caseStatus === 'experiment'
+			? 'project.experiment'
+			: 'project.caseComingSoon')}`
 }
 
 function syncActiveCard() {

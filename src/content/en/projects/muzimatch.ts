@@ -61,20 +61,19 @@ const muzimatch = {
 						align: 'center',
 						title: 'Starting with an empty marketplace',
 						paragraphs: [
-							'(Cold start / launch)'
+							'A platform for finding musicians only works when there is something to find. I started with a small set of example listings, giving early visitors something to explore while I worked on attracting the first real users. As organic listings started appearing, MuziMatch gradually became a product shaped by its users rather than my assumptions.'
 						]
 					},
-					/**
 					{
 						type: 'media',
-						width: 'full',
-						src: 'projects/muzimatch/muzimatch_oproepen',
+						width: 'narrow',
+						src: 'projects/muzimatch/muzimatch_oproepen-demos',
 						format: 'png',
 						alt: 'MuziMatch interface',
-						caption: 'MuziMatch',
+						//caption: 'MuziMatch',
 						presentation: 'wide'
 					},
-					
+					/**
 					{
 						type: 'feature',
 						width: 'full',

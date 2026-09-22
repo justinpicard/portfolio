@@ -44,6 +44,8 @@ export default {
 		live: 'Live',
 		viewProject: 'Bekijk project',
 		viewProjectIndicator: 'BEKIJK PROJECT • BEKIJK PROJECT •',
+		experiment: 'Experiment',
+		experimentIndicator: 'EXPERIMENT • EXPERIMENT •',
 		caseStudyEyebrowLabel: 'Casestudy',
 		caseComingSoon: 'Case binnenkort beschikbaar',
 		caseComingSoonIndicator: 'CASE BINNENKORT • CASE BINNENKORT •',

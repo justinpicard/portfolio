@@ -9,7 +9,7 @@ export type ProjectSlug =
 	| 'charlie'
 	| 'sfvonline'
 
-export type ProjectCaseStatus = 'published' | 'coming-soon'
+export type ProjectCaseStatus = 'published' | 'coming-soon' | 'experiment'
 
 export type AboutContent = {
 	greeting: string
@@ -20,6 +20,7 @@ export type AboutContent = {
 export type HeroContent = {
 	name: string
 	role: string
+	availability: string
 	introduction: string
 }
 

@@ -65,7 +65,7 @@
 							data-project-metadata
 						>
 							<span class="eyebrow opacity-50">{{ t('project.type') }}</span>
-							<span class="text-md">{{ project.type }}</span>
+							<span class="text-md d-flex">{{ project.type }}</span>
 						</div>
 						<div
 							v-if="project.live"
@@ -74,12 +74,16 @@
 						>
 							<span class="eyebrow opacity-50">{{ t('project.live') }}</span>
 							<a
-								class="text-md text-primary"
+								:key="project.live"
+								ref="liveLink"
+								class="text-md text-primary d-flex items-center"
 								:href="project.live"
 								target="_blank"
 								rel="noopener noreferrer"
+								data-stagger-link
 							>
-								{{ displayLiveUrl }}
+								<span data-stagger-link-container>{{ displayLiveUrl }}</span>
+								<span aria-hidden="true" class="ml-1 mt-1">↗</span>
 							</a>
 						</div>
 					</div>
@@ -102,9 +106,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Project } from '../../content'
+import { initStaggerLinks, type StaggerLinksController } from '../../utils/animations/staggerLinks'
 import ProjectHeroMedia from './ProjectHeroMedia.vue'
 
 const props = defineProps<{
@@ -126,8 +131,26 @@ const intro = ref<HTMLElement | null>(null)
 const tags = ref<HTMLElement | null>(null)
 const metadata = ref<HTMLElement | null>(null)
 const divider = ref<HTMLElement | null>(null)
+const liveLink = ref<HTMLAnchorElement | null>(null)
+let staggerLinks: StaggerLinksController | undefined
+
+function cleanupLiveLinkAnimation() {
+	staggerLinks?.destroy()
+	staggerLinks = undefined
+}
+
+function setupLiveLinkAnimation() {
+	cleanupLiveLinkAnimation()
+	staggerLinks = liveLink.value ? initStaggerLinks(liveLink.value) : undefined
+}
+
+watch(liveLink, setupLiveLinkAnimation, { flush: 'post' })
+
+onBeforeUnmount(cleanupLiveLinkAnimation)
 
 defineExpose({
+	setupLiveLinkAnimation,
+	cleanupLiveLinkAnimation,
 	getMediaElement: () => media.value,
 	getSharedElements: () => ({
 		media: media.value,

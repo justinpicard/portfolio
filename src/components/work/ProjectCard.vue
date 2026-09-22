@@ -8,12 +8,13 @@ x<template>
 				'project-card--active': active,
 				'project-card--interactive': interactive,
 				'project-card--coming-soon': !casePublished,
+				'project-card--experiment': project.caseStatus === 'experiment',
 				'project-card--transition-hidden': transitionHidden
 			}
 		]"
 		:aria-label="cardAriaLabel"
-		:tabindex="canNavigate ? 0 : -1"
-		:role="canNavigate ? 'button' : undefined"
+		:tabindex="canActivate ? 0 : -1"
+		:role="canActivate ? 'button' : undefined"
 		:style="cardStyles"
 		data-project-card
 		@click="handleOpen"
@@ -31,7 +32,7 @@ x<template>
 					:position="project.thumbnailImagePosition ?? 'center center'"
 				/>
 			</div>
-			<span v-if="!casePublished" class="project-card__corner-label">
+			<span v-if="project.caseStatus === 'coming-soon'" class="project-card__corner-label">
 				<span class="project-card__corner-label-text">
 					{{ t('project.caseComingSoon') }}
 				</span>
@@ -118,16 +119,23 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const casePublished = computed(() => isProjectPublished(props.project))
-const canNavigate = computed(() => Boolean(props.interactive) && casePublished.value)
+const canActivate = computed(() => (
+	Boolean(props.interactive)
+	&& (casePublished.value || props.project.caseStatus === 'experiment')
+))
 const cardAriaLabel = computed(() => (
 	casePublished.value
 		? props.project.title
-		: `${props.project.title}: ${t('project.caseComingSoon')}`
+		: `${props.project.title}: ${t(props.project.caseStatus === 'experiment'
+			? 'project.experiment'
+			: 'project.caseComingSoon')}`
 ))
 const cursorIndicatorText = computed(() => (
 	casePublished.value
 		? t('project.viewProjectIndicator')
-		: t('project.caseComingSoonIndicator')
+		: t(props.project.caseStatus === 'experiment'
+			? 'project.experimentIndicator'
+			: 'project.caseComingSoonIndicator')
 ))
 const cardStyles = computed<CSSProperties>(() => (
 	props.project.overlayBackground

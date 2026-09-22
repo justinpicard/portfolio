@@ -83,6 +83,7 @@
 									:aria-disabled="RESUME_PDF_HREF ? undefined : 'true'"
 									data-stagger-link
 									class="d-flex items-center"
+									target="_blank"
 								>
 									<span data-stagger-link-container>{{ t('footer.resume') }}</span><span class="ml-1 mt-1">↓</span>
 								</a>
@@ -125,8 +126,7 @@ import Button from './Button.vue'
 
 const { locale, t } = useI18n()
 const { footer } = usePortfolioContent()
-// Set this to the public PDF path once the standalone resume is available.
-const RESUME_PDF_HREF = ''
+const RESUME_PDF_HREF = '/justin-picard_resume.pdf'
 const linkList = ref<HTMLUListElement | null>(null)
 const footerRoot = ref<HTMLElement | null>(null)
 const footerDivider = ref<HTMLElement | null>(null)

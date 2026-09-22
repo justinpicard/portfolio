@@ -4,6 +4,7 @@ import type { HeroContent } from '../types'
 const hero = {
 	name: 'Justin.',
 	role: 'Digital Product Designer',
+	availability: 'Open for work',
 	introduction: 'Ik ontwerp en bouw digitale producten met focus op productdesign, design systems en code.'
 } satisfies HeroContent
 

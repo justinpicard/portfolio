@@ -46,7 +46,7 @@ export const projectMedia = [
 	{
 		id: '4',
 		slug: 'charlie',
-		caseStatus: 'coming-soon',
+		caseStatus: 'experiment',
 		thumbnailImage: 'projects/charlie/charlie-thumb-vertical@2x',
 		landscapeThumbnailImage: 'projects/charlie/charlie-thumb-horizontal@2x',
 		heroImage: 'hz-university',

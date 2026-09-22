@@ -125,6 +125,11 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 		cursor: default;
 	}
 
+	&--experiment:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 4px;
+	}
+
 	&--transition-hidden {
 		visibility: hidden;
 	}
@@ -421,6 +426,10 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 		.split-line-wrapper,
 		.split-line {
 			display: block;
+		}
+
+		a {
+			text-decoration: none;
 		}
 	}
 

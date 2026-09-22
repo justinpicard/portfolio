@@ -8,7 +8,8 @@ const charlie = {
 		'Side project',
 		'Personal productivity',
 		'Nuxt',
-		'Work in progress'
+		'Work in progress',
+		'Experiment'
 	],
 	year: '2025 - Current',
 	job: 'Side project',

@@ -106,15 +106,34 @@
 		height: 100%;
 	}
 
-	.hero-figure__role {
+	.hero-figure__role-group {
 		grid-column: 1;
 		grid-row: 3;
 		justify-self: start;
 		align-self: start;
+	}
+
+	.hero-figure__role {
 		display: block;
 		overflow: hidden;
 		text-align: left;
 		text-transform: none;
+	}
+
+	.hero-figure__availability {
+		display: flex;
+		align-items: center;
+		gap: var(--space-4);
+		margin: var(--space-6) 0 0;
+	}
+
+	.hero-figure__availability-dot {
+		flex: 0 0 10px;
+		width: 10px;
+		height: 10px;
+		border-radius: var(--radius-full);
+		background-color: var(--color-secondary);
+		box-shadow: 0 0 10px 7px rgba($secondary, 0.25);
 	}
 
 	.hero-figure__intro {
@@ -196,7 +215,7 @@
 			min-height: 0;
 		}
 
-		.hero-figure__role {
+		.hero-figure__role-group {
 			grid-area: role;
 			justify-self: start;
 			align-self: start;

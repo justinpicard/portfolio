@@ -1916,8 +1916,11 @@ function splitMaskedLines(element: HTMLElement) {
 }
 
 function revertHeroRevealSplits() {
+	if (heroRevealSplits.length === 0) return
+
 	heroRevealSplits.forEach((split) => split.revert())
 	heroRevealSplits = []
+	projectHero.value?.setupLiveLinkAnimation()
 }
 
 function cleanupHeroReveal() {
@@ -2022,6 +2025,8 @@ function createCaseHeroReveal(includeProjectHeader = true) {
 	const dividerTargets = divider ? [divider] : []
 	const metadata = getHeroMetadataElements(heroElements)
 		.filter((element) => element !== eyebrow)
+	// Nested SplitText instances must be removed before the reveal replaces link markup.
+	projectHero.value?.cleanupLiveLinkAnimation()
 	const metadataReveals = metadata.flatMap((element) => (
 		Array.from(element.children)
 			.filter((child): child is HTMLElement => child instanceof HTMLElement)
