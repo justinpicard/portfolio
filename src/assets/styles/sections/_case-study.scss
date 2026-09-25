@@ -154,6 +154,7 @@
 .case-media-caption {
 	@include type-role(ui);
 
+	font-style: italic;
 	display: block;
 	margin-block-start: var(--space-6);
 	text-align: center;

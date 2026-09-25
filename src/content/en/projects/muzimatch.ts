@@ -23,10 +23,11 @@ const muzimatch = {
 				id: 'introvisual',
 				type: 'media',
 				width: 'full',
-				src: 'projects/muzimatch/muzimatch-listing-detail-early-version@2x',
+				src: 'projects/muzimatch/muzimatch-redesign-opening-visual@2x',
 				alt: 'MuziMatch interface',
 				presentation: 'wide',
-				spacing: 'spacious'
+				spacing: 'spacious',
+				caption: 'A glimpse of the Muzimatch redesign, which is currently in progress.',
 			},
 			{
 				id: 'problem',
