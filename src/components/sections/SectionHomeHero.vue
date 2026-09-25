@@ -307,15 +307,16 @@ onMounted(async () => {
 	const useCursorScrollIndicator = supportsCursorFollow()
 	const finalTitle = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-name')
 	const finalDivider = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-divider')
+	const finalAvailability = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-figure__availability')
 	const finalRole = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-figure__role')
 	const finalText = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-figure__intro')
-	if (!finalTitle || !finalDivider || !finalRole || !finalText) return
+	if (!finalTitle || !finalDivider || !finalRole || !finalText || !finalAvailability) return
 
 	scrollIndicatorFollow = useCursorFollowIndicator({
 		triggerElement: root,
 		wrapperElement: scrollIndicatorWrapper,
 		visualElement: scrollIndicatorElement,
-		suppressSelector: '.site-header a, .site-header button, .site-header [role="button"], .site-header .role'
+		suppressSelector: '.site-header a, .site-header button, .site-header [role="button"], .site-header .role, .hero-figure__availability[href]'
 	})
 	setupScrollIndicatorVelocity(scrollIndicatorVisualElement)
 
@@ -332,7 +333,7 @@ onMounted(async () => {
 
 		heroTimeline
 			.call(markHeroIntroStarted, [], 0)
-			.set([finalTitle, finalDivider, finalRole, finalText].filter(Boolean), {
+			.set([finalTitle, finalDivider, finalRole, finalText, finalAvailability].filter(Boolean), {
 				visibility: 'visible'
 			}, 0)
 			.set(finalDivider, {
@@ -361,6 +362,12 @@ onMounted(async () => {
 	}
 
 	ctx = gsap.context(() => {
+		// Reuse the link's split so the intro and hover never create competing character trees.
+		const availabilityChars = finalAvailability.querySelectorAll('[data-stagger-link-container] .stagger-link-char')
+		const availabilityDot = finalAvailability.querySelector('.hero-figure__availability-dot')
+		gsap.set(finalAvailability, { autoAlpha: 0 })
+		gsap.set(availabilityChars, { yPercent: 100 })
+		gsap.set(availabilityDot, { opacity: 0 })
 		titleSplit = new SplitText(finalTitle, { type: 'chars', charsClass: 'split-display-char' })
 		roleSplit = new SplitText(finalRole, {
 			type: 'lines',
@@ -433,6 +440,18 @@ onMounted(async () => {
 				stagger: animationStaggers.lines,
 				ease: animationEases.strongOut
 			}, 0.55)
+			.addLabel('availabilityIn', '>')
+			.set(finalAvailability, { autoAlpha: 1 }, 'availabilityIn')
+			.to(availabilityChars, {
+				yPercent: 0,
+				duration: animationDurations.reveal,
+				stagger: animationStaggers.chars,
+				ease: animationEases.strongOut
+			}, 'availabilityIn')
+			.to(availabilityDot, {
+				opacity: 1,
+				duration: animationDurations.fast
+			}, 'availabilityIn')
 			.to(introSplit.lines, {
 				y: 0,
 				opacity: 1,

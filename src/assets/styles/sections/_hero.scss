@@ -125,6 +125,7 @@
 		align-items: center;
 		gap: var(--space-4);
 		margin: var(--space-6) 0 0;
+		text-decoration: none;
 	}
 
 	.hero-figure__availability-dot {
@@ -134,6 +135,29 @@
 		border-radius: var(--radius-full);
 		background-color: var(--color-secondary);
 		box-shadow: 0 0 10px 7px rgba($secondary, 0.25);
+	}
+
+	.hero-figure__availability-label {
+		--stagger-link-descender-space: 0.08em;
+
+		display: grid;
+		overflow: hidden;
+		cursor: pointer;
+		
+		[data-stagger-link-container],
+		[data-stagger-link-alternate] {
+			grid-area: 1 / 1;
+		}
+
+		[data-stagger-link-alternate] {
+			display: inline-block;
+			line-height: 1;
+			visibility: hidden;
+		}
+
+		.stagger-link-char {
+			text-shadow: none;
+		}
 	}
 
 	.hero-figure__intro {

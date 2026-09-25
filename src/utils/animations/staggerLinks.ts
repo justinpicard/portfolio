@@ -31,12 +31,28 @@ function initStaggerLink(link: HTMLElement): StaggerLinkInstance | undefined {
 		charsClass: 'stagger-link-char'
 	})
 	const chars = split.chars
+	const alternate = link.querySelector<HTMLElement>('[data-stagger-link-alternate]')
+	const alternateSplit = alternate ? new SplitText(alternate, {
+		type: 'chars',
+		charsClass: 'stagger-link-char'
+	}) : undefined
+	const context = gsap.context(() => {
+		if (alternateSplit) gsap.set(alternateSplit.chars, { yPercent: 100 })
+		if (alternate) gsap.set(alternate, { visibility: 'visible' })
+	}, link)
 
 	function animate(isActive: boolean) {
-		gsap.to(chars, {
-			yPercent: isActive ? -100 : 0,
-			...staggerLinkPreset,
-			overwrite: true
+		context.add(() => {
+			gsap.to(chars, {
+				yPercent: isActive ? -100 : 0,
+				...staggerLinkPreset,
+				overwrite: true
+			})
+			if (alternateSplit) gsap.to(alternateSplit.chars, {
+				yPercent: isActive ? 0 : 100,
+				...staggerLinkPreset,
+				overwrite: true
+			})
 		})
 	}
 
@@ -68,6 +84,8 @@ function initStaggerLink(link: HTMLElement): StaggerLinkInstance | undefined {
 			link.removeEventListener('focusin', handleFocusIn)
 			link.removeEventListener('focusout', handleFocusOut)
 			gsap.killTweensOf(chars)
+			context.revert()
+			alternateSplit?.revert()
 			split.revert()
 		}
 	}
