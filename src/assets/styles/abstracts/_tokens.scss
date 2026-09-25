@@ -228,7 +228,7 @@ $shadows: (
 	--section-space-editorial-compact: clamp(5em, calc(3em + 4vw), 8em);
 	--section-space-case-tight: clamp(var(--space-8), 3vw, var(--space-10));
 	--section-space-case-default: clamp(var(--space-10), 5vw, var(--space-16));
-	--section-space-case-spacious: clamp(var(--space-16), calc(2rem + 8vw), var(--space-32));
+	--section-space-case-spacious: clamp(var(--space-16), calc(2rem + 8vw), 160px);
 
 	--radius-sm: 0.125rem;
 	--radius: 0.25rem;

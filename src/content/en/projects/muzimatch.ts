@@ -16,16 +16,27 @@ const muzimatch = {
 	type: 'Privacy-first musicians classifieds platform',
 	caseStudy: {
 		introduction: [
-			'What started as a side project to learn Nuxt evolved into an ongoing product with real users. Building MuziMatch pushed me beyond interface design, using feedback, analytics and continuous iteration to improve the product.'
+			'MuziMatch helps musicians find the right people for their next band, project or collaboration. What started as a side project to learn Nuxt became a live product used by musicians across the Netherlands.'
 		],
 		sections: [
 			{
+				id: 'introvisual',
+				type: 'media',
+				width: 'full',
+				src: 'projects/muzimatch/muzimatch-listing-detail-early-version@2x',
+				alt: 'MuziMatch interface',
+				presentation: 'wide',
+				spacing: 'spacious'
+			},
+			{
 				id: 'problem',
+				eyebrow: 'The problem',
 				title: 'Finding the right musicians is harder than it should be',
 				spacing: 'spacious',
 				blocks: [
 					{
 						type: 'text',
+						width: 'content',
 						paragraphs: [
 							'Finding musicians online often means relying on outdated platforms, scattered communities or services that add unnecessary friction to making contact. I saw an opportunity for a simpler approach, focused on helping musicians discover relevant people and get in touch with as little friction as possible.',
 						]
@@ -57,8 +68,9 @@ const muzimatch = {
 					},
 					{
 						type: 'text',
-						width: 'narrow',
+						width: 'content',
 						align: 'center',
+						eyebrow: 'The challenge',
 						title: 'Starting with an empty marketplace',
 						paragraphs: [
 							'A platform for finding musicians only works when there is something to find. I started with a small set of example listings, giving early visitors something to explore while I worked on attracting the first real users. As organic listings started appearing, MuziMatch gradually became a product shaped by its users rather than my assumptions.'
@@ -66,12 +78,12 @@ const muzimatch = {
 					},
 					{
 						type: 'media',
-						width: 'narrow',
-						src: 'projects/muzimatch/muzimatch_oproepen-demos',
-						format: 'png',
+						width: 'content',
+						src: 'projects/muzimatch/muzimatch_oproepen-demos@2x',
+						format: 'jpg',
 						alt: 'MuziMatch interface',
 						//caption: 'MuziMatch',
-						presentation: 'wide'
+						presentation: 'natural'
 					},
 					/**
 					{
@@ -95,8 +107,9 @@ const muzimatch = {
 				]
 			},
 			{
-				id: 'accountless',
-				title: 'Removing the account',
+				id: 'decision',
+				eyebrow: 'The decision',
+				title: 'Designing MuziMatch without accounts',
 				spacing: 'spacious',
 				blocks: [
 					{
@@ -108,26 +121,16 @@ const muzimatch = {
 				]
 			},
 			{
-				id: 'experience',
-				title: 'Designing the core experience',
-				spacing: 'spacious',
-				blocks: []
-			},
-			{
 				id: 'iteration',
+				eyebrow: 'The evidence',
 				title: 'From assumptions to evidence',
 				spacing: 'spacious',
 				blocks: []
 			},
 			{
 				id: 'outcome',
+				eyebrow: 'The outcome',
 				title: 'An evolving product',
-				spacing: 'spacious',
-				blocks: []
-			},
-			{
-				id: 'refelction',
-				title: 'What I\'m taking forward',
 				spacing: 'spacious',
 				blocks: []
 			},

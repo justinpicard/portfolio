@@ -60,6 +60,7 @@ export type CaseFeatureDirection = 'text-media' | 'media-text'
 
 export type CaseTextBlock = CaseBlockLayout & {
 	type: 'text'
+	eyebrow?: string
 	title?: string
 	paragraphs: [string, ...string[]]
 }
@@ -94,11 +95,15 @@ export type CaseFeatureBlock = CaseBlockLayout & {
 	media: CaseMediaBlock
 }
 
-export type CaseBlock =
+export type CaseBlock = (
 	| CaseTextBlock
 	| CaseMediaBlock
 	| CaseColumnsBlock
 	| CaseFeatureBlock
+) & {
+	/** Gap to the next block; the final block retains section spacing. */
+	spacingAfter?: 'compact' | 'default' | 'spacious'
+}
 
 export type CaseSectionSpacing = 'tight' | 'default' | 'spacious'
 
@@ -108,6 +113,7 @@ export type CaseSectionLayout = {
 
 export type LegacyProjectSection = CaseSectionLayout & {
 	id: string
+	eyebrow?: string
 	title?: string
 	paragraphs: [string, ...string[]]
 	blocks?: never
@@ -115,6 +121,7 @@ export type LegacyProjectSection = CaseSectionLayout & {
 
 export type BlockProjectSection = CaseSectionLayout & {
 	id: string
+	eyebrow?: string
 	title?: string
 	blocks: CaseBlock[]
 	paragraphs?: never
@@ -122,9 +129,13 @@ export type BlockProjectSection = CaseSectionLayout & {
 
 export type ProjectSection = LegacyProjectSection | BlockProjectSection
 
+export type CaseStandaloneMedia = CaseMediaBlock & CaseSectionLayout & {
+	id: string
+}
+
 export type ProjectCaseStudy = {
 	introduction: string[]
-	sections: ProjectSection[]
+	sections: (ProjectSection | CaseStandaloneMedia)[]
 }
 
 export type ProjectContent = {

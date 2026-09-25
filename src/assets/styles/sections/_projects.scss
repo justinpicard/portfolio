@@ -394,7 +394,7 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 
 		position: relative;
 		width: 100vw;
-		margin: 0 auto clamp(3rem, 8vh, 7rem);
+		margin: 0 auto var(--section-space-case-spacious);
 		aspect-ratio: var(--project-hero-media-ratio);
 		overflow: hidden;
 		border-radius: 0;

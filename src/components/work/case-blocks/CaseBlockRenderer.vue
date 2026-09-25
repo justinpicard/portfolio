@@ -37,7 +37,8 @@ const layoutClasses = computed(() => {
 	return [
 		'case-block',
 		`case-block--width-${props.block.width ?? 'content'}`,
-		`case-block--align-${props.block.align ?? 'center'}`
+		`case-block--align-${props.block.align ?? 'center'}`,
+		props.block.spacingAfter ? `case-block--spacing-after-${props.block.spacingAfter}` : undefined
 	]
 })
 </script>

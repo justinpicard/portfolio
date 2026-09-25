@@ -34,6 +34,13 @@
 		margin-block-end: var(--case-section-space);
 	}
 
+	// Only internal gaps opt in; the final block preserves the section rhythm.
+	@each $spacing, $section-spacing in (compact: tight, default: default, spacious: spacious) {
+		.case-block--spacing-after-#{$spacing}:not(:last-child) {
+			margin-block-end: var(--section-space-case-#{$section-spacing});
+		}
+	}
+
 	.case-block--contained {
 		flex-basis: auto;
 		width: 100%;
@@ -87,6 +94,11 @@
 			}
 		}
 	}
+}
+
+.case-eyebrow {
+	display: block;
+	margin-block-end: var(--space-4);
 }
 
 .case-text-block {

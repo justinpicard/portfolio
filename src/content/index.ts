@@ -138,6 +138,7 @@ export type {
 	CaseMediaPosition,
 	CaseSectionLayout,
 	CaseSectionSpacing,
+	CaseStandaloneMedia,
 	CaseTextBlock,
 	HeroContent,
 	LegacyProjectSection,

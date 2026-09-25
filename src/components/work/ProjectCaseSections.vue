@@ -1,12 +1,12 @@
 <template>
 	<div class="project-case-study">
 		<section
-			class="section-layout section-layout--case project-case-study__introduction"
+			class="section-layout section-layout--case section-layout--case-spacious project-case-study__introduction"
 			:class="`${projectSlug}-case__introduction`"
 		>
 			<div class="container">
 				<div class="row">
-					<div class="project-case-study__introduction-content case-block--width-narrow case-block--align-center">
+					<div class="project-case-study__introduction-content case-block--width-content case-block--align-center">
 						<p
 							v-for="(paragraph, index) in caseStudy.introduction"
 							:key="`introduction-${index}`"
@@ -19,8 +19,9 @@
 			</div>
 		</section>
 
-		<section
+		<component
 			v-for="section in renderedSections"
+			:is="section.isMedia ? 'div' : 'section'"
 			:key="section.id"
 			:id="section.id"
 			class="section-layout section-layout--case project-case-study__section"
@@ -31,10 +32,11 @@
 					<div
 						v-if="section.title"
 						class="project-case-study__section-heading"
-						:class="{
-							'case-block--width-narrow case-block--align-center': section.isFirst
-						}"
+						:class="section.isFirst
+							? [`case-block--width-${section.headingWidth}`, 'case-block--align-center']
+							: undefined"
 					>
+						<span v-if="section.eyebrow" class="case-eyebrow eyebrow">{{ section.eyebrow }}</span>
 						<h3>{{ section.title }}</h3>
 					</div>
 
@@ -45,7 +47,7 @@
 					/>
 				</div>
 			</div>
-		</section>
+		</component>
 	</div>
 </template>
 
@@ -64,7 +66,21 @@ const props = defineProps<{
 }>()
 
 const renderedSections = computed(() => props.caseStudy.sections.map((section, sectionIndex) => {
-	const isFirst = sectionIndex === 0
+	if ('type' in section) {
+		return {
+			id: section.id,
+			spacing: section.spacing ?? 'default',
+			isMedia: true,
+			isFirst: false,
+			title: undefined,
+			eyebrow: undefined,
+			headingWidth: undefined,
+			blocks: [section]
+		}
+	}
+
+	// Interstitial media must not change the first story section's layout defaults.
+	const isFirst = sectionIndex === props.caseStudy.sections.findIndex(item => !('type' in item))
 	const blocks: CaseBlock[] = section.blocks ?? [{
 		type: 'text',
 		paragraphs: section.paragraphs
@@ -75,9 +91,12 @@ const renderedSections = computed(() => props.caseStudy.sections.map((section, s
 
 	return {
 		id: section.id,
+		eyebrow: section.eyebrow,
 		title: section.title,
 		spacing: section.spacing ?? 'default',
 		isFirst,
+		isMedia: false,
+		headingWidth: blocks[firstTextBlockIndex]?.width ?? 'narrow',
 		blocks: blocks.map((block, blockIndex) => (
 			blockIndex === firstTextBlockIndex
 				? {
