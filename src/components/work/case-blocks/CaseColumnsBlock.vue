@@ -20,6 +20,7 @@
 						v-else
 						:block="columnBlock"
 						:inside-shared-figure="Boolean(block.caption)"
+						:sizes="caseImageSizes(block.width, (column.emphasis === 'wide' ? 2 : 1) / columnWeight, block.columns.length - 1)"
 						class="case-block case-block--contained"
 					/>
 				</template>
@@ -32,11 +33,14 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { caseImageSizes } from '../../../utils/images/caseImageSizes'
 import type { CaseColumnsBlock } from '../../../content'
 import CaseMediaBlock from './CaseMediaBlock.vue'
 import CaseTextBlock from './CaseTextBlock.vue'
 
-defineProps<{
+const props = defineProps<{
 	block: CaseColumnsBlock
 }>()
+const columnWeight = computed(() => props.block.columns.reduce((sum, column) => sum + (column.emphasis === 'wide' ? 2 : 1), 0))
 </script>

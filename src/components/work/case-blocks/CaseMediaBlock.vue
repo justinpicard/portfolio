@@ -10,6 +10,7 @@
 			:alt="block.alt"
 			:fallback-format="block.format"
 			:position="mediaPosition"
+			:sizes="sizes ?? caseImageSizes(block.width)"
 		/>
 		<figcaption v-if="block.caption" class="case-media-block__caption case-media-caption">
 			{{ block.caption }}
@@ -21,10 +22,12 @@
 import { computed } from 'vue'
 import type { CaseMediaBlock } from '../../../content'
 import BaseImage from '../../base/BaseImage.vue'
+import { caseImageSizes } from '../../../utils/images/caseImageSizes'
 
 const props = defineProps<{
 	block: CaseMediaBlock
 	insideSharedFigure?: boolean
+	sizes?: string
 }>()
 
 const rootElement = computed(() => (

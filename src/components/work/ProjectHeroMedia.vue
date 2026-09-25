@@ -5,6 +5,7 @@
 		:fallback-format="imageFormat"
 		:position="mediaPosition"
 		loading="eager"
+		sizes="100vw"
 	/>
 
 	<video

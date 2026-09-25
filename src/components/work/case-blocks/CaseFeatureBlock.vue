@@ -9,6 +9,7 @@
 		/>
 		<CaseMediaBlock
 			:block="block.media"
+			sizes=""
 			class="case-feature-block__media"
 		/>
 	</div>

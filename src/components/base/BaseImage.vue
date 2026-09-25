@@ -7,11 +7,12 @@
 		]"
 		:style="imageStyles"
 	>
+		<source v-if="optimizedImage" type="image/webp" :srcset="webpSrcset" :sizes="sizes" />
 		<img
 			:src="fallbackSource"
 			:alt="alt"
-			:width="width"
-			:height="height"
+			:width="width ?? optimizedImage?.width"
+			:height="height ?? optimizedImage?.height"
 			:loading="loading"
 			:decoding="decoding"
 		>
@@ -21,6 +22,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { CSSProperties } from 'vue'
+import { getOptimizedImage } from '../../utils/images/optimizedImages'
 
 const props = withDefaults(defineProps<{
 	src: string
@@ -35,6 +37,7 @@ const props = withDefaults(defineProps<{
 	aspectRatio?: string
 	className?: string
 	fallbackFormat?: 'jpg' | 'jpeg' | 'png'
+	sizes?: string
 }>(), {
 	loading: 'lazy',
 	decoding: 'async',
@@ -45,6 +48,13 @@ const props = withDefaults(defineProps<{
 })
 
 const fallbackSource = computed(() => `${props.src}.${props.fallbackFormat}`)
+const optimizedImage = computed(() => getOptimizedImage(fallbackSource.value))
+const webpSrcset = computed(() => {
+	const image = optimizedImage.value
+	if (!image) return undefined
+	if (!props.sizes || !image.variants.length) return image.url
+	return [...image.variants, image].map(variant => `${variant.url} ${variant.width}w`).join(', ')
+})
 
 const toCssSize = (value?: number | string) => {
 	if (value === undefined) return undefined
