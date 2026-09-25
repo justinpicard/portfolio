@@ -24,6 +24,7 @@ const muzimatch = {
 				type: 'media',
 				width: 'full',
 				src: 'projects/muzimatch/muzimatch-redesign-opening-visual@2x',
+				format: 'jpg',
 				alt: 'MuziMatch interface',
 				presentation: 'wide',
 				spacing: 'spacious',
@@ -39,7 +40,7 @@ const muzimatch = {
 						type: 'text',
 						width: 'content',
 						paragraphs: [
-							'Finding musicians online often means relying on outdated platforms, scattered communities or services that add unnecessary friction to making contact. I saw an opportunity for a simpler approach, focused on helping musicians discover relevant people and get in touch with as little friction as possible.',
+							'Finding musicians online often means searching across outdated platforms and scattered communities. MuziMatch was my attempt to make finding and contacting relevant musicians simpler.',
 						]
 					},
 					{ // Images
@@ -74,7 +75,7 @@ const muzimatch = {
 						eyebrow: 'The challenge',
 						title: 'Starting with an empty marketplace',
 						paragraphs: [
-							'A platform for finding musicians only works when there is something to find. I started with a small set of example listings, giving early visitors something to explore while I worked on attracting the first real users. As organic listings started appearing, MuziMatch gradually became a product shaped by its users rather than my assumptions.'
+							'I started with a small set of example listings, giving early visitors something to explore until the first real listings began to appear.'
 						]
 					},
 					{
@@ -110,13 +111,13 @@ const muzimatch = {
 			{
 				id: 'decision',
 				eyebrow: 'The decision',
-				title: 'Designing MuziMatch without accounts',
+				title: 'No account required',
 				spacing: 'spacious',
 				blocks: [
 					{
 						type: 'text',
 						paragraphs: [
-							'(Accountless model + privacy)',
+							'Creating an account felt like unnecessary friction for someone who simply wanted to post or respond to a listing. MuziMatch uses email verification and secure links instead, while keeping personal contact details private.',
 						]
 					},
 				]
@@ -124,16 +125,76 @@ const muzimatch = {
 			{
 				id: 'iteration',
 				eyebrow: 'The evidence',
-				title: 'From assumptions to evidence',
+				title: 'Learning from real usage',
 				spacing: 'spacious',
-				blocks: []
+				blocks: [
+					{
+						type: 'text',
+						paragraphs: [
+							'I built a small analytics dashboard to understand how MuziMatch was being used and where people dropped out. Combined with feedback from users, it helps me decide what to simplify or improve next.',
+						]
+					},
+					{
+						type: 'text',
+						title: 'Simplifying the create flow',
+						paragraphs: [
+							'The original three-step flow felt more complicated than it needed to be, so I reduced it to a single page.',
+						]
+					},
+					{
+						type: 'text',
+						paragraphs: [
+							'(visuals of the old and new create flow and showing the results precentages of people completing the flow)',
+						]
+					},
+					{
+						type: 'text',
+						title: 'Keeping listings relevant',
+						paragraphs: [
+							'As MuziMatch grew, older listings made it harder to know who was still looking. I introduced status reminders that let musicians confirm their listing is still relevant or take it offline.',
+						]
+					},
+					{
+						type: 'text',
+						paragraphs: [
+							'(visuals of reminder email)',
+						]
+					},
+					{
+						type: 'text',
+						title: 'Understanding what happens after contact',
+						paragraphs: [
+							'MuziMatch can track when musicians get in touch, but not whether that contact actually leads to a match. While I know the platform has resulted in at least one successful match, there’s currently no reliable way to measure what happens after that first contact.',
+						]
+					},
+				]
 			},
 			{
 				id: 'outcome',
 				eyebrow: 'The outcome',
-				title: 'An evolving product',
+				title: 'From side project to a product people use',
 				spacing: 'spacious',
-				blocks: []
+				blocks: [
+					{
+						type: 'text',
+						paragraphs: [
+							'MuziMatch started as a way to learn Nuxt, but grew into a live product used by musicians across the Netherlands. It continues to evolve as more people post, respond and show me where the product can improve.',
+						]
+					},
+					{
+						type: 'text',
+						paragraphs: [
+							'(visuals of metrics (listings posted, responses sent, matches made, active in X provinces)',
+						]
+					},
+					{
+						type: 'text',
+						title: 'Still evolving',
+						paragraphs: [
+							'MuziMatch isn’t finished. The next challenge is understanding what happens after musicians connect, while continuing to simplify the experience and build features people actually use.',
+						]
+					},
+				]
 			},
 		]
 	}
