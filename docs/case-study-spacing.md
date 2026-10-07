@@ -2,7 +2,9 @@
 
 `caseStudy.sections` is ordered after the introduction. It accepts existing story sections and standalone media entries. Every entry needs a unique `id`.
 
-Standalone media uses the existing media renderer and properties (`width`, `align`, `src`, `format`, `alt`, `caption`, `presentation`, `position`). Its optional `spacing` uses `tight`, `default`, or `spacious` and controls the gap after the visual, including its caption. The preceding entry controls the gap before it. Omitted spacing uses `default`.
+Standalone media uses the existing media renderer and properties (`width`, `align`, `src`, `format`, `alt`, `caption`, `presentation`, `position`, `fullBleed`). Its optional `spacing` uses `tight`, `default`, or `spacious` and controls the gap after the visual, including its caption. The preceding entry controls the gap before it. Omitted spacing uses `default`.
+
+For an edge-to-edge image in any case, use `width: 'full'` with `fullBleed: true`. This removes the page gutter and outer corner radius while keeping captions padded. Use `presentation: 'natural'` to show the image at its intrinsic ratio without cropping.
 
 ```ts
 sections: [

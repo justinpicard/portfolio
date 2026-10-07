@@ -20,6 +20,7 @@
 		@include type-role(lead);
 
 		font-weight: var(--font-weight-medium);
+		text-align: center;
 	}
 
 	&__section-heading {
@@ -32,6 +33,28 @@
 
 	.case-block {
 		margin-block-end: var(--case-section-space);
+	}
+
+	&__section--divided &__section-row > .case-block:last-child {
+		margin-block-end: var(--section-space-case-spacious);
+	}
+
+	&__section-divider {
+		display: flex;
+		justify-content: center;
+		padding-block-end: var(--section-space-case-spacious);
+		font-size: var(--font-size-body);
+	}
+
+	.case-media-block--full-bleed {
+		padding-inline: 0;
+	}
+
+	.section-layout--case-spacious .case-text-block:where(:has(
+		+ .case-media-block,
+		+ .case-columns-block .case-media-block
+	)) {
+		margin-block-end: var(--section-space-case-default);
 	}
 
 	// Only internal gaps opt in; the final block preserves the section rhythm.
@@ -107,6 +130,7 @@
 	}
 
 	&__title {
+		font-size: var(--font-size-lead);
 		margin-block-end: var(--space-4);
 	}
 }
@@ -148,6 +172,15 @@
 	&--natural &__image,
 	&--natural &__image img {
 		height: auto;
+	}
+
+	&--full-bleed &__image,
+	&--full-bleed &__image img {
+		border-radius: 0;
+	}
+
+	&--full-bleed &__caption {
+		padding-inline: var(--page-gutter);
 	}
 }
 
@@ -203,13 +236,11 @@
 
 .project-case-study {
 	@include respond(lg) {
-		&__introduction-content,
 		&__section-heading,
 		.case-block--width-content {
 			flex-basis: 66.6667%;
 		}
 
-		&__introduction-content,
 		&__section-heading,
 		.case-block--width-content.case-block--align-center {
 			margin-inline-start: 16.6667%;

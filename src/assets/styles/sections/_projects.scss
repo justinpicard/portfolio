@@ -422,6 +422,22 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 		}
 	}
 
+	&__hero-logo {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding-inline: var(--page-gutter);
+		pointer-events: none;
+
+		img {
+			width: 100%;
+			max-width: 600px;
+			height: auto;
+		}
+	}
+
 	&__metadata {
 		.split-line-wrapper,
 		.split-line {
@@ -470,37 +486,6 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 		margin-block-end: var(--space-8);
 	}
 
-	&__scrims {
-		position: absolute;
-		inset: 0;
-		z-index: 6;
-		pointer-events: none;
-	}
-
-	&__scrim {
-		position: absolute;
-		left: 0;
-		width: 100%;
-		height: 8rem;
-
-		&--top {
-			top: 0;
-			background: linear-gradient(
-				to bottom,
-				var(--project-layer-background),
-				color-mix(in srgb, var(--project-layer-background) 0%, transparent)
-			);
-		}
-
-		&--bottom {
-			bottom: 0;
-			background: linear-gradient(
-				to top,
-				var(--project-layer-background),
-				color-mix(in srgb, var(--project-layer-background) 0%, transparent)
-			);
-		}
-	}
 }
 
 .project-stack-navigator {
@@ -719,7 +704,7 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 }
 
 .project-nav {
-	padding-block: var(--case-section-space);
+	padding-block-end: var(--case-section-space);
 
 	&__row {
 		@include respond(md) {

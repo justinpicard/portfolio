@@ -27,6 +27,10 @@
 		<source :src="`/images/${project.heroVideo.webm}`" type="video/webm">
 		<source :src="`/images/${project.heroVideo.mp4}`" type="video/mp4">
 	</video>
+
+	<div v-if="project.heroLogo" class="project-layer-prototype__hero-logo" aria-hidden="true">
+		<img :src="`/images/${project.heroLogo}`" alt="" width="1000" height="140">
+	</div>
 </template>
 
 <script setup lang="ts">

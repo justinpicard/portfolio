@@ -57,7 +57,15 @@ export function getPortfolioScrollY() {
 
 export function setPortfolioScrollY(scrollY: number) {
 	if (smoother) {
-		smoother.scrollTop(scrollY)
+		const wasPaused = smoother.paused()
+		// A paused smoother updates its scroll value without rendering the content
+		// transform. Resume briefly so overlay close targets and pins stay aligned.
+		if (wasPaused) smoother.paused(false)
+		try {
+			smoother.scrollTop(scrollY)
+		} finally {
+			if (wasPaused) smoother.paused(true)
+		}
 		return
 	}
 

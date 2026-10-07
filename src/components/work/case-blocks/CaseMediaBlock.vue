@@ -2,7 +2,10 @@
 	<component
 		:is="rootElement"
 		class="case-media-block"
-		:class="`case-media-block--${block.presentation ?? 'natural'}`"
+		:class="[
+			`case-media-block--${block.presentation ?? 'natural'}`,
+			{ 'case-media-block--full-bleed': block.fullBleed }
+		]"
 	>
 		<BaseImage
 			class-name="case-media-block__image"
@@ -10,7 +13,7 @@
 			:alt="block.alt"
 			:fallback-format="block.format"
 			:position="mediaPosition"
-			:sizes="sizes ?? caseImageSizes(block.width)"
+			:sizes="sizes ?? (block.fullBleed ? '100vw' : caseImageSizes(block.width))"
 		/>
 		<figcaption v-if="block.caption" class="case-media-block__caption case-media-caption">
 			{{ block.caption }}

@@ -6,7 +6,7 @@
 		>
 			<div class="container">
 				<div class="row">
-					<div class="project-case-study__introduction-content case-block--width-content case-block--align-center">
+					<div class="project-case-study__introduction-content case-block--width-narrow case-block--align-center">
 						<p
 							v-for="(paragraph, index) in caseStudy.introduction"
 							:key="`introduction-${index}`"
@@ -20,21 +20,22 @@
 		</section>
 
 		<component
-			v-for="section in renderedSections"
+			v-for="(section, sectionIndex) in renderedSections"
 			:is="section.isMedia ? 'div' : 'section'"
 			:key="section.id"
 			:id="section.id"
 			class="section-layout section-layout--case project-case-study__section"
-			:class="`section-layout--case-${section.spacing}`"
+			:class="[
+				`section-layout--case-${section.spacing}`,
+				{ 'project-case-study__section--divided': sectionIndex < renderedSections.length - 1 }
+			]"
 		>
 			<div class="container">
 				<div class="row project-case-study__section-row">
 					<div
 						v-if="section.title"
 						class="project-case-study__section-heading"
-						:class="section.isFirst
-							? [`case-block--width-${section.headingWidth}`, 'case-block--align-center']
-							: undefined"
+						:class="[`case-block--width-${section.headingWidth}`, 'case-block--align-center']"
 					>
 						<span v-if="section.eyebrow" class="case-eyebrow eyebrow">{{ section.eyebrow }}</span>
 						<h3>{{ section.title }}</h3>
@@ -46,6 +47,13 @@
 						:block="block"
 					/>
 				</div>
+			</div>
+			<div
+				v-if="sectionIndex < renderedSections.length - 1"
+				class="project-case-study__section-divider"
+				aria-hidden="true"
+			>
+			✦
 			</div>
 		</component>
 	</div>
@@ -71,7 +79,6 @@ const renderedSections = computed(() => props.caseStudy.sections.map((section, s
 			id: section.id,
 			spacing: section.spacing ?? 'default',
 			isMedia: true,
-			isFirst: false,
 			title: undefined,
 			eyebrow: undefined,
 			headingWidth: undefined,
@@ -85,20 +92,17 @@ const renderedSections = computed(() => props.caseStudy.sections.map((section, s
 		type: 'text',
 		paragraphs: section.paragraphs
 	}]
-	const firstTextBlockIndex = isFirst
-		? blocks.findIndex(block => block.type === 'text')
-		: -1
+	const firstTextBlockIndex = blocks.findIndex(block => block.type === 'text')
 
 	return {
 		id: section.id,
 		eyebrow: section.eyebrow,
 		title: section.title,
 		spacing: section.spacing ?? 'default',
-		isFirst,
 		isMedia: false,
-		headingWidth: blocks[firstTextBlockIndex]?.width ?? 'narrow',
+		headingWidth: blocks[firstTextBlockIndex]?.width ?? (isFirst ? 'narrow' : 'content'),
 		blocks: blocks.map((block, blockIndex) => (
-			blockIndex === firstTextBlockIndex
+			isFirst && blockIndex === firstTextBlockIndex
 				? {
 					...block,
 					width: block.width ?? 'narrow',

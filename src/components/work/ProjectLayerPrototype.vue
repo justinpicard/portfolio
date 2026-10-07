@@ -79,14 +79,6 @@
 				<p class="sr-only" aria-live="polite" aria-atomic="true">
 					{{ announcement }}
 				</p>
-
-				<div ref="scrims" class="project-layer-prototype__scrims" aria-hidden="true">
-					<span class="project-layer-prototype__scrim project-layer-prototype__scrim--top" />
-					<span
-						ref="bottomScrim"
-						class="project-layer-prototype__scrim project-layer-prototype__scrim--bottom"
-					/>
-				</div>
 			</article>
 		</div>
 	</Teleport>
@@ -187,8 +179,6 @@ const surface = ref<HTMLElement | null>(null)
 const content = ref<HTMLElement | null>(null)
 const projectHero = ref<InstanceType<typeof ProjectHero> | null>(null)
 const caseContent = ref<HTMLElement | null>(null)
-const scrims = ref<HTMLElement | null>(null)
-const bottomScrim = ref<HTMLElement | null>(null)
 const projectHeader = ref<InstanceType<typeof ProjectHeader> | null>(null)
 const projectNavigator = ref<InstanceType<typeof ProjectStackNavigator> | null>(null)
 const projectNav = ref<HTMLElement | null>(null)
@@ -310,7 +300,6 @@ let heroRevealTargets: HTMLElement[] = []
 let cardRestoreSplits: SplitText[] = []
 let cardRestoreTargets: HTMLElement[] = []
 let contextTransitionRunId = 0
-let isBottomScrimVisible: boolean | undefined
 let sharedRepresentations: SharedElementRepresentation[] = []
 let closeRequestedDuringOpen: CloseSource | undefined
 let projectNavDividerTween: gsap.core.Tween | undefined
@@ -1473,49 +1462,6 @@ function waitForAnimationFrame() {
 	})
 }
 
-function updateBottomScrim(immediate = false) {
-	if (!content.value || !bottomScrim.value) return
-
-	const heroMedia = projectHero.value?.getMediaElement()
-	const contentBottom = content.value.getBoundingClientRect().bottom
-	const scrimHeight = bottomScrim.value.getBoundingClientRect().height
-	const shouldShow = heroMedia
-		? heroMedia.getBoundingClientRect().bottom <= contentBottom - scrimHeight
-		: false
-
-	if (shouldShow === isBottomScrimVisible) return
-	isBottomScrimVisible = shouldShow
-
-	gsap.to(bottomScrim.value, {
-		autoAlpha: shouldShow ? 1 : 0,
-		yPercent: shouldShow ? 0 : 100,
-		duration: immediate || prefersReducedMotion() ? 0 : 0.28,
-		ease: animationEases.out,
-		overwrite: true
-	})
-}
-
-function setupBottomScrim() {
-	isBottomScrimVisible = undefined
-	updateBottomScrim(true)
-	content.value?.addEventListener('scroll', handleProjectContentScroll, {
-		passive: true
-	})
-	window.addEventListener('resize', handleProjectContentScroll)
-}
-
-function cleanupBottomScrim() {
-	content.value?.removeEventListener('scroll', handleProjectContentScroll)
-	window.removeEventListener('resize', handleProjectContentScroll)
-	if (bottomScrim.value) {
-		gsap.killTweensOf(bottomScrim.value)
-		gsap.set(bottomScrim.value, {
-			clearProps: 'opacity,transform,visibility'
-		})
-	}
-	isBottomScrimVisible = undefined
-}
-
 function cleanupProjectNavDivider() {
 	projectNavDividerTween?.scrollTrigger?.kill()
 	projectNavDividerTween?.kill()
@@ -1549,10 +1495,6 @@ function setupProjectNavDivider() {
 			toggleActions: 'play none none none'
 		}
 	})
-}
-
-function handleProjectContentScroll() {
-	updateBottomScrim()
 }
 
 function killContextTransition() {
@@ -1661,8 +1603,6 @@ async function navigateToProject(nextIndex: number, restoreFocus = false) {
 			if (content.value) {
 				content.value.scrollTop = 0
 			}
-			isBottomScrimVisible = undefined
-			updateBottomScrim(true)
 			gsap.set(surface.value, {
 				'--project-card-color': getProjectBackground(nextIndex)
 			})
@@ -1727,8 +1667,6 @@ async function navigateToProject(nextIndex: number, restoreFocus = false) {
 		if (isStaleContextTransition(runId) || !content.value) return
 
 		content.value.scrollTop = 0
-		isBottomScrimVisible = undefined
-		updateBottomScrim(true)
 		const incomingHero = getHeroElements()
 		if (!incomingHero) {
 			gsap.set(content.value, {
@@ -2010,7 +1948,7 @@ async function waitForHeroRevealLayout() {
 
 function createCaseHeroReveal(includeProjectHeader = true) {
 	const heroElements = getHeroElements()
-	if (!heroElements || !content.value || !scrims.value) return undefined
+	if (!heroElements || !content.value) return undefined
 
 	cleanupHeroReveal()
 
@@ -2049,7 +1987,6 @@ function createCaseHeroReveal(includeProjectHeader = true) {
 		...metadataLines,
 		...(caseContent.value ? [caseContent.value] : []),
 		...controls,
-		scrims.value,
 		...(image ? [image] : [])
 	]
 
@@ -2086,8 +2023,7 @@ function createCaseHeroReveal(includeProjectHeader = true) {
 		autoAlpha: 0,
 		y: 12
 	})
-	gsap.set([...controls, scrims.value], { autoAlpha: 0 })
-	gsap.set(bottomScrim.value, { autoAlpha: 0 })
+	gsap.set(controls, { autoAlpha: 0 })
 
 	heroRevealTimeline = gsap.timeline({ paused: true })
 		.to(content.value, {
@@ -2145,7 +2081,7 @@ function createCaseHeroReveal(includeProjectHeader = true) {
 			duration: animationDurations.fast,
 			ease: animationEases.out
 		}, 0.46)
-		.to([...controls, scrims.value], {
+		.to(controls, {
 			autoAlpha: 1,
 			duration: animationDurations.fast,
 			ease: animationEases.out
@@ -2158,14 +2094,12 @@ async function animateSimpleOpen() {
 	if (
 		!surface.value
 		|| !content.value
-		|| !scrims.value
 	) return
 
 	const sourceCardContents = getProjectCardContents(props.sourceCard)
 	const destinationElements = [
 		content.value,
-		...getOverlayControls(),
-		scrims.value
+		...getOverlayControls()
 	]
 
 	const useCompactTransition = usesCompactRendering()
@@ -2270,7 +2204,6 @@ async function animateOpen() {
 	if (
 		!surface.value
 		|| !content.value
-		|| !scrims.value
 	) return
 
 	setInitialGeometry()
@@ -2285,8 +2218,7 @@ async function animateOpen() {
 		gsap.set([
 			...Object.values(getHeroSharedElements() ?? {}),
 			...getDetailElements(),
-			...getOverlayControls(),
-			scrims.value
+			...getOverlayControls()
 		], {
 			autoAlpha: 1
 		})
@@ -2300,7 +2232,7 @@ async function animateOpen() {
 		emit('source-ready')
 		setFullscreenGeometry()
 		gsap.set(content.value, { autoAlpha: 1, y: 0 })
-		gsap.set([...getDetailElements(), ...getOverlayControls(), scrims.value], {
+		gsap.set([...getDetailElements(), ...getOverlayControls()], {
 			autoAlpha: 1
 		})
 		projectHeader.value?.focusClose()
@@ -2325,8 +2257,7 @@ async function animateOpen() {
 		gsap.set([
 			...Object.values(heroElements),
 			...getDetailElements(),
-			...getOverlayControls(),
-			scrims.value
+			...getOverlayControls()
 		], { autoAlpha: 1 })
 		projectHeader.value?.focusClose()
 		return
@@ -2342,8 +2273,7 @@ async function animateOpen() {
 		gsap.set([
 			...Object.values(heroElements),
 			...getDetailElements(),
-			...getOverlayControls(),
-			scrims.value
+			...getOverlayControls()
 		], { autoAlpha: 1 })
 		projectHeader.value?.focusClose()
 		return
@@ -2388,7 +2318,6 @@ async function animateOpen() {
 		y: 0,
 		backgroundColor: contentBackground
 	})
-	gsap.set(scrims.value, { autoAlpha: 0 })
 
 	timeline = gsap.timeline({
 		onComplete: () => {
@@ -2442,11 +2371,6 @@ async function animateOpen() {
 			ease: 'power2.out',
 			stagger: 0.025
 		}, 0.76)
-		.to(scrims.value, {
-			autoAlpha: 1,
-			duration: 0.3,
-			ease: 'power2.out'
-		}, 0.78)
 		.set(typographyHeroElements, {
 			autoAlpha: 1
 		}, 0.84)
@@ -2492,11 +2416,10 @@ async function animateOpen() {
 }
 
 function restoreClosePresentation() {
-	if (content.value && scrims.value) {
+	if (content.value) {
 		gsap.set([
 			content.value,
-			...getOverlayControls(),
-			scrims.value
+			...getOverlayControls()
 		], {
 			clearProps: 'opacity,transform,visibility'
 		})
@@ -2512,10 +2435,7 @@ function restoreClosePresentation() {
 }
 
 async function hideCloseContent() {
-	if (
-		!content.value
-		|| !scrims.value
-	) return false
+	if (!content.value) return false
 
 	isClosing.value = true
 	killContextTransition()
@@ -2523,8 +2443,7 @@ async function hideCloseContent() {
 	timeline?.kill()
 	const destinationElements = [
 		content.value,
-		...getOverlayControls(),
-		scrims.value
+		...getOverlayControls()
 	]
 
 	if (prefersReducedMotion()) {
@@ -2684,7 +2603,6 @@ watch(displayedIndex, async () => {
 onMounted(async () => {
 	window.addEventListener('keydown', handleKeydown)
 	await nextTick()
-	setupBottomScrim()
 	await animateOpen()
 	emit('opened')
 	isOpening.value = false
@@ -2703,7 +2621,6 @@ onBeforeUnmount(() => {
 	cleanupHeroReveal()
 	cleanupCardRestore()
 	killContextTransition()
-	cleanupBottomScrim()
 	cleanupProjectNavDivider()
 	window.removeEventListener('keydown', handleKeydown)
 	isClosing.value = false

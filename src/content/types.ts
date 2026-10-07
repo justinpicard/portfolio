@@ -73,6 +73,8 @@ export type CaseMediaBlock = CaseBlockLayout & {
 	format?: 'jpg' | 'jpeg' | 'png'
 	presentation?: 'natural' | 'wide' | 'landscape' | 'portrait' | 'square'
 	position?: CaseMediaPosition
+	/** Removes the page gutter and rounded corners from full-width case media. */
+	fullBleed?: boolean
 }
 
 export type CaseColumnEmphasis = 'equal' | 'narrow' | 'wide'
@@ -165,6 +167,7 @@ export type ProjectMedia = {
 	landscapeThumbnailImageFormat?: 'jpg' | 'jpeg' | 'png'
 	landscapeThumbnailImagePosition?: string
 	heroImage: string
+	heroLogo?: string
 	heroImageFormat?: 'jpg' | 'jpeg' | 'png'
 	heroImagePosition?: string
 	heroPosterImage?: string
