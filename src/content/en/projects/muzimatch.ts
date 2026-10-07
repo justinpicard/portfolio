@@ -191,13 +191,6 @@ const muzimatch = {
 					{
 						type: 'text',
 						width: 'narrow',
-						paragraphs: [
-							'(visuals of metrics (listings posted, responses sent, matches made, active in X provinces)',
-						]
-					},
-					{
-						type: 'text',
-						width: 'narrow',
 						title: 'Still evolving',
 						paragraphs: [
 							'MuziMatch isn’t finished. The next challenge is understanding what happens after musicians connect, while continuing to simplify the experience and build features people actually use.',
