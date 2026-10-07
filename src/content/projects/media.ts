@@ -20,7 +20,7 @@ export const projectMedia = [
 	{
 		id: '2',
 		slug: 'recranet',
-		//caseStatus: 'coming-soon',
+		caseStatus: 'coming-soon',
 		thumbnailImage: 'projects/recranet/recranet-thumb-vertical@2x',
 		landscapeThumbnailImage: 'projects/recranet/recranet-thumb-horizontal',
 		landscapeThumbnailImagePosition: 'left center',
