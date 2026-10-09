@@ -93,6 +93,7 @@ let titleRevealTween: gsap.core.Tween | undefined
 let titleRefreshId = 0
 let exhibitionTimeline: gsap.core.Timeline | undefined
 let exhibitionTrigger: ReturnType<typeof ScrollTrigger.create> | undefined
+let exhibitionSnapResumeScrollY: number | undefined
 let exhibitionMediaContext: gsap.MatchMedia | undefined
 let projectCards: HTMLElement[] = []
 let projectCardWidths: number[] = []
@@ -169,9 +170,9 @@ function openProject(payload: { projectIndex: number; sourceElement: HTMLElement
 		},
 		sourceRect: layerOrigin.value
 	})
+	setOverlayLifecycle('opening')
 	suspendExhibitionTracking()
 	lockHomepageScroll()
-	setOverlayLifecycle('opening')
 	isProjectLayerMounted.value = true
 }
 
@@ -203,17 +204,48 @@ function suspendExhibitionTracking() {
 	if (!exhibitionTrigger) return
 
 	const hadActiveSnap = Boolean(exhibitionTrigger.getTween(true))
-	// Keep the current pin and card transforms, but stop the delayed/active snap
-	// from owning the window scroll while the fixed project layer is active.
-	exhibitionTrigger.disable(false, false)
+	// Disabled pins lose their spacing during a global refresh. Keep desktop's
+	// pin enabled; the snap guard prevents it from owning the overlay's scroll.
+	if (exhibitionTrigger.pin) {
+		cancelExhibitionSnap(exhibitionTrigger)
+	} else {
+		exhibitionTrigger.disable(false, false)
+	}
 	debugProjectClose('Work ScrollTrigger suspended', { hadActiveSnap })
 }
 
 function resumeExhibitionTracking() {
 	if (!exhibitionTrigger) return
 
-	exhibitionTrigger.enable(false, false)
+	if (!exhibitionTrigger.pin) exhibitionTrigger.enable(false, false)
 	debugProjectClose('Work ScrollTrigger resumed')
+}
+
+function cancelExhibitionSnap(trigger: ReturnType<typeof ScrollTrigger.create>) {
+	const snapTween = trigger.getTween(true)
+	if (!snapTween) return
+
+	// GSAP's interruption callback queues another snap; cancellation must not retry.
+	snapTween.eventCallback('onInterrupt', null)
+	snapTween.kill()
+	// GSAP 3.15's disable() also clears the scroll tween creator's reference.
+	// Killing alone leaves keyboard/programmatic scrolling unable to snap again.
+	const tweenTo = trigger.tweenTo as typeof trigger.tweenTo & {
+		tween?: gsap.core.Tween | number
+	}
+	if (tweenTo.tween === snapTween) tweenTo.tween = 0
+}
+
+function isExhibitionSnapSuppressed(trigger: ReturnType<typeof ScrollTrigger.create>) {
+	if (overlayLifecycle.value !== 'closed') return true
+	if (exhibitionSnapResumeScrollY === undefined) return false
+
+	// A refresh/update may have queued a snap before close finished. Ignore it
+	// at the restored position; fresh homepage scrolling resumes normal snapping.
+	if (Math.abs(trigger.scroll() - exhibitionSnapResumeScrollY) <= 0.5) return true
+
+	exhibitionSnapResumeScrollY = undefined
+	return false
 }
 
 function synchronizeExhibitionScroll(scrollY: number) {
@@ -386,6 +418,7 @@ async function closeProject(source: 'button' | 'escape') {
 				actualScrollY: getPortfolioScrollY()
 			})
 		}
+		exhibitionSnapResumeScrollY = exhibitionTrigger?.scroll()
 		setOverlayLifecycle('closed')
 		debugProjectClose('lifecycle → closed')
 		openingHomepageScrollY = undefined
@@ -1035,7 +1068,12 @@ function setupExhibition(useNativeSticky = false) {
 			updateVisualProjectActivation(cards)
 		},
 		snap: {
-			snapTo: (value: number) => {
+			snapTo: (value: number, trigger) => {
+				if (trigger && isExhibitionSnapSuppressed(trigger)) {
+					// Returning the predicted value would retain GSAP's snap inertia.
+					return (trigger.scroll() - trigger.start) / (trigger.end - trigger.start)
+				}
+
 				const nearestPoint = snapPoints.reduce((nearest, point) => (
 					Math.abs(point - value) < Math.abs(nearest - value) ? point : nearest
 				))
@@ -1043,6 +1081,10 @@ function setupExhibition(useNativeSticky = false) {
 				return Math.abs(nearestPoint - value) <= snapThreshold
 					? nearestPoint
 					: value
+			},
+			onStart: (trigger) => {
+				if (!isExhibitionSnapSuppressed(trigger)) return
+				cancelExhibitionSnap(trigger)
 			},
 			delay: 0.04,
 			duration: {
@@ -1056,6 +1098,7 @@ function setupExhibition(useNativeSticky = false) {
 	const trigger = exhibitionTrigger
 	return () => {
 		trigger.kill()
+		exhibitionSnapResumeScrollY = undefined
 		timeline.kill()
 		root.value?.classList.remove('work-section--active')
 		root.value?.style.removeProperty('--work-scroll-distance')

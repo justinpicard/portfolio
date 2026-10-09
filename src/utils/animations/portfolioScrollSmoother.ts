@@ -42,7 +42,10 @@ export function initPortfolioScrollSmoother(
 		content: options.content,
 		smooth: PORTFOLIO_SCROLL_SMOOTHING,
 		smoothTouch: 0,
-		effects: false
+		effects: false,
+		// Pausing blocks native input, but focus in a teleported case can still
+		// make ScrollSmoother scroll the homepage to that element's coordinates.
+		onFocusIn: () => smoothingLockCount > 0 ? false : undefined
 	})
 	if (smoothingLockCount > 0) smoother.paused(true)
 	ScrollTrigger.refresh()
