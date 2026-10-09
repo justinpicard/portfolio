@@ -5,6 +5,14 @@ body {
 
 	font-family: var(--font-body);
 	overflow-x: hidden;
+
+	@include respond(lg, down) {
+		// Root scroll locking stops body overflow propagating to the viewport.
+		// Clip without creating a scroll container so Work stays viewport-sticky.
+		&:has(> .project-layer-prototype) {
+			overflow-x: clip;
+		}
+	}
 }
 
 img {

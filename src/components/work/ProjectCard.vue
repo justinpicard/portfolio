@@ -81,6 +81,8 @@ x<template>
 </template>
 
 <script setup lang="ts">
+// TEMPORARY mobile scroll isolation; pointer-follow also installs a scroll listener.
+import { isScrollDiagnosticGroupEnabled } from '../../config/mobileScrollDiagnostics'
 import {
 	computed,
 	onMounted,
@@ -205,6 +207,7 @@ function animateHover(isHovered: boolean) {
 }
 
 onMounted(() => {
+	if (!isScrollDiagnosticGroupEnabled('projectCards')) return
 	if (!projectIndicatorWrapper.value || !projectIndicatorVisual.value) return
 
 	cursorFollowIndicator = useCursorFollowIndicator({

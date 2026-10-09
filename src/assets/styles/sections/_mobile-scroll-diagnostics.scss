@@ -1,0 +1,89 @@
+@use "../abstracts" as *;
+
+// TEMPORARY: usable static layouts only for opted-in compact diagnostics.
+@include respond(lg, down) {
+	.work-section--diagnostic-static {
+		height: auto;
+		overflow: visible;
+
+		.work-section__stage {
+			position: relative;
+			height: auto;
+			overflow: visible;
+		}
+
+		.work-section__title-wrapper {
+			position: relative;
+			height: var(--work-stage-height);
+		}
+
+		.work-section__exhibition {
+			position: relative;
+			inset: auto;
+			display: flex;
+			flex-direction: column;
+			gap: var(--space-10);
+			padding-block: var(--space-10);
+			perspective: none;
+			pointer-events: auto;
+		}
+
+		.project-card {
+			position: relative;
+			top: auto;
+			left: auto;
+			flex: 0 0 auto;
+			margin-inline: auto;
+		}
+	}
+
+	.work-section--diagnostic-sticky {
+		height: calc(var(--work-stage-height) + var(--work-scroll-distance, 0px));
+
+		.work-section__stage {
+			position: sticky;
+			top: 0;
+			height: var(--work-stage-height);
+			overflow: hidden;
+		}
+
+		.work-section__exhibition {
+			position: absolute;
+			inset: 0;
+			flex-direction: row;
+			align-items: center;
+			padding: 0 calc((100vw - var(--exhibition-card-width)) / 2);
+			overflow-x: auto;
+		}
+
+		.project-card {
+			margin: 0;
+		}
+	}
+
+	.home-life-section--diagnostic-static {
+		.home-life-section__intro {
+			position: relative;
+			height: auto;
+			padding-block: var(--home-life-flow-space);
+		}
+
+		.home-life-section__stack-track {
+			display: grid;
+			height: auto;
+		}
+
+		.home-life-section__stack {
+			position: static;
+			display: contents;
+			height: auto;
+		}
+
+		.home-life-section__card {
+			position: relative;
+			inset: auto;
+			max-width: 100%;
+			will-change: auto;
+		}
+	}
+}

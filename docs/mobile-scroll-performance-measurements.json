@@ -1,0 +1,1096 @@
+{
+  "date": "2026-10-08",
+  "baselineCommit": "7556b0c",
+  "status": "Preliminary implementation audit and desktop-hosted browser screening. Physical iPhone profiling and isolation are outstanding.",
+  "reportedDevice": "iPhone 14 Pro; Safari and Chrome; About and Work worst; iOS version unknown",
+  "limits": [
+    "No physical iPhone measurements",
+    "No iOS WebKit performance trace",
+    "Synthetic scrolling without native momentum",
+    "CPU throttling does not emulate mobile GPU or display",
+    "rAF intervals are not presented-frame counts",
+    "Chrome GPU stalls are not evidence of the reported iPhone bottleneck"
+  ],
+  "runs": [
+    {
+      "environment": "headless-screening",
+      "case": "baseline",
+      "frames": 450,
+      "p95IntervalMs": 16.799999999999272,
+      "intervalsAbove25ms": 11,
+      "intervalsAbove50ms": 9,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17724,
+      "timings": {
+        "FunctionCall": {
+          "count": 2199,
+          "ms": 249.34499999999693,
+          "maxMs": 2.383
+        },
+        "UpdateLayoutTree": {
+          "count": 1075,
+          "ms": 121.07300000000046,
+          "maxMs": 1.403
+        },
+        "Layout": {
+          "count": 119,
+          "ms": 15.826999999999998,
+          "maxMs": 0.877
+        },
+        "Paint": {
+          "count": 932,
+          "ms": 57.69000000000016,
+          "maxMs": 1.497
+        },
+        "RasterTask": {
+          "count": 1225,
+          "ms": 52.12400000000008,
+          "maxMs": 4.095
+        },
+        "ImageDecodeTask": {
+          "count": 22,
+          "ms": 116.41999999999999,
+          "maxMs": 21.243
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 1225,
+          "ms": 819.9290000000003,
+          "maxMs": 155.504
+        }
+      }
+    },
+    {
+      "environment": "headless-screening",
+      "case": "none",
+      "frames": 509,
+      "p95IntervalMs": 16.799999999999272,
+      "intervalsAbove25ms": 0,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17724,
+      "timings": {
+        "FunctionCall": {
+          "count": 2489,
+          "ms": 107.09400000000029,
+          "maxMs": 2.18
+        },
+        "UpdateLayoutTree": {
+          "count": 936,
+          "ms": 68.61000000000007,
+          "maxMs": 2.151
+        },
+        "Layout": {
+          "count": 4,
+          "ms": 0.22500000000000003,
+          "maxMs": 0.101
+        },
+        "Paint": {
+          "count": 163,
+          "ms": 7.25999999999999,
+          "maxMs": 1.013
+        },
+        "RasterTask": {
+          "count": 197,
+          "ms": 6.25199999999999,
+          "maxMs": 0.531
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 197,
+          "ms": 11.116999999999999,
+          "maxMs": 0.899
+        }
+      }
+    },
+    {
+      "environment": "headless-screening",
+      "case": "hero",
+      "frames": 508,
+      "p95IntervalMs": 16.799999999999272,
+      "intervalsAbove25ms": 0,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17724,
+      "timings": {
+        "FunctionCall": {
+          "count": 2482,
+          "ms": 112.85399999999974,
+          "maxMs": 2.724
+        },
+        "UpdateLayoutTree": {
+          "count": 935,
+          "ms": 67.93200000000004,
+          "maxMs": 2.364
+        },
+        "Layout": {
+          "count": 4,
+          "ms": 0.248,
+          "maxMs": 0.102
+        },
+        "Paint": {
+          "count": 166,
+          "ms": 12.494000000000012,
+          "maxMs": 1.024
+        },
+        "RasterTask": {
+          "count": 197,
+          "ms": 5.381999999999993,
+          "maxMs": 0.377
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 197,
+          "ms": 10.052000000000003,
+          "maxMs": 0.55
+        }
+      }
+    },
+    {
+      "environment": "headless-screening",
+      "case": "about",
+      "frames": 509,
+      "p95IntervalMs": 16.700000000000728,
+      "intervalsAbove25ms": 0,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17724,
+      "timings": {
+        "FunctionCall": {
+          "count": 2495,
+          "ms": 128.24900000000014,
+          "maxMs": 1.835
+        },
+        "UpdateLayoutTree": {
+          "count": 965,
+          "ms": 75.02600000000022,
+          "maxMs": 1.807
+        },
+        "Layout": {
+          "count": 4,
+          "ms": 0.9790000000000001,
+          "maxMs": 0.505
+        },
+        "Paint": {
+          "count": 391,
+          "ms": 19.071999999999992,
+          "maxMs": 1.077
+        },
+        "RasterTask": {
+          "count": 292,
+          "ms": 6.772999999999985,
+          "maxMs": 0.445
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 292,
+          "ms": 11.934,
+          "maxMs": 0.678
+        }
+      }
+    },
+    {
+      "environment": "headless-screening",
+      "case": "workHeading",
+      "frames": 508,
+      "p95IntervalMs": 16.700000000000728,
+      "intervalsAbove25ms": 0,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17724,
+      "timings": {
+        "FunctionCall": {
+          "count": 2491,
+          "ms": 259.22299999999717,
+          "maxMs": 1.49
+        },
+        "UpdateLayoutTree": {
+          "count": 969,
+          "ms": 146.2499999999999,
+          "maxMs": 1.467
+        },
+        "Paint": {
+          "count": 167,
+          "ms": 10.313000000000006,
+          "maxMs": 1.16
+        },
+        "RasterTask": {
+          "count": 319,
+          "ms": 10.38899999999997,
+          "maxMs": 1.112
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 319,
+          "ms": 14.236999999999984,
+          "maxMs": 0.701
+        }
+      }
+    },
+    {
+      "environment": "headless-screening",
+      "case": "sticky",
+      "frames": 508,
+      "p95IntervalMs": 16.700000000000728,
+      "intervalsAbove25ms": 0,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17724,
+      "timings": {
+        "FunctionCall": {
+          "count": 2485,
+          "ms": 88.06899999999973,
+          "maxMs": 1.776
+        },
+        "UpdateLayoutTree": {
+          "count": 935,
+          "ms": 52.32700000000008,
+          "maxMs": 1.101
+        },
+        "Paint": {
+          "count": 144,
+          "ms": 5.941999999999989,
+          "maxMs": 0.795
+        },
+        "RasterTask": {
+          "count": 197,
+          "ms": 5.106999999999997,
+          "maxMs": 0.351
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 197,
+          "ms": 9.361999999999998,
+          "maxMs": 0.537
+        }
+      }
+    },
+    {
+      "environment": "headless-screening",
+      "case": "cards",
+      "frames": 508,
+      "p95IntervalMs": 16.799999999999272,
+      "intervalsAbove25ms": 0,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17724,
+      "timings": {
+        "FunctionCall": {
+          "count": 2488,
+          "ms": 131.79999999999936,
+          "maxMs": 2.355
+        },
+        "UpdateLayoutTree": {
+          "count": 1056,
+          "ms": 81.28600000000023,
+          "maxMs": 1.9
+        },
+        "Layout": {
+          "count": 5,
+          "ms": 0.6610000000000001,
+          "maxMs": 0.437
+        },
+        "Paint": {
+          "count": 401,
+          "ms": 27.852,
+          "maxMs": 1.223
+        },
+        "RasterTask": {
+          "count": 776,
+          "ms": 34.85800000000012,
+          "maxMs": 2.388
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 776,
+          "ms": 22.687999999999917,
+          "maxMs": 0.717
+        }
+      }
+    },
+    {
+      "environment": "headless-screening",
+      "case": "lifeHeading",
+      "frames": 508,
+      "p95IntervalMs": 16.700000000000728,
+      "intervalsAbove25ms": 0,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17724,
+      "timings": {
+        "FunctionCall": {
+          "count": 2492,
+          "ms": 102.96399999999961,
+          "maxMs": 2.594
+        },
+        "UpdateLayoutTree": {
+          "count": 935,
+          "ms": 62.474000000000046,
+          "maxMs": 2.554
+        },
+        "Paint": {
+          "count": 151,
+          "ms": 10.550000000000013,
+          "maxMs": 1.015
+        },
+        "RasterTask": {
+          "count": 371,
+          "ms": 7.463999999999965,
+          "maxMs": 0.45
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 371,
+          "ms": 12.993,
+          "maxMs": 1.108
+        }
+      }
+    },
+    {
+      "environment": "headless-screening",
+      "case": "lifeStack",
+      "frames": 508,
+      "p95IntervalMs": 16.700000000000728,
+      "intervalsAbove25ms": 0,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17724,
+      "timings": {
+        "FunctionCall": {
+          "count": 2488,
+          "ms": 95.19700000000014,
+          "maxMs": 2.332
+        },
+        "UpdateLayoutTree": {
+          "count": 935,
+          "ms": 54.81200000000014,
+          "maxMs": 2.3
+        },
+        "Paint": {
+          "count": 139,
+          "ms": 6.410999999999993,
+          "maxMs": 0.872
+        },
+        "RasterTask": {
+          "count": 197,
+          "ms": 6.178999999999993,
+          "maxMs": 0.408
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 197,
+          "ms": 8.885999999999996,
+          "maxMs": 0.569
+        }
+      }
+    },
+    {
+      "environment": "headless-screening",
+      "case": "global",
+      "frames": 508,
+      "p95IntervalMs": 16.700000000000728,
+      "intervalsAbove25ms": 0,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17724,
+      "timings": {
+        "FunctionCall": {
+          "count": 2486,
+          "ms": 157.93199999999936,
+          "maxMs": 2.088
+        },
+        "UpdateLayoutTree": {
+          "count": 1059,
+          "ms": 76.50800000000005,
+          "maxMs": 2.056
+        },
+        "Layout": {
+          "count": 116,
+          "ms": 18.625000000000007,
+          "maxMs": 0.771
+        },
+        "Paint": {
+          "count": 590,
+          "ms": 24.13299999999999,
+          "maxMs": 0.911
+        },
+        "RasterTask": {
+          "count": 413,
+          "ms": 7.817999999999963,
+          "maxMs": 0.462
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 413,
+          "ms": 15.31999999999998,
+          "maxMs": 0.918
+        }
+      }
+    },
+    {
+      "environment": "visible-chrome",
+      "case": "baseline",
+      "frames": 498,
+      "p95IntervalMs": 17.600000000000364,
+      "intervalsAbove25ms": 3,
+      "intervalsAbove50ms": 3,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17723.5,
+      "timings": {
+        "FunctionCall": {
+          "count": 2436,
+          "ms": 365.5339999999991,
+          "maxMs": 3.043
+        },
+        "UpdateLayoutTree": {
+          "count": 1209,
+          "ms": 175.45099999999968,
+          "maxMs": 1.966
+        },
+        "Layout": {
+          "count": 120,
+          "ms": 24.982999999999993,
+          "maxMs": 0.939
+        },
+        "Paint": {
+          "count": 905,
+          "ms": 62.19200000000001,
+          "maxMs": 1.139
+        },
+        "RasterTask": {
+          "count": 1318,
+          "ms": 56.65599999999998,
+          "maxMs": 2.66
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 1318,
+          "ms": 173.90899999999868,
+          "maxMs": 136.454
+        }
+      }
+    },
+    {
+      "environment": "visible-chrome",
+      "case": "cards",
+      "frames": 509,
+      "p95IntervalMs": 17.600000000000364,
+      "intervalsAbove25ms": 0,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17723.5,
+      "timings": {
+        "FunctionCall": {
+          "count": 2493,
+          "ms": 183.3100000000012,
+          "maxMs": 1.262
+        },
+        "UpdateLayoutTree": {
+          "count": 1057,
+          "ms": 119.90800000000021,
+          "maxMs": 1.249
+        },
+        "Layout": {
+          "count": 5,
+          "ms": 0.407,
+          "maxMs": 0.151
+        },
+        "Paint": {
+          "count": 464,
+          "ms": 25.730000000000018,
+          "maxMs": 0.976
+        },
+        "RasterTask": {
+          "count": 739,
+          "ms": 47.899000000000036,
+          "maxMs": 2.649
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 739,
+          "ms": 26.18399999999994,
+          "maxMs": 0.527
+        }
+      }
+    },
+    {
+      "environment": "visible-chrome",
+      "case": "noBackdrop",
+      "frames": 511,
+      "p95IntervalMs": 17.600000000000364,
+      "intervalsAbove25ms": 0,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17723.5,
+      "timings": {
+        "FunctionCall": {
+          "count": 2496,
+          "ms": 293.8450000000004,
+          "maxMs": 3.688
+        },
+        "UpdateLayoutTree": {
+          "count": 1233,
+          "ms": 153.3019999999999,
+          "maxMs": 2.188
+        },
+        "Layout": {
+          "count": 74,
+          "ms": 11.443999999999997,
+          "maxMs": 0.691
+        },
+        "Paint": {
+          "count": 857,
+          "ms": 52.414,
+          "maxMs": 1.327
+        },
+        "RasterTask": {
+          "count": 1222,
+          "ms": 56.69400000000004,
+          "maxMs": 2.706
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 1222,
+          "ms": 41.34299999999998,
+          "maxMs": 0.233
+        }
+      }
+    },
+    {
+      "environment": "visible-chrome",
+      "case": "aboutOpacity",
+      "frames": 508,
+      "p95IntervalMs": 17.599999999998545,
+      "intervalsAbove25ms": 0,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17723.5,
+      "timings": {
+        "FunctionCall": {
+          "count": 2492,
+          "ms": 340.8639999999982,
+          "maxMs": 1.517
+        },
+        "UpdateLayoutTree": {
+          "count": 1230,
+          "ms": 184.2549999999995,
+          "maxMs": 1.787
+        },
+        "Layout": {
+          "count": 73,
+          "ms": 14.517,
+          "maxMs": 0.875
+        },
+        "Paint": {
+          "count": 846,
+          "ms": 53.89700000000015,
+          "maxMs": 0.935
+        },
+        "RasterTask": {
+          "count": 1243,
+          "ms": 57.30899999999993,
+          "maxMs": 2.586
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 1243,
+          "ms": 36.87399999999992,
+          "maxMs": 0.116
+        }
+      }
+    },
+    {
+      "environment": "visible-chrome",
+      "case": "aboutTransform",
+      "frames": 509,
+      "p95IntervalMs": 17.5,
+      "intervalsAbove25ms": 0,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17723.5,
+      "timings": {
+        "FunctionCall": {
+          "count": 2495,
+          "ms": 344.4329999999993,
+          "maxMs": 1.894
+        },
+        "UpdateLayoutTree": {
+          "count": 1232,
+          "ms": 183.943,
+          "maxMs": 1.584
+        },
+        "Layout": {
+          "count": 74,
+          "ms": 19.499000000000002,
+          "maxMs": 0.968
+        },
+        "Paint": {
+          "count": 829,
+          "ms": 53.477000000000075,
+          "maxMs": 1.255
+        },
+        "RasterTask": {
+          "count": 1227,
+          "ms": 55.55299999999988,
+          "maxMs": 2.596
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 1227,
+          "ms": 34.805999999999905,
+          "maxMs": 0.145
+        }
+      }
+    },
+    {
+      "environment": "headless-property-screening",
+      "case": "baselineRepeat",
+      "frames": 508,
+      "p95IntervalMs": 16.799999999999272,
+      "intervalsAbove25ms": 0,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17724,
+      "timings": {
+        "FunctionCall": {
+          "count": 2486,
+          "ms": 215.3050000000017,
+          "maxMs": 1.965
+        },
+        "UpdateLayoutTree": {
+          "count": 1240,
+          "ms": 113.9920000000003,
+          "maxMs": 1.935
+        },
+        "Layout": {
+          "count": 120,
+          "ms": 14.224999999999994,
+          "maxMs": 0.882
+        },
+        "Paint": {
+          "count": 1015,
+          "ms": 68.04800000000014,
+          "maxMs": 1.646
+        },
+        "RasterTask": {
+          "count": 1338,
+          "ms": 40.32399999999992,
+          "maxMs": 1.236
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 1338,
+          "ms": 32.520999999999894,
+          "maxMs": 0.547
+        }
+      }
+    },
+    {
+      "environment": "headless-property-screening",
+      "case": "noScale",
+      "frames": 508,
+      "p95IntervalMs": 16.700000000000728,
+      "intervalsAbove25ms": 0,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17724,
+      "timings": {
+        "FunctionCall": {
+          "count": 2487,
+          "ms": 450.2329999999962,
+          "maxMs": 1.842
+        },
+        "UpdateLayoutTree": {
+          "count": 1239,
+          "ms": 226.06399999999937,
+          "maxMs": 1.735
+        },
+        "Layout": {
+          "count": 121,
+          "ms": 28.531999999999993,
+          "maxMs": 1.123
+        },
+        "Paint": {
+          "count": 1067,
+          "ms": 72.87900000000025,
+          "maxMs": 1.239
+        },
+        "RasterTask": {
+          "count": 1379,
+          "ms": 32.84100000000032,
+          "maxMs": 1.142
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 1379,
+          "ms": 47.09200000000008,
+          "maxMs": 4.049
+        }
+      }
+    },
+    {
+      "environment": "headless-property-screening",
+      "case": "noShadows",
+      "frames": 508,
+      "p95IntervalMs": 16.799999999999272,
+      "intervalsAbove25ms": 0,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17724,
+      "timings": {
+        "FunctionCall": {
+          "count": 2479,
+          "ms": 258.4390000000012,
+          "maxMs": 1.772
+        },
+        "UpdateLayoutTree": {
+          "count": 1235,
+          "ms": 132.9610000000005,
+          "maxMs": 1.149
+        },
+        "Layout": {
+          "count": 120,
+          "ms": 16.993,
+          "maxMs": 0.867
+        },
+        "Paint": {
+          "count": 980,
+          "ms": 51.90100000000013,
+          "maxMs": 2.568
+        },
+        "RasterTask": {
+          "count": 1258,
+          "ms": 41.157000000000075,
+          "maxMs": 1.21
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 1258,
+          "ms": 31.98799999999995,
+          "maxMs": 0.555
+        }
+      }
+    },
+    {
+      "environment": "headless-property-screening",
+      "case": "noClip",
+      "frames": 508,
+      "p95IntervalMs": 16.700000000000728,
+      "intervalsAbove25ms": 0,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17724,
+      "timings": {
+        "FunctionCall": {
+          "count": 2486,
+          "ms": 245.11300000000105,
+          "maxMs": 2.312
+        },
+        "UpdateLayoutTree": {
+          "count": 1240,
+          "ms": 124.40600000000047,
+          "maxMs": 2.285
+        },
+        "Layout": {
+          "count": 120,
+          "ms": 19.210999999999988,
+          "maxMs": 0.831
+        },
+        "Paint": {
+          "count": 1022,
+          "ms": 48.642000000000166,
+          "maxMs": 1.146
+        },
+        "RasterTask": {
+          "count": 1337,
+          "ms": 40.49300000000006,
+          "maxMs": 1.186
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 1337,
+          "ms": 32.49599999999994,
+          "maxMs": 0.539
+        }
+      }
+    },
+    {
+      "environment": "headless-property-screening",
+      "case": "aboutWorkHeading",
+      "frames": 506,
+      "p95IntervalMs": 16.799999999999272,
+      "intervalsAbove25ms": 1,
+      "intervalsAbove50ms": 0,
+      "longTasks": [],
+      "refreshes": [],
+      "startScrollY": 0,
+      "endScrollY": 17724,
+      "timings": {
+        "FunctionCall": {
+          "count": 2482,
+          "ms": 88.80300000000022,
+          "maxMs": 2.337
+        },
+        "UpdateLayoutTree": {
+          "count": 986,
+          "ms": 54.0260000000001,
+          "maxMs": 2.306
+        },
+        "Paint": {
+          "count": 392,
+          "ms": 19.302999999999987,
+          "maxMs": 1.025
+        },
+        "RasterTask": {
+          "count": 415,
+          "ms": 9.554999999999986,
+          "maxMs": 1.048
+        },
+        "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush": {
+          "count": 415,
+          "ms": 13.07899999999998,
+          "maxMs": 0.535
+        }
+      }
+    }
+  ],
+  "desktopScreening": {
+    "frames": 473,
+    "p95IntervalMs": 17.600000000000364,
+    "intervalsAbove25ms": 10,
+    "intervalsAbove50ms": 9,
+    "longtasks": [],
+    "refreshes": []
+  },
+  "controlledGeometryExperiment": {
+    "before": {
+      "y": 6250,
+      "innerHeight": 852,
+      "visualHeight": 852,
+      "workHeight": 7238,
+      "stageHeight": 852,
+      "cardRect": {
+        "x": 18.202316284179688,
+        "y": 119.64932250976562,
+        "width": 329.71319580078125,
+        "height": 612.701416015625,
+        "top": 119.64932250976562,
+        "right": 347.91551208496094,
+        "bottom": 732.3507385253906,
+        "left": 18.202316284179688
+      },
+      "lifeTop": 9630.15625,
+      "triggers": [
+        {
+          "trigger": "about-section__eyebrow eyebrow font-body mb-8 text-secondary",
+          "start": 623,
+          "end": 738,
+          "progress": 1
+        },
+        {
+          "trigger": "about-section__title heading-font mb-8 md:mb-16",
+          "start": 668,
+          "end": 1756,
+          "progress": 1
+        },
+        {
+          "trigger": "section-layout section-layout--stage work-section work-section--active",
+          "start": 1540,
+          "end": 2903,
+          "progress": 1
+        },
+        {
+          "trigger": "section-layout section-layout--stage work-section work-section--active",
+          "start": 2392,
+          "end": 8778,
+          "progress": 0.6041340432195428
+        },
+        {
+          "trigger": "home-life-section__stack-track",
+          "start": 10482,
+          "end": 16872,
+          "progress": 0
+        }
+      ],
+      "refreshes": []
+    },
+    "cssOnly": {
+      "y": 6250,
+      "innerHeight": 852,
+      "visualHeight": 852,
+      "workHeight": 7166,
+      "stageHeight": 780,
+      "cardRect": {
+        "x": 18.202316284179688,
+        "y": 83.64932250976562,
+        "width": 329.71319580078125,
+        "height": 612.701416015625,
+        "top": 83.64932250976562,
+        "right": 347.91551208496094,
+        "bottom": 696.3507385253906,
+        "left": 18.202316284179688
+      },
+      "lifeTop": 9558.15625,
+      "triggers": [
+        {
+          "trigger": "about-section__eyebrow eyebrow font-body mb-8 text-secondary",
+          "start": 623,
+          "end": 738,
+          "progress": 1
+        },
+        {
+          "trigger": "about-section__title heading-font mb-8 md:mb-16",
+          "start": 668,
+          "end": 1756,
+          "progress": 1
+        },
+        {
+          "trigger": "section-layout section-layout--stage work-section work-section--active",
+          "start": 1540,
+          "end": 2903,
+          "progress": 1
+        },
+        {
+          "trigger": "section-layout section-layout--stage work-section work-section--active",
+          "start": 2392,
+          "end": 8778,
+          "progress": 0.6041340432195428
+        },
+        {
+          "trigger": "home-life-section__stack-track",
+          "start": 10482,
+          "end": 16872,
+          "progress": 0
+        }
+      ],
+      "refreshes": []
+    },
+    "emulatedResize": {
+      "y": 6250,
+      "innerHeight": 780,
+      "visualHeight": 780,
+      "workHeight": 7166,
+      "stageHeight": 780,
+      "cardRect": {
+        "x": 18.202316284179688,
+        "y": 109.54010009765625,
+        "width": 329.71319580078125,
+        "height": 560.9197998046875,
+        "top": 109.54010009765625,
+        "right": 347.91551208496094,
+        "bottom": 670.4598999023438,
+        "left": 18.202316284179688
+      },
+      "lifeTop": 9558.15625,
+      "triggers": [
+        {
+          "trigger": "about-section__eyebrow eyebrow font-body mb-8 text-secondary",
+          "start": 623,
+          "end": 738,
+          "progress": 1
+        },
+        {
+          "trigger": "about-section__title heading-font mb-8 md:mb-16",
+          "start": 668,
+          "end": 1756,
+          "progress": 1
+        },
+        {
+          "trigger": "section-layout section-layout--stage work-section work-section--active",
+          "start": 1540,
+          "end": 2903,
+          "progress": 1
+        },
+        {
+          "trigger": "section-layout section-layout--stage work-section work-section--active",
+          "start": 2392,
+          "end": 8778,
+          "progress": 0.6041340432195428
+        },
+        {
+          "trigger": "home-life-section__stack-track",
+          "start": 10482,
+          "end": 16872,
+          "progress": 0
+        }
+      ],
+      "refreshes": []
+    },
+    "explicitRefresh": {
+      "y": 6401,
+      "innerHeight": 780,
+      "visualHeight": 780,
+      "workHeight": 6627,
+      "stageHeight": 780,
+      "cardRect": {
+        "x": 31.4453125,
+        "y": 109.203125,
+        "width": 330.109375,
+        "height": 561.59375,
+        "top": 109.203125,
+        "right": 361.5546875,
+        "bottom": 670.796875,
+        "left": 31.4453125
+      },
+      "lifeTop": 9018.46875,
+      "triggers": [
+        {
+          "trigger": "about-section__eyebrow eyebrow font-body mb-8 text-secondary",
+          "start": 675,
+          "end": 781,
+          "progress": 1
+        },
+        {
+          "trigger": "about-section__title heading-font mb-8 md:mb-16",
+          "start": 719,
+          "end": 1799,
+          "progress": 1
+        },
+        {
+          "trigger": "section-layout section-layout--stage work-section work-section--active",
+          "start": 1612,
+          "end": 2860,
+          "progress": 1
+        },
+        {
+          "trigger": "section-layout section-layout--stage work-section work-section--active",
+          "start": 2392,
+          "end": 8238,
+          "progress": 0.6857680465275402
+        },
+        {
+          "trigger": "home-life-section__stack-track",
+          "start": 9798,
+          "end": 15648,
+          "progress": 0
+        }
+      ],
+      "refreshes": [
+        {
+          "y": 6250,
+          "h": 780,
+          "time": 10435.5
+        }
+      ]
+    }
+  }
+}

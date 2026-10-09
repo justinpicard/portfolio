@@ -30,6 +30,8 @@
 </template>
 
 <script setup lang="ts">
+// TEMPORARY mobile scroll isolation; see src/config/mobileScrollDiagnostics.ts.
+import { isScrollDiagnosticGroupEnabled } from '../../config/mobileScrollDiagnostics'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePortfolioContent } from '../../composables/usePortfolioContent'
@@ -244,7 +246,7 @@ function updateScrollIndicatorRotation(scrollVelocity: number) {
 function setupScrollIndicatorVelocity(
 	scrollIndicatorVisualElement: HTMLElement
 ) {
-	if (prefersReducedMotion() || !root.value) return
+	if (!isScrollDiagnosticGroupEnabled('hero') || prefersReducedMotion() || !root.value) return
 
 	const graphic = scrollIndicatorVisualElement.querySelector<SVGElement>(
 		'.circular-scroll-indicator__graphic'
@@ -312,12 +314,14 @@ onMounted(async () => {
 	const finalText = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-figure__intro')
 	if (!finalTitle || !finalDivider || !finalRole || !finalText || !finalAvailability) return
 
-	scrollIndicatorFollow = useCursorFollowIndicator({
-		triggerElement: root,
-		wrapperElement: scrollIndicatorWrapper,
-		visualElement: scrollIndicatorElement,
-		suppressSelector: '.site-header a, .site-header button, .site-header [role="button"], .site-header .role, .hero-figure__availability[href]'
-	})
+	if (isScrollDiagnosticGroupEnabled('hero')) {
+		scrollIndicatorFollow = useCursorFollowIndicator({
+			triggerElement: root,
+			wrapperElement: scrollIndicatorWrapper,
+			visualElement: scrollIndicatorElement,
+			suppressSelector: '.site-header a, .site-header button, .site-header [role="button"], .site-header .role, .hero-figure__availability[href]'
+		})
+	}
 	setupScrollIndicatorVelocity(scrollIndicatorVisualElement)
 
 	unlockScroll = lockPageScroll()

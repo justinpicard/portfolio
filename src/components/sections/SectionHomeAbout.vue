@@ -27,6 +27,8 @@
 </template>
 
 <script setup lang="ts">
+// TEMPORARY mobile scroll isolation; see src/config/mobileScrollDiagnostics.ts.
+import { isScrollDiagnosticGroupEnabled } from '../../config/mobileScrollDiagnostics'
 import { nextTick, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePortfolioContent } from '../../composables/usePortfolioContent'
@@ -49,19 +51,15 @@ let ctx: gsap.Context | undefined
 let isMounted = false
 let revealRequestId = 0
 const ABOUT_NAVIGATION_TEXT_VIEWPORT_POSITION = 0.2
-const ABOUT_CHARACTER_INITIAL_SCALE = 2
-const ABOUT_CHARACTER_INITIAL_BLUR = 15
-const ABOUT_CHARACTER_INITIAL_OPACITY = 0
-const ABOUT_EYEBROW_REVEAL_DURATION = 0.06
-const ABOUT_EYEBROW_REVEAL_STAGGER_AMOUNT = 0.12
+// Keep dimmed text readable against the primary background, including the small label.
+const ABOUT_CHARACTER_INITIAL_OPACITY = 0.5
+const ABOUT_EYEBROW_INITIAL_OPACITY = 0.75
+const ABOUT_CHARACTER_REVEAL_DURATION = 1
+const ABOUT_CHARACTER_REVEAL_STAGGER = 1
 const ABOUT_EYEBROW_REVEAL_START = 'top 72%'
 const ABOUT_EYEBROW_REVEAL_END = 'bottom 60%'
-const ABOUT_INTRO_REVEAL_DURATION = 0.1
-const ABOUT_INTRO_REVEAL_STAGGER_AMOUNT = 1.1
 const ABOUT_INTRO_REVEAL_START = 'top 72%'
 const ABOUT_INTRO_REVEAL_END = 'bottom 60%'
-const COMPACT_OR_TOUCH_QUERY = '(max-width: 63.999rem), (hover: none) and (pointer: coarse)'
-const ABOUT_TOUCH_INITIAL_Y_PERCENT = 24
 
 function cleanupAboutReveal() {
 	revealRequestId += 1
@@ -69,7 +67,6 @@ function cleanupAboutReveal() {
 	ctx = undefined
 	aboutSplits.forEach((split) => split.revert())
 	aboutSplits = []
-	if (aboutText.value) gsap.set(aboutText.value, { clearProps: 'visibility' })
 	if (root.value) delete root.value.dataset.sectionNavigationScrollY
 }
 
@@ -86,14 +83,12 @@ function waitForFrame() {
 }
 
 async function initAboutReveal() {
+	if (!isScrollDiagnosticGroupEnabled('about')) return
+
 	const requestId = ++revealRequestId
 	const reduceMotion = prefersReducedMotion()
 
 	registerGsapPlugins()
-	if (aboutText.value && !reduceMotion) {
-		// Avoid flashing the sharp state while fonts and character boundaries settle.
-		gsap.set(aboutText.value, { visibility: 'hidden' })
-	}
 
 	await waitForFonts()
 	await nextTick()
@@ -103,7 +98,6 @@ async function initAboutReveal() {
 
 	ctx = gsap.context(() => {
 		if (!aboutText.value || !aboutLabel.value || !aboutIntro.value) return
-		const useTouchReveal = window.matchMedia(COMPACT_OR_TOUCH_QUERY).matches
 
 		ScrollTrigger.create({
 			trigger: aboutText.value,
@@ -115,48 +109,27 @@ async function initAboutReveal() {
 			}
 		})
 
-		if (reduceMotion) {
-			gsap.set(aboutText.value, { clearProps: 'visibility' })
-			return
-		}
+		if (reduceMotion) return
 
 		const labelSplit = new SplitText(aboutLabel.value, {
-			type: useTouchReveal ? 'words' : 'words,chars',
+			type: 'words,chars',
 			wordsClass: 'about-section__word',
 			charsClass: 'about-section__char'
 		})
 		const introSplit = new SplitText(aboutIntro.value, {
-			type: useTouchReveal ? 'words' : 'words,chars',
+			type: 'words,chars',
 			wordsClass: 'about-section__word',
 			charsClass: 'about-section__char'
 		})
 		aboutSplits = [labelSplit, introSplit]
-		const labelTargets = useTouchReveal ? labelSplit.words : labelSplit.chars
-		const introTargets = useTouchReveal ? introSplit.words : introSplit.chars
-		const revealTargets = [...labelTargets, ...introTargets]
+		// Set every character before the stagger starts so waiting text stays readable.
+		gsap.set(labelSplit.chars, { opacity: ABOUT_EYEBROW_INITIAL_OPACITY })
+		gsap.set(introSplit.chars, { opacity: ABOUT_CHARACTER_INITIAL_OPACITY })
 
-		gsap.set(revealTargets, {
-			opacity: ABOUT_CHARACTER_INITIAL_OPACITY,
-			...(useTouchReveal
-				? { yPercent: ABOUT_TOUCH_INITIAL_Y_PERCENT }
-				: {
-					filter: `blur(${ABOUT_CHARACTER_INITIAL_BLUR}px)`,
-					scale: ABOUT_CHARACTER_INITIAL_SCALE,
-					transformOrigin: 'center center'
-				})
-		})
-		gsap.set(aboutText.value, { visibility: 'visible' })
-
-		gsap.to(labelTargets, {
+		gsap.to(labelSplit.chars, {
 			opacity: 1,
-			...(useTouchReveal
-				? { yPercent: 0 }
-				: { filter: 'blur(0px)', scale: 1 }),
-			duration: ABOUT_EYEBROW_REVEAL_DURATION,
-			stagger: {
-				amount: ABOUT_EYEBROW_REVEAL_STAGGER_AMOUNT,
-				from: 'start'
-			},
+			duration: ABOUT_CHARACTER_REVEAL_DURATION,
+			stagger: ABOUT_CHARACTER_REVEAL_STAGGER,
 			ease: 'none',
 			scrollTrigger: {
 				trigger: aboutLabel.value,
@@ -167,16 +140,10 @@ async function initAboutReveal() {
 			}
 		})
 
-		gsap.to(introTargets, {
+		gsap.to(introSplit.chars, {
 			opacity: 1,
-			...(useTouchReveal
-				? { yPercent: 0 }
-				: { filter: 'blur(0px)', scale: 1 }),
-			duration: ABOUT_INTRO_REVEAL_DURATION,
-			stagger: {
-				amount: ABOUT_INTRO_REVEAL_STAGGER_AMOUNT,
-				from: 'start'
-			},
+			duration: ABOUT_CHARACTER_REVEAL_DURATION,
+			stagger: ABOUT_CHARACTER_REVEAL_STAGGER,
 			ease: 'none',
 			scrollTrigger: {
 				trigger: aboutIntro.value,

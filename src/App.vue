@@ -38,6 +38,8 @@
 	</main>
 </template>
 <script setup>
+// TEMPORARY mobile scroll isolation; see src/config/mobileScrollDiagnostics.ts.
+import { isScrollDiagnosticGroupEnabled } from './config/mobileScrollDiagnostics'
 import { onErrorCaptured, onMounted, onUnmounted, ref } from 'vue'
 import { useHead } from '@unhead/vue'
 import { useI18n } from 'vue-i18n'
@@ -101,6 +103,7 @@ function updateScrollBounds() {
 }
 
 onMounted(() => {
+	if (!isScrollDiagnosticGroupEnabled('sectionNavigation')) return
 	updateScrollBounds()
 	documentResizeObserver = new ResizeObserver(updateScrollBounds)
 	documentResizeObserver.observe(document.body)

@@ -7,6 +7,8 @@ $mobile-project-card-radius: 1.5rem;
 $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 
 .work-section {
+	--work-stage-height: var(--viewport-height-dynamic);
+
 	// Exhibition composition controls.
 	--exhibition-card-width: min(42vw, 620px, calc(74svh * 0.72));
 	--exhibition-card-height: min(74svh, 820px);
@@ -30,13 +32,13 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 	--exhibition-active-radius: 140;
 
 	position: relative;
-	height: var(--viewport-height-dynamic);
+	height: var(--work-stage-height);
 	overflow: clip;
 
 	&__stage {
 		position: relative;
 		width: 100%;
-		height: var(--viewport-height-dynamic);
+		height: var(--work-stage-height);
 		overflow: hidden;
 		isolation: isolate;
 	}
@@ -721,6 +723,13 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 
 .work-section {
 	@include respond(lg, down) {
+		// Browser chrome must not move the sticky stage or following sections mid-scroll.
+		--work-stage-height: 100vh;
+
+		@supports (height: 100svh) {
+			--work-stage-height: 100svh;
+		}
+
 		--exhibition-card-width: min(52vw, 560px, calc(70svh * 0.72));
 		--exhibition-card-height: min(70svh, 720px);
 		--exhibition-card-spacing: 94;
@@ -739,7 +748,7 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 @media (prefers-reduced-motion: no-preference) {
 	.work-section {
 		@include respond(lg, down) {
-			height: calc(var(--viewport-height-dynamic) + var(--work-scroll-distance, 0px));
+			height: calc(var(--work-stage-height) + var(--work-scroll-distance, 0px));
 			overflow: visible;
 
 			&__stage {
@@ -854,19 +863,19 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 @media (prefers-reduced-motion: reduce) {
 	.work-section {
 		height: auto;
-		min-height: var(--viewport-height-dynamic);
+		min-height: var(--work-stage-height);
 		overflow: visible;
 
 		&__stage {
 			height: auto;
-			min-height: var(--viewport-height-dynamic);
+			min-height: var(--work-stage-height);
 			overflow: visible;
 		}
 
 		&__title-wrapper {
 			position: sticky;
 			top: 0;
-			height: var(--viewport-height-dynamic);
+			height: var(--work-stage-height);
 		}
 
 		&__exhibition {
@@ -875,7 +884,7 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 			flex-direction: column;
 			gap: 20svh;
 			padding-block: 20svh;
-			margin-top: calc(var(--viewport-height-dynamic) * -1);
+			margin-top: calc(var(--work-stage-height) * -1);
 			perspective: none;
 		}
 

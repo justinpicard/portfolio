@@ -1,7 +1,7 @@
 <template>
 	<section class="section-layout section-layout--stage work-section" id="work" ref="root">
 		<div class="work-section__stage" ref="stage">
-			<div class="work-section__title-wrapper">
+			<div class="work-section__title-wrapper" ref="titleWrapper">
 				<div class="work-section__title-inner">
 					<h2 class="work-section__title huge-title" ref="titleRef">{{ t('home.workLabel') }}</h2>
 				</div>
@@ -19,7 +19,7 @@
 					:project="projects[projectIndex - 1]"
 					:active="activeProjectIndex === projectIndex - 1"
 					:interactive="overlayLifecycle === 'closed'
-						&& interactiveProjectIndex === projectIndex - 1"
+						&& (diagnosticStaticCards || interactiveProjectIndex === projectIndex - 1)"
 					:transition-hidden="hiddenProjectIndex === projectIndex - 1"
 					@open="openProject"
 				/>
@@ -46,12 +46,15 @@
 </template>
 
 <script setup lang="ts">
+// TEMPORARY mobile scroll isolation; see src/config/mobileScrollDiagnostics.ts.
+import { isScrollDiagnosticGroupEnabled } from '../../config/mobileScrollDiagnostics'
 import { nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePortfolioContent } from '../../composables/usePortfolioContent'
 import { isProjectPublished } from '../../content'
 import type { WorkCloseTarget, WorkOverlayLifecycle } from '../../config/workOverlay'
 import { gsap, prefersReducedMotion, ScrollTrigger, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
+import { animationDurations, animationEases, animationStaggers } from '../../utils/animations/presets'
 import {
 	getPortfolioScrollY,
 	lockPortfolioScrollSmoothing,
@@ -71,6 +74,7 @@ const root = ref<HTMLElement | null>(null)
 const stage = ref<HTMLElement | null>(null)
 const exhibition = ref<HTMLElement | null>(null)
 const titleRef = ref<HTMLHeadingElement | null>(null)
+const titleWrapper = ref<HTMLElement | null>(null)
 const projectLayer = ref<InstanceType<typeof ProjectLayerPrototype> | null>(null)
 const activeProjectIndex = ref(0)
 const selectedProjectIndex = ref(0)
@@ -80,6 +84,8 @@ const hiddenProjectIndex = ref<number | null>(null)
 const layerOrigin = ref<LayerOrigin | null>(null)
 const openSourceCard = shallowRef<HTMLElement | null>(null)
 const overlayLifecycle = ref<WorkOverlayLifecycle>('closed')
+// TEMPORARY: set after mount to preserve identical server/client initial markup.
+const diagnosticStaticCards = ref(false)
 
 let ctx: gsap.Context | undefined
 let splitTitle: SplitText | undefined
@@ -142,7 +148,7 @@ function debugProjectClose(message: string, detail?: unknown) {
 
 function openProject(payload: { projectIndex: number; sourceElement: HTMLElement }) {
 	if (
-		interactiveProjectIndex.value !== payload.projectIndex
+		(!diagnosticStaticCards.value && interactiveProjectIndex.value !== payload.projectIndex)
 		|| !isProjectPublished(projects.value[payload.projectIndex])
 	) return
 
@@ -390,6 +396,18 @@ async function closeProject(source: 'button' | 'escape') {
 }
 
 function getExhibitionProjectScrollY(projectIndex: number) {
+	// TEMPORARY: reuse the existing close coordinator with the real static card.
+	if (diagnosticStaticCards.value) {
+		const card = projectCards[projectIndex]
+		if (!card || !exhibition.value) return undefined
+		if (root.value?.classList.contains('work-section--diagnostic-sticky')) {
+			exhibition.value.scrollLeft = card.offsetLeft
+				- (exhibition.value.clientWidth - card.offsetWidth) / 2
+			return openingHomepageScrollY
+		}
+		const rect = card.getBoundingClientRect()
+		return getPortfolioScrollY() + rect.top + rect.height / 2 - window.innerHeight / 2
+	}
 	if (reducedMotionActivationEnabled) {
 		const cardCenter = reducedMotionCardCenters[projectIndex]
 		return cardCenter === undefined ? undefined : cardCenter - viewportHeight / 2
@@ -571,8 +589,52 @@ function cleanupTitleReveal() {
 	}
 }
 
+function getWorkViewportHeight() {
+	// Measure the CSS-sized mask only during setup/refresh, never on scroll updates.
+	// Compact masks use svh; desktop retains its existing viewport choreography.
+	return window.matchMedia(COMPACT_LAYOUT_QUERY).matches
+		? titleWrapper.value?.clientHeight || window.innerHeight
+		: window.innerHeight
+}
+
 function setupTitleReveal() {
-	if (!titleRef.value || prefersReducedMotion()) return
+	if (!isScrollDiagnosticGroupEnabled('workTitle') || !titleRef.value || prefersReducedMotion()) return
+
+	if (window.matchMedia(COMPACT_LAYOUT_QUERY).matches) {
+		splitTitle = new SplitText(titleRef.value, {
+			type: 'lines',
+			linesClass: 'split-line',
+			tag: 'span',
+			autoSplit: true,
+			onSplit(split) {
+				wrapSplitElements(split.lines, 'split-line-wrapper')
+				gsap.set(split.lines, { yPercent: 110, opacity: 1 })
+
+				titleRevealTween = gsap.to(split.lines, {
+					yPercent: 0,
+					opacity: 1,
+					duration: animationDurations.reveal,
+					stagger: animationStaggers.lines,
+					ease: animationEases.strongOut,
+					scrollTrigger: {
+						trigger: root.value,
+						// Reveal only once the existing sticky stage holds the title at viewport center.
+						start: 'top top',
+						toggleActions: 'play none none reverse',
+						invalidateOnRefresh: true,
+						onRefresh(self) {
+							if (root.value) {
+								root.value.dataset.sectionNavigationScrollY = String(self.start)
+							}
+						}
+					}
+				})
+
+				return titleRevealTween
+			}
+		})
+		return
+	}
 
 	splitTitle = new SplitText(titleRef.value, {
 		type: 'chars',
@@ -584,7 +646,7 @@ function setupTitleReveal() {
 
 	gsap.set(splitTitle.chars, {
 		y: () => (
-			window.innerHeight
+			getWorkViewportHeight()
 			* readCssNumber('--exhibition-title-entry-offset', 100)
 			/ 100
 		),
@@ -598,7 +660,7 @@ function setupTitleReveal() {
 		scrollTrigger: {
 			trigger: root.value,
 			start: 'top bottom',
-			end: () => `+=${window.innerHeight * TITLE_REVEAL_SCROLL_DISTANCE}`,
+			end: () => `+=${getWorkViewportHeight() * TITLE_REVEAL_SCROLL_DISTANCE}`,
 			scrub: true,
 			invalidateOnRefresh: true,
 			toggleClass: {
@@ -748,6 +810,37 @@ function setupExhibition(useNativeSticky = false) {
 	const cards = gsap.utils.toArray<HTMLElement>('[data-project-card]', exhibition.value)
 	if (cards.length === 0) return
 	projectCards = cards
+	// TEMPORARY: omit the coverflow trigger, callbacks, scrub and snap entirely.
+	if (!isScrollDiagnosticGroupEnabled('projectCards')) {
+		diagnosticStaticCards.value = true
+		root.value.classList.add('work-section--diagnostic-static')
+		const keepSticky = isScrollDiagnosticGroupEnabled('workPin') && !prefersReducedMotion()
+		root.value.classList.toggle('work-section--diagnostic-sticky', keepSticky)
+		const refreshStaticDistance = () => {
+			// Match the original gallery's scroll range without creating a timeline.
+			const duration = readCssNumber('--exhibition-title-reveal-distance', 0.92)
+				+ readCssNumber('--exhibition-title-rest-distance', 0.62)
+				+ readCssNumber('--exhibition-entry-distance', 0.82)
+				+ (projectCount - 1) * (
+					readCssNumber('--exhibition-rest-distance', 0.58)
+					+ readCssNumber('--exhibition-transition-distance', 1)
+				)
+				+ readCssNumber('--exhibition-rest-distance', 0.58)
+				+ readCssNumber('--exhibition-exit-distance', 0.9)
+				+ (projectCount - 1) * 0.025
+			root.value?.style.setProperty('--work-scroll-distance', `${duration * getWorkViewportHeight() * readCssNumber('--exhibition-scroll-per-project', 92) / 100}px`)
+		}
+		if (keepSticky) {
+			refreshStaticDistance()
+			window.addEventListener('resize', refreshStaticDistance)
+		}
+		return () => {
+			window.removeEventListener('resize', refreshStaticDistance)
+			root.value?.classList.remove('work-section--diagnostic-static', 'work-section--diagnostic-sticky')
+			root.value?.style.removeProperty('--work-scroll-distance')
+			diagnosticStaticCards.value = false
+		}
+	}
 	const shadowsFromLeft = cards.map((card) => (
 		card.querySelector<HTMLElement>('[data-project-shadow-from-left]')
 	))
@@ -790,7 +883,7 @@ function setupExhibition(useNativeSticky = false) {
 
 	const refreshMeasurements = () => {
 		viewportWidth = window.innerWidth
-		viewportHeight = window.innerHeight
+		viewportHeight = getWorkViewportHeight()
 		exhibitionActiveRadius = readCssNumber('--exhibition-active-radius', 140)
 		projectCardWidths = cards.map((card) => card.offsetWidth)
 		const scrollDistance = getScrollDistance()
@@ -801,7 +894,7 @@ function setupExhibition(useNativeSticky = false) {
 	// Cache all geometry before the scroll-linked timeline starts. Refreshes may
 	// read layout, but normal scroll updates only read GSAP's transform cache.
 	viewportWidth = window.innerWidth
-	viewportHeight = window.innerHeight
+	viewportHeight = getWorkViewportHeight()
 
 	cards.forEach((card, index) => {
 		gsap.set(card, {
@@ -906,12 +999,15 @@ function setupExhibition(useNativeSticky = false) {
 			opacity: readCssNumber('--exhibition-shadow-opacity', 0.5),
 			duration: exitDistance
 		}, position + restDistance)
-		.to(titleChars, {
+
+	if (titleChars.length > 0) {
+		timeline.to(titleChars, {
 			y: () => -viewportHeight,
 			duration: exitDistance * 0.78,
 			stagger: 0.06,
 			ease: 'power4.in'
 		}, position + restDistance)
+	}
 
 	const snapPoints = Array.from({ length: projectCount }, (_, index) => (
 		timeline.labels[`project-${index}`] / timeline.duration()

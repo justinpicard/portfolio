@@ -1,9 +1,10 @@
 @use "../abstracts" as *;
 
 .home-life-section {
+	--home-life-stage-height: var(--viewport-height-dynamic);
 	--home-life-flow-space: clamp(5em, 12vh, 12em);
 
-	min-height: var(--viewport-height-dynamic);
+	min-height: var(--home-life-stage-height);
 	padding-block: var(--home-life-flow-space);
 	overflow: clip;
 
@@ -56,6 +57,15 @@
 		line-height: var(--line-height-tight);
 	}
 
+	@include respond(lg, down) {
+		// Keep copy, photo centering and the scroll track stable while toolbars toggle.
+		--home-life-stage-height: 100vh;
+
+		@supports (height: 100svh) {
+			--home-life-stage-height: 100svh;
+		}
+	}
+
 	@include respond(md) {
 		@include respond(lg, down) {
 			&__stack-track {
@@ -74,14 +84,14 @@
 	}
 
 	@include respond(lg) {
-		margin-block-start: calc(var(--viewport-height-dynamic) * -1);
+		margin-block-start: calc(var(--home-life-stage-height) * -1);
 		padding-block: 0;
 
 		&__layout {
 			grid-template-columns: minmax(0, 5fr) minmax(28rem, 7fr);
 			align-items: center;
 			gap: clamp(3rem, 8vw, 9rem);
-			height: var(--viewport-height-dynamic);
+			height: var(--home-life-stage-height);
 		}
 
 		&__intro {
@@ -141,7 +151,7 @@
 				position: relative;
 				display: block;
 				height: calc(
-					var(--viewport-height-dynamic)
+					var(--home-life-stage-height)
 					+ (var(--home-life-scroll-steps) * 75svh)
 				);
 			}
@@ -149,7 +159,7 @@
 			&__stack {
 				position: sticky;
 				top: 0;
-				height: var(--viewport-height-dynamic);
+				height: var(--home-life-stage-height);
 				width: 100vw;
 				margin-inline: calc(50% - 50vw);
 				overflow: hidden;
@@ -184,7 +194,7 @@
 					display: flex;
 					flex-direction: column;
 					justify-content: center;
-					height: var(--viewport-height-dynamic);
+					height: var(--home-life-stage-height);
 					padding-block: 0;
 				}
 

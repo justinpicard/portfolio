@@ -1,3 +1,5 @@
+// TEMPORARY mobile scroll isolation; see src/config/mobileScrollDiagnostics.ts.
+import { isScrollDiagnosticGroupEnabled } from '../../config/mobileScrollDiagnostics'
 import {
 	prefersReducedMotion,
 	registerGsapPlugins,
@@ -22,7 +24,8 @@ export function initPortfolioScrollSmoother(
 	if (typeof window === 'undefined') return () => {}
 
 	registerGsapPlugins()
-	const shouldSmooth = window.matchMedia(PORTFOLIO_POINTER_QUERY).matches
+	const shouldSmooth = isScrollDiagnosticGroupEnabled('sectionNavigation')
+		&& window.matchMedia(PORTFOLIO_POINTER_QUERY).matches
 		&& !prefersReducedMotion()
 
 	// Native scrolling is both cheaper and more stable on touch devices. Creating
