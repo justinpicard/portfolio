@@ -295,3 +295,245 @@ test('normal-motion linking preserves the existing loading overlap', async () =>
 		gsap.ticker.sleep()
 	}
 })
+
+
+const mobileStackCode = await componentCode('src/components/sections/SectionHomeWork.vue', [
+	'setupMobileStack', 'updateVisualProjectActivation', 'getExhibitionProjectScrollY'
+])
+
+function createMobileStackHarness(height = 600, titleLines = []) {
+	const viewport = { height }
+	const mobileStackMode = { value: false }, activeProjectIndex = { value: 0 }
+	const interactiveProjectIndex = { value: null }, isProjectLayerMounted = { value: false }
+	const cards = Array.from({ length: 5 }, () => ({
+		x: 0, xPercent: 0, y: 0, yPercent: 0, rotationY: 0, scale: 1,
+		zIndex: 0, transformOrigin: '', '--work-card-entry': 1, '--work-card-scale': 1, '--work-card-depth': '0px'
+	}))
+	let config, killed = false
+	const dependencies = {
+		document: { querySelector: () => null }, splitTitle: { lines: titleLines },
+		animationDurations: { reveal: 0.8 }, animationStaggers: { lines: 0.1 }, animationEases: { strongOut: 'power3.out' },
+		gsap, mobileStackMode, activeProjectIndex, interactiveProjectIndex, isProjectLayerMounted,
+		getWorkViewportHeight: () => viewport.height, window: { innerWidth: 375 },
+		root: { value: { style: { removeProperty() {} }, classList: { remove() {} } } },
+		ScrollTrigger: { create(options) {
+			config = options
+			return { start: 100, end: 100 + options.animation.duration() * viewport.height, kill() { killed = true } }
+		} },
+		diagnosticStaticCards: { value: false }
+	}
+	const api = new Function(...Object.keys(dependencies), 'cards', `
+		let exhibitionTimeline, exhibitionTrigger, viewportHeight = 0, viewportWidth = 0;
+		let isRestoringProjectClose = false, reducedMotionActivationEnabled = false, openingProjectIndex = 0;
+		${mobileStackCode}
+		const cleanup = setupMobileStack(cards);
+		return {
+			cleanup, getExhibitionProjectScrollY,
+			getOpeningProjectIndex: () => openingProjectIndex,
+			seek: time => { exhibitionTimeline.time(time, false); },
+		};
+	`)(...Object.values(dependencies), cards)
+	return { ...api, cards, viewport, config, mobileStackMode, activeProjectIndex, interactiveProjectIndex, isProjectLayerMounted, killed: () => killed }
+}
+
+test('phone stack overlaps vertically, reverses, and uses a pin without snap or scroll interception', () => {
+	const stack = createMobileStackHarness()
+	try {
+		assert.equal(stack.config.pinSpacing, true)
+		assert.equal(stack.config.scrub, 0.8)
+		assert.equal(stack.config.snap, undefined)
+		assert.equal(stack.cards[0]['--work-card-scale'], 1)
+		assert.equal(stack.cards[1]['--work-card-entry'], 1)
+		stack.seek(2.42)
+		assert.equal(stack.cards[0]['--work-card-scale'], 0.97)
+		assert.equal(stack.cards[1]['--work-card-entry'], 0.5)
+		assert.equal(stack.interactiveProjectIndex.value, null)
+		stack.seek(2.92)
+		assert.equal(stack.cards[0]['--work-card-scale'], 0.94)
+		assert.equal(stack.cards[0]['--work-card-depth'], '-18px')
+		assert.equal(stack.cards[1].y, 0)
+		assert.equal(stack.interactiveProjectIndex.value, 1)
+		assert(stack.cards[1].zIndex > stack.cards[0].zIndex)
+		stack.seek(0)
+		assert.equal(stack.cards[0]['--work-card-scale'], 1)
+		assert.equal(stack.cards[0].y, 0)
+		assert.equal(stack.cards[1]['--work-card-entry'], 1)
+		assert.equal(stack.cards[0]['--work-card-entry'], 1)
+		assert.equal(stack.interactiveProjectIndex.value, null)
+	} finally {
+		stack.cleanup()
+		assert.equal(stack.killed(), true)
+		assert.equal(stack.mobileStackMode.value, false)
+		gsap.ticker.sleep()
+	}
+})
+
+test('phone project labels resolve case/keyboard targets, freeze activation under overlays, and refresh height', () => {
+	const stack = createMobileStackHarness(500)
+	try {
+		for (let index = 0; index < 5; index++) {
+			const label = stack.config.animation.labels[`project-${index}`]
+			stack.seek(label)
+			assert.equal(stack.interactiveProjectIndex.value, index)
+			assert.equal(stack.getExhibitionProjectScrollY(index), 100 + label * 500)
+		}
+		stack.isProjectLayerMounted.value = true
+		stack.seek(0)
+		assert.equal(stack.activeProjectIndex.value, 4)
+		stack.viewport.height = 400
+		stack.config.onRefreshInit()
+		assert.equal(stack.getOpeningProjectIndex(), undefined)
+		assert.equal(stack.config.end(), `+=${stack.config.animation.duration() * 400}`)
+	} finally {
+		stack.cleanup()
+		gsap.ticker.sleep()
+	}
+})
+
+
+test('phone title precedes every card and reversing hides the first card below the viewport', () => {
+	const title = { yPercent: 110, opacity: 1 }
+	const stack = createMobileStackHarness(600, [title])
+	try {
+		stack.seek(0.4)
+		assert(title.yPercent > 0 && title.yPercent < 110)
+		assert(stack.cards.every(card => card['--work-card-entry'] === 1))
+		assert.equal(stack.interactiveProjectIndex.value, null)
+		stack.seek(1.3)
+		assert.equal(title.yPercent, 0)
+		assert.equal(stack.cards[0]['--work-card-entry'], 0.5)
+		assert.equal(stack.cards[1]['--work-card-entry'], 1)
+		stack.seek(stack.config.animation.labels['project-0'])
+		assert.equal(stack.cards[0]['--work-card-entry'], 0)
+		assert.equal(stack.interactiveProjectIndex.value, 0)
+		stack.seek(0)
+		assert.equal(title.yPercent, 110)
+		assert(stack.cards.every(card => card['--work-card-entry'] === 1))
+		assert.equal(stack.interactiveProjectIndex.value, null)
+	} finally {
+		stack.cleanup()
+		gsap.ticker.sleep()
+	}
+})
+
+const mobileScrollCode = await componentCode('src/components/sections/SectionHomeWork.vue', [
+	'suspendExhibitionTracking', 'resumeExhibitionTracking', 'synchronizeExhibitionScroll', 'focusKeyboardProject'
+])
+
+test('phone scrub freezes displayed geometry for overlays and settles explicit restoration and keyboard navigation', () => {
+	const events = []
+	const scrub = { pause: () => events.push('pause'), progress: value => events.push(`settle:${value}`) }
+	const dependencies = {
+		exhibitionTrigger: { pin: {}, getTween: snap => snap ? undefined : scrub },
+		mobileStackMode: { value: true }, overlayLifecycle: { value: 'closed' },
+		activeProjectIndex: { value: 0 }, interactiveProjectIndex: { value: null },
+		getExhibitionProjectScrollY: () => 250,
+		setPortfolioScrollY: value => events.push(`scroll:${value}`),
+		ScrollTrigger: { update: () => events.push('update') },
+		cancelExhibitionSnap() {}, debugProjectClose() {}
+	}
+	const api = new Function(...Object.keys(dependencies), `
+		let exhibitionSnapResumeScrollY;
+		${mobileScrollCode}
+		return { suspendExhibitionTracking, synchronizeExhibitionScroll, focusKeyboardProject };
+	`)(...Object.values(dependencies))
+	api.suspendExhibitionTracking()
+	assert.deepEqual(events.splice(0), ['pause'])
+	api.synchronizeExhibitionScroll(500)
+	assert.deepEqual(events.splice(0), ['scroll:500', 'update', 'settle:1', 'pause'])
+	api.focusKeyboardProject(2)
+	assert.deepEqual(events.splice(0), ['scroll:250', 'update', 'settle:1'])
+	assert.equal(dependencies.interactiveProjectIndex.value, 2)
+	dependencies.mobileStackMode.value = false
+	api.focusKeyboardProject(3)
+	assert.deepEqual(events, ['scroll:250', 'update'])
+})
+
+const lifeStackCode = await componentCode('src/components/sections/HomeLifeStackExperiment.vue', ['initAnimations'])
+
+async function createLifeStackHarness({ mobile = true, desktop = false, motion = true } = {}) {
+	const cards = Array.from({ length: 2 }, () => ({
+		'--life-photo-entry': 1, '--life-photo-x': '0px', '--life-photo-y': '0px', '--life-photo-rotation': '0deg',
+		x: 0, y: 0, xPercent: 0, yPercent: 0, rotate: 0, autoAlpha: 1, zIndex: 0
+	}))
+	const photos = [{ x: -10, y: 6, rotation: 2.2 }, { x: 8, y: -5, rotation: -1 }]
+	let timeline, config, refreshes = 0
+	const dependencies = {
+		gsap: {
+			set: gsap.set,
+			context: callback => { callback(); return { revert() {} } },
+			matchMedia: () => ({ add(query, callback) {
+				if (typeof query === 'object') callback({ conditions: { mobile, desktop, motion } })
+			} }),
+			timeline: options => {
+				config = options.scrollTrigger
+				timeline = gsap.timeline({ paused: true })
+				return timeline
+			}
+		},
+		root: { value: { dataset: {}, classList: { toggle() {} } } },
+		layout: { value: { clientHeight: 600 } }, stackTrack: { value: {} }, stack: { value: { clientHeight: 600 } },
+		introRef: { value: null }, cardRefs: { value: cards }, photos,
+		isScrollDiagnosticGroupEnabled: () => true, registerGsapPlugins() {},
+		document: { documentElement: { clientHeight: 600 } }, nextTick: async () => {},
+		ScrollTrigger: { refresh: () => { refreshes++ } },
+		DESKTOP_LAYOUT_QUERY: '(min-width: 64rem)', MOBILE_LAYOUT_QUERY: '(max-width: 47.999rem)',
+		FIRST_PHOTO_SETTLED_LABEL: 'first-photo-settled'
+	}
+	await new Function(...Object.keys(dependencies), `
+		let animationRequestId = 0, isMounted = true, context, mediaContext;
+		${lifeStackCode}
+		return initAnimations();
+	`)(...Object.values(dependencies))
+	return { cards, photos, timeline, config, refreshes }
+}
+
+test('Life mobile entrances use live CSS viewport fractions with unchanged scrub, rhythm and photo poses', async () => {
+	const stack = await createLifeStackHarness()
+	try {
+		assert.equal(stack.config.scrub, 0.8)
+		assert.equal(stack.config.end, 'bottom bottom')
+		assert.equal(stack.config.pin, undefined)
+		assert.equal(stack.timeline.duration(), 2.7)
+		assert.equal(stack.refreshes, 1)
+		assert.equal(stack.cards[0]['--life-photo-entry'], 1)
+		stack.timeline.time(0.5)
+		assert.equal(stack.cards[0]['--life-photo-entry'], 0.0625)
+		assert.equal(stack.cards[1]['--life-photo-entry'], 1)
+		stack.timeline.time(2.35)
+		stack.cards.forEach((card, index) => {
+			assert.equal(card['--life-photo-entry'], 0)
+			assert.equal(card['--life-photo-x'], `${stack.photos[index].x}px`)
+			assert.equal(card['--life-photo-y'], `${stack.photos[index].y}px`)
+			assert.equal(card['--life-photo-rotation'], `${stack.photos[index].rotation}deg`)
+			assert.equal(card.zIndex, index + 1)
+		})
+		stack.timeline.time(0)
+		assert(stack.cards.every(card => card['--life-photo-entry'] === 1))
+	} finally {
+		stack.timeline.kill()
+		gsap.ticker.sleep()
+	}
+})
+
+test('Life desktop and tablet retain pixel transforms and reduced motion creates no photo timeline', async () => {
+	for (const desktop of [true, false]) {
+		const stack = await createLifeStackHarness({ mobile: false, desktop })
+		try {
+			assert.equal(stack.cards[0].y, 600)
+			assert.equal(stack.cards[0].xPercent, -50)
+			assert.equal(stack.cards[0].yPercent, -50)
+			assert.equal(Boolean(stack.config.pin), desktop)
+			if (desktop) assert.equal(stack.config.end(), '+=450')
+			stack.timeline.time(1)
+			assert.equal(stack.cards[0].y, 6)
+			assert.equal(stack.cards[0].rotate, 2.2)
+		} finally {
+			stack.timeline.kill()
+			gsap.ticker.sleep()
+		}
+	}
+	const reduced = await createLifeStackHarness({ motion: false })
+	assert.equal(reduced.timeline, undefined)
+	assert.equal(reduced.refreshes, 0)
+})

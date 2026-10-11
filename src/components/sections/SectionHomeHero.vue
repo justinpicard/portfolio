@@ -479,6 +479,7 @@ onMounted(async () => {
 				stagger: animationStaggers.chars,
 				ease: animationEases.strongOut
 			}, 'availabilityIn')
+			.addLabel('introIn', '>')
 			.to(availabilityDot, {
 				opacity: 1,
 				duration: animationDurations.fast
@@ -489,7 +490,7 @@ onMounted(async () => {
 				duration: animationDurations.reveal,
 				stagger: animationStaggers.lines,
 				ease: animationEases.strongOut
-			}, 0.7)
+			}, 'introIn')
 			.to(loadingScreenElement, {
 				clipPath: 'inset(0 0 100% 0)',
 				duration: 1.1,

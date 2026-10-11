@@ -39,12 +39,6 @@
 		width: 100vw;
 		overflow: hidden;
 		transform: translateX(-50%);
-
-		.motion-control {
-			position: absolute;
-			right: var(--page-gutter);
-			bottom: var(--space-2);
-		}
 	}
 
 	&__marquee-track {

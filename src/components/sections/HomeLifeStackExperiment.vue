@@ -83,6 +83,7 @@ function lifePhotoSizes(ratio: PhotoRatio) {
 
 const FIRST_PHOTO_SETTLED_LABEL = 'first-photo-settled'
 const DESKTOP_LAYOUT_QUERY = '(min-width: 64rem)'
+const MOBILE_LAYOUT_QUERY = '(max-width: 47.999rem)'
 
 const photos: LifePhoto[] = [
 	{
@@ -309,7 +310,8 @@ async function initAnimations() {
 		mediaContext.add(
 			{
 				motion: '(prefers-reduced-motion: no-preference)',
-				desktop: DESKTOP_LAYOUT_QUERY
+				desktop: DESKTOP_LAYOUT_QUERY,
+				mobile: MOBILE_LAYOUT_QUERY
 			},
 			(mediaQueryContext) => {
 				if (!isScrollDiagnosticGroupEnabled('lifePhotos') || !mediaQueryContext.conditions?.motion) return
@@ -318,12 +320,21 @@ async function initAnimations() {
 				const shouldPinWithScrollTrigger = Boolean(
 					mediaQueryContext.conditions.desktop
 				)
+				const useDynamicMobileStage = Boolean(mediaQueryContext.conditions.mobile)
 				const getStageHeight = () => (
 					shouldPinWithScrollTrigger ? layout.value : stack.value
 				)?.clientHeight
 					?? document.documentElement.clientHeight
 
-				gsap.set(cards, {
+				gsap.set(cards, useDynamicMobileStage ? {
+					// CSS resolves the entrance against the live viewport without refreshes.
+					'--life-photo-entry': 1,
+					'--life-photo-x': (index: number) => `${photos[index].x}px`,
+					'--life-photo-y': '0px',
+					'--life-photo-rotation': (index: number) => `${photos[index].rotation + (index % 2 === 0 ? 0.35 : -0.35)}deg`,
+					autoAlpha: 1,
+					zIndex: (index: number) => index + 1
+				} : {
 					// Keep percentage-based centering inside GSAP so it remains correct
 					// when lazy-loaded images change a card's final height.
 					xPercent: -50,
@@ -376,9 +387,11 @@ async function initAnimations() {
 
 					// Animate the complete figure so its image and caption always travel together.
 					timeline.to(card, {
-						x: photo.x,
-						y: photo.y,
-						rotate: photo.rotation,
+						...(useDynamicMobileStage ? {
+							'--life-photo-entry': 0,
+							'--life-photo-y': `${photo.y}px`,
+							'--life-photo-rotation': `${photo.rotation}deg`
+						} : { x: photo.x, y: photo.y, rotate: photo.rotation }),
 						duration: 1,
 						ease: 'power3.out'
 					})

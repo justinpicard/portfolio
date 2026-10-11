@@ -33,6 +33,7 @@
 					:interactive="overlayLifecycle === 'closed'
 						&& (diagnosticStaticCards || reducedMotionMode || interactiveProjectIndex === projectIndex - 1)"
 					:transition-hidden="hiddenProjectIndex === projectIndex - 1"
+					:obscured="mobileStackMode && interactiveProjectIndex !== projectIndex - 1"
 					@open="openProject"
 					@inactive-focus="focusWorkSection"
 				/>
@@ -103,6 +104,7 @@ const layerOrigin = ref<LayerOrigin | null>(null)
 const openSourceCard = shallowRef<HTMLElement | null>(null)
 const overlayLifecycle = ref<WorkOverlayLifecycle>('closed')
 const reducedMotionMode = ref(false)
+const mobileStackMode = ref(false)
 // TEMPORARY: set after mount to preserve identical server/client initial markup.
 const diagnosticStaticCards = ref(false)
 
@@ -133,6 +135,7 @@ let unlockHomepageScrollSmoothing: (() => void) | undefined
 const TITLE_REVEAL_SCROLL_DISTANCE = 1.6
 const DESKTOP_LAYOUT_QUERY = '(min-width: 64rem)'
 const COMPACT_LAYOUT_QUERY = '(max-width: 63.999rem)'
+const MOBILE_LAYOUT_QUERY = '(max-width: 47.999rem)'
 
 const DEBUG_EXHIBITION_ACTIVATION = import.meta.env.DEV
 	&& new URLSearchParams(window.location.search).has('debugExhibitionActivation')
@@ -234,6 +237,7 @@ function unlockHomepageScroll() {
 function suspendExhibitionTracking() {
 	if (!exhibitionTrigger) return
 
+	if (mobileStackMode.value) exhibitionTrigger.getTween()?.pause()
 	const hadActiveSnap = Boolean(exhibitionTrigger.getTween(true))
 	// Disabled pins lose their spacing during a global refresh. Keep desktop's
 	// pin enabled; the snap guard prevents it from owning the overlay's scroll.
@@ -283,6 +287,7 @@ function synchronizeExhibitionScroll(scrollY: number) {
 	resumeExhibitionTracking()
 	setPortfolioScrollY(scrollY)
 	ScrollTrigger.update()
+	if (mobileStackMode.value) exhibitionTrigger?.getTween()?.progress(1)
 	// update() applies the timeline synchronously. Suspend immediately afterward
 	// so its snap delay cannot reclaim the homepage scroll during the overlay.
 	suspendExhibitionTracking()
@@ -688,10 +693,13 @@ function setupTitleReveal() {
 			type: 'lines',
 			linesClass: 'split-line',
 			tag: 'span',
-			autoSplit: true,
+			autoSplit: !window.matchMedia(MOBILE_LAYOUT_QUERY).matches,
 			onSplit(split) {
 				wrapSplitElements(split.lines, 'split-line-wrapper')
 				gsap.set(split.lines, { yPercent: 110, opacity: 1 })
+
+				// The phone pin owns both the title and card entrances.
+				if (window.matchMedia(MOBILE_LAYOUT_QUERY).matches) return
 
 				titleRevealTween = gsap.to(split.lines, {
 					yPercent: 0,
@@ -810,6 +818,27 @@ function updateVisualProjectActivation(cards: HTMLElement[]) {
 		return
 	}
 
+	if (mobileStackMode.value && exhibitionTimeline) {
+		const time = exhibitionTimeline.time()
+		if (time + 0.00001 < exhibitionTimeline.labels['project-0']) {
+			interactiveProjectIndex.value = null
+			return
+		}
+		let settledIndex = 0
+		for (let index = 1; index < cards.length; index += 1) {
+			const arrival = exhibitionTimeline.labels[`project-${index}`]
+			if (time + 0.00001 < arrival) break
+			settledIndex = index
+		}
+		const nextArrival = exhibitionTimeline.labels[`project-${settledIndex + 1}`]
+		const entering = nextArrival !== undefined && time > nextArrival - 1
+		activeProjectIndex.value = entering && time >= nextArrival - 0.5
+			? settledIndex + 1 : settledIndex
+		// Obscured and moving cards must not own taps or keyboard focus.
+		interactiveProjectIndex.value = entering ? null : settledIndex
+		return
+	}
+
 	const viewportCenter = viewportWidth / 2
 	let nearestIndex = 0
 	let nearestDistance = Number.POSITIVE_INFINITY
@@ -882,6 +911,96 @@ function refreshReducedMotionMeasurements() {
 	updateReducedMotionActivation()
 }
 
+function setupMobileStack(cards: HTMLElement[]) {
+	mobileStackMode.value = true
+	if (isProjectLayerMounted.value) openingProjectIndex = undefined
+	const refreshMeasurements = () => {
+		// The root uses svh; browser chrome only changes the inner stage.
+		const nextHeight = root.value?.clientHeight || getWorkViewportHeight()
+		// A resized pin needs the current project's label, rather than its old pixel offset.
+		if (isProjectLayerMounted.value && nextHeight !== viewportHeight) openingProjectIndex = undefined
+		viewportHeight = nextHeight
+		viewportWidth = window.innerWidth
+	}
+	refreshMeasurements()
+	// Header layout changes do not change the pin's stable scroll distance.
+	const header = document.querySelector<HTMLElement>('.site-header')
+	const headerParts = header?.querySelectorAll<HTMLElement>('.site-nav__identity, .site-nav__utility')
+	const measureHeader = () => {
+		if (!header || !headerParts?.length) return
+		const headerTop = header.getBoundingClientRect().top
+		const bottom = Math.max(...Array.from(headerParts, part => part.getBoundingClientRect().bottom - headerTop))
+		root.value?.style.setProperty('--work-header-bottom', `${bottom}px`)
+	}
+	measureHeader()
+	const headerObserver = header ? new ResizeObserver(measureHeader) : undefined
+	headerParts?.forEach(part => headerObserver?.observe(part))
+	const timeline = gsap.timeline({
+		paused: true,
+		defaults: { ease: 'none' },
+		onUpdate: () => updateVisualProjectActivation(cards)
+	})
+	exhibitionTimeline = timeline
+	cards.forEach((card, index) => {
+		gsap.set(card, {
+			'--work-card-entry': 1, '--work-card-scale': 1, '--work-card-depth': '0px',
+			zIndex: index + 1
+		})
+	})
+	const titleLines = splitTitle?.lines ?? []
+	const revealDistance = animationDurations.reveal
+	if (titleLines.length) {
+		timeline.fromTo(titleLines, { yPercent: 110 }, {
+			yPercent: 0, opacity: 1, duration: revealDistance,
+			stagger: animationStaggers.lines, ease: animationEases.strongOut
+		}, 0)
+	}
+	let position = Math.max(revealDistance, timeline.duration())
+	for (let index = 0; index < cards.length; index += 1) {
+		cards.slice(0, index).forEach((card, previousIndex) => {
+			timeline.to(card, {
+				'--work-card-scale': 0.94,
+				'--work-card-depth': () => `${-Math.min(index - previousIndex, 3) * Math.min(18, viewportHeight * 0.03)}px`,
+				duration: 1
+			}, position)
+		})
+		// CSS resolves this fraction against dvh continuously, including toolbar changes.
+		timeline.fromTo(cards[index], { '--work-card-entry': 1 }, {
+			'--work-card-entry': 0, duration: 1, immediateRender: false
+		}, position)
+		position += 1
+		timeline.addLabel(`project-${index}`, position)
+		timeline.to({}, { duration: 0.12 }, position)
+		position += 0.12
+	}
+	const trigger = ScrollTrigger.create({
+		trigger: root.value,
+		start: 'top top',
+		end: () => `+=${timeline.duration() * viewportHeight}`,
+		pin: root.value,
+		pinSpacing: true,
+		scrub: 0.8,
+		invalidateOnRefresh: true,
+		animation: timeline,
+		toggleClass: { targets: root.value, className: 'work-section--active' },
+		onRefreshInit: () => { refreshMeasurements(); measureHeader() },
+		onRefresh(self) {
+			if (root.value) root.value.dataset.sectionNavigationScrollY = String(self.start)
+		}
+	})
+	exhibitionTrigger = trigger
+	updateVisualProjectActivation(cards)
+	return () => {
+		headerObserver?.disconnect()
+		root.value?.style.removeProperty('--work-header-bottom')
+		trigger.kill()
+		timeline.kill()
+		mobileStackMode.value = false
+		if (isProjectLayerMounted.value) openingProjectIndex = undefined
+		root.value?.classList.remove('work-section--active')
+	}
+}
+
 function setupExhibition(useNativeSticky = false) {
 	if (
 		!root.value
@@ -945,6 +1064,8 @@ function setupExhibition(useNativeSticky = false) {
 			reducedMotionCardCenters = []
 		}
 	}
+
+	if (window.matchMedia(MOBILE_LAYOUT_QUERY).matches) return setupMobileStack(cards)
 
 	const transitionDistance = readCssNumber('--exhibition-transition-distance', 1)
 	const restDistance = readCssNumber('--exhibition-rest-distance', 0.58)
@@ -1217,7 +1338,6 @@ function setupWorkAnimations() {
 	exhibitionTimeline = undefined
 	reducedMotionMode.value = prefersReducedMotion()
 	ctx = gsap.context(() => {
-		setupTitleReveal()
 		if (reducedMotionMode.value) {
 			cleanupReducedMotionExhibition = setupExhibition()
 			return
@@ -1225,10 +1345,17 @@ function setupWorkAnimations() {
 		exhibitionMediaContext = gsap.matchMedia()
 		exhibitionMediaContext.add({
 			desktop: DESKTOP_LAYOUT_QUERY,
-			compact: COMPACT_LAYOUT_QUERY
-		}, (mediaQueryContext) => (
-			setupExhibition(Boolean(mediaQueryContext.conditions?.compact))
-		))
+			compact: COMPACT_LAYOUT_QUERY,
+			mobile: MOBILE_LAYOUT_QUERY
+		}, (mediaQueryContext) => {
+			cleanupTitleReveal()
+			setupTitleReveal()
+			const cleanup = setupExhibition(Boolean(mediaQueryContext.conditions?.compact))
+			return () => {
+				cleanup?.()
+				cleanupTitleReveal()
+			}
+		})
 	}, root.value ?? undefined)
 }
 
@@ -1253,6 +1380,7 @@ function focusKeyboardProject(projectIndex: number) {
 	exhibitionSnapResumeScrollY = scrollY
 	setPortfolioScrollY(scrollY)
 	ScrollTrigger.update()
+	if (mobileStackMode.value) exhibitionTrigger?.getTween()?.progress(1)
 	activeProjectIndex.value = projectIndex
 	interactiveProjectIndex.value = projectIndex
 }
@@ -1290,7 +1418,7 @@ watch(
 
 		if (refreshId !== titleRefreshId) return
 
-		setupTitleReveal()
+		setupWorkAnimations()
 		ScrollTrigger.refresh()
 	},
 	{ flush: 'pre' }

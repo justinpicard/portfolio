@@ -39,7 +39,6 @@
 							</div>
 						</div>
 					</div>
-					<MotionControl v-if="!reducedMotion" :paused="isMarqueePaused" @toggle="toggleMarquee" />
 				</div>
 				<div class="site-footer__intro col-span-1 md:col-span-2">
 					<p class="site-footer__copy">
@@ -111,7 +110,6 @@
 </template>
 
 <script setup lang="ts">
-import MotionControl from './ui/MotionControl.vue'
 // TEMPORARY mobile scroll isolation; see src/config/mobileScrollDiagnostics.ts.
 import { isScrollDiagnosticGroupEnabled } from '../config/mobileScrollDiagnostics'
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
@@ -136,15 +134,8 @@ const footerRoot = ref<HTMLElement | null>(null)
 const footerDivider = ref<HTMLElement | null>(null)
 const footerMarquee = ref<HTMLElement | null>(null)
 let staggerLinks: StaggerLinksController | undefined
-const isMarqueePaused = ref(false)
 const reducedMotion = ref(false)
-let marqueeLoop: gsap.core.Tween | undefined
 let stopObservingMotion: (() => void) | undefined
-
-function toggleMarquee() {
-	isMarqueePaused.value = !isMarqueePaused.value
-	marqueeLoop?.paused(isMarqueePaused.value)
-}
 
 let footerAnimationContext: gsap.Context | undefined
 
@@ -196,13 +187,11 @@ async function setupFooterAnimations() {
 		}
 
 		const loop = gsap.to(track, {
-			paused: isMarqueePaused.value,
 			xPercent: -50,
 			duration: 15,
 			ease: animationEases.none,
 			repeat: -1
 		})
-		marqueeLoop = loop
 		if (!isScrollDiagnosticGroupEnabled('footer')) return
 		let marqueeDirection = 1
 

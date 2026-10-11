@@ -186,6 +186,22 @@
 			}
 
 			@include respond(md, down) {
+				// The track retains svh sizing; only the visible sticky stage follows chrome.
+				&__stack {
+					height: var(--viewport-height-dynamic);
+				}
+
+				&__card {
+					--life-photo-entry: 1;
+					--life-photo-x: 0px;
+					--life-photo-y: 0px;
+					--life-photo-rotation: 0deg;
+
+					transform: translate(-50%, -50%)
+						translate(var(--life-photo-x), calc(var(--life-photo-entry) * var(--viewport-height-dynamic) + var(--life-photo-y)))
+						rotate(var(--life-photo-rotation));
+				}
+
 				// Keep the copy within the same native scroll range as the sticky photo stage.
 				&__intro {
 					position: sticky;

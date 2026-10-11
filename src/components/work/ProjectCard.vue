@@ -13,6 +13,7 @@ x<template>
 			}
 		]"
 		:aria-label="cardAriaLabel"
+		:aria-hidden="obscured || undefined"
 		:tabindex="canActivate ? 0 : -1"
 		:role="canActivate ? 'button' : undefined"
 		:style="cardStyles"
@@ -29,7 +30,7 @@ x<template>
 					:src="`/images/${project.thumbnailImage}`"
 					alt=""
 					:fallback-format="project.thumbnailImageFormat"
-					sizes="(max-width: 47.999rem) min(84vw, calc(72svh * 0.72)), min(42vw, 620px, calc(74svh * 0.72))"
+					sizes="(max-width: 47.999rem) min(88vw, 24rem), min(42vw, 620px, calc(74svh * 0.72))"
 					:position="project.thumbnailImagePosition ?? 'center center'"
 				/>
 			</div>
@@ -111,6 +112,7 @@ const props = defineProps<{
 	active?: boolean
 	interactive?: boolean
 	transitionHidden?: boolean
+	obscured?: boolean
 }>()
 
 const emit = defineEmits<{

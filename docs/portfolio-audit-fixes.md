@@ -146,3 +146,12 @@ These fixes extend the existing audit changes on `fix/portfolio-audit`; previous
 - Remaining browser checks: delay fonts and toggle motion during initialization; direct-case reload after the intro; rapid opening/switching/closing and Back/Forward during each transition; focus outlines on both published cards in both motion modes during/after hover; homepage scroll and Work-spacer dimensions before/during/after overlays. Physical mobile safe-area and resize checks from the original audit remain outstanding.
 
 All three review findings have code fixes and focused regression coverage for the two transaction/lifecycle issues. Browser visual/geometry verification remains a release check. Nothing was merged, deployed, or submitted as a pull request.
+
+
+## Intentional decorative-marquee playback decision
+
+On `feature/mobile-project-stack`, the footer marquee pause/play button, its pause state, toggle handler, retained tween reference and footer-only control positioning were removed at the owner's explicit request. The footer again loops continuously with the existing 15-second duration, linear easing and scroll-direction reversal. Other decorative CSS marquees already have no playback controls and require no changes. Runtime `prefers-reduced-motion` support and GSAP context cleanup are retained. Video controls and the shared MotionControl component/styles remain unchanged because case videos still use them.
+
+Accessibility trade-off: users who have not enabled reduced motion no longer have an in-page mechanism to pause the decorative footer animation. Consequently, the original continuous-motion finding is intentionally accepted rather than fully resolved for the marquee; reduced-motion support alone does not provide a pause mechanism to everyone affected by moving content (WCAG 2.2.2). No alternative pause or automatic-stop mechanism was introduced.
+
+Verification for this removal: typecheck, all 20 automated tests, production build, static SEO verification, image verification and `git diff --check` pass. Source review confirms the original loop timing/direction, motion observer and video controls are retained. No browser verification was performed for this removal. The existing Vite chunk-size advisory remains informational.

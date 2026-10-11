@@ -951,3 +951,65 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 	// Preserve the hierarchy while meeting 4.5:1 on both published case backgrounds.
 	opacity: 0.95;
 }
+
+
+// The phone stack uses ScrollTrigger pin spacing; tablet retains native sticky coverflow.
+.work-section {
+	@include respond(md, down) {
+		--exhibition-card-width: min(88vw, 24rem);
+		--exhibition-card-height: min(82svh, 760px);
+
+		&__keyboard-nav {
+			z-index: 100;
+		}
+
+		.project-card__hover-surface {
+			display: grid;
+			grid-template-rows: auto minmax(0, 1fr);
+			grid-template-areas: "content" "media";
+		}
+
+		.project-card__content {
+			position: relative;
+			inset: auto;
+			grid-area: content;
+			padding: $mobile-project-card-inset;
+		}
+
+		.project-card__visual {
+			position: relative;
+			inset: auto;
+			grid-area: media;
+			min-height: 0;
+		}
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.work-section {
+		@include respond(md, down) {
+			height: var(--work-stage-height);
+
+			// Keep pin geometry stable; only the visible composition follows browser chrome.
+			// Reserve three 18px depth offsets above the front card.
+			--work-stack-top: calc(var(--work-header-bottom, 0px) + max(var(--space-4), env(safe-area-inset-top, 0px)) + 3 * 18px);
+			--exhibition-card-height: min(82svh, 760px, calc(var(--viewport-height-dynamic) - var(--work-stack-top) - max(var(--space-4), env(safe-area-inset-bottom, 0px))));
+
+			&__stage {
+				position: relative;
+				height: var(--viewport-height-dynamic);
+			}
+
+			.project-card {
+				--work-card-entry: 1;
+				--work-card-scale: 1;
+				--work-card-depth: 0px;
+				top: calc(var(--work-stack-top) + var(--exhibition-card-height) / 2);
+				transform-origin: center top;
+				transform: translate(-50%, -50%)
+					translateY(calc(var(--work-card-entry) * (var(--viewport-height-dynamic) - var(--work-stack-top)) + var(--work-card-depth)))
+					scale(var(--work-card-scale));
+			}
+		}
+	}
+}
