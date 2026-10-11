@@ -26,7 +26,7 @@ const muzimatch = {
 				src: 'projects/muzimatch/muzimatch-redesign-opening-visual@2x',
 				format: 'jpg',
 				alt: 'MuziMatch interface',
-				presentation: 'wide',
+				presentation: 'natural',
 				spacing: 'spacious',
 				caption: 'A glimpse of the Muzimatch redesign, which is currently in progress.',
 			},

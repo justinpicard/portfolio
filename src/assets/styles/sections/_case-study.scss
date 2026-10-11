@@ -143,14 +143,11 @@
 	}
 
 	&--wide &__image,
-	&--wide &__image img,
 	&--landscape &__image,
-	&--landscape &__image img,
 	&--portrait &__image,
-	&--portrait &__image img,
-	&--square &__image,
-	&--square &__image img {
-		height: 100%;
+	&--square &__image {
+		// The ratio sizes the image; the figure must also include its caption.
+		height: auto;
 	}
 
 	&--wide &__image {

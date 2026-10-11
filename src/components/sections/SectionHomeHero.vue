@@ -471,7 +471,7 @@ onMounted(async () => {
 				stagger: animationStaggers.lines,
 				ease: animationEases.strongOut
 			}, 0.55)
-			.addLabel('availabilityIn', '>')
+			.addLabel('availabilityIn', '<+=0.15')
 			.set(finalAvailability, { autoAlpha: 1 }, 'availabilityIn')
 			.to(availabilityChars, {
 				yPercent: 0,
@@ -479,7 +479,7 @@ onMounted(async () => {
 				stagger: animationStaggers.chars,
 				ease: animationEases.strongOut
 			}, 'availabilityIn')
-			.addLabel('introIn', '>')
+			.addLabel('introIn', '<+=0.15')
 			.to(availabilityDot, {
 				opacity: 1,
 				duration: animationDurations.fast

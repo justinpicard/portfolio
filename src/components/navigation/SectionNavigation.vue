@@ -191,6 +191,7 @@ let labelTimeline: gsap.core.Timeline | undefined
 let labelSplits: SplitText[] = []
 let staggerLinks: StaggerLinksController | undefined
 let scrollTween: gsap.core.Tween | undefined
+let cleanupScrollInput: (() => void) | undefined
 let isProgrammaticScrolling = false
 let triggerPointerType: string | undefined
 let suppressTriggerFocusOpen = false
@@ -633,11 +634,45 @@ function refreshActiveSectionPositions() {
 	}))
 }
 
+function cancelNavigationScroll() {
+	scrollTween?.kill()
+	cleanupScrollInput?.()
+	cleanupScrollInput = undefined
+	scrollTween = undefined
+	isProgrammaticScrolling = false
+}
+
+function observeNavigationScrollInput() {
+	const interrupt = () => cancelNavigationScroll()
+	const handleKeydown = (event: KeyboardEvent) => {
+		if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return
+		if (!['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) return
+		const target = event.target
+		if (target instanceof HTMLElement) {
+			if (target.isContentEditable || target.closest('input, textarea, select, [role="textbox"], [role="slider"], [role="spinbutton"], [role="combobox"], [role="listbox"]')) return
+			// Space activates controls rather than scrolling the page.
+			if (event.key === ' ' && target.closest('button, a[href], [role="button"]')) return
+		}
+		interrupt()
+	}
+	window.addEventListener('wheel', interrupt, { passive: true })
+	window.addEventListener('touchstart', interrupt, { passive: true })
+	window.addEventListener('touchmove', interrupt, { passive: true })
+	window.addEventListener('keydown', handleKeydown)
+	return () => {
+		window.removeEventListener('wheel', interrupt)
+		window.removeEventListener('touchstart', interrupt)
+		window.removeEventListener('touchmove', interrupt)
+		window.removeEventListener('keydown', handleKeydown)
+	}
+}
+
 function scrollToSection(sectionId: SectionNavigationId) {
+	if (props.disabled || props.trackingSuspended) return
 	const section = document.getElementById(sectionId)
 	if (!section) return
 
-	scrollTween?.kill()
+	cancelNavigationScroll()
 	isProgrammaticScrolling = true
 	setActiveSection(sectionId)
 	updateLocationHash(sectionId)
@@ -661,11 +696,14 @@ function scrollToSection(sectionId: SectionNavigationId) {
 		duration: 0.9,
 		ease: animationEases.inOut,
 		onUpdate() {
+			if (scrollTween !== tween || props.disabled || props.trackingSuspended) return
 			setPortfolioScrollY(scrollPosition.y)
 		},
 		onComplete() {
 			if (scrollTween !== tween) return
 
+			cleanupScrollInput?.()
+			cleanupScrollInput = undefined
 			scrollTween = undefined
 			isProgrammaticScrolling = false
 			updateActiveSection()
@@ -673,12 +711,15 @@ function scrollToSection(sectionId: SectionNavigationId) {
 		onInterrupt() {
 			if (scrollTween !== tween) return
 
+			cleanupScrollInput?.()
+			cleanupScrollInput = undefined
 			scrollTween = undefined
 			isProgrammaticScrolling = false
 			updateActiveSection()
 		}
 	})
 	scrollTween = tween
+	cleanupScrollInput = observeNavigationScrollInput()
 }
 
 async function selectSection(sectionId: SectionNavigationId) {
@@ -800,6 +841,7 @@ watch(
 	() => props.disabled || props.trackingSuspended,
 	(trackingSuspended) => {
 		if (trackingSuspended) {
+			cancelNavigationScroll()
 			activeSectionTrigger?.disable(false)
 			sectionPositionTriggers.forEach(({ trigger }) => trigger.disable(false))
 			return
@@ -833,7 +875,7 @@ onUnmounted(() => {
 	itemTimeline?.kill()
 	cleanupLabelTransition()
 	staggerLinks?.destroy()
-	scrollTween?.kill()
+	cancelNavigationScroll()
 	animationContext?.revert()
 	sectionActivationPositions = []
 	itemElements.clear()

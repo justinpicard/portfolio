@@ -293,7 +293,8 @@ async function initAnimations() {
 							scrollTrigger: {
 								trigger: root.value,
 								// Reveal the copy as the stage reaches its pinned position.
-								start: () => window.matchMedia(DESKTOP_LAYOUT_QUERY).matches
+								start: () => (window.matchMedia(DESKTOP_LAYOUT_QUERY).matches
+									|| window.matchMedia(MOBILE_LAYOUT_QUERY).matches)
 									? 'top top'
 									: 'top 75%',
 								toggleActions: 'play none none reverse',

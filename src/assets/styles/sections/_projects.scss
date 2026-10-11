@@ -27,7 +27,7 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 	--exhibition-transition-distance: 1;
 	--exhibition-rest-distance: 0.62;
 	--exhibition-exit-distance: 0.92;
-	--exhibition-scroll-per-project: 92;
+	--exhibition-scroll-per-project: 69;
 	--exhibition-snap-range: 240px;
 	--exhibition-active-radius: 140;
 
@@ -428,6 +428,10 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 		position: relative;
 		width: 100vw;
 		margin: 0 auto var(--section-space-case-spacious);
+
+		@include respond(sm, down) {
+			margin-bottom: 0;
+		}
 		aspect-ratio: var(--project-hero-media-ratio);
 		overflow: hidden;
 		border-radius: 0;
@@ -1004,10 +1008,10 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 				--work-card-entry: 1;
 				--work-card-scale: 1;
 				--work-card-depth: 0px;
-				top: calc(var(--work-stack-top) + var(--exhibition-card-height) / 2);
+				top: calc(var(--work-stack-top) + var(--exhibition-card-height) / 2 - var(--space-6));
 				transform-origin: center top;
 				transform: translate(-50%, -50%)
-					translateY(calc(var(--work-card-entry) * (var(--viewport-height-dynamic) - var(--work-stack-top)) + var(--work-card-depth)))
+					translateY(calc(var(--work-card-entry) * (var(--viewport-height-dynamic) - var(--work-stack-top) + var(--space-6)) + var(--work-card-depth)))
 					scale(var(--work-card-scale));
 			}
 		}

@@ -959,8 +959,8 @@ function setupMobileStack(cards: HTMLElement[]) {
 	for (let index = 0; index < cards.length; index += 1) {
 		cards.slice(0, index).forEach((card, previousIndex) => {
 			timeline.to(card, {
-				'--work-card-scale': 0.94,
-				'--work-card-depth': () => `${-Math.min(index - previousIndex, 3) * Math.min(18, viewportHeight * 0.03)}px`,
+				'--work-card-scale': 0.90 - (index - previousIndex - 1) * 0.03,
+				'--work-card-depth': `${(index - previousIndex) * 3}%`,
 				duration: 1
 			}, position)
 		})
@@ -1239,19 +1239,24 @@ function setupExhibition(useNativeSticky = false) {
 			updateVisualProjectActivation(cards)
 		},
 		snap: {
+			...(!useNativeSticky ? { inertia: false } : {}),
 			snapTo: (value: number, trigger) => {
 				if (trigger && isExhibitionSnapSuppressed(trigger)) {
 					// Returning the predicted value would retain GSAP's snap inertia.
 					return (trigger.scroll() - trigger.start) / (trigger.end - trigger.start)
 				}
 
+				// Desktop snapping assists the actual position, never a predicted destination.
+				const progress = !useNativeSticky && trigger
+					? (trigger.scroll() - trigger.start) / (trigger.end - trigger.start)
+					: value
 				const nearestPoint = snapPoints.reduce((nearest, point) => (
-					Math.abs(point - value) < Math.abs(nearest - value) ? point : nearest
+					Math.abs(point - progress) < Math.abs(nearest - progress) ? point : nearest
 				))
 
-				return Math.abs(nearestPoint - value) <= snapThreshold
+				return Math.abs(nearestPoint - progress) <= snapThreshold
 					? nearestPoint
-					: value
+					: progress
 			},
 			onStart: (trigger) => {
 				if (!isExhibitionSnapSuppressed(trigger)) return

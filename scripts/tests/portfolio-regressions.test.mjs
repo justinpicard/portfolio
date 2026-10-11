@@ -345,12 +345,12 @@ test('phone stack overlaps vertically, reverses, and uses a pin without snap or 
 		assert.equal(stack.cards[0]['--work-card-scale'], 1)
 		assert.equal(stack.cards[1]['--work-card-entry'], 1)
 		stack.seek(2.42)
-		assert.equal(stack.cards[0]['--work-card-scale'], 0.97)
+		assert.equal(stack.cards[0]['--work-card-scale'], 0.95)
 		assert.equal(stack.cards[1]['--work-card-entry'], 0.5)
 		assert.equal(stack.interactiveProjectIndex.value, null)
 		stack.seek(2.92)
-		assert.equal(stack.cards[0]['--work-card-scale'], 0.94)
-		assert.equal(stack.cards[0]['--work-card-depth'], '-18px')
+		assert.equal(stack.cards[0]['--work-card-scale'], 0.9)
+		assert.equal(stack.cards[0]['--work-card-depth'], '3%')
 		assert.equal(stack.cards[1].y, 0)
 		assert.equal(stack.interactiveProjectIndex.value, 1)
 		assert(stack.cards[1].zIndex > stack.cards[0].zIndex)
@@ -536,4 +536,185 @@ test('Life desktop and tablet retain pixel transforms and reduced motion creates
 	const reduced = await createLifeStackHarness({ motion: false })
 	assert.equal(reduced.timeline, undefined)
 	assert.equal(reduced.refreshes, 0)
+})
+
+const workSnapSource = await readFile('src/components/sections/SectionHomeWork.vue', 'utf8')
+const workSnapScript = workSnapSource.match(/<script setup[^>]*>([\s\S]*?)<\/script>/)[1]
+const workSnapAst = ts.createSourceFile('SectionHomeWork.ts', workSnapScript, ts.ScriptTarget.Latest, true)
+let workSnapObject
+function findWorkSnap(node) {
+	if (ts.isPropertyAssignment(node) && node.name.getText(workSnapAst) === 'snap'
+		&& ts.isObjectLiteralExpression(node.initializer)) workSnapObject = node.initializer
+	ts.forEachChild(node, findWorkSnap)
+}
+findWorkSnap(workSnapAst)
+assert(workSnapObject)
+const workSnapCode = ts.transpileModule(`return ${workSnapObject.getText(workSnapAst)};`, {
+	compilerOptions: { target: ts.ScriptTarget.ESNext }
+}).outputText
+
+function createWorkSnapHarness(compact = false, suppressed = false) {
+	return new Function('useNativeSticky', 'snapPoints', 'snapThreshold', 'isExhibitionSnapSuppressed', 'cancelExhibitionSnap', workSnapCode)(
+		compact, [0.2, 0.4, 0.6, 0.8, 0.95], 0.03, () => suppressed, () => {}
+	)
+}
+
+test('desktop snaps near actual project positions and preserves off-target scroll despite predicted progress', () => {
+	const snap = createWorkSnapHarness()
+	const trigger = progress => ({ start: 100, end: 1100, scroll: () => 100 + progress * 1000 })
+	assert.equal(snap.inertia, false)
+	assert.equal(snap.snapTo(0.8, trigger(0.42)), 0.4)
+	assert.equal(snap.snapTo(0.2, trigger(0.58)), 0.6)
+	assert.equal(snap.snapTo(0.6, trigger(0.5)), 0.5)
+	assert.equal(snap.snapTo(0.2, trigger(0.73)), 0.73)
+	for (const point of [0.2, 0.4, 0.6, 0.8, 0.95]) assert.equal(snap.snapTo(point, trigger(point)), point)
+	assert.equal(snap.delay, 0.04)
+	assert.deepEqual(snap.duration, { min: 0.1, max: 0.22 })
+	assert.equal(snap.ease, 'power1.inOut')
+	assert.equal(createWorkSnapHarness(false, true).snapTo(0.8, trigger(0.42)), 0.42)
+})
+
+test('compact coverflow keeps its original inertia and predicted-progress snapping', () => {
+	const snap = createWorkSnapHarness(true)
+	assert.equal(snap.inertia, undefined)
+	assert.equal(snap.snapTo(0.79, { start: 0, end: 1000, scroll: () => 500 }), 0.8)
+	assert.equal(snap.snapTo(0.5, { start: 0, end: 1000, scroll: () => 800 }), 0.5)
+})
+
+const sectionScrollCode = await componentCode('src/components/navigation/SectionNavigation.vue', [
+	'cancelNavigationScroll', 'observeNavigationScrollInput', 'scrollToSection'
+], ['onUnmounted'])
+
+function createSectionScrollHarness(reduced = false) {
+	const listeners = new Map(), tweens = [], writes = []
+	let unmount, scrollY = 100, activeUpdates = 0
+	class ElementTarget {
+		constructor(matches = [], editable = false) { this.matches = matches; this.isContentEditable = editable }
+		closest(selector) { return this.matches.some(match => selector.split(', ').includes(match)) ? this : null }
+	}
+	const props = { disabled: false, trackingSuspended: false }
+	const dependencies = {
+		props, HTMLElement: ElementTarget,
+		window: {
+			addEventListener: (name, handler) => listeners.set(name, handler),
+			removeEventListener: (name, handler) => { if (listeners.get(name) === handler) listeners.delete(name) }
+		},
+		document: { getElementById: id => ({ dataset: { sectionNavigationScrollY: id === 'life' ? '1000' : '500' } }), removeEventListener() {} },
+		gsap: { to: (target, options) => {
+			const tween = gsap.to(target, { ...options, paused: true })
+			tweens.push({ tween, options })
+			return tween
+		} },
+		setActiveSection() {}, updateLocationHash() {}, prefersReducedMotion: () => reduced,
+		getPortfolioScrollY: () => scrollY,
+		setPortfolioScrollY: value => { scrollY = value; writes.push(value) },
+		updateActiveSection: () => { activeUpdates++ }, animationEases: { inOut: 'power2.inOut' },
+		onUnmounted: callback => { unmount = callback },
+		cleanupLabelTransition() {}, handleDocumentPointerDown() {}
+	}
+	const api = new Function(...Object.keys(dependencies), `
+		let scrollTween, cleanupScrollInput, isProgrammaticScrolling = false;
+		let labelTransitionId = 0, activeSectionTrigger, panelTween, itemTimeline, staggerLinks, animationContext;
+		let sectionPositionTriggers = [], sectionActivationPositions = [];
+		const itemElements = new Map();
+		${sectionScrollCode}
+		return { scrollToSection, cancelNavigationScroll, scrolling: () => isProgrammaticScrolling };
+	`)(...Object.values(dependencies))
+	return { ...api, props, listeners, tweens, writes, ElementTarget, unmount: () => unmount(), scrollY: () => scrollY, activeUpdates: () => activeUpdates,
+		input(name, event = {}) { listeners.get(name)?.({ defaultPrevented: false, altKey: false, ctrlKey: false, metaKey: false, target: new ElementTarget(), ...event }) }
+	}
+}
+
+test('navigation wheel, trackpad-style wheel, touch and scroll keys cancel without further position writes', () => {
+	for (const [name, event] of [['wheel', {}], ['wheel', { deltaY: -1, deltaMode: 0 }], ['touchstart', {}], ['touchmove', {}], ...['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].map(key => ['keydown', { key }])]) {
+		const nav = createSectionScrollHarness()
+		nav.scrollToSection('life')
+		const { tween, options } = nav.tweens[0]
+		tween.progress(0.4)
+		const position = nav.scrollY(), writes = nav.writes.length
+		nav.input(name, event)
+		assert.equal(nav.scrolling(), false)
+		assert.equal(nav.listeners.size, 0)
+		assert.equal(nav.scrollY(), position)
+		options.onUpdate()
+		assert.equal(nav.writes.length, writes)
+		assert.equal(tween.parent, null)
+		tween.kill()
+	}
+	gsap.ticker.sleep()
+})
+
+test('navigation ignores editing, control activation and unrelated keyboard input; completion removes observers', () => {
+	const nav = createSectionScrollHarness()
+	try {
+		nav.scrollToSection('life')
+		for (const event of [
+			{ key: 'Tab' }, { key: 'Escape' }, { key: 'ArrowDown', ctrlKey: true },
+			{ key: 'PageDown', defaultPrevented: true },
+			{ key: 'ArrowDown', target: new nav.ElementTarget(['input']) },
+			{ key: 'Home', target: new nav.ElementTarget([], true) },
+			{ key: 'ArrowDown', target: new nav.ElementTarget(['[role="slider"]']) },
+			{ key: ' ', target: new nav.ElementTarget(['button']) }
+		]) {
+			nav.input('keydown', event)
+			assert.equal(nav.scrolling(), true)
+		}
+		nav.tweens[0].tween.progress(1)
+		assert.equal(nav.scrollY(), 1000)
+		assert.equal(nav.listeners.size, 0)
+		assert.equal(nav.scrolling(), false)
+		assert.equal(nav.tweens[0].options.duration, 0.9)
+	} finally { nav.unmount(); gsap.ticker.sleep() }
+})
+
+test('navigation replacements and unmount clean listeners; overlay lock prevents writes and reduced motion needs no listeners', () => {
+	const nav = createSectionScrollHarness()
+	nav.scrollToSection('work')
+	const old = nav.tweens[0]
+	old.tween.progress(0.3)
+	nav.scrollToSection('life')
+	assert.equal(old.tween.parent, null)
+	assert.equal(nav.listeners.size, 4)
+	const writes = nav.writes.length
+	old.options.onUpdate()
+	assert.equal(nav.writes.length, writes)
+	nav.props.trackingSuspended = true
+	nav.tweens[1].tween.progress(0.4)
+	assert.equal(nav.writes.length, writes)
+	nav.scrollToSection('work')
+	assert.equal(nav.tweens.length, 2)
+	nav.unmount()
+	assert.equal(nav.listeners.size, 0)
+	assert.equal(nav.scrolling(), false)
+	const reduced = createSectionScrollHarness(true)
+	reduced.scrollToSection('life')
+	assert.equal(reduced.scrollY(), 1000)
+	assert.equal(reduced.tweens.length, 0)
+	assert.equal(reduced.listeners.size, 0)
+	reduced.unmount()
+	gsap.ticker.sleep()
+})
+
+
+test('phone rear cards become progressively smaller and lower while reverse scroll restores their poses', () => {
+	const stack = createMobileStackHarness(400)
+	try {
+		const timeline = stack.config.animation
+		const duration = timeline.duration()
+		stack.seek(timeline.labels['project-4'])
+		for (let index = 0; index < 4; index++) {
+			assert.equal(stack.cards[index]['--work-card-depth'], `${(4 - index) * 3}%`)
+			assert(stack.cards[index]['--work-card-scale'] < stack.cards[index + 1]['--work-card-scale'])
+		}
+		assert.equal(stack.cards[3]['--work-card-scale'], 0.9)
+		assert.equal(stack.cards[4]['--work-card-scale'], 1)
+		assert.equal(stack.interactiveProjectIndex.value, 4)
+		stack.seek(timeline.labels['project-1'])
+		assert.equal(stack.cards[0]['--work-card-scale'], 0.9)
+		assert.equal(stack.cards[0]['--work-card-depth'], '3%')
+		assert.equal(stack.cards[1]['--work-card-scale'], 1)
+		assert.equal(stack.cards[1]['--work-card-depth'], '0px')
+		assert.equal(stack.interactiveProjectIndex.value, 1)
+		assert.equal(timeline.duration(), duration)
+	} finally { stack.cleanup(); gsap.ticker.sleep() }
 })
