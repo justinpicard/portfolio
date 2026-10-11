@@ -9,13 +9,14 @@
 		/>
 		<CaseMediaBlock
 			:block="block.media"
-			sizes=""
+			:sizes="caseFeatureImageSizes(block.width)"
 			class="case-feature-block__media"
 		/>
 	</div>
 </template>
 
 <script setup lang="ts">
+import { caseFeatureImageSizes } from '../../../utils/images/caseImageSizes'
 import type { CaseFeatureBlock } from '../../../content'
 import CaseMediaBlock from './CaseMediaBlock.vue'
 import CaseTextBlock from './CaseTextBlock.vue'

@@ -6,6 +6,8 @@ import sharp from 'sharp'
 const sourceRoot = 'public/images'
 const outputRoot = 'public/generated/images'
 const manifestRoot = 'src/generated'
+const dimensionsOnly = process.argv.includes('--dimensions-only')
+const dimensions = {}
 const manifest = {}
 const report = []
 
@@ -17,18 +19,23 @@ async function collect(directory) {
 }
 
 // Only this reproducible output directory is cleared; source assets remain untouched.
-await rm(outputRoot, { recursive: true, force: true })
-await mkdir(outputRoot, { recursive: true })
+if (!dimensionsOnly) {
+	await rm(outputRoot, { recursive: true, force: true })
+	await mkdir(outputRoot, { recursive: true })
+}
 await mkdir(manifestRoot, { recursive: true })
 for (const path of (await collect(sourceRoot)).sort()) {
 	if (!/\.(jpe?g|png)$/i.test(path)) continue
 	const input = await readFile(path)
 	const url = '/' + relative('public', path).split('\\').join('/')
+	const metadata = await sharp(input).metadata()
+	const rotated = metadata.orientation >= 5 && metadata.orientation <= 8
+	dimensions[url] = { width: rotated ? metadata.height : metadata.width, height: rotated ? metadata.width : metadata.height }
+	if (dimensionsOnly) continue
 	if (input.length < 32 * 1024) {
 		report.push({ url, originalBytes: input.length, skipped: 'under 32 KiB' })
 		continue
 	}
-	const metadata = await sharp(input).metadata()
 	const isPng = extname(path).toLowerCase() === '.png'
 	const options = isPng
 		? { lossless: true, effort: 6 }
@@ -46,9 +53,10 @@ for (const path of (await collect(sourceRoot)).sort()) {
 	}
 	const optimized = await emit(full)
 	const variants = []
-	// Two smaller candidates cover mobile and column layouts; retain full resolution for wide/high-DPR screens.
-	if (path.includes('/projects/') && optimized.width >= 1600) {
-		for (const width of [800, 1200]) {
+	// Portraits and thumbnails also need candidates; keep the authored full image for high DPR.
+	const candidateWidths = path.includes('avatar') ? [96, 144] : [320, 640, 960, 1200]
+	if (optimized.width >= 400) {
+		for (const width of candidateWidths) {
 			if (width >= optimized.width * 0.8) continue
 			const variant = await sharp(input).rotate().resize({ width, withoutEnlargement: true }).webp(options).toBuffer({ resolveWithObject: true })
 			if (variant.data.length < full.data.length * 0.85) variants.push(await emit(variant))
@@ -57,6 +65,11 @@ for (const path of (await collect(sourceRoot)).sort()) {
 	manifest[url] = { ...optimized, variants }
 	report.push({ originalUrl: url, originalBytes: input.length, ...optimized, variants, hasAlpha: metadata.hasAlpha })
 }
-await writeFile(join(manifestRoot, 'image-manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
-await writeFile(join(manifestRoot, 'image-report.json'), JSON.stringify(report, null, 2) + '\n')
-console.log(`Images: ${Object.keys(manifest).length} optimized, ${report.filter(item => item.skipped).length} skipped. See src/generated/image-report.json.`)
+await writeFile(join(manifestRoot, 'image-dimensions.json'), JSON.stringify(dimensions, null, 2) + '\n')
+if (dimensionsOnly) {
+	console.log(`Image dimensions: ${Object.keys(dimensions).length} originals.`)
+} else {
+	await writeFile(join(manifestRoot, 'image-manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
+	await writeFile(join(manifestRoot, 'image-report.json'), JSON.stringify(report, null, 2) + '\n')
+	console.log(`Images: ${Object.keys(manifest).length} optimized, ${report.filter(item => item.skipped).length} skipped. See src/generated/image-report.json.`)
+}

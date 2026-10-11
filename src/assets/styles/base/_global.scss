@@ -1,5 +1,30 @@
 @use "../abstracts" as *;
 
+:where(a[href], button, [tabindex]):focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 4px;
+}
+
+.skip-link {
+	position: fixed;
+	top: var(--space-4);
+	left: var(--page-gutter);
+	z-index: 1100;
+	padding: var(--space-3) var(--space-4);
+	color: var(--color-primary);
+	background: var(--color-white);
+	border-radius: var(--radius-full);
+	transform: translateY(calc(-100% - var(--space-8)));
+
+	&:focus {
+		transform: none;
+	}
+}
+
+.main-content {
+	scroll-margin-block-start: 6rem;
+}
+
 body {
 	@include type-role(ui);
 

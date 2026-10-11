@@ -1,6 +1,8 @@
 <template>
 	<Teleport to="body">
 		<div
+			ref="dialog"
+			tabindex="-1"
 			class="project-layer-prototype"
 			:class="{
 				'project-layer-prototype--opening': isOpening && isOpeningVisibilityLocked
@@ -85,6 +87,7 @@
 </template>
 
 <script setup lang="ts">
+import { containDialogFocus } from '../../utils/dom/dialogFocus'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
@@ -1576,15 +1579,15 @@ function isStaleContextTransition(runId: number) {
 	return isStale
 }
 
-async function navigateToProject(nextIndex: number, restoreFocus = false) {
-	if (isOpening.value || isTransitioning.value || isClosing.value) return
+async function navigateToProject(nextIndex: number, restoreFocus = false): Promise<boolean> {
+	if (isOpening.value || isTransitioning.value || isClosing.value) return false
 
 	if (
 		nextIndex < 0
 		|| nextIndex >= props.projects.length
 		|| nextIndex === displayedIndex.value
 		|| !isProjectPublished(props.projects[nextIndex])
-	) return
+	) return false
 
 	isTransitioning.value = true
 	let shouldRestoreFocus = false
@@ -1599,7 +1602,7 @@ async function navigateToProject(nextIndex: number, restoreFocus = false) {
 			displayedIndex.value = nextIndex
 			emit('project-change-commit', nextIndex)
 			await nextTick()
-			if (isStaleContextTransition(runId)) return
+			if (isStaleContextTransition(runId)) return false
 			if (content.value) {
 				content.value.scrollTop = 0
 			}
@@ -1607,7 +1610,7 @@ async function navigateToProject(nextIndex: number, restoreFocus = false) {
 				'--project-card-color': getProjectBackground(nextIndex)
 			})
 			await waitForAnimationFrame()
-			if (isStaleContextTransition(runId)) return
+			if (isStaleContextTransition(runId)) return false
 			gsap.set([
 				...Object.values(getHeroElements() ?? {}),
 				...getTransitionBodies()
@@ -1619,11 +1622,11 @@ async function navigateToProject(nextIndex: number, restoreFocus = false) {
 			})
 			announcement.value = `${displayedProject.value.title} project loaded`
 			shouldRestoreFocus = restoreFocus
-			return
+			return true
 		}
 
 		const outgoingHero = getHeroElements()
-		if (!outgoingHero || !content.value) return
+		if (!outgoingHero || !content.value) throw new Error('Project switch is missing its outgoing content')
 
 		const outgoingLines = splitHeroTransitionLines(outgoingHero)
 		const outgoingMetadata = getHeroMetadataElements(outgoingHero)
@@ -1657,30 +1660,25 @@ async function navigateToProject(nextIndex: number, restoreFocus = false) {
 			}, 0.18)
 
 		await playUntil(transitionTimeline, 0.34)
-		if (isStaleContextTransition(runId)) return
+		if (isStaleContextTransition(runId)) return false
 
 		revertTransitionSplits()
 
 		displayedIndex.value = nextIndex
 		emit('project-change-commit', nextIndex)
 		await nextTick()
-		if (isStaleContextTransition(runId) || !content.value) return
+		if (isStaleContextTransition(runId) || !content.value) return false
 
 		content.value.scrollTop = 0
 		const incomingHero = getHeroElements()
-		if (!incomingHero) {
-			gsap.set(content.value, {
-				clearProps: 'opacity,transform,visibility'
-			})
-			return
-		}
+		if (!incomingHero) throw new Error('Project switch is missing its incoming content')
 
 		await waitForAnimationFrame()
-		if (isStaleContextTransition(runId)) return
+		if (isStaleContextTransition(runId)) return false
 		await waitForImageReady(
 			incomingHero.media.querySelector<HTMLImageElement>('img')
 		)
-		if (isStaleContextTransition(runId)) return
+		if (isStaleContextTransition(runId)) return false
 
 		const caseHeroReveal = createCaseHeroReveal(false)
 		if (caseHeroReveal) {
@@ -1693,20 +1691,16 @@ async function navigateToProject(nextIndex: number, restoreFocus = false) {
 			})
 			await continueTimeline(transitionTimeline)
 		}
-		if (isStaleContextTransition(runId)) return
+		if (isStaleContextTransition(runId)) return false
 
 		cleanupHeroReveal()
 		transitionTimeline = undefined
 		announcement.value = `${displayedProject.value.title} project loaded`
 		shouldRestoreFocus = restoreFocus
+		return true
 	} catch (error) {
 		killContextTransition()
-		if (DEBUG_PROJECT_CLOSE) {
-			console.error('[Project close] caught exception', {
-				transaction: 'project switch',
-				error
-			})
-		}
+		throw error
 	} finally {
 		completeProjectSwitch()
 
@@ -2600,7 +2594,11 @@ watch(displayedIndex, async () => {
 	setupProjectNavDivider()
 }, { flush: 'post' })
 
+const dialog = ref<HTMLElement | null>(null)
+let releaseDialogFocus: (() => void) | undefined
+
 onMounted(async () => {
+	if (dialog.value) releaseDialogFocus = containDialogFocus(dialog.value)
 	window.addEventListener('keydown', handleKeydown)
 	await nextTick()
 	await animateOpen()
@@ -2617,6 +2615,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+	releaseDialogFocus?.()
 	timeline?.kill()
 	cleanupHeroReveal()
 	cleanupCardRestore()

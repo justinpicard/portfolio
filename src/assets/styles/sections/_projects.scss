@@ -85,6 +85,36 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 		}
 	}
 
+	&__keyboard-nav {
+		position: absolute;
+		inset: auto 0 var(--space-4);
+		z-index: 5;
+		display: flex;
+		justify-content: center;
+		flex-wrap: wrap;
+		gap: var(--space-3);
+		padding-inline: var(--page-gutter);
+		pointer-events: auto;
+
+		&:not(:focus-within) {
+			width: 1px;
+			height: 1px;
+			overflow: hidden;
+			clip-path: inset(50%);
+		}
+
+		button {
+			max-width: 100%;
+			min-height: 48px;
+			padding: var(--space-3);
+			border: 1px solid currentColor;
+			border-radius: var(--radius-full);
+			background: var(--color-primary);
+			color: var(--color-white);
+			cursor: pointer;
+		}
+	}
+
 	&__exhibition {
 		position: absolute;
 		inset: 0;
@@ -116,7 +146,6 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 	background: transparent;
 	color: var(--color-primary);
 	backface-visibility: hidden;
-	outline: none;
 
 	&--interactive {
 		pointer-events: auto;
@@ -127,8 +156,8 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 		cursor: default;
 	}
 
-	&--experiment:focus-visible {
-		outline: 2px solid currentColor;
+	&:focus-visible {
+		outline: 2px solid var(--color-white);
 		outline-offset: 4px;
 	}
 
@@ -376,6 +405,8 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 		inset: 0;
 		z-index: 4;
 		overflow-y: auto;
+		overscroll-behavior-y: contain;
+		padding-block-end: env(safe-area-inset-bottom, 0px);
 		padding-block-start: clamp(8rem, 12vh, 8rem);
 			//clamp(1.5rem, 7vw, 8rem)
 			//clamp(9rem, 16vh, 12rem);
@@ -401,6 +432,13 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 		overflow: hidden;
 		border-radius: 0;
 		background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+
+		.motion-control {
+			position: absolute;
+			right: var(--page-gutter);
+			bottom: var(--space-4);
+			z-index: 1;
+		}
 
 		.base-image,
 		img {
@@ -862,6 +900,10 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 
 @media (prefers-reduced-motion: reduce) {
 	.work-section {
+		&__keyboard-nav {
+			// The static exhibition is taller than the viewport; keep focused controls visible.
+			position: fixed;
+		}
 		height: auto;
 		min-height: var(--work-stage-height);
 		overflow: visible;
@@ -903,4 +945,9 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 		opacity: 1;
 		transform: none;
 	}
+}
+
+.project-hero__metadata-label {
+	// Preserve the hierarchy while meeting 4.5:1 on both published case backgrounds.
+	opacity: 0.95;
 }

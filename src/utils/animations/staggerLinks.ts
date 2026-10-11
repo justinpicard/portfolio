@@ -1,4 +1,4 @@
-import { gsap, SplitText, registerGsapPlugins } from './gsap'
+import { gsap, SplitText, registerGsapPlugins, prefersReducedMotion, observeReducedMotion } from './gsap'
 import { staggerLinkPreset } from './presets'
 
 const STAGGER_LINK_SELECTOR = '[data-stagger-link]'
@@ -43,6 +43,12 @@ function initStaggerLink(link: HTMLElement): StaggerLinkInstance | undefined {
 
 	function animate(isActive: boolean) {
 		context.add(() => {
+			if (prefersReducedMotion()) {
+				gsap.killTweensOf([...chars, ...(alternateSplit?.chars ?? [])])
+				gsap.set(chars, { yPercent: 0 })
+				if (alternateSplit) gsap.set(alternateSplit.chars, { yPercent: 100 })
+				return
+			}
 			gsap.to(chars, {
 				yPercent: isActive ? -100 : 0,
 				...staggerLinkPreset,
@@ -76,14 +82,17 @@ function initStaggerLink(link: HTMLElement): StaggerLinkInstance | undefined {
 	link.addEventListener('pointerleave', handlePointerLeave)
 	link.addEventListener('focusin', handleFocusIn)
 	link.addEventListener('focusout', handleFocusOut)
+	const stopObservingMotion = observeReducedMotion(() => animate(false))
 
 	return {
 		destroy() {
+			stopObservingMotion()
 			link.removeEventListener('pointerenter', handlePointerEnter)
 			link.removeEventListener('pointerleave', handlePointerLeave)
 			link.removeEventListener('focusin', handleFocusIn)
 			link.removeEventListener('focusout', handleFocusOut)
 			gsap.killTweensOf(chars)
+			if (alternateSplit) gsap.killTweensOf(alternateSplit.chars)
 			context.revert()
 			alternateSplit?.revert()
 			split.revert()

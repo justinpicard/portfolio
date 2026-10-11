@@ -39,8 +39,8 @@
 							</div>
 						</div>
 					</div>
+					<MotionControl v-if="!reducedMotion" :paused="isMarqueePaused" @toggle="toggleMarquee" />
 				</div>
-
 				<div class="site-footer__intro col-span-1 md:col-span-2">
 					<p class="site-footer__copy">
 						{{ footer.introduction }}
@@ -111,6 +111,7 @@
 </template>
 
 <script setup lang="ts">
+import MotionControl from './ui/MotionControl.vue'
 // TEMPORARY mobile scroll isolation; see src/config/mobileScrollDiagnostics.ts.
 import { isScrollDiagnosticGroupEnabled } from '../config/mobileScrollDiagnostics'
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
@@ -119,6 +120,7 @@ import { usePortfolioContent } from '../composables/usePortfolioContent'
 import {
 	gsap,
 	prefersReducedMotion,
+	observeReducedMotion,
 	registerGsapPlugins,
 	ScrollTrigger
 } from '../utils/animations/gsap'
@@ -134,6 +136,16 @@ const footerRoot = ref<HTMLElement | null>(null)
 const footerDivider = ref<HTMLElement | null>(null)
 const footerMarquee = ref<HTMLElement | null>(null)
 let staggerLinks: StaggerLinksController | undefined
+const isMarqueePaused = ref(false)
+const reducedMotion = ref(false)
+let marqueeLoop: gsap.core.Tween | undefined
+let stopObservingMotion: (() => void) | undefined
+
+function toggleMarquee() {
+	isMarqueePaused.value = !isMarqueePaused.value
+	marqueeLoop?.paused(isMarqueePaused.value)
+}
+
 let footerAnimationContext: gsap.Context | undefined
 
 // Starting at 70% viewport height means roughly 30% of the footer is in view.
@@ -156,7 +168,7 @@ async function setupFooterAnimations() {
 		!footerRoot.value
 		|| !footerDivider.value
 		|| !footerMarquee.value
-		|| prefersReducedMotion()
+		|| reducedMotion.value
 	) return
 
 	registerGsapPlugins()
@@ -184,11 +196,13 @@ async function setupFooterAnimations() {
 		}
 
 		const loop = gsap.to(track, {
+			paused: isMarqueePaused.value,
 			xPercent: -50,
 			duration: 15,
 			ease: animationEases.none,
 			repeat: -1
 		})
+		marqueeLoop = loop
 		if (!isScrollDiagnosticGroupEnabled('footer')) return
 		let marqueeDirection = 1
 
@@ -215,6 +229,11 @@ async function setupFooterAnimations() {
 }
 
 onMounted(() => {
+	reducedMotion.value = prefersReducedMotion()
+	stopObservingMotion = observeReducedMotion((reduced) => {
+		reducedMotion.value = reduced
+		void setupFooterAnimations()
+	})
 	setupStaggerLinks()
 	setupFooterAnimations()
 })
@@ -225,6 +244,7 @@ watch(locale, () => {
 }, { flush: 'post' })
 
 onUnmounted(() => {
+	stopObservingMotion?.()
 	staggerLinks?.destroy()
 	footerAnimationContext?.revert()
 })

@@ -106,6 +106,7 @@ import {
 	type ComponentPublicInstance
 } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { isModifiedClick } from '../../utils/dom/linkClick'
 import { useRoute, useRouter } from 'vue-router'
 import {
 	SECTION_NAVIGATION_ACTIVE_THRESHOLD,
@@ -703,6 +704,7 @@ async function selectSection(sectionId: SectionNavigationId) {
 }
 
 function handleItemClick(event: MouseEvent, sectionId: SectionNavigationId) {
+	if (isModifiedClick(event)) return
 	event.preventDefault()
 	void selectSection(sectionId)
 }

@@ -63,7 +63,10 @@ export const routes = [
 export const routerOptions = {
 	base: import.meta.env.BASE_URL,
 	routes,
-	scrollBehavior(_to, from, savedPosition) {
+	scrollBehavior(to, from, savedPosition) {
+		// The overlay coordinator, including its close reconciliation, owns this scroll.
+		if (to.name === 'home' && from.name === 'home'
+			&& (to.query.case !== undefined || from.query.case !== undefined)) return false
 		if (savedPosition) return savedPosition
 
 		// Preserve native restoration after reloads and discarded-tab restores.

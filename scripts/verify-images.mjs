@@ -3,6 +3,13 @@ import { readFile } from 'node:fs/promises'
 import sharp from 'sharp'
 
 const manifest = JSON.parse(await readFile('src/generated/image-manifest.json', 'utf8'))
+const dimensions = JSON.parse(await readFile('src/generated/image-dimensions.json', 'utf8'))
+for (const [original, image] of Object.entries(dimensions)) {
+	const metadata = await sharp(`public${original}`).metadata()
+	const rotated = metadata.orientation >= 5 && metadata.orientation <= 8
+	assert.equal(image.width, rotated ? metadata.height : metadata.width, `Intrinsic width: ${original}`)
+	assert.equal(image.height, rotated ? metadata.width : metadata.height, `Intrinsic height: ${original}`)
+}
 for (const [original, image] of Object.entries(manifest)) {
 	const source = await readFile(`public${original}`)
 	assert(source.equals(await readFile(`dist${original}`)), `Fallback changed: ${original}`)
@@ -10,6 +17,7 @@ for (const [original, image] of Object.entries(manifest)) {
 	const sourceMetadata = await sharp(source).rotate().toBuffer({ resolveWithObject: true })
 	assert.equal(image.width, sourceMetadata.info.width)
 	assert.equal(image.height, sourceMetadata.info.height)
+	assert.deepEqual(dimensions[original], { width: image.width, height: image.height })
 	for (const variant of [...image.variants, image]) {
 		const output = await readFile(`dist${variant.url}`)
 		const metadata = await sharp(output).metadata()

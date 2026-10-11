@@ -28,7 +28,7 @@ export default {
 			pretzel: 'I’m quite easy to convince when good food, drinks or a plane ticket are involved 🥨🍺',
 			empireStateBuilding: 'Speaking of plane tickets, I love exploring new places. 🛫',
 			learningSpanish: 'My latest challenge: Spanish 🇪🇸 Starting with the basics',
-			pintxos: '(secretly the real reason I\'m learing spanish)',
+			pintxos: '(secretly the real reason I\'m learning spanish)',
 			randomPhoto: 'Just a random photo of my first ever basketball game at Madison Square Garden, NYC',
 			berlinArchitecture: 'I have a thing for photographing buildings from weird angles',
 			mirrorSelfie: 'Like I said… weird angles',
@@ -70,6 +70,9 @@ export default {
 		resume: 'Resume'
 	},
 	accessibility: {
+		skipToContent: 'Skip to main content',
+		pauseMotion: 'Pause animation',
+		resumeMotion: 'Play animation',
 		scrollDown: 'SCROLL • SCROLL • SCROLL •',
 		scrollToAbout: 'Scroll to the About section',
 		avatarAlt: 'Portrait of Justin Picard',

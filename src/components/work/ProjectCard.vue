@@ -29,6 +29,7 @@ x<template>
 					:src="`/images/${project.thumbnailImage}`"
 					alt=""
 					:fallback-format="project.thumbnailImageFormat"
+					sizes="(max-width: 47.999rem) min(84vw, calc(72svh * 0.72)), min(42vw, 620px, calc(74svh * 0.72))"
 					:position="project.thumbnailImagePosition ?? 'center center'"
 				/>
 			</div>
@@ -94,7 +95,7 @@ import {
 import { useI18n } from 'vue-i18n'
 import { useCursorFollowIndicator } from '../../composables/useCursorFollowIndicator'
 import { isProjectPublished, type Project } from '../../content'
-import { gsap } from '../../utils/animations/gsap'
+import { gsap, prefersReducedMotion, observeReducedMotion } from '../../utils/animations/gsap'
 import { animationEases } from '../../utils/animations/presets'
 import {
 	playUnavailableCardShake,
@@ -113,6 +114,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
+	'inactive-focus': []
 	open: [payload: {
 		projectIndex: number
 		sourceElement: HTMLElement
@@ -160,6 +162,7 @@ const projectIndicatorVisual = computed(
 )
 let cursorFollowIndicator: ReturnType<typeof useCursorFollowIndicator> | undefined
 let unavailableShakeTimeline: gsap.core.Timeline | undefined
+let stopObservingMotion: (() => void) | undefined
 
 function handleOpen() {
 	if (!props.interactive || !card.value) return
@@ -197,6 +200,11 @@ function clearUnavailableCardShake() {
 
 function animateHover(isHovered: boolean) {
 	if (!hoverSurface.value || (!props.interactive && isHovered)) return
+	if (prefersReducedMotion()) {
+		gsap.killTweensOf(hoverSurface.value)
+		gsap.set(hoverSurface.value, { scale: 1 })
+		return
+	}
 
 	gsap.to(hoverSurface.value, {
 		scale: isHovered ? 1.1 : 1,
@@ -207,6 +215,10 @@ function animateHover(isHovered: boolean) {
 }
 
 onMounted(() => {
+	stopObservingMotion = observeReducedMotion(() => {
+		clearUnavailableCardShake()
+		animateHover(false)
+	})
 	if (!isScrollDiagnosticGroupEnabled('projectCards')) return
 	if (!projectIndicatorWrapper.value || !projectIndicatorVisual.value) return
 
@@ -230,9 +242,11 @@ watch(() => props.interactive, (interactive) => {
 	cursorFollowIndicator?.disable()
 	clearUnavailableCardShake()
 	animateHover(false)
+	if (document.activeElement === card.value) emit('inactive-focus')
 })
 
 onUnmounted(() => {
+	stopObservingMotion?.()
 	cursorFollowIndicator?.cleanup()
 	unavailableShakeTimeline?.kill()
 	if (hoverSurface.value) gsap.killTweensOf(hoverSurface.value)

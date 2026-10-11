@@ -14,6 +14,8 @@
 				<figure ref="avatar" class="avatar">
 					<BaseImage
 						src="/images/justin-picard-avatar-3"
+						sizes="48px"
+						loading="eager"
 						:alt="t('accessibility.avatarAlt')"
 					/>
 				</figure>
@@ -89,6 +91,7 @@ import { isScrollDiagnosticGroupEnabled } from '../config/mobileScrollDiagnostic
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
+import { isModifiedClick } from '../utils/dom/linkClick'
 import BaseImage from './base/BaseImage.vue'
 import SectionNavigation from './navigation/SectionNavigation.vue'
 import { useLocalizedRoute } from '../composables/useLocalizedRoute'
@@ -156,13 +159,7 @@ function preventActiveLocaleNavigation(event: MouseEvent, locale: 'en' | 'nl') {
 }
 
 function handleLogoClick(event: MouseEvent) {
-	const isModifiedClick = event.button !== 0
-		|| event.metaKey
-		|| event.ctrlKey
-		|| event.shiftKey
-		|| event.altKey
-
-	if (isModifiedClick || route.name !== 'home') return
+	if (isModifiedClick(event) || route.name !== 'home') return
 
 	event.preventDefault()
 

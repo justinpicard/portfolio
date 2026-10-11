@@ -33,6 +33,7 @@
 							:alt="t(photo.altKey)"
 							:aspect-ratio="aspectRatios[photo.ratio]"
 							:position="photo.position"
+							:sizes="lifePhotoSizes(photo.ratio)"
 						/>
 						<figcaption class="home-life-section__caption">
 							{{ t(photo.captionKey) }}
@@ -72,6 +73,14 @@ const aspectRatios: Record<PhotoRatio, string> = {
 	square: '1 / 1'
 }
 
+function lifePhotoSizes(ratio: PhotoRatio) {
+	const desktop = ratio === 'landscape' ? 'min(34vw, 32rem)' : ratio === 'square' ? 'min(30vw, 28rem)' : 'min(28vw, 27rem)'
+	const compact = ratio === 'landscape' ? 'min(108vw, 64svh, 28rem)' : ratio === 'square' ? 'min(100vw, 56svh, 25rem)' : 'min(94vw, 48svh, 22rem)'
+	const gutter = 'clamp(1.5rem, 2vw, 2rem)'
+	const reducedDesktop = `min(30rem, calc((max(28rem, (100vw - 2 * ${gutter} - clamp(3rem, 8vw, 9rem)) * 7 / 12) - 2.5rem) / 2))`
+	return `(prefers-reduced-motion: reduce) and (min-width: 64rem) ${reducedDesktop}, (prefers-reduced-motion: reduce) and (min-width: 48rem) calc((100vw - 2 * ${gutter} - 2.5rem) / 2), (prefers-reduced-motion: reduce) min(30rem, calc(100vw - 2 * ${gutter})), (min-width: 64rem) ${desktop}, ${compact}`
+}
+
 const FIRST_PHOTO_SETTLED_LABEL = 'first-photo-settled'
 const DESKTOP_LAYOUT_QUERY = '(min-width: 64rem)'
 
@@ -90,7 +99,7 @@ const photos: LifePhoto[] = [
 		src: '/images/photos/justin-picard_bassist',
 		altKey: 'accessibility.lifePhotoAlts.bassist',
 		captionKey: 'home.lifePhotoCaptions.bassist',
-		ratio: 'landscape',
+		ratio: 'square',
 		position: 'center center',
 		rotation: -0.8,
 		x: -5,

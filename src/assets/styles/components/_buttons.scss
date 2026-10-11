@@ -31,7 +31,7 @@
 		transform-style: preserve-3d;
 		border: 1px solid transparent;
 		background-color: transparent;
-		transition: all .3s cubic-bezier(.165,.84,.44,1);
+		transition: transform .3s cubic-bezier(.165,.84,.44,1), background-color .3s cubic-bezier(.165,.84,.44,1), border-color .3s cubic-bezier(.165,.84,.44,1);
 		position: absolute;
 		inset: 0;
 		overflow: hidden;
@@ -148,5 +148,22 @@
 				border-color: var(--color-primary);
 			}
 		}
+	}
+}
+
+.motion-control {
+	display: grid;
+	place-items: center;
+	width: 48px;
+	height: 48px;
+	border: 1px solid currentColor;
+	border-radius: var(--radius-full);
+	background: var(--color-primary);
+	color: var(--color-white);
+	cursor: pointer;
+
+	&:hover {
+		background: var(--color-white);
+		color: var(--color-primary);
 	}
 }

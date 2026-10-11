@@ -14,6 +14,7 @@
 								src="/images/justin-picard-hero"
 								alt=""
 								loading="eager"
+									sizes="(min-width: 48rem) clamp(300px, 30vw, 550px), min(22rem, calc(100vw - 2 * clamp(1.5rem, 2vw, 2rem)))"
 							/>
 						</div>
 					</div>
@@ -24,7 +25,7 @@
 		<CircularScrollIndicator
 			ref="scrollIndicator"
 			:text="t('accessibility.scrollDown')"
-			:aria-label="t('accessibility.scrollToAbout')"
+			aria-hidden="true"
 		/>
 	</section>
 </template>
@@ -38,6 +39,7 @@ import { usePortfolioContent } from '../../composables/usePortfolioContent'
 import {
 	gsap,
 	prefersReducedMotion,
+	observeReducedMotion,
 	registerGsapPlugins,
 	ScrollTrigger,
 	SplitText
@@ -68,9 +70,12 @@ const HERO_INTRO_LOADING_OVERLAP = 0.14
 const CURSOR_FOLLOW_POINTER_QUERY = '(hover: hover) and (pointer: fine)'
 const INDICATOR_MAX_PLAYBACK_RATE = 30
 const INDICATOR_VELOCITY_DIVISOR = 500
+let stopObservingMotion: (() => void) | undefined
 let ctx: gsap.Context | undefined
 let heroTimeline: gsap.core.Timeline | undefined
 let isHeroIntroLinked = false
+let isHeroIntroComplete = false
+let isHeroMounted = false
 let titleSplit: SplitText | undefined
 let roleSplit: SplitText | undefined
 let introSplit: SplitText | undefined
@@ -86,6 +91,7 @@ const scrollIndicatorPlayback = { rate: 1 }
 
 const emit = defineEmits<{
 	'intro-start': []
+	'intro-complete': []
 }>()
 
 defineExpose({
@@ -187,8 +193,13 @@ async function refreshHeroCopySplits() {
 }
 
 function restoreScroll() {
-	unlockScroll?.()
+	const releaseScroll = unlockScroll
 	unlockScroll = undefined
+	releaseScroll?.()
+	if (releaseScroll && !isHeroIntroComplete) {
+		isHeroIntroComplete = true
+		emit('intro-complete')
+	}
 }
 
 function playHeroIntro() {
@@ -284,8 +295,10 @@ function linkHeroIntroTimeline() {
 	const loadingTimeline = props.loadingScreen?.getSignatureDrawTimeline()
 	heroTimeline.pause(0)
 
-	if (!loadingTimeline) {
-		playHeroIntro()
+	if (!loadingTimeline || (prefersReducedMotion() && loadingTimeline.progress() === 1)) {
+		// Restart renders zero-duration callbacks even after pause(0) initialized the timeline.
+		if (prefersReducedMotion()) heroTimeline.restart(true, false)
+		else playHeroIntro()
 		isHeroIntroLinked = true
 		return
 	}
@@ -296,10 +309,24 @@ function linkHeroIntroTimeline() {
 }
 
 onMounted(async () => {
+	isHeroMounted = true
+	stopObservingMotion = observeReducedMotion((reduced) => {
+		cleanupScrollIndicatorVelocity()
+		if (reduced) {
+			props.loadingScreen?.getSignatureDrawTimeline()?.progress(1)
+			if (heroTimeline) {
+				heroTimeline.progress(1)
+				restoreScroll()
+			}
+		} else if (scrollIndicatorElement.value) {
+			setupScrollIndicatorVelocity(scrollIndicatorElement.value)
+		}
+	})
 	await nextTick()
 	registerGsapPlugins()
 	await waitForFonts()
 	await nextTick()
+	if (!isHeroMounted) return
 
 	const loadingScreenElement = props.loadingScreen?.element
 	const heroPhotoPositionerElement = heroPhotoPositioner.value
@@ -505,6 +532,8 @@ watch(
 )
 
 onUnmounted(() => {
+	isHeroMounted = false
+	stopObservingMotion?.()
 	copyRefreshId += 1
 	cancelAnimationFrame(splitRefreshFrame)
 	heroTimeline?.kill()

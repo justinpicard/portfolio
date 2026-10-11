@@ -109,7 +109,7 @@
 	}
 
 	.site-nav__identity {
-		margin-inline-start: var(--page-gutter);
+		margin-inline-start: max(var(--page-gutter), env(safe-area-inset-left, 0px));
 	}
 
 	.site-logo {
@@ -258,16 +258,16 @@
 
 	&__close,
 	&__project-pill {
-		top: var(--space-6);
+		top: max(var(--space-6), env(safe-area-inset-top, 0px));
 		position: absolute;
 
 		@include respond(sm) {
-			top: var(--space-8);
+			top: max(var(--space-8), env(safe-area-inset-top, 0px));
 		}
 	}
 
 	&__close {
-		left: var(--page-gutter);
+		left: max(var(--page-gutter), env(safe-area-inset-left, 0px));
 		pointer-events: auto;
 	}
 
@@ -323,7 +323,7 @@
 	}
 
 	&__project-pill {
-		right: var(--page-gutter);
+		right: max(var(--page-gutter), env(safe-area-inset-right, 0px));
 		pointer-events: none;
 	}
 

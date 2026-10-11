@@ -70,6 +70,9 @@ export default {
 		resume: 'CV'
 	},
 	accessibility: {
+		skipToContent: 'Ga naar de inhoud',
+		pauseMotion: 'Animatie pauzeren',
+		resumeMotion: 'Animatie afspelen',
 		scrollDown: 'SCROLL • SCROLL • SCROLL •',
 		scrollToAbout: 'Scrol naar het onderdeel Over mij',
 		avatarAlt: 'Portret van Justin Picard',

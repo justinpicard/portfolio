@@ -1,5 +1,5 @@
 <template>
-	<section class="section-layout section-layout--stage work-section" id="work" ref="root">
+	<section class="section-layout section-layout--stage work-section" id="work" ref="root" tabindex="-1">
 		<div class="work-section__stage" ref="stage">
 			<div class="work-section__title-wrapper" ref="titleWrapper">
 				<div class="work-section__title-inner">
@@ -12,6 +12,18 @@
 				ref="exhibition"
 				:aria-label="t('home.workExhibitionLabel')"
 			>
+				<nav class="work-section__keyboard-nav" :aria-label="t('project.navigationLabel')">
+					<template v-for="(project, index) in projects" :key="project.id">
+						<button
+							v-if="isProjectPublished(project)"
+							type="button"
+							@focus="focusKeyboardProject(index)"
+							@click="openKeyboardProject(index)"
+						>
+							{{ t('project.openProject', { title: project.title }) }}
+						</button>
+					</template>
+				</nav>
 				<ProjectCard
 					v-for="projectIndex in projectCount"
 					:key="projectIndex"
@@ -19,9 +31,10 @@
 					:project="projects[projectIndex - 1]"
 					:active="activeProjectIndex === projectIndex - 1"
 					:interactive="overlayLifecycle === 'closed'
-						&& (diagnosticStaticCards || interactiveProjectIndex === projectIndex - 1)"
+						&& (diagnosticStaticCards || reducedMotionMode || interactiveProjectIndex === projectIndex - 1)"
 					:transition-hidden="hiddenProjectIndex === projectIndex - 1"
 					@open="openProject"
+					@inactive-focus="focusWorkSection"
 				/>
 			</div>
 		</div>
@@ -32,8 +45,8 @@
 			:project-index="selectedProjectIndex"
 			:origin="layerOrigin"
 			:source-card="openSourceCard"
-			@close="closeProject"
-			@request-project-change="handleProjectChangeRequest"
+			@close="closeProject($event)"
+			@request-project-change="handleProjectChangeRequest($event)"
 			@project-change-commit="commitProjectChange"
 			@opened="handleProjectOpened"
 			@switch-complete="debugProjectClose('switch-complete')"
@@ -49,11 +62,13 @@
 // TEMPORARY mobile scroll isolation; see src/config/mobileScrollDiagnostics.ts.
 import { isScrollDiagnosticGroupEnabled } from '../../config/mobileScrollDiagnostics'
 import { nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { resolveCaseProjectIndex, withCaseQuery } from '../../utils/navigation/caseQuery'
 import { useI18n } from 'vue-i18n'
 import { usePortfolioContent } from '../../composables/usePortfolioContent'
 import { isProjectPublished } from '../../content'
 import type { WorkCloseTarget, WorkOverlayLifecycle } from '../../config/workOverlay'
-import { gsap, prefersReducedMotion, ScrollTrigger, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
+import { gsap, prefersReducedMotion, observeReducedMotion, ScrollTrigger, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
 import { animationDurations, animationEases, animationStaggers } from '../../utils/animations/presets'
 import {
 	getPortfolioScrollY,
@@ -63,6 +78,9 @@ import {
 import ProjectCard from '../work/ProjectCard.vue'
 import ProjectLayerPrototype from '../work/ProjectLayerPrototype.vue'
 
+const props = defineProps<{ navigationReady?: boolean }>()
+const route = useRoute()
+const router = useRouter()
 const { t } = useI18n()
 const { projects } = usePortfolioContent()
 const projectCount = projects.value.length
@@ -84,9 +102,12 @@ const hiddenProjectIndex = ref<number | null>(null)
 const layerOrigin = ref<LayerOrigin | null>(null)
 const openSourceCard = shallowRef<HTMLElement | null>(null)
 const overlayLifecycle = ref<WorkOverlayLifecycle>('closed')
+const reducedMotionMode = ref(false)
 // TEMPORARY: set after mount to preserve identical server/client initial markup.
 const diagnosticStaticCards = ref(false)
 
+let stopObservingMotion: (() => void) | undefined
+let cleanupReducedMotionExhibition: (() => void) | undefined
 let ctx: gsap.Context | undefined
 let splitTitle: SplitText | undefined
 let titleRevealTween: gsap.core.Tween | undefined
@@ -106,6 +127,8 @@ let isRestoringProjectClose = false
 let openingHomepageScrollY: number | undefined
 let openingProjectIndex: number | undefined
 let previousDocumentOverflow = ''
+let backgroundElement: HTMLElement | null = null
+let previousBackgroundInert = false
 let unlockHomepageScrollSmoothing: (() => void) | undefined
 const TITLE_REVEAL_SCROLL_DISTANCE = 1.6
 const DESKTOP_LAYOUT_QUERY = '(min-width: 64rem)'
@@ -147,9 +170,10 @@ function debugProjectClose(message: string, detail?: unknown) {
 	console.debug(`[Project close] ${message}`, detail)
 }
 
-function openProject(payload: { projectIndex: number; sourceElement: HTMLElement }) {
+function openProject(payload: { projectIndex: number; sourceElement: HTMLElement }, updateUrl = true) {
 	if (
-		(!diagnosticStaticCards.value && interactiveProjectIndex.value !== payload.projectIndex)
+		overlayLifecycle.value !== 'closed'
+		|| (!diagnosticStaticCards.value && !reducedMotionMode.value && interactiveProjectIndex.value !== payload.projectIndex)
 		|| !isProjectPublished(projects.value[payload.projectIndex])
 	) return
 
@@ -170,16 +194,21 @@ function openProject(payload: { projectIndex: number; sourceElement: HTMLElement
 		},
 		sourceRect: layerOrigin.value
 	})
+	if (updateUrl) lastSynchronizedCase = Symbol('case interaction')
 	setOverlayLifecycle('opening')
 	suspendExhibitionTracking()
 	lockHomepageScroll()
 	isProjectLayerMounted.value = true
+	if (updateUrl) void writeCaseUrl(payload.projectIndex)
 }
 
 function lockHomepageScroll() {
 	if (unlockHomepageScrollSmoothing) return
 
 	previousDocumentOverflow = document.documentElement.style.overflow
+	backgroundElement = document.getElementById('app')
+	previousBackgroundInert = backgroundElement?.inert ?? false
+	if (backgroundElement) backgroundElement.inert = true
 	unlockHomepageScrollSmoothing = lockPortfolioScrollSmoothing()
 	document.documentElement.style.overflow = 'hidden'
 	debugProjectClose('homepage scroll locked', {
@@ -192,6 +221,8 @@ function unlockHomepageScroll() {
 	if (!unlockHomepageScrollSmoothing) return
 
 	document.documentElement.style.overflow = previousDocumentOverflow
+	if (backgroundElement) backgroundElement.inert = previousBackgroundInert
+	backgroundElement = null
 	unlockHomepageScrollSmoothing()
 	unlockHomepageScrollSmoothing = undefined
 	debugProjectClose('scroll unlocked', {
@@ -269,7 +300,7 @@ function handleProjectOpened() {
 	validateFrozenHomepageScroll('open')
 }
 
-async function handleProjectChangeRequest(nextIndex: number) {
+async function handleProjectChangeRequest(nextIndex: number, updateUrl = true): Promise<boolean> {
 	const layer = projectLayer.value
 	if (
 		overlayLifecycle.value !== 'open'
@@ -278,16 +309,21 @@ async function handleProjectChangeRequest(nextIndex: number) {
 		|| nextIndex >= projectCount
 		|| nextIndex === selectedProjectIndex.value
 		|| !isProjectPublished(projects.value[nextIndex])
-	) return
+	) return false
 
 	debugProjectClose('homepage scroll before project switch', {
 		homepageScrollY: getPortfolioScrollY(),
 		openingHomepageScrollY
 	})
 	validateFrozenHomepageScroll('switching')
+	if (updateUrl) lastSynchronizedCase = Symbol('case interaction')
 	setOverlayLifecycle('switching')
+	const requestedSlug = projects.value[nextIndex].slug
+	let switchCompleted = false
 	try {
-		await layer.navigateToProject(nextIndex, true)
+		if (updateUrl) await writeCaseUrl(nextIndex)
+		switchCompleted = await layer.navigateToProject(nextIndex, true)
+		return switchCompleted
 	} catch (error) {
 		if (DEBUG_PROJECT_CLOSE) {
 			console.error('[Project close] caught exception', {
@@ -295,8 +331,15 @@ async function handleProjectChangeRequest(nextIndex: number) {
 				error
 			})
 		}
+		return false
 	} finally {
-		if ((overlayLifecycle.value as WorkOverlayLifecycle) === 'switching') {
+		// A newer history request belongs to the next transaction, not this rollback.
+		if (isWorkMounted && projectLayer.value === layer && !switchCompleted
+			&& route.query.case === requestedSlug) {
+			await writeCaseUrl(selectedProjectIndex.value, true)
+		}
+		if (isWorkMounted && projectLayer.value === layer
+			&& (overlayLifecycle.value as WorkOverlayLifecycle) === 'switching') {
 			setOverlayLifecycle('open')
 		}
 		debugProjectClose('homepage scroll after project switch', {
@@ -330,7 +373,7 @@ function showActiveProjectCard() {
 	hiddenProjectIndex.value = null
 }
 
-async function closeProject(source: 'button' | 'escape') {
+async function closeProject(source: 'button' | 'escape', updateUrl = true) {
 	const selectedClosingProjectIndex = selectedProjectIndex.value
 	const closeTargetProjectIndex = selectedClosingProjectIndex
 	const layer = projectLayer.value
@@ -362,7 +405,10 @@ async function closeProject(source: 'button' | 'escape') {
 		selectedClosingProjectIndex,
 		closeTargetProjectIndex
 	})
+	if (updateUrl) lastSynchronizedCase = Symbol('case interaction')
+	const requestedCase = updateUrl ? undefined : route.query.case
 	setOverlayLifecycle('closing')
+	if (updateUrl) void writeCaseUrl()
 	debugProjectClose('lifecycle → closing')
 	debugProjectClose('animateClose start')
 
@@ -387,9 +433,13 @@ async function closeProject(source: 'button' | 'escape') {
 			})
 		}
 	} finally {
+		if (!isWorkMounted || projectLayer.value !== layer) return
 		if (!closeCompleted) {
 			await restoreOpeningWorkState()
 			layer.cancelClose()
+			if (route.query.case === requestedCase) {
+				await writeCaseUrl(selectedProjectIndex.value, true)
+			}
 			setOverlayLifecycle('open')
 			return
 		}
@@ -1106,17 +1156,72 @@ function setupExhibition(useNativeSticky = false) {
 	}
 }
 
-onMounted(() => {
-	registerGsapPlugins()
+async function writeCaseUrl(projectIndex?: number, replace = false) {
+	const slug = projectIndex === undefined ? undefined : projects.value[projectIndex]?.slug
+	if (route.query.case === slug) return
+	const location = { query: withCaseQuery(route.query, slug), hash: route.hash }
+	await (replace ? router.replace(location) : router.push(location))
+}
 
+let synchronizingCaseRoute = false
+// Explicit controls can change the overlay even if history returns to the previous URL.
+let lastSynchronizedCase: unknown = Symbol('uninitialized case route')
+let isWorkMounted = false
+
+async function synchronizeCaseRoute() {
+	if (!isWorkMounted || !props.navigationReady || synchronizingCaseRoute
+		|| (overlayLifecycle.value !== 'closed' && overlayLifecycle.value !== 'open')
+		|| route.query.case === lastSynchronizedCase) return
+	const requestedCase = route.query.case
+	const index = resolveCaseProjectIndex(projects.value, route.query.case)
+	if (route.query.case !== undefined && index < 0) {
+		await writeCaseUrl(undefined, true)
+		return
+	}
+	synchronizingCaseRoute = true
+	lastSynchronizedCase = requestedCase
+	try {
+		if (index < 0) {
+			if (overlayLifecycle.value === 'open') await closeProject('button', false)
+		} else if (overlayLifecycle.value === 'closed') {
+			focusKeyboardProject(index)
+			await nextTick()
+			await waitForAnimationFrame()
+			if (!isWorkMounted || resolveCaseProjectIndex(projects.value, route.query.case) !== index) return
+			const sourceElement = projectCards[index]
+			if (sourceElement) openProject({ projectIndex: index, sourceElement }, false)
+		} else if (selectedProjectIndex.value !== index) {
+			await handleProjectChangeRequest(index, false)
+		}
+	} finally {
+		synchronizingCaseRoute = false
+		// Only a new URL can start another transaction; a failed unchanged request settles once.
+		if (isWorkMounted && route.query.case !== requestedCase) {
+			void synchronizeCaseRoute()
+		}
+	}
+}
+
+watch([() => route.query.case, () => props.navigationReady, overlayLifecycle], () => {
+	void synchronizeCaseRoute()
+}, { flush: 'post' })
+
+function setupWorkAnimations() {
+	cleanupReducedMotionExhibition?.()
+	cleanupReducedMotionExhibition = undefined
+	exhibitionMediaContext?.revert()
+	exhibitionMediaContext = undefined
+	cleanupTitleReveal()
+	ctx?.revert()
+	exhibitionTrigger = undefined
+	exhibitionTimeline = undefined
+	reducedMotionMode.value = prefersReducedMotion()
 	ctx = gsap.context(() => {
 		setupTitleReveal()
-
-		if (prefersReducedMotion()) {
-			setupExhibition()
+		if (reducedMotionMode.value) {
+			cleanupReducedMotionExhibition = setupExhibition()
 			return
 		}
-
 		exhibitionMediaContext = gsap.matchMedia()
 		exhibitionMediaContext.add({
 			desktop: DESKTOP_LAYOUT_QUERY,
@@ -1125,6 +1230,54 @@ onMounted(() => {
 			setupExhibition(Boolean(mediaQueryContext.conditions?.compact))
 		))
 	}, root.value ?? undefined)
+}
+
+function refreshWorkMotion() {
+	// The close coordinator owns pin geometry until the dialog has fully unmounted.
+	if (!isWorkMounted || overlayLifecycle.value !== 'closed' || reducedMotionMode.value === prefersReducedMotion()) return
+	const rect = root.value?.getBoundingClientRect()
+	const wasViewingWork = rect && rect.top <= 0 && rect.bottom > 0
+	const projectIndex = activeProjectIndex.value
+	setupWorkAnimations()
+	ScrollTrigger.refresh()
+	if (wasViewingWork) {
+		requestAnimationFrame(() => focusKeyboardProject(projectIndex))
+	}
+}
+
+function focusKeyboardProject(projectIndex: number) {
+	if (overlayLifecycle.value !== 'closed') return
+	const scrollY = getExhibitionProjectScrollY(projectIndex)
+	if (scrollY === undefined) return
+	if (exhibitionTrigger) cancelExhibitionSnap(exhibitionTrigger)
+	exhibitionSnapResumeScrollY = scrollY
+	setPortfolioScrollY(scrollY)
+	ScrollTrigger.update()
+	activeProjectIndex.value = projectIndex
+	interactiveProjectIndex.value = projectIndex
+}
+
+function focusWorkSection() {
+	// Preserve the user's scroll when a focused card leaves the activation radius.
+	if (overlayLifecycle.value === 'closed') root.value?.focus({ preventScroll: true })
+}
+
+async function openKeyboardProject(projectIndex: number) {
+	focusKeyboardProject(projectIndex)
+	await nextTick()
+	const sourceElement = projectCards[projectIndex]
+	if (sourceElement) openProject({ projectIndex, sourceElement })
+}
+
+onMounted(() => {
+	isWorkMounted = true
+	registerGsapPlugins()
+	setupWorkAnimations()
+	stopObservingMotion = observeReducedMotion(refreshWorkMotion)
+})
+
+watch(overlayLifecycle, (lifecycle) => {
+	if (lifecycle === 'closed') refreshWorkMotion()
 })
 
 watch(
@@ -1144,6 +1297,9 @@ watch(
 )
 
 onUnmounted(() => {
+	isWorkMounted = false
+	stopObservingMotion?.()
+	cleanupReducedMotionExhibition?.()
 	setOverlayLifecycle('closed')
 	unlockHomepageScroll()
 	titleRefreshId += 1

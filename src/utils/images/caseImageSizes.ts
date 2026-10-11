@@ -8,3 +8,10 @@ export function caseImageSizes(width: CaseBlockWidth = 'content', columnShare = 
 		`calc(${100 * outerFraction * share}vw - ${2 * share} * ${gutter} - ${2 * gaps * share}rem)`
 	return `(min-width: 64rem) ${size(fraction, columnShare, columnGaps)}, (min-width: 48rem) ${size(1, columnShare, columnGaps)}, ${size(1, 1, 0)}`
 }
+
+export function caseFeatureImageSizes(width: CaseBlockWidth = 'content') {
+	const fraction = width === 'full' ? 1 : width === 'narrow' ? 0.5 : 2 / 3
+	const gutter = 'clamp(1.5rem, 2vw, 2rem)'
+	const column = (share: number) => `min(40rem, calc((${share * 100}vw - 2 * ${gutter} - 2rem) * 7 / 12 - 2rem))`
+	return `(min-width: 64rem) ${column(fraction)}, (min-width: 48rem) ${column(1)}, min(40rem, calc(100vw - 2 * ${gutter}))`
+}

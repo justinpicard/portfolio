@@ -1,5 +1,5 @@
 import type { Ref } from 'vue'
-import { gsap } from '../utils/animations/gsap'
+import { gsap, prefersReducedMotion, observeReducedMotion } from '../utils/animations/gsap'
 
 type CursorFollowIndicatorOptions = {
 	triggerElement: Ref<HTMLElement | null>
@@ -166,6 +166,7 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 	}
 
 	function showIndicator(clientX: number, clientY: number) {
+		if (prefersReducedMotion()) return
 		const elements = getElements()
 		if (!elements) return
 		if (isPointerSuppressed(clientX, clientY)) return
@@ -283,7 +284,7 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 		gsap.to(elements.visualElement, {
 			autoAlpha: 0,
 			scale: LEAVE_SCALE,
-			duration: LEAVE_DURATION,
+			duration: prefersReducedMotion() ? 0 : LEAVE_DURATION,
 			ease: LEAVE_EASE
 		})
 	}
@@ -351,6 +352,7 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 	}
 
 	function cleanup() {
+		stopObservingMotion()
 		const elements = getElements()
 
 		if (elements) {
@@ -372,6 +374,15 @@ export function useCursorFollowIndicator(options: CursorFollowIndicatorOptions) 
 		isVisible = false
 	}
 
+	const stopObservingMotion = observeReducedMotion((reduced) => {
+		if (!reduced) return
+		handlePointerLeave()
+		const elements = getElements()
+		if (elements) {
+			gsap.killTweensOf(elements.visualElement)
+			gsap.set(elements.visualElement, { autoAlpha: 0 })
+		}
+	})
 	init()
 
 	return {

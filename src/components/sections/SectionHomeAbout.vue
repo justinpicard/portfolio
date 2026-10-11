@@ -35,6 +35,7 @@ import { usePortfolioContent } from '../../composables/usePortfolioContent'
 import {
 	gsap,
 	prefersReducedMotion,
+	observeReducedMotion,
 	ScrollTrigger,
 	SplitText,
 	registerGsapPlugins
@@ -49,6 +50,7 @@ const aboutIntro = ref<HTMLParagraphElement | null>(null)
 let aboutSplits: SplitText[] = []
 let ctx: gsap.Context | undefined
 let isMounted = false
+let stopObservingMotion: (() => void) | undefined
 let revealRequestId = 0
 const ABOUT_NAVIGATION_TEXT_VIEWPORT_POSITION = 0.2
 // Keep dimmed text readable against the primary background, including the small label.
@@ -159,6 +161,10 @@ async function initAboutReveal() {
 
 onMounted(() => {
 	isMounted = true
+	stopObservingMotion = observeReducedMotion(() => {
+		cleanupAboutReveal()
+		void initAboutReveal()
+	})
 	initAboutReveal()
 })
 
@@ -172,6 +178,7 @@ watch(locale, async () => {
 }, { flush: 'pre' })
 
 onUnmounted(() => {
+	stopObservingMotion?.()
 	isMounted = false
 	cleanupAboutReveal()
 })

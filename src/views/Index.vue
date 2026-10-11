@@ -13,14 +13,16 @@
 	<div class="page-surface__background" aria-hidden="true" />
 	<div id="smooth-wrapper" ref="smoothWrapper">
 		<div id="smooth-content" ref="smoothContent">
-			<div class="page-surface">
+			<div id="main-content" class="page-surface main-content" tabindex="-1">
 				<SectionHomeHero
 					:loading-screen="loadingScreen"
 					@intro-start="showHeader"
+					@intro-complete="isIntroComplete = true"
 				/>
 				<SectionHomeAbout />
 				<SectionHomeWork
 					ref="workSection"
+					:navigation-ready="isIntroComplete"
 					@overlay-lifecycle-change="workOverlayLifecycle = $event"
 				/>
 				<HomeLifeStackExperiment />
@@ -50,6 +52,7 @@ const smoothWrapper = ref<HTMLElement | null>(null)
 const smoothContent = ref<HTMLElement | null>(null)
 const workSection = ref<InstanceType<typeof SectionHomeWork> | null>(null)
 const isHeaderVisible = ref(false)
+const isIntroComplete = ref(false)
 const workOverlayLifecycle = ref<WorkOverlayLifecycle>('closed')
 let destroyScrollSmoother: (() => void) | undefined
 

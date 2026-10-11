@@ -45,6 +45,7 @@
 							?? projects[projectIndex].thumbnailImage
 						}`"
 						:alt="projects[projectIndex].title"
+							sizes="(max-width: 47.999rem) min(84vw, calc(72svh * 0.72)), calc(clamp(20rem, 42vw, 22rem) * 1.2)"
 						:fallback-format="
 							projects[projectIndex].landscapeThumbnailImageFormat
 							?? projects[projectIndex].thumbnailImageFormat
@@ -126,6 +127,7 @@ import { isProjectPublished, type Project } from '../../content'
 import {
 	gsap,
 	prefersReducedMotion,
+	observeReducedMotion,
 	registerGsapPlugins
 } from '../../utils/animations/gsap'
 import {
@@ -163,6 +165,7 @@ const projectIndicator = ref<InstanceType<typeof CircularScrollIndicator> | null
 )
 const cardElements = new Map<number, HTMLButtonElement>()
 let animationContext: gsap.Context | undefined
+let stopObservingMotion: (() => void) | undefined
 let shuffleTimeline: gsap.core.Timeline | undefined
 let unavailableShakeTimeline: gsap.core.Timeline | undefined
 let unavailableShakeCard: HTMLButtonElement | null = null
@@ -463,9 +466,9 @@ function animateCardHover(
 	) return
 
 	gsap.to(event.currentTarget, {
-		'--project-stack-hover-scale': isHovered ? 1.1 : 1,
-		'--project-stack-hover-rotation': isHovered ? '0.8deg' : '0deg',
-		duration: isHovered ? 0.45 : 0.3,
+		'--project-stack-hover-scale': isHovered && !prefersReducedMotion() ? 1.1 : 1,
+		'--project-stack-hover-rotation': isHovered && !prefersReducedMotion() ? '0.8deg' : '0deg',
+		duration: prefersReducedMotion() ? 0 : isHovered ? 0.45 : 0.3,
 		ease: isHovered ? animationEases.backOut : animationEases.out,
 		overwrite: 'auto'
 	})
@@ -501,6 +504,19 @@ watch(() => props.disabled, (disabled) => {
 })
 
 onMounted(async () => {
+	stopObservingMotion = observeReducedMotion((reduced) => {
+		if (!reduced) return
+		clearUnavailableCardShake()
+		gsap.killTweensOf(Array.from(cardElements.values()))
+		gsap.set(Array.from(cardElements.values()), {
+			'--project-stack-hover-scale': 1,
+			'--project-stack-hover-rotation': '0deg'
+		})
+		if (isShuffling.value) {
+			shuffleTimeline?.kill()
+			void finishShuffle()
+		}
+	})
 	registerGsapPlugins()
 	resetOrder()
 	await setupCursorIndicator()
@@ -511,6 +527,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+	stopObservingMotion?.()
 	clearUnavailableCardShake()
 	shuffleTimeline?.kill()
 	shuffleTimeline = undefined

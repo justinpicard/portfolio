@@ -43,28 +43,28 @@
 							data-project-metadata 
 							class="d-flex gap-1 flex-column"
 						>
-								<span class="eyebrow opacity-50">{{ t('project.year') }}</span>
+								<span class="eyebrow project-hero__metadata-label">{{ t('project.year') }}</span>
 								<span class="text-md">{{ project.year }}</span>
 						</div>
 						<div 
 							data-project-metadata
 							class="d-flex gap-1 flex-column"
 						>
-							<span class="eyebrow opacity-50">{{ t('project.job') }}</span>
+							<span class="eyebrow project-hero__metadata-label">{{ t('project.job') }}</span>
 							<span class="text-md">{{ project.job }}</span>
 						</div>
 						<div 
 							data-project-metadata
 							class="d-flex gap-1 flex-column"
 						>
-							<span class="eyebrow opacity-50">{{ t('project.role') }}</span>
+							<span class="eyebrow project-hero__metadata-label">{{ t('project.role') }}</span>
 							<span class="text-md">{{ project.role }}</span>
 						</div>
 						<div 
 							class="d-flex gap-1 flex-column"
 							data-project-metadata
 						>
-							<span class="eyebrow opacity-50">{{ t('project.type') }}</span>
+							<span class="eyebrow project-hero__metadata-label">{{ t('project.type') }}</span>
 							<span class="text-md d-flex">{{ project.type }}</span>
 						</div>
 						<div
@@ -72,7 +72,7 @@
 							class="d-flex gap-1 flex-column"
 							data-project-metadata
 						>
-							<span class="eyebrow opacity-50">{{ t('project.live') }}</span>
+							<span class="eyebrow project-hero__metadata-label">{{ t('project.live') }}</span>
 							<a
 								:key="project.live"
 								ref="liveLink"

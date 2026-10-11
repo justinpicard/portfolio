@@ -1,4 +1,5 @@
 <template>
+	<a class="skip-link" href="#main-content" @click="skipToContent">{{ t('accessibility.skipToContent') }}</a>
 	<main
 		class="main"
 		:class="{
@@ -63,6 +64,14 @@ const isAtPageBottom = ref(false)
 const { locale, t } = useI18n()
 const router = useRouter()
 const { hasRuntimeError } = useRuntimeError()
+
+function skipToContent(event) {
+	const destination = document.getElementById('main-content')
+	if (!destination) return
+	event.preventDefault()
+	destination.focus({ preventScroll: true })
+	destination.scrollIntoView({ block: 'start' })
+}
 let maximumScrollY = 0
 let documentResizeObserver
 

@@ -9,6 +9,7 @@
 	/>
 
 	<video
+		ref="video"
 		v-if="shouldRenderVideo && project.heroVideo"
 		class="project-layer-prototype__hero-video"
 		:class="{ 'is-playing': isPlaying }"
@@ -27,6 +28,7 @@
 		<source :src="`/images/${project.heroVideo.webm}`" type="video/webm">
 		<source :src="`/images/${project.heroVideo.mp4}`" type="video/mp4">
 	</video>
+	<MotionControl v-if="shouldRenderVideo" :paused="isVideoPaused" @toggle="toggleVideo" />
 
 	<div v-if="project.heroLogo" class="project-layer-prototype__hero-logo" aria-hidden="true">
 		<img :src="`/images/${project.heroLogo}`" alt="" width="1000" height="140">
@@ -37,6 +39,7 @@
 import { computed, onMounted, onUnmounted, ref, watch, type CSSProperties } from 'vue'
 import type { Project } from '../../content'
 import BaseImage from '../base/BaseImage.vue'
+import MotionControl from '../ui/MotionControl.vue'
 
 const props = withDefaults(defineProps<{
 	project: Project
@@ -48,6 +51,8 @@ const props = withDefaults(defineProps<{
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
 const shouldRenderVideo = ref(false)
 const isPlaying = ref(false)
+const video = ref<HTMLVideoElement | null>(null)
+const isVideoPaused = ref(false)
 let reducedMotionQuery: MediaQueryList | undefined
 
 const imageSource = computed(() => (
@@ -62,6 +67,16 @@ const videoStyles = computed<CSSProperties>(() => ({
 	'--project-hero-media-position': mediaPosition.value
 } as CSSProperties))
 
+function toggleVideo() {
+	if (!video.value) return
+	if (isVideoPaused.value) {
+		void video.value.play().then(() => { isVideoPaused.value = false }).catch(() => {})
+	} else {
+		video.value.pause()
+		isVideoPaused.value = true
+	}
+}
+
 function updateMotionPreference() {
 	shouldRenderVideo.value = Boolean(
 		props.videoEnabled
@@ -71,6 +86,7 @@ function updateMotionPreference() {
 
 	if (!shouldRenderVideo.value) {
 		isPlaying.value = false
+		isVideoPaused.value = false
 	}
 }
 

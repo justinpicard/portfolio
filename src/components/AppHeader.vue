@@ -18,7 +18,7 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue'
-import { gsap } from '../utils/animations/gsap'
+import { gsap, prefersReducedMotion } from '../utils/animations/gsap'
 import SiteNav from './SiteNav.vue'
 
 const props = withDefaults(defineProps<{
@@ -58,7 +58,7 @@ function animateHeader(isVisible: boolean) {
 	gsap.to(header.value, {
 		autoAlpha: isVisible ? 1 : 0,
 		y: isVisible ? 0 : -16,
-		duration: isVisible ? 0.45 : 0.3,
+		duration: prefersReducedMotion() ? 0 : isVisible ? 0.45 : 0.3,
 		ease: 'power2.out',
 		overwrite: true
 	})

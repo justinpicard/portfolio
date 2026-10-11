@@ -11,8 +11,8 @@
 		<img
 			:src="fallbackSource"
 			:alt="alt"
-			:width="width ?? optimizedImage?.width"
-			:height="height ?? optimizedImage?.height"
+			:width="width ?? imageDimensions?.width"
+			:height="height ?? imageDimensions?.height"
 			:loading="loading"
 			:decoding="decoding"
 		>
@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { CSSProperties } from 'vue'
-import { getOptimizedImage } from '../../utils/images/optimizedImages'
+import { getImageDimensions, getOptimizedImage } from '../../utils/images/optimizedImages'
 
 const props = withDefaults(defineProps<{
 	src: string
@@ -48,6 +48,7 @@ const props = withDefaults(defineProps<{
 })
 
 const fallbackSource = computed(() => `${props.src}.${props.fallbackFormat}`)
+const imageDimensions = computed(() => getImageDimensions(fallbackSource.value))
 const optimizedImage = computed(() => getOptimizedImage(fallbackSource.value))
 const webpSrcset = computed(() => {
 	const image = optimizedImage.value

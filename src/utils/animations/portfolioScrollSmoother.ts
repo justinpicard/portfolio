@@ -2,6 +2,7 @@
 import { isScrollDiagnosticGroupEnabled } from '../../config/mobileScrollDiagnostics'
 import {
 	prefersReducedMotion,
+	observeReducedMotion,
 	registerGsapPlugins,
 	ScrollSmoother,
 	ScrollTrigger
@@ -12,6 +13,7 @@ const PORTFOLIO_POINTER_QUERY = '(hover: hover) and (pointer: fine)'
 
 let smoother: ScrollSmoother | undefined
 let smoothingLockCount = 0
+let refreshSmoothing: (() => void) | undefined
 
 type PortfolioScrollSmootherOptions = {
 	wrapper: HTMLElement
@@ -24,33 +26,42 @@ export function initPortfolioScrollSmoother(
 	if (typeof window === 'undefined') return () => {}
 
 	registerGsapPlugins()
-	const shouldSmooth = isScrollDiagnosticGroupEnabled('sectionNavigation')
-		&& window.matchMedia(PORTFOLIO_POINTER_QUERY).matches
-		&& !prefersReducedMotion()
-
-	// Native scrolling is both cheaper and more stable on touch devices. Creating
-	// a zero-duration smoother still installs its scroll proxy and can force
-	// ScrollTrigger pins onto a transformed scrolling layer.
-	if (!shouldSmooth) {
+	const pointerQuery = window.matchMedia(PORTFOLIO_POINTER_QUERY)
+	function updateSmoothing() {
+		if (smoothingLockCount > 0) return
+		const shouldSmooth = isScrollDiagnosticGroupEnabled('sectionNavigation')
+			&& pointerQuery.matches && !prefersReducedMotion()
+		if (Boolean(smoother) === shouldSmooth) return
+		const scrollY = getPortfolioScrollY()
+		smoother?.kill()
 		smoother = undefined
+		// Native scrolling is cheaper and more stable on coarse pointers and under reduced motion.
+		if (shouldSmooth) {
+			smoother = ScrollSmoother.create({
+				wrapper: options.wrapper,
+				content: options.content,
+				smooth: PORTFOLIO_SCROLL_SMOOTHING,
+				smoothTouch: 0,
+				effects: false,
+				onFocusIn: (_self, event) => {
+					const target = event.target
+					// These focus destinations already have an explicit scroll owner.
+					if (smoothingLockCount > 0 || (target instanceof HTMLElement
+						&& (target.id === 'work' || target.id === 'main-content'))) return false
+				}
+			})
+		}
+		setPortfolioScrollY(scrollY)
 		ScrollTrigger.refresh()
-		return () => {}
 	}
-
-	smoother = ScrollSmoother.create({
-		wrapper: options.wrapper,
-		content: options.content,
-		smooth: PORTFOLIO_SCROLL_SMOOTHING,
-		smoothTouch: 0,
-		effects: false,
-		// Pausing blocks native input, but focus in a teleported case can still
-		// make ScrollSmoother scroll the homepage to that element's coordinates.
-		onFocusIn: () => smoothingLockCount > 0 ? false : undefined
-	})
-	if (smoothingLockCount > 0) smoother.paused(true)
-	ScrollTrigger.refresh()
-
+	refreshSmoothing = updateSmoothing
+	updateSmoothing()
+	const stopObservingMotion = observeReducedMotion(updateSmoothing)
+	pointerQuery.addEventListener('change', updateSmoothing)
 	return () => {
+		stopObservingMotion()
+		pointerQuery.removeEventListener('change', updateSmoothing)
+		refreshSmoothing = undefined
 		smoother?.kill()
 		smoother = undefined
 		ScrollTrigger.refresh()
@@ -88,6 +99,9 @@ export function lockPortfolioScrollSmoothing() {
 
 		isLocked = false
 		smoothingLockCount = Math.max(0, smoothingLockCount - 1)
-		if (smoothingLockCount === 0) smoother?.paused(false)
+		if (smoothingLockCount === 0) {
+			smoother?.paused(false)
+			refreshSmoothing?.()
+		}
 	}
 }
