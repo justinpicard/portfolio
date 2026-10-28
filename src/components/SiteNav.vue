@@ -86,8 +86,6 @@
 </template>
 
 <script setup lang="ts">
-// TEMPORARY mobile scroll isolation; see src/config/mobileScrollDiagnostics.ts.
-import { isScrollDiagnosticGroupEnabled } from '../config/mobileScrollDiagnostics'
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
@@ -204,7 +202,7 @@ function setupHeaderCopyReveal() {
 
 	revealContext = gsap.context(() => {
 		const roles = gsap.utils.toArray<HTMLElement>('.role', root.value)
-		if (props.copyVisible || !isScrollDiagnosticGroupEnabled('sectionNavigation')) {
+		if (props.copyVisible) {
 			gsap.set([name.value, ...roles], {
 				autoAlpha: 1,
 				yPercent: 0,

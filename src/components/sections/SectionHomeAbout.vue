@@ -27,8 +27,6 @@
 </template>
 
 <script setup lang="ts">
-// TEMPORARY mobile scroll isolation; see src/config/mobileScrollDiagnostics.ts.
-import { isScrollDiagnosticGroupEnabled } from '../../config/mobileScrollDiagnostics'
 import { nextTick, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePortfolioContent } from '../../composables/usePortfolioContent'
@@ -85,7 +83,6 @@ function waitForFrame() {
 }
 
 async function initAboutReveal() {
-	if (!isScrollDiagnosticGroupEnabled('about')) return
 
 	const requestId = ++revealRequestId
 	const reduceMotion = prefersReducedMotion()

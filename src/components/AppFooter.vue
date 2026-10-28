@@ -110,8 +110,6 @@
 </template>
 
 <script setup lang="ts">
-// TEMPORARY mobile scroll isolation; see src/config/mobileScrollDiagnostics.ts.
-import { isScrollDiagnosticGroupEnabled } from '../config/mobileScrollDiagnostics'
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePortfolioContent } from '../composables/usePortfolioContent'
@@ -171,20 +169,18 @@ async function setupFooterAnimations() {
 
 		if (!track) return
 
-		if (isScrollDiagnosticGroupEnabled('footer')) {
-			gsap.fromTo(footerDivider.value, {
-				width: '0%'
-			}, {
-				width: '100%',
-				duration: 0.9,
-				ease: animationEases.strongInOut,
-				scrollTrigger: {
-					trigger: footerRoot.value,
-					start: FOOTER_DIVIDER_REVEAL_START,
-					toggleActions: 'play none none none'
-				}
-			})
-		}
+		gsap.fromTo(footerDivider.value, {
+			width: '0%'
+		}, {
+			width: '100%',
+			duration: 0.9,
+			ease: animationEases.strongInOut,
+			scrollTrigger: {
+				trigger: footerRoot.value,
+				start: FOOTER_DIVIDER_REVEAL_START,
+				toggleActions: 'play none none none'
+			}
+		})
 
 		const loop = gsap.to(track, {
 			xPercent: -50,
@@ -192,7 +188,6 @@ async function setupFooterAnimations() {
 			ease: animationEases.none,
 			repeat: -1
 		})
-		if (!isScrollDiagnosticGroupEnabled('footer')) return
 		let marqueeDirection = 1
 
 		ScrollTrigger.create({

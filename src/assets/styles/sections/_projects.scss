@@ -138,6 +138,26 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 		}
 	}
 
+	&--native-sticky {
+		height: calc(var(--work-stage-height) + var(--work-scroll-distance, 0px));
+
+		// Reserve the largest stage so toolbar movement cannot shorten the sticky track.
+		@supports (height: 100lvh) {
+			height: calc(100lvh + var(--work-scroll-distance, 0px));
+		}
+
+		.work-section__stage {
+			position: sticky;
+			top: 0;
+			height: var(--viewport-height-dynamic);
+		}
+
+		.work-section__card-layer {
+			// Animate CSS variables so GSAP cannot flatten the viewport offset into pixels.
+			transform: translateY(calc(var(--work-card-y, var(--work-stage-height)) + var(--work-card-entry, 1) * (var(--viewport-height-dynamic) - var(--work-stage-height))));
+		}
+	}
+
 	@include respond(lg, down) {
 		&__title {
 			font-size: 38cqw;

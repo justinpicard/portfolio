@@ -34,9 +34,9 @@
 						:project="projects[projectIndex - 1]"
 						:active="activeProjectIndex === projectIndex - 1"
 						:interactive="overlayLifecycle === 'closed'
-							&& (diagnosticStaticCards || reducedMotionMode || interactiveProjectIndex === projectIndex - 1)"
+							&& (reducedMotionMode || interactiveProjectIndex === projectIndex - 1)"
 						:transition-hidden="hiddenProjectIndex === projectIndex - 1"
-						:obscured="!reducedMotionMode && !diagnosticStaticCards && interactiveProjectIndex !== projectIndex - 1"
+						:obscured="!reducedMotionMode && interactiveProjectIndex !== projectIndex - 1"
 						@open="openProject"
 						@inactive-focus="focusWorkSection"
 					/>
@@ -64,8 +64,6 @@
 </template>
 
 <script setup lang="ts">
-// TEMPORARY mobile scroll isolation; see src/config/mobileScrollDiagnostics.ts.
-import { isScrollDiagnosticGroupEnabled } from '../../config/mobileScrollDiagnostics'
 import { nextTick, onMounted, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { resolveCaseProjectIndex, withCaseQuery } from '../../utils/navigation/caseQuery'
@@ -109,7 +107,6 @@ const openSourceCard = shallowRef<HTMLElement | null>(null)
 const overlayLifecycle = ref<WorkOverlayLifecycle>('closed')
 const reducedMotionMode = ref(false)
 // TEMPORARY: set after mount to preserve identical server/client initial markup.
-const diagnosticStaticCards = ref(false)
 
 let stopObservingMotion: (() => void) | undefined
 let cleanupReducedMotionExhibition: (() => void) | undefined
@@ -137,6 +134,7 @@ let backgroundElement: HTMLElement | null = null
 let previousBackgroundInert = false
 let unlockHomepageScrollSmoothing: (() => void) | undefined
 const TITLE_REVEAL_SCROLL_DISTANCE = 1.6
+const NATIVE_STICKY_QUERY = '(max-width: 63.999rem) and (hover: none) and (pointer: coarse)'
 const COMPACT_LAYOUT_QUERY = '(max-width: 63.999rem)'
 const MOBILE_LAYOUT_QUERY = '(max-width: 47.999rem)'
 
@@ -177,7 +175,7 @@ function debugProjectClose(message: string, detail?: unknown) {
 function openProject(payload: { projectIndex: number; sourceElement: HTMLElement }, updateUrl = true) {
 	if (
 		overlayLifecycle.value !== 'closed'
-		|| (!diagnosticStaticCards.value && !reducedMotionMode.value && interactiveProjectIndex.value !== payload.projectIndex)
+		|| (!reducedMotionMode.value && interactiveProjectIndex.value !== payload.projectIndex)
 		|| !isProjectPublished(projects.value[payload.projectIndex])
 	) return
 
@@ -240,6 +238,7 @@ function unlockHomepageScroll() {
 
 function suspendExhibitionTracking() {
 	// Keep the pin enabled: global font/layout refreshes must retain its spacing.
+	exhibitionTrigger?.getTween()?.pause()
 	exhibitionTimeline?.pause()
 }
 
@@ -251,6 +250,7 @@ function synchronizeExhibitionScroll(scrollY: number) {
 	frozenStackProgress = progress
 	setPortfolioScrollY(scrollY)
 	ScrollTrigger.update()
+	exhibitionTrigger?.getTween()?.progress(1)
 	if (progress !== undefined) exhibitionTimeline?.progress(progress)
 }
 
@@ -663,7 +663,7 @@ function getWorkViewportHeight() {
 }
 
 function setupTitleReveal() {
-	if (!isScrollDiagnosticGroupEnabled('workTitle') || !titleRef.value || prefersReducedMotion()) return
+	if (!titleRef.value || prefersReducedMotion()) return
 
 	if (window.matchMedia(COMPACT_LAYOUT_QUERY).matches) {
 		splitTitle = new SplitText(titleRef.value, {
@@ -802,9 +802,6 @@ function setupExhibition() {
 	if (!cards.length) return
 	projectCards = cards
 	const animated = !prefersReducedMotion()
-		&& isScrollDiagnosticGroupEnabled('projectCards')
-		&& isScrollDiagnosticGroupEnabled('workPin')
-	diagnosticStaticCards.value = !animated && !prefersReducedMotion()
 	root.value.classList.toggle('work-section--stack', animated)
 
 	if (!animated) {
@@ -816,10 +813,11 @@ function setupExhibition() {
 			window.removeEventListener('scroll', updateReducedMotionActivation)
 			window.removeEventListener('resize', refreshReducedMotionMeasurements)
 			reducedMotionActivationEnabled = false
-			diagnosticStaticCards.value = false
 		}
 	}
 
+	const useNativeSticky = window.matchMedia(NATIVE_STICKY_QUERY).matches
+	root.value.classList.toggle('work-section--native-sticky', useNativeSticky)
 	const tiltAngles = [1.5, -3.5, 2, -2.5, 1]
 	const timeline = gsap.timeline({
 		paused: true,
@@ -829,7 +827,11 @@ function setupExhibition() {
 	exhibitionTimeline = timeline
 	let totalDistance = 0
 	let sizeSignature = ''
-	const measure = () => [stage.value!.clientWidth, stage.value!.clientHeight,
+	// The visible stage follows browser chrome; timeline geometry stays on svh.
+	const getScrollStageHeight = () => useNativeSticky
+		? titleWrapper.value!.clientHeight
+		: stage.value!.clientHeight
+	const measure = () => [stage.value!.clientWidth, getScrollStageHeight(),
 		...layers.map(layer => layer.offsetHeight)].join(':')
 	const buildTimeline = () => {
 		const nextSignature = measure()
@@ -839,7 +841,7 @@ function setupExhibition() {
 			return
 		}
 		sizeSignature = nextSignature
-		viewportHeight = stage.value!.clientHeight
+		viewportHeight = getScrollStageHeight()
 		const introDistance = viewportHeight * 0.3
 		const outroDistance = viewportHeight * 0.35
 		let nextTop = viewportHeight
@@ -850,8 +852,16 @@ function setupExhibition() {
 		})
 		const lastArrival = introDistance + positions[positions.length - 1]!
 		totalDistance = lastArrival + outroDistance
+		// Replace pin spacing with an equal native scroll track on touch layouts.
+		if (useNativeSticky) root.value!.style.setProperty('--work-scroll-distance', `${totalDistance}px`)
 		timeline.clear()
-		gsap.set(layers, { y: (index: number) => positions[index], zIndex: (index: number) => index + 1 })
+		gsap.set(layers, {
+			zIndex: (index: number) => index + 1,
+			...(useNativeSticky ? {
+				'--work-card-y': (index: number) => `${positions[index]}px`,
+				'--work-card-entry': 1
+			} : { y: (index: number) => positions[index] })
+		})
 		gsap.set(cards, { scale: 1, rotation: 0, rotationX: 0, transformOrigin: '50% 10%' })
 		if (window.matchMedia(MOBILE_LAYOUT_QUERY).matches && splitTitle?.lines.length) {
 			// Keep the existing phone title reveal in scroll units without changing card timing.
@@ -865,8 +875,11 @@ function setupExhibition() {
 		layers.forEach((layer, index) => {
 			const distance = positions[index]!
 			const arrival = introDistance + distance
-			timeline.fromTo(layer, { y: distance }, {
-				y: 0, duration: distance, immediateRender: false
+			timeline.fromTo(layer, useNativeSticky
+				? { '--work-card-y': `${distance}px`, '--work-card-entry': 1 }
+				: { y: distance }, {
+				duration: distance, immediateRender: false,
+				...(useNativeSticky ? { '--work-card-y': '0px', '--work-card-entry': 0 } : { y: 0 })
 			}, introDistance)
 			timeline.addLabel(`project-${index}`, arrival)
 			if (index === cards.length - 1) return
@@ -883,9 +896,8 @@ function setupExhibition() {
 		trigger: root.value,
 		start: 'top top',
 		end: () => `+=${totalDistance}`,
-		pin: root.value,
-		pinSpacing: true,
-		scrub: true,
+		...(useNativeSticky ? {} : { pin: root.value, pinSpacing: true }),
+		scrub: useNativeSticky ? 0.8 : true,
 		anticipatePin: 1,
 		animation: timeline,
 		onRefreshInit: buildTimeline,
@@ -897,9 +909,8 @@ function setupExhibition() {
 		onUpdate: () => {
 			if (isProjectLayerMounted.value && !isRestoringProjectClose && frozenStackProgress !== undefined) {
 				timeline.progress(frozenStackProgress)
-				return
 			}
-			updateVisualProjectActivation(cards)
+			// Timeline updates already synchronize the foreground card.
 		}
 	})
 	exhibitionTrigger = trigger
@@ -910,7 +921,7 @@ function setupExhibition() {
 			trigger: root.value,
 			start: () => trigger.start,
 			end: () => trigger.end,
-			scrub: true,
+			scrub: useNativeSticky ? 0.8 : true,
 			invalidateOnRefresh: true
 		}
 	}) : undefined
@@ -934,7 +945,8 @@ function setupExhibition() {
 		titleScaleTween?.kill()
 		trigger.kill()
 		timeline.kill()
-		root.value?.classList.remove('work-section--stack')
+		root.value?.classList.remove('work-section--stack', 'work-section--native-sticky')
+		root.value?.style.removeProperty('--work-scroll-distance')
 	}
 }
 
@@ -1022,6 +1034,8 @@ function focusKeyboardProject(projectIndex: number) {
 	if (scrollY === undefined) return
 	setPortfolioScrollY(scrollY)
 	ScrollTrigger.update()
+	// Explicit focus destinations must settle immediately despite touch scrubbing.
+	exhibitionTrigger?.getTween()?.progress(1)
 	activeProjectIndex.value = projectIndex
 	interactiveProjectIndex.value = projectIndex
 }
@@ -1043,7 +1057,7 @@ onMounted(() => {
 	registerGsapPlugins()
 	setupWorkAnimations()
 	stopObservingMotion = observeReducedMotion(refreshWorkMotion)
-	const layoutQueries = [COMPACT_LAYOUT_QUERY, MOBILE_LAYOUT_QUERY].map(query => window.matchMedia(query))
+	const layoutQueries = [COMPACT_LAYOUT_QUERY, MOBILE_LAYOUT_QUERY, NATIVE_STICKY_QUERY].map(query => window.matchMedia(query))
 	const refreshLayout = () => {
 		stackNeedsRefresh = true
 		refreshWorkMotion()

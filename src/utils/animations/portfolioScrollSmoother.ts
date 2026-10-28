@@ -1,5 +1,3 @@
-// TEMPORARY mobile scroll isolation; see src/config/mobileScrollDiagnostics.ts.
-import { isScrollDiagnosticGroupEnabled } from '../../config/mobileScrollDiagnostics'
 import {
 	prefersReducedMotion,
 	observeReducedMotion,
@@ -29,8 +27,7 @@ export function initPortfolioScrollSmoother(
 	const pointerQuery = window.matchMedia(PORTFOLIO_POINTER_QUERY)
 	function updateSmoothing() {
 		if (smoothingLockCount > 0) return
-		const shouldSmooth = isScrollDiagnosticGroupEnabled('sectionNavigation')
-			&& pointerQuery.matches && !prefersReducedMotion()
+		const shouldSmooth = pointerQuery.matches && !prefersReducedMotion()
 		if (Boolean(smoother) === shouldSmooth) return
 		const scrollY = getPortfolioScrollY()
 		smoother?.kill()

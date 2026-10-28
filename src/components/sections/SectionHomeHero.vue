@@ -31,8 +31,6 @@
 </template>
 
 <script setup lang="ts">
-// TEMPORARY mobile scroll isolation; see src/config/mobileScrollDiagnostics.ts.
-import { isScrollDiagnosticGroupEnabled } from '../../config/mobileScrollDiagnostics'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePortfolioContent } from '../../composables/usePortfolioContent'
@@ -124,13 +122,15 @@ function scheduleSplitRefresh() {
 
 function createResponsiveLineSplit(element: HTMLElement) {
 	return new SplitText(element, {
-		type: 'lines',
+		type: 'lines,words,chars',
 		linesClass: 'split-line',
+		charsClass: 'split-display-char',
 		tag: 'span',
 		autoSplit: true,
 		onSplit(split) {
-			wrapSplitElements(split.lines, 'split-line-wrapper')
-			gsap.set(split.lines, {
+			// Preserve the reveal's character structure so font kerning cannot shift on completion.
+			wrapSplitElements(split.chars, 'split-display-char-wrapper')
+			gsap.set(split.chars, {
 				y: 0,
 				yPercent: 0,
 				opacity: 1,
@@ -257,7 +257,7 @@ function updateScrollIndicatorRotation(scrollVelocity: number) {
 function setupScrollIndicatorVelocity(
 	scrollIndicatorVisualElement: HTMLElement
 ) {
-	if (!isScrollDiagnosticGroupEnabled('hero') || prefersReducedMotion() || !root.value) return
+	if (prefersReducedMotion() || !root.value) return
 
 	const graphic = scrollIndicatorVisualElement.querySelector<SVGElement>(
 		'.circular-scroll-indicator__graphic'
@@ -341,14 +341,12 @@ onMounted(async () => {
 	const finalText = root.value?.querySelector<HTMLElement>('.hero-copy-layer--final .hero-figure__intro')
 	if (!finalTitle || !finalDivider || !finalRole || !finalText || !finalAvailability) return
 
-	if (isScrollDiagnosticGroupEnabled('hero')) {
-		scrollIndicatorFollow = useCursorFollowIndicator({
-			triggerElement: root,
-			wrapperElement: scrollIndicatorWrapper,
-			visualElement: scrollIndicatorElement,
-			suppressSelector: '.site-header a, .site-header button, .site-header [role="button"], .site-header .role, .hero-figure__availability[href]'
-		})
-	}
+	scrollIndicatorFollow = useCursorFollowIndicator({
+		triggerElement: root,
+		wrapperElement: scrollIndicatorWrapper,
+		visualElement: scrollIndicatorElement,
+		suppressSelector: '.site-header a, .site-header button, .site-header [role="button"], .site-header .role, .hero-figure__availability[href]'
+	})
 	setupScrollIndicatorVelocity(scrollIndicatorVisualElement)
 
 	unlockScroll = lockPageScroll()
@@ -466,13 +464,14 @@ onMounted(async () => {
 					duration: 0.9,
 					ease: 'power3.inOut'
 				}, 0)
+			.addLabel('copyIn', 0.55)
 			.to(roleSplit.chars, {
 				yPercent: 0,
 				opacity: 1,
 				duration: animationDurations.reveal,
 				stagger: animationStaggers.chars,
 				ease: animationEases.backOut
-			}, 0.55)
+			}, 'copyIn')
 			.addLabel('availabilityIn', '<+=0.15')
 			.set(finalAvailability, { autoAlpha: 1 }, 'availabilityIn')
 			.to(availabilityChars, {
@@ -481,7 +480,6 @@ onMounted(async () => {
 				stagger: animationStaggers.chars,
 				ease: animationEases.backOut
 			}, 'availabilityIn')
-			.addLabel('introIn', '<+=0.15')
 			.to(availabilityDot, {
 				opacity: 1,
 				duration: animationDurations.fast
@@ -492,7 +490,7 @@ onMounted(async () => {
 				duration: animationDurations.reveal,
 				stagger: animationStaggers.chars,
 				ease: animationEases.backOut
-			}, 'introIn')
+			}, 'copyIn')
 			.to(loadingScreenElement, {
 				clipPath: 'inset(0 0 100% 0)',
 				duration: 1.1,

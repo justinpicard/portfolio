@@ -70,8 +70,6 @@
 </template>
 
 <script setup lang="ts">
-// TEMPORARY mobile scroll isolation; pointer-follow also installs a scroll listener.
-import { isScrollDiagnosticGroupEnabled } from '../../config/mobileScrollDiagnostics'
 import {
 	computed,
 	onMounted,
@@ -190,7 +188,6 @@ onMounted(() => {
 	stopObservingMotion = observeReducedMotion(() => {
 		clearUnavailableCardShake()
 	})
-	if (!isScrollDiagnosticGroupEnabled('projectCards')) return
 	if (!projectIndicatorWrapper.value || !projectIndicatorVisual.value) return
 
 	cursorFollowIndicator = useCursorFollowIndicator({

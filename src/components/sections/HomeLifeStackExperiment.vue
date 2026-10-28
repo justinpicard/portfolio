@@ -46,8 +46,6 @@
 </template>
 
 <script setup lang="ts">
-// TEMPORARY mobile scroll isolation; see src/config/mobileScrollDiagnostics.ts.
-import { isScrollDiagnosticGroupEnabled } from '../../config/mobileScrollDiagnostics'
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { gsap, ScrollTrigger, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
@@ -235,15 +233,12 @@ function cleanupAnimations() {
 }
 
 async function initAnimations() {
-	// TEMPORARY: natural photo flow when the scrubbed stack is absent.
-	root.value?.classList.toggle('home-life-section--diagnostic-static', !isScrollDiagnosticGroupEnabled('lifePhotos'))
 	const requestId = ++animationRequestId
 
 	registerGsapPlugins()
 
 	if (
 		introRef.value
-		&& isScrollDiagnosticGroupEnabled('lifeTitle')
 		&& window.matchMedia('(prefers-reduced-motion: no-preference)').matches
 	) {
 		// Prevent the copy from appearing before its masked start state is ready.
@@ -268,7 +263,7 @@ async function initAnimations() {
 		mediaContext.add(
 			'(prefers-reduced-motion: no-preference)',
 			() => {
-				if (!isScrollDiagnosticGroupEnabled('lifeTitle') || !introRef.value || !titleRef.value || !textRef.value) return
+				if (!introRef.value || !titleRef.value || !textRef.value) return
 
 				introSplit = new SplitText([titleRef.value, textRef.value], {
 					type: 'lines',
@@ -315,7 +310,7 @@ async function initAnimations() {
 				mobile: MOBILE_LAYOUT_QUERY
 			},
 			(mediaQueryContext) => {
-				if (!isScrollDiagnosticGroupEnabled('lifePhotos') || !mediaQueryContext.conditions?.motion) return
+				if (!mediaQueryContext.conditions?.motion) return
 
 				const cards = cardRefs.value
 				const shouldPinWithScrollTrigger = Boolean(

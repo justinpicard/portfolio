@@ -50,8 +50,8 @@ function createHeroHarness() {
 		onUnmounted: callback => { unmount = callback },
 		observeReducedMotion: callback => { motion = callback; return () => { removed = true } },
 		prefersReducedMotion: () => reduced, nextTick: async () => {},
-		registerGsapPlugins: noop, supportsCursorFollow: () => false,
-		isScrollDiagnosticGroupEnabled: () => false, setupScrollIndicatorVelocity: noop,
+		useCursorFollowIndicator: noop, registerGsapPlugins: noop, supportsCursorFollow: () => false,
+		setupScrollIndicatorVelocity: noop,
 		cleanupScrollIndicatorVelocity: noop, enableResponsiveLineSplits: noop,
 		lockPageScroll: () => { locks++; return () => { releases++ } },
 		cancelAnimationFrame: noop, HERO_INTRO_LOADING_OVERLAP: 0.14, FINAL_PHOTO_ROTATION: 0
@@ -304,12 +304,15 @@ const workStackCode = await componentCode('src/components/sections/SectionHomeWo
 	'updateReducedMotionActivation', 'refreshReducedMotionMeasurements'
 ])
 
-function createWorkStackHarness(height = 600, cardShare = 0.74, reduced = false, titleLines = []) {
-	const viewport = { width: 1200, height }
-	const stage = { get clientHeight() { return viewport.height }, get clientWidth() { return viewport.width },
+function createWorkStackHarness(height = 600, cardShare = 0.74, reduced = false, titleLines = [], touch = false) {
+	const viewport = { width: 1200, height, visibleHeight: undefined }
+	const trackStyles = new Map()
+	const stage = { get clientHeight() { return viewport.visibleHeight ?? viewport.height }, get clientWidth() { return viewport.width },
 		getBoundingClientRect: () => ({ top: 0, bottom: viewport.height, left: 0, right: viewport.width }) }
 	const layers = Array.from({ length: 5 }, () => ({
-		y: 0, zIndex: 0, get offsetHeight() { return viewport.height * cardShare }
+		'--work-card-entry': 1, _y: 0,
+		get y() { return this['--work-card-y'] === undefined ? this._y : Number.parseFloat(this['--work-card-y']) },
+		set y(value) { this._y = value }, zIndex: 0, get offsetHeight() { return viewport.height * cardShare }
 	}))
 	const cards = layers.map(layer => ({
 		scale: 1, rotation: 0, rotationX: 0, transformOrigin: '',
@@ -324,19 +327,20 @@ function createWorkStackHarness(height = 600, cardShare = 0.74, reduced = false,
 			fromTo(target, from, to) { titleExit = { target, from, to }; return { scrollTrigger: { kill() {} }, kill() { titleExitKilled = true } } }
 		},
 		titleRef: { value: {} },
+		titleWrapper: { value: { get clientHeight() { return viewport.height } } },
 		stage: { value: stage }, exhibition: { value: {} },
-		root: { value: { classList: { toggle() {}, remove() {} } } },
-		prefersReducedMotion: () => reduced, isScrollDiagnosticGroupEnabled: () => true,
+		root: { value: { classList: { toggle() {}, remove() {} }, style: { setProperty: (name, value) => trackStyles.set(name, value), removeProperty: name => trackStyles.delete(name) } } },
+		prefersReducedMotion: () => reduced,
 		getPortfolioScrollY: () => 0, readCssNumber: (_property, fallback) => fallback,
-		splitTitle: { lines: titleLines }, MOBILE_LAYOUT_QUERY: '(max-width: 47.999rem)',
+		NATIVE_STICKY_QUERY: 'native-sticky', splitTitle: { lines: titleLines }, MOBILE_LAYOUT_QUERY: '(max-width: 47.999rem)',
 		animationDurations: { reveal: 0.8 }, animationStaggers: { lines: 0.1 }, animationEases: { strongOut: 'power3.out' },
-		diagnosticStaticCards: { value: false }, activeProjectIndex, interactiveProjectIndex, isProjectLayerMounted,
-		window: { matchMedia: () => ({ matches: titleLines.length > 0 }), addEventListener() {}, removeEventListener() {}, get innerHeight() { return viewport.height }, get innerWidth() { return viewport.width } },
+		activeProjectIndex, interactiveProjectIndex, isProjectLayerMounted,
+		window: { matchMedia: query => ({ matches: query === 'native-sticky' ? touch : titleLines.length > 0 }), addEventListener() {}, removeEventListener() {}, get innerHeight() { return viewport.height }, get innerWidth() { return viewport.width } },
 		ResizeObserver: class { constructor(callback) { observerCallback = callback } observe() {} disconnect() { disconnected = true } },
 		cancelAnimationFrame() {}, requestAnimationFrame: callback => { callback(); return 1 },
 		setPortfolioScrollY: value => events.push(value),
 		ScrollTrigger: {
-			create(options) { config = options; return { start: 100, get end() { return 100 + Number(options.end().slice(2)) }, kill() { killed = true } } },
+			create(options) { config = options; return { start: 100, get end() { return 100 + Number(options.end().slice(2)) }, getTween: () => touch ? ({ pause: () => events.push('scrub-pause'), progress: () => events.push('scrub-settle') }) : undefined, kill() { killed = true } } },
 			refresh() { config.onRefreshInit() }, update() { events.push('update') }
 		}
 	}
@@ -353,7 +357,7 @@ function createWorkStackHarness(height = 600, cardShare = 0.74, reduced = false,
 			freeze: () => { frozenStackProgress = exhibitionTimeline.progress() },
 			seek: time => exhibitionTimeline.time(time, false) };
 	`)(...Object.values(dependencies))
-	return { ...api, cards, layers, viewport, config, events, activeProjectIndex, interactiveProjectIndex,
+	return { ...api, cards, layers, viewport, config, events, trackStyles, activeProjectIndex, interactiveProjectIndex,
 		isProjectLayerMounted, titleExit, resize: () => observerCallback(), disposed: () => killed && disconnected,
 		titleExitDisposed: () => titleExitKilled }
 }
@@ -405,6 +409,70 @@ for (const [height, share] of [[900, 0.74], [650, 0.84], [400, 0.9]]) {
 		} finally { stack.cleanup(); assert(stack.disposed()); gsap.ticker.sleep() }
 	})
 }
+
+test('touch Work uses native sticky with identical timeline, targets and frozen overlay poses', () => {
+	const desktop = createWorkStackHarness(650, 0.84)
+	const mobile = createWorkStackHarness(650, 0.84, false, [], true)
+	try {
+		assert.equal(mobile.trackStyles.get('--work-scroll-distance'), `${mobile.config.animation.duration()}px`)
+		assert.equal(mobile.config.pin, undefined)
+		assert.equal(mobile.config.pinSpacing, undefined)
+		assert.equal(mobile.config.scrub, 0.8)
+		assert.equal(mobile.titleExit.to.scrollTrigger.scrub, 0.8)
+		assert.equal(desktop.config.scrub, true)
+		assert.equal(mobile.config.end(), desktop.config.end())
+		assert.deepEqual(mobile.config.animation.labels, desktop.config.animation.labels)
+		for (const time of [0, 500, 1000, 2000, 3000]) {
+			desktop.seek(time)
+			mobile.seek(time)
+			assert.deepEqual(mobile.layers.map(layer => layer.y), desktop.layers.map(layer => layer.y))
+			assert.deepEqual(mobile.cards.map(card => [card.scale, card.rotationX]), desktop.cards.map(card => [card.scale, card.rotationX]))
+		}
+		assert.equal(mobile.getExhibitionProjectScrollY(2), desktop.getExhibitionProjectScrollY(2))
+		mobile.focusKeyboardProject(2)
+		assert(mobile.events.includes('scrub-settle'))
+		mobile.suspendExhibitionTracking()
+		assert(mobile.events.includes('scrub-pause'))
+		mobile.freeze()
+		const poses = mobile.layers.map(layer => layer.y)
+		mobile.isProjectLayerMounted.value = true
+		mobile.seek(0)
+		mobile.config.onUpdate()
+		mobile.config.onRefresh()
+		assert.deepEqual(mobile.layers.map(layer => layer.y), poses)
+	} finally {
+		desktop.cleanup()
+		mobile.cleanup()
+		assert.equal(mobile.trackStyles.size, 0)
+		gsap.ticker.sleep()
+	}
+})
+
+test('touch toolbar height changes leave Work timing and scroll track unchanged', () => {
+	const stack = createWorkStackHarness(650, 0.84, false, [], true)
+	try {
+		const duration = stack.config.animation.duration()
+		for (const visibleHeight of [650, 750]) {
+			const first = stack.layers[0]
+			assert.equal(first.y + first['--work-card-entry'] * (visibleHeight - 650), visibleHeight)
+		}
+		const labels = { ...stack.config.animation.labels }
+		stack.seek(500)
+		const entry = stack.layers[0]['--work-card-entry']
+		assert(entry > 0 && entry < 1)
+		stack.viewport.visibleHeight = 750
+		stack.resize()
+		assert.equal(stack.config.animation.time(), 500)
+		assert.equal(stack.config.animation.duration(), duration)
+		assert.deepEqual(stack.config.animation.labels, labels)
+		assert.equal(stack.trackStyles.get('--work-scroll-distance'), `${duration}px`)
+		assert.equal(stack.layers[0]['--work-card-entry'], entry)
+		stack.seek(labels['project-0'])
+		assert.equal(stack.layers[0]['--work-card-entry'], 0)
+		stack.seek(0)
+		assert.equal(stack.layers[0]['--work-card-entry'], 1)
+	} finally { stack.cleanup(); gsap.ticker.sleep() }
+})
 
 test('phone title keeps its scroll-driven reveal without changing prototype card arrivals', () => {
 	const title = { yPercent: 110, opacity: 1 }
@@ -481,7 +549,7 @@ async function createLifeStackHarness({ mobile = true, desktop = false, motion =
 		root: { value: { dataset: {}, classList: { toggle() {} } } },
 		layout: { value: { clientHeight: 600 } }, stackTrack: { value: {} }, stack: { value: { clientHeight: 600 } },
 		introRef: { value: null }, cardRefs: { value: cards }, photos,
-		isScrollDiagnosticGroupEnabled: () => true, registerGsapPlugins() {},
+		registerGsapPlugins() {},
 		document: { documentElement: { clientHeight: 600 } }, nextTick: async () => {},
 		ScrollTrigger: { refresh: () => { refreshes++ } },
 		DESKTOP_LAYOUT_QUERY: '(min-width: 64rem)', MOBILE_LAYOUT_QUERY: '(max-width: 47.999rem)',
@@ -969,7 +1037,7 @@ test('open A, switch to B, then close: settle B under the fullscreen overlay bef
 		window: { innerWidth: 1200, innerHeight: 900, getComputedStyle: () => ({ borderRadius: '0px' }) },
 		openingViewport: { width: 1200, height: 900 }, openingProjectIndex: 0, openingStackProgress: 0.2,
 		openingHomepageScrollY: 300, reducedMotionMode: { value: false }, prefersReducedMotion: () => false,
-		exhibitionTrigger: { start: 100, end: 1100 },
+		exhibitionTrigger: { start: 100, end: 1100, getTween: () => undefined },
 		exhibitionTimeline: { duration: () => 1000, labels: { 'project-1': 700 }, progress(value) {
 			if (value !== undefined) { progress = value; events.push('pose') }
 			return progress

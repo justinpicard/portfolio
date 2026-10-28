@@ -93,8 +93,6 @@
 </template>
 
 <script setup lang="ts">
-// TEMPORARY mobile scroll isolation; see src/config/mobileScrollDiagnostics.ts.
-import { isScrollDiagnosticGroupEnabled } from '../../config/mobileScrollDiagnostics'
 import {
 	computed,
 	nextTick,
@@ -601,8 +599,7 @@ function updateActiveSection() {
 	}
 
 	if (
-		!isScrollDiagnosticGroupEnabled('sectionNavigation')
-		|| route.name !== 'home'
+		route.name !== 'home'
 		|| props.disabled
 		|| props.trackingSuspended
 	) return
@@ -756,7 +753,7 @@ function setupActiveSectionDetection() {
 	sectionPositionTriggers.forEach(({ trigger }) => trigger.kill())
 	sectionPositionTriggers = []
 
-	if (isStatic.value || !isScrollDiagnosticGroupEnabled('sectionNavigation')) return
+	if (isStatic.value) return
 
 	if (props.fixedSectionId) {
 		setActiveSection(props.fixedSectionId)
