@@ -238,7 +238,8 @@ function unlockHomepageScroll() {
 
 function suspendExhibitionTracking() {
 	// Keep the pin enabled: global font/layout refreshes must retain its spacing.
-	exhibitionTrigger?.getTween()?.pause()
+	const scrubTween = exhibitionTrigger?.getTween()
+	if (scrubTween) scrubTween.pause()
 	exhibitionTimeline?.pause()
 }
 
@@ -250,7 +251,8 @@ function synchronizeExhibitionScroll(scrollY: number) {
 	frozenStackProgress = progress
 	setPortfolioScrollY(scrollY)
 	ScrollTrigger.update()
-	exhibitionTrigger?.getTween()?.progress(1)
+	const scrubTween = exhibitionTrigger?.getTween()
+	if (scrubTween) scrubTween.progress(1)
 	if (progress !== undefined) exhibitionTimeline?.progress(progress)
 }
 
@@ -1028,7 +1030,8 @@ function focusKeyboardProject(projectIndex: number) {
 	setPortfolioScrollY(scrollY)
 	ScrollTrigger.update()
 	// Explicit focus destinations must settle immediately despite touch scrubbing.
-	exhibitionTrigger?.getTween()?.progress(1)
+	const scrubTween = exhibitionTrigger?.getTween()
+	if (scrubTween) scrubTween.progress(1)
 	activeProjectIndex.value = projectIndex
 	interactiveProjectIndex.value = projectIndex
 }

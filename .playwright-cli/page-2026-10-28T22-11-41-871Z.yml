@@ -1,0 +1,666 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - link "Skip to main content" [ref=e2] [cursor=pointer]:
+      - /url: "#main-content"
+    - main:
+      - generic "Justin Picard" [ref=e3] [cursor=pointer]
+      - generic "Digital Product Designer" [ref=e16]
+      - navigation "Page sections" [ref=e39]:
+        - generic [ref=e40]:
+          - button "01 Welcome" [ref=e41] [cursor=pointer]:
+            - generic [ref=e43]:
+              - generic [ref=e44]: "01"
+              - generic [ref=e45]: Welcome
+          - list [aria-hidden]:
+            - listitem:
+              - link:
+                - /url: "#intro"
+                - generic:
+                  - generic:
+                    - generic [aria-hidden]: "0"
+                    - generic [aria-hidden]: "1"
+                  - generic:
+                    - generic [aria-hidden]: W
+                    - generic [aria-hidden]: e
+                    - generic [aria-hidden]: l
+                    - generic [aria-hidden]: c
+                    - generic [aria-hidden]: o
+                    - generic [aria-hidden]: m
+                    - generic [aria-hidden]: e
+            - listitem:
+              - link:
+                - /url: "#about"
+                - generic:
+                  - generic:
+                    - generic [aria-hidden]: "0"
+                    - generic [aria-hidden]: "2"
+                  - generic:
+                    - generic [aria-hidden]: A
+                    - generic [aria-hidden]: b
+                    - generic [aria-hidden]: o
+                    - generic [aria-hidden]: u
+                    - generic [aria-hidden]: t
+            - listitem:
+              - link:
+                - /url: "#work"
+                - generic:
+                  - generic:
+                    - generic [aria-hidden]: "0"
+                    - generic [aria-hidden]: "3"
+                  - generic:
+                    - generic [aria-hidden]: W
+                    - generic [aria-hidden]: o
+                    - generic [aria-hidden]: r
+                    - generic [aria-hidden]: k
+            - listitem:
+              - link:
+                - /url: "#life"
+                - generic:
+                  - generic:
+                    - generic [aria-hidden]: "0"
+                    - generic [aria-hidden]: "4"
+                  - generic:
+                    - generic [aria-hidden]: L
+                    - generic [aria-hidden]: i
+                    - generic [aria-hidden]: f
+                    - generic [aria-hidden]: e
+            - listitem:
+              - link:
+                - /url: "#say-hi"
+                - generic:
+                  - generic:
+                    - generic [aria-hidden]: "0"
+                    - generic [aria-hidden]: "5"
+                  - generic:
+                    - generic [aria-hidden]: S
+                    - generic [aria-hidden]: a
+                    - generic [aria-hidden]: "y"
+                    - generic [aria-hidden]: h
+                    - generic [aria-hidden]: i
+      - generic [aria-hidden]:
+        - generic:
+          - paragraph
+      - generic [ref=e48]:
+        - generic [ref=e50] [cursor=pointer]:
+          - generic [aria-hidden] [ref=e51]: E
+          - generic [aria-hidden] [ref=e52]: m
+          - generic [aria-hidden] [ref=e53]: a
+          - generic [aria-hidden] [ref=e54]: i
+          - generic [aria-hidden] [ref=e55]: l
+          - generic [aria-hidden] [ref=e56]: m
+          - generic [aria-hidden] [ref=e57]: e
+          - generic [aria-hidden] [ref=e58]: "!"
+        - generic [ref=e62]:
+          - heading "About" [level=2] [ref=e63]:
+            - generic [aria-hidden] [ref=e64]:
+              - generic [aria-hidden] [ref=e65]: A
+              - generic [aria-hidden] [ref=e66]: b
+              - generic [aria-hidden] [ref=e67]: o
+              - generic [aria-hidden] [ref=e68]: u
+              - generic [aria-hidden] [ref=e69]: t
+          - paragraph [ref=e70]:
+            - generic [aria-hidden] [ref=e71]:
+              - generic [aria-hidden] [ref=e72]: H
+              - generic [aria-hidden] [ref=e73]: i
+              - generic [aria-hidden] [ref=e74]: .
+            - generic [aria-hidden] [ref=e77]: 👋🏼
+            - generic [aria-hidden] [ref=e78]:
+              - generic [aria-hidden] [ref=e79]: I
+              - generic [aria-hidden] [ref=e80]: ’
+              - generic [aria-hidden] [ref=e81]: m
+            - generic [aria-hidden] [ref=e82]:
+              - generic [aria-hidden] [ref=e83]: J
+              - generic [aria-hidden] [ref=e84]: u
+              - generic [aria-hidden] [ref=e85]: s
+              - generic [aria-hidden] [ref=e86]: t
+              - generic [aria-hidden] [ref=e87]: i
+              - generic [aria-hidden] [ref=e88]: "n"
+              - generic [aria-hidden] [ref=e89]: ","
+            - generic [aria-hidden] [ref=e91]: a
+            - generic [aria-hidden] [ref=e92]:
+              - generic [aria-hidden] [ref=e93]: D
+              - generic [aria-hidden] [ref=e94]: i
+              - generic [aria-hidden] [ref=e95]: g
+              - generic [aria-hidden] [ref=e96]: i
+              - generic [aria-hidden] [ref=e97]: t
+              - generic [aria-hidden] [ref=e98]: a
+              - generic [aria-hidden] [ref=e99]: l
+            - generic [aria-hidden] [ref=e100]:
+              - generic [aria-hidden] [ref=e101]: P
+              - generic [aria-hidden] [ref=e102]: r
+              - generic [aria-hidden] [ref=e103]: o
+              - generic [aria-hidden] [ref=e104]: d
+              - generic [aria-hidden] [ref=e105]: u
+              - generic [aria-hidden] [ref=e106]: c
+              - generic [aria-hidden] [ref=e107]: t
+            - generic [aria-hidden] [ref=e108]:
+              - generic [aria-hidden] [ref=e109]: D
+              - generic [aria-hidden] [ref=e110]: e
+              - generic [aria-hidden] [ref=e111]: s
+              - generic [aria-hidden] [ref=e112]: i
+              - generic [aria-hidden] [ref=e113]: g
+              - generic [aria-hidden] [ref=e114]: "n"
+              - generic [aria-hidden] [ref=e115]: e
+              - generic [aria-hidden] [ref=e116]: r
+            - generic [aria-hidden] [ref=e117]:
+              - generic [aria-hidden] [ref=e118]: f
+              - generic [aria-hidden] [ref=e119]: r
+              - generic [aria-hidden] [ref=e120]: o
+              - generic [aria-hidden] [ref=e121]: m
+            - generic [aria-hidden] [ref=e122]:
+              - generic [aria-hidden] [ref=e123]: M
+              - generic [aria-hidden] [ref=e124]: i
+              - generic [aria-hidden] [ref=e125]: d
+              - generic [aria-hidden] [ref=e126]: d
+              - generic [aria-hidden] [ref=e127]: e
+              - generic [aria-hidden] [ref=e128]: l
+              - generic [aria-hidden] [ref=e129]: b
+              - generic [aria-hidden] [ref=e130]: u
+              - generic [aria-hidden] [ref=e131]: r
+              - generic [aria-hidden] [ref=e132]: g
+              - generic [aria-hidden] [ref=e133]: ","
+            - generic [aria-hidden] [ref=e134]:
+              - generic [aria-hidden] [ref=e135]: T
+              - generic [aria-hidden] [ref=e136]: h
+              - generic [aria-hidden] [ref=e137]: e
+            - generic [aria-hidden] [ref=e138]:
+              - generic [aria-hidden] [ref=e139]: "N"
+              - generic [aria-hidden] [ref=e140]: e
+              - generic [aria-hidden] [ref=e141]: t
+              - generic [aria-hidden] [ref=e142]: h
+              - generic [aria-hidden] [ref=e143]: e
+              - generic [aria-hidden] [ref=e144]: r
+              - generic [aria-hidden] [ref=e145]: l
+              - generic [aria-hidden] [ref=e146]: a
+              - generic [aria-hidden] [ref=e147]: "n"
+              - generic [aria-hidden] [ref=e148]: d
+              - generic [aria-hidden] [ref=e149]: s
+              - generic [aria-hidden] [ref=e150]: .
+            - generic [aria-hidden] [ref=e151]:
+              - generic [aria-hidden] [ref=e152]: I
+              - generic [aria-hidden] [ref=e153]: ’
+              - generic [aria-hidden] [ref=e154]: v
+              - generic [aria-hidden] [ref=e155]: e
+            - generic [aria-hidden] [ref=e156]:
+              - generic [aria-hidden] [ref=e157]: s
+              - generic [aria-hidden] [ref=e158]: p
+              - generic [aria-hidden] [ref=e159]: e
+              - generic [aria-hidden] [ref=e160]: "n"
+              - generic [aria-hidden] [ref=e161]: t
+            - generic [aria-hidden] [ref=e162]:
+              - generic [aria-hidden] [ref=e163]: m
+              - generic [aria-hidden] [ref=e164]: o
+              - generic [aria-hidden] [ref=e165]: r
+              - generic [aria-hidden] [ref=e166]: e
+            - generic [aria-hidden] [ref=e167]:
+              - generic [aria-hidden] [ref=e168]: t
+              - generic [aria-hidden] [ref=e169]: h
+              - generic [aria-hidden] [ref=e170]: a
+              - generic [aria-hidden] [ref=e171]: "n"
+            - generic [aria-hidden] [ref=e172]:
+              - generic [aria-hidden] [ref=e173]: "1"
+              - generic [aria-hidden] [ref=e174]: "0"
+            - generic [aria-hidden] [ref=e175]:
+              - generic [aria-hidden] [ref=e176]: "y"
+              - generic [aria-hidden] [ref=e177]: e
+              - generic [aria-hidden] [ref=e178]: a
+              - generic [aria-hidden] [ref=e179]: r
+              - generic [aria-hidden] [ref=e180]: s
+            - generic [aria-hidden] [ref=e181]:
+              - generic [aria-hidden] [ref=e182]: d
+              - generic [aria-hidden] [ref=e183]: e
+              - generic [aria-hidden] [ref=e184]: s
+              - generic [aria-hidden] [ref=e185]: i
+              - generic [aria-hidden] [ref=e186]: g
+              - generic [aria-hidden] [ref=e187]: "n"
+              - generic [aria-hidden] [ref=e188]: i
+              - generic [aria-hidden] [ref=e189]: "n"
+              - generic [aria-hidden] [ref=e190]: g
+            - generic [aria-hidden] [ref=e191]:
+              - generic [aria-hidden] [ref=e192]: w
+              - generic [aria-hidden] [ref=e193]: e
+              - generic [aria-hidden] [ref=e194]: b
+              - generic [aria-hidden] [ref=e195]: s
+              - generic [aria-hidden] [ref=e196]: i
+              - generic [aria-hidden] [ref=e197]: t
+              - generic [aria-hidden] [ref=e198]: e
+              - generic [aria-hidden] [ref=e199]: s
+            - generic [aria-hidden] [ref=e200]:
+              - generic [aria-hidden] [ref=e201]: a
+              - generic [aria-hidden] [ref=e202]: "n"
+              - generic [aria-hidden] [ref=e203]: d
+            - generic [aria-hidden] [ref=e204]:
+              - generic [aria-hidden] [ref=e205]: d
+              - generic [aria-hidden] [ref=e206]: i
+              - generic [aria-hidden] [ref=e207]: g
+              - generic [aria-hidden] [ref=e208]: i
+              - generic [aria-hidden] [ref=e209]: t
+              - generic [aria-hidden] [ref=e210]: a
+              - generic [aria-hidden] [ref=e211]: l
+            - generic [aria-hidden] [ref=e212]:
+              - generic [aria-hidden] [ref=e213]: p
+              - generic [aria-hidden] [ref=e214]: r
+              - generic [aria-hidden] [ref=e215]: o
+              - generic [aria-hidden] [ref=e216]: d
+              - generic [aria-hidden] [ref=e217]: u
+              - generic [aria-hidden] [ref=e218]: c
+              - generic [aria-hidden] [ref=e219]: t
+              - generic [aria-hidden] [ref=e220]: s
+              - generic [aria-hidden] [ref=e221]: ","
+            - generic [aria-hidden] [ref=e222]:
+              - generic [aria-hidden] [ref=e223]: a
+              - generic [aria-hidden] [ref=e224]: "n"
+              - generic [aria-hidden] [ref=e225]: d
+            - generic [aria-hidden] [ref=e226]:
+              - generic [aria-hidden] [ref=e227]: o
+              - generic [aria-hidden] [ref=e228]: v
+              - generic [aria-hidden] [ref=e229]: e
+              - generic [aria-hidden] [ref=e230]: r
+            - generic [aria-hidden] [ref=e231]:
+              - generic [aria-hidden] [ref=e232]: t
+              - generic [aria-hidden] [ref=e233]: i
+              - generic [aria-hidden] [ref=e234]: m
+              - generic [aria-hidden] [ref=e235]: e
+            - generic [aria-hidden] [ref=e236]:
+              - generic [aria-hidden] [ref=e237]: m
+              - generic [aria-hidden] [ref=e238]: "y"
+            - generic [aria-hidden] [ref=e239]:
+              - generic [aria-hidden] [ref=e240]: c
+              - generic [aria-hidden] [ref=e241]: u
+              - generic [aria-hidden] [ref=e242]: r
+              - generic [aria-hidden] [ref=e243]: i
+              - generic [aria-hidden] [ref=e244]: o
+              - generic [aria-hidden] [ref=e245]: s
+              - generic [aria-hidden] [ref=e246]: i
+              - generic [aria-hidden] [ref=e247]: t
+              - generic [aria-hidden] [ref=e248]: "y"
+            - generic [aria-hidden] [ref=e249]:
+              - generic [aria-hidden] [ref=e250]: "n"
+              - generic [aria-hidden] [ref=e251]: a
+              - generic [aria-hidden] [ref=e252]: t
+              - generic [aria-hidden] [ref=e253]: u
+              - generic [aria-hidden] [ref=e254]: r
+              - generic [aria-hidden] [ref=e255]: a
+              - generic [aria-hidden] [ref=e256]: l
+              - generic [aria-hidden] [ref=e257]: l
+              - generic [aria-hidden] [ref=e258]: "y"
+            - generic [aria-hidden] [ref=e259]:
+              - generic [aria-hidden] [ref=e260]: s
+              - generic [aria-hidden] [ref=e261]: h
+              - generic [aria-hidden] [ref=e262]: i
+              - generic [aria-hidden] [ref=e263]: f
+              - generic [aria-hidden] [ref=e264]: t
+              - generic [aria-hidden] [ref=e265]: e
+              - generic [aria-hidden] [ref=e266]: d
+            - generic [aria-hidden] [ref=e267]:
+              - generic [aria-hidden] [ref=e268]: f
+              - generic [aria-hidden] [ref=e269]: r
+              - generic [aria-hidden] [ref=e270]: o
+              - generic [aria-hidden] [ref=e271]: m
+            - generic [aria-hidden] [ref=e272]:
+              - generic [aria-hidden] [ref=e273]: v
+              - generic [aria-hidden] [ref=e274]: i
+              - generic [aria-hidden] [ref=e275]: s
+              - generic [aria-hidden] [ref=e276]: u
+              - generic [aria-hidden] [ref=e277]: a
+              - generic [aria-hidden] [ref=e278]: l
+            - generic [aria-hidden] [ref=e279]:
+              - generic [aria-hidden] [ref=e280]: d
+              - generic [aria-hidden] [ref=e281]: e
+              - generic [aria-hidden] [ref=e282]: s
+              - generic [aria-hidden] [ref=e283]: i
+              - generic [aria-hidden] [ref=e284]: g
+              - generic [aria-hidden] [ref=e285]: "n"
+            - generic [aria-hidden] [ref=e286]:
+              - generic [aria-hidden] [ref=e287]: t
+              - generic [aria-hidden] [ref=e288]: o
+              - generic [aria-hidden] [ref=e289]: w
+              - generic [aria-hidden] [ref=e290]: a
+              - generic [aria-hidden] [ref=e291]: r
+              - generic [aria-hidden] [ref=e292]: d
+              - generic [aria-hidden] [ref=e293]: s
+            - generic [aria-hidden] [ref=e294]:
+              - generic [aria-hidden] [ref=e295]: p
+              - generic [aria-hidden] [ref=e296]: r
+              - generic [aria-hidden] [ref=e297]: o
+              - generic [aria-hidden] [ref=e298]: d
+              - generic [aria-hidden] [ref=e299]: u
+              - generic [aria-hidden] [ref=e300]: c
+              - generic [aria-hidden] [ref=e301]: t
+            - generic [aria-hidden] [ref=e302]:
+              - generic [aria-hidden] [ref=e303]: t
+              - generic [aria-hidden] [ref=e304]: h
+              - generic [aria-hidden] [ref=e305]: i
+              - generic [aria-hidden] [ref=e306]: "n"
+              - generic [aria-hidden] [ref=e307]: k
+              - generic [aria-hidden] [ref=e308]: i
+              - generic [aria-hidden] [ref=e309]: "n"
+              - generic [aria-hidden] [ref=e310]: g
+              - generic [aria-hidden] [ref=e311]: ","
+            - generic [aria-hidden] [ref=e312]:
+              - generic [aria-hidden] [ref=e313]: d
+              - generic [aria-hidden] [ref=e314]: e
+              - generic [aria-hidden] [ref=e315]: s
+              - generic [aria-hidden] [ref=e316]: i
+              - generic [aria-hidden] [ref=e317]: g
+              - generic [aria-hidden] [ref=e318]: "n"
+            - generic [aria-hidden] [ref=e319]:
+              - generic [aria-hidden] [ref=e320]: s
+              - generic [aria-hidden] [ref=e321]: "y"
+              - generic [aria-hidden] [ref=e322]: s
+              - generic [aria-hidden] [ref=e323]: t
+              - generic [aria-hidden] [ref=e324]: e
+              - generic [aria-hidden] [ref=e325]: m
+              - generic [aria-hidden] [ref=e326]: s
+            - generic [aria-hidden] [ref=e327]:
+              - generic [aria-hidden] [ref=e328]: a
+              - generic [aria-hidden] [ref=e329]: "n"
+              - generic [aria-hidden] [ref=e330]: d
+            - generic [aria-hidden] [ref=e331]:
+              - generic [aria-hidden] [ref=e332]: h
+              - generic [aria-hidden] [ref=e333]: o
+              - generic [aria-hidden] [ref=e334]: w
+            - generic [aria-hidden] [ref=e335]:
+              - generic [aria-hidden] [ref=e336]: p
+              - generic [aria-hidden] [ref=e337]: r
+              - generic [aria-hidden] [ref=e338]: o
+              - generic [aria-hidden] [ref=e339]: d
+              - generic [aria-hidden] [ref=e340]: u
+              - generic [aria-hidden] [ref=e341]: c
+              - generic [aria-hidden] [ref=e342]: t
+              - generic [aria-hidden] [ref=e343]: s
+            - generic [aria-hidden] [ref=e344]:
+              - generic [aria-hidden] [ref=e345]: e
+              - generic [aria-hidden] [ref=e346]: v
+              - generic [aria-hidden] [ref=e347]: o
+              - generic [aria-hidden] [ref=e348]: l
+              - generic [aria-hidden] [ref=e349]: v
+              - generic [aria-hidden] [ref=e350]: e
+            - generic [aria-hidden] [ref=e351]:
+              - generic [aria-hidden] [ref=e352]: a
+              - generic [aria-hidden] [ref=e353]: s
+            - generic [aria-hidden] [ref=e354]:
+              - generic [aria-hidden] [ref=e355]: t
+              - generic [aria-hidden] [ref=e356]: h
+              - generic [aria-hidden] [ref=e357]: e
+              - generic [aria-hidden] [ref=e358]: "y"
+            - generic [aria-hidden] [ref=e359]:
+              - generic [aria-hidden] [ref=e360]: g
+              - generic [aria-hidden] [ref=e361]: r
+              - generic [aria-hidden] [ref=e362]: o
+              - generic [aria-hidden] [ref=e363]: w
+              - generic [aria-hidden] [ref=e364]: .
+            - generic [ref=e365]:
+              - generic [aria-hidden] [ref=e366]:
+                - generic [aria-hidden] [ref=e367]: I
+                - generic [aria-hidden] [ref=e368]: "n"
+              - generic [aria-hidden] [ref=e369]:
+                - generic [aria-hidden] [ref=e370]: m
+                - generic [aria-hidden] [ref=e371]: "y"
+              - generic [aria-hidden] [ref=e372]:
+                - generic [aria-hidden] [ref=e373]: f
+                - generic [aria-hidden] [ref=e374]: r
+                - generic [aria-hidden] [ref=e375]: e
+                - generic [aria-hidden] [ref=e376]: e
+              - generic [aria-hidden] [ref=e377]:
+                - generic [aria-hidden] [ref=e378]: t
+                - generic [aria-hidden] [ref=e379]: i
+                - generic [aria-hidden] [ref=e380]: m
+                - generic [aria-hidden] [ref=e381]: e
+                - generic [aria-hidden] [ref=e382]: ","
+              - generic [aria-hidden] [ref=e384]: I
+              - generic [aria-hidden] [ref=e385]:
+                - generic [aria-hidden] [ref=e386]: e
+                - generic [aria-hidden] [ref=e387]: "n"
+                - generic [aria-hidden] [ref=e388]: j
+                - generic [aria-hidden] [ref=e389]: o
+                - generic [aria-hidden] [ref=e390]: "y"
+              - generic [aria-hidden] [ref=e391]:
+                - generic [aria-hidden] [ref=e392]: t
+                - generic [aria-hidden] [ref=e393]: u
+                - generic [aria-hidden] [ref=e394]: r
+                - generic [aria-hidden] [ref=e395]: "n"
+                - generic [aria-hidden] [ref=e396]: i
+                - generic [aria-hidden] [ref=e397]: "n"
+                - generic [aria-hidden] [ref=e398]: g
+              - generic [aria-hidden] [ref=e399]:
+                - generic [aria-hidden] [ref=e400]: i
+                - generic [aria-hidden] [ref=e401]: d
+                - generic [aria-hidden] [ref=e402]: e
+                - generic [aria-hidden] [ref=e403]: a
+                - generic [aria-hidden] [ref=e404]: s
+              - generic [aria-hidden] [ref=e405]:
+                - generic [aria-hidden] [ref=e406]: i
+                - generic [aria-hidden] [ref=e407]: "n"
+                - generic [aria-hidden] [ref=e408]: t
+                - generic [aria-hidden] [ref=e409]: o
+              - generic [aria-hidden] [ref=e410]:
+                - generic [aria-hidden] [ref=e411]: s
+                - generic [aria-hidden] [ref=e412]: i
+                - generic [aria-hidden] [ref=e413]: d
+                - generic [aria-hidden] [ref=e414]: e
+              - generic [aria-hidden] [ref=e415]:
+                - generic [aria-hidden] [ref=e416]: p
+                - generic [aria-hidden] [ref=e417]: r
+                - generic [aria-hidden] [ref=e418]: o
+                - generic [aria-hidden] [ref=e419]: j
+                - generic [aria-hidden] [ref=e420]: e
+                - generic [aria-hidden] [ref=e421]: c
+                - generic [aria-hidden] [ref=e422]: t
+                - generic [aria-hidden] [ref=e423]: s
+              - generic [aria-hidden] [ref=e424]:
+                - generic [aria-hidden] [ref=e425]: t
+                - generic [aria-hidden] [ref=e426]: o
+              - generic [aria-hidden] [ref=e427]:
+                - generic [aria-hidden] [ref=e428]: e
+                - generic [aria-hidden] [ref=e429]: x
+                - generic [aria-hidden] [ref=e430]: p
+                - generic [aria-hidden] [ref=e431]: e
+                - generic [aria-hidden] [ref=e432]: r
+                - generic [aria-hidden] [ref=e433]: i
+                - generic [aria-hidden] [ref=e434]: m
+                - generic [aria-hidden] [ref=e435]: e
+                - generic [aria-hidden] [ref=e436]: "n"
+                - generic [aria-hidden] [ref=e437]: t
+              - generic [aria-hidden] [ref=e438]:
+                - generic [aria-hidden] [ref=e439]: a
+                - generic [aria-hidden] [ref=e440]: "n"
+                - generic [aria-hidden] [ref=e441]: d
+              - generic [aria-hidden] [ref=e442]:
+                - generic [aria-hidden] [ref=e443]: l
+                - generic [aria-hidden] [ref=e444]: e
+                - generic [aria-hidden] [ref=e445]: a
+                - generic [aria-hidden] [ref=e446]: r
+                - generic [aria-hidden] [ref=e447]: "n"
+              - generic [aria-hidden] [ref=e448]:
+                - generic [aria-hidden] [ref=e449]: s
+                - generic [aria-hidden] [ref=e450]: o
+                - generic [aria-hidden] [ref=e451]: m
+                - generic [aria-hidden] [ref=e452]: e
+                - generic [aria-hidden] [ref=e453]: t
+                - generic [aria-hidden] [ref=e454]: h
+                - generic [aria-hidden] [ref=e455]: i
+                - generic [aria-hidden] [ref=e456]: "n"
+                - generic [aria-hidden] [ref=e457]: g
+              - generic [aria-hidden] [ref=e458]:
+                - generic [aria-hidden] [ref=e459]: "n"
+                - generic [aria-hidden] [ref=e460]: e
+                - generic [aria-hidden] [ref=e461]: w
+                - generic [aria-hidden] [ref=e462]: .
+        - generic [ref=e465]:
+          - generic:
+            - generic:
+              - heading "Work." [level=2]:
+                - generic:
+                  - generic [aria-hidden]: W
+                - generic:
+                  - generic [aria-hidden]: o
+                - generic:
+                  - generic [aria-hidden]: r
+                - generic:
+                  - generic [aria-hidden]: k
+                - generic:
+                  - generic [aria-hidden]: .
+          - generic "Selected work exhibition":
+            - navigation "Project navigation" [ref=e466]:
+              - 'button "Open project: MuziMatch" [ref=e467] [cursor=pointer]'
+              - 'button "Open project: SFVonline" [ref=e468] [cursor=pointer]'
+            - generic:
+              - article [aria-hidden]:
+                - generic:
+                  - generic:
+                    - generic:
+                      - paragraph: "2026"
+                    - heading [level=3]: MuziMatch
+                    - paragraph: Privacy-first musicians classifieds platform
+                    - generic:
+                      - generic: Side project
+                      - generic: Product Design
+                      - generic: Nuxt
+                      - generic: Redesign coming
+            - generic:
+              - article [aria-hidden]:
+                - generic:
+                  - generic: Coming soon
+                  - generic:
+                    - generic:
+                      - paragraph: 2023 - Current
+                    - heading [level=3]: Recranet Booking
+                    - paragraph: Design system & SaaS product design
+                    - generic:
+                      - generic: Enterprise SaaS
+                      - generic: Product Design
+                      - generic: Design System
+                      - generic: Online booking management
+            - generic:
+              - article [aria-hidden]:
+                - generic:
+                  - generic:
+                    - generic:
+                      - paragraph: "2020"
+                    - heading [level=3]: SFVonline
+                    - paragraph: SaaS for insolvency management
+                    - generic:
+                      - generic: Product Design
+                      - generic: UX/UI
+                      - generic: SaaS
+                      - generic: Early work
+        - region [ref=e469]:
+          - generic [ref=e471]:
+            - generic [ref=e472]:
+              - heading "Life." [level=2] [ref=e473]:
+                - generic [aria-hidden] [ref=e475]: Life.
+              - paragraph [ref=e476]:
+                - generic [aria-hidden] [ref=e478]: There’s a lot more to my life than
+                - generic [aria-hidden] [ref=e480]: work and side projects. Here’s a little
+                - generic [aria-hidden] [ref=e482]: glimpse into it.
+              - list [ref=e483]
+            - generic [ref=e485]:
+              - figure "This is me, spotted in the wild 👋🏼" [ref=e486]:
+                - img "Portrait of Justin Picard" [ref=e488]
+              - 'figure "Fun fact: in another life, I used to be a rockstar 🤘🏼" [ref=e490]':
+                - img "Justin Picard playing bass guitar" [ref=e492]
+              - figure "I’m quite easy to convince when good food, drinks or a plane ticket are involved 🥨🍺" [ref=e494]:
+                - img "Justin Picard eating a pretzel while holding two glasses of beer in Germany" [ref=e496]
+              - figure "Speaking of plane tickets, I love exploring new places. 🛫" [ref=e498]:
+                - img "View from the Empire State Building in New York" [ref=e500]
+              - 'figure "My latest challenge: Spanish 🇪🇸 Starting with the basics" [ref=e502]':
+                - img "A spanish childrens book" [ref=e504]
+              - figure "(secretly the real reason I'm learning spanish)" [ref=e506]:
+                - img "Pitxos in a bar in Bilbao" [ref=e508]
+              - figure "Just a random photo of my first ever basketball game at Madison Square Garden, NYC" [ref=e510]:
+                - img "Basketball game at the Madison Square Garden in New York" [ref=e512]
+              - figure "I have a thing for photographing buildings from weird angles" [ref=e514]:
+                - img "Photo of the Fernsehturm in Berlin, taken from a low perspective angle" [ref=e516]
+              - figure "Like I said… weird angles" [ref=e518]:
+                - img "Selfie from below in The Summit in New York" [ref=e520]
+              - figure "Middelburg is where the ❤️ is" [ref=e522]:
+                - img "Lange Jan church tower in Middelburg, Zeeland" [ref=e524]
+              - figure "These rascals run the place 🐈🐈‍⬛" [ref=e526]:
+                - img "Cats" [ref=e528]
+        - generic [ref=e532]:
+          - generic [ref=e534]:
+            - generic [ref=e535]:
+              - generic [ref=e536]:
+                - heading "Say hi." [level=2] [ref=e537]
+                - generic [aria-hidden] [ref=e538]: 👋🏼
+              - generic [aria-hidden] [ref=e539]:
+                - generic [ref=e540]: Say hi.
+                - generic [aria-hidden] [ref=e541]: 👋🏼
+              - generic [aria-hidden] [ref=e542]:
+                - generic [ref=e543]: Say hi.
+                - generic [aria-hidden] [ref=e544]: 👋🏼
+            - generic [aria-hidden] [ref=e545]:
+              - generic [aria-hidden] [ref=e546]:
+                - generic [ref=e547]: Say hi.
+                - generic [aria-hidden] [ref=e548]: 👋🏼
+              - generic [aria-hidden] [ref=e549]:
+                - generic [ref=e550]: Say hi.
+                - generic [aria-hidden] [ref=e551]: 👋🏼
+              - generic [aria-hidden] [ref=e552]:
+                - generic [ref=e553]: Say hi.
+                - generic [aria-hidden] [ref=e554]: 👋🏼
+          - generic [ref=e555]:
+            - paragraph [ref=e556]: Every great conversation starts with a simple 'hello'. Whether it’s about design, side projects, or something completely different, my inbox is always open.
+            - link [ref=e557] [cursor=pointer]:
+              - /url: mailto:hallo@justinpicard.nl
+              - generic "Send me an email" [ref=e558]:
+                - generic [aria-hidden] [ref=e559]: S
+                - generic [aria-hidden] [ref=e560]: e
+                - generic [aria-hidden] [ref=e561]: "n"
+                - generic [aria-hidden] [ref=e562]: d
+                - generic [aria-hidden] [ref=e563]: m
+                - generic [aria-hidden] [ref=e564]: e
+                - generic [aria-hidden] [ref=e565]: a
+                - generic [aria-hidden] [ref=e566]: "n"
+                - generic [aria-hidden] [ref=e567]: e
+                - generic [aria-hidden] [ref=e568]: m
+                - generic [aria-hidden] [ref=e569]: a
+                - generic [aria-hidden] [ref=e570]: i
+                - generic [aria-hidden] [ref=e571]: l
+          - generic [ref=e573]:
+            - navigation "Contact and social links" [ref=e574]:
+              - list [ref=e575]:
+                - listitem [ref=e576]:
+                  - link "LinkedIn ↗" [ref=e577] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/in/picardjustin/
+                    - generic "LinkedIn" [ref=e578]:
+                      - generic [aria-hidden] [ref=e579]: L
+                      - generic [aria-hidden] [ref=e580]: i
+                      - generic [aria-hidden] [ref=e581]: "n"
+                      - generic [aria-hidden] [ref=e582]: k
+                      - generic [aria-hidden] [ref=e583]: e
+                      - generic [aria-hidden] [ref=e584]: d
+                      - generic [aria-hidden] [ref=e585]: I
+                      - generic [aria-hidden] [ref=e586]: "n"
+                    - generic [ref=e587]: ↗
+                - listitem [ref=e588]:
+                  - link "Unsplash ↗" [ref=e589] [cursor=pointer]:
+                    - /url: https://unsplash.com/@justinpicard
+                    - generic "Unsplash" [ref=e590]:
+                      - generic [aria-hidden] [ref=e591]: U
+                      - generic [aria-hidden] [ref=e592]: "n"
+                      - generic [aria-hidden] [ref=e593]: s
+                      - generic [aria-hidden] [ref=e594]: p
+                      - generic [aria-hidden] [ref=e595]: l
+                      - generic [aria-hidden] [ref=e596]: a
+                      - generic [aria-hidden] [ref=e597]: s
+                      - generic [aria-hidden] [ref=e598]: h
+                    - generic [ref=e599]: ↗
+                - listitem [ref=e600]:
+                  - link "Resume ↓" [ref=e601] [cursor=pointer]:
+                    - /url: /justin-picard_resume.pdf
+                    - generic "Resume" [ref=e602]:
+                      - generic [aria-hidden] [ref=e603]: R
+                      - generic [aria-hidden] [ref=e604]: e
+                      - generic [aria-hidden] [ref=e605]: s
+                      - generic [aria-hidden] [ref=e606]: u
+                      - generic [aria-hidden] [ref=e607]: m
+                      - generic [aria-hidden] [ref=e608]: e
+                    - generic [ref=e609]: ↓
+            - generic [ref=e610]:
+              - paragraph [ref=e611]:
+                - text: Hero portrait by
+                - link "Percy's" [ref=e612] [cursor=pointer]:
+                  - /url: https://percys.nl
+              - paragraph [ref=e613]: © 2026 Justin Picard

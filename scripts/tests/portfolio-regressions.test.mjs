@@ -340,7 +340,7 @@ function createWorkStackHarness(height = 600, cardShare = 0.74, reduced = false,
 		cancelAnimationFrame() {}, requestAnimationFrame: callback => { callback(); return 1 },
 		setPortfolioScrollY: value => events.push(value),
 		ScrollTrigger: {
-			create(options) { config = options; return { start: 100, get end() { return 100 + Number(options.end().slice(2)) }, getTween: () => touch ? ({ pause: () => events.push('scrub-pause'), progress: () => events.push('scrub-settle') }) : undefined, kill() { killed = true } } },
+			create(options) { config = options; return { start: 100, get end() { return 100 + Number(options.end().slice(2)) }, getTween: () => touch ? ({ pause: () => events.push('scrub-pause'), progress: () => events.push('scrub-settle') }) : 0, kill() { killed = true } } },
 			refresh() { config.onRefreshInit() }, update() { events.push('update') }
 		}
 	}
@@ -524,6 +524,7 @@ test('Work labels serve routing/keyboard targets and resize rebuilds defer while
 			assert.equal(stack.interactiveProjectIndex.value, index)
 			assert(Math.abs(stack.getExhibitionProjectScrollY(index) - 100 - label) < 0.000001)
 		}
+		stack.synchronizeExhibitionScroll(stack.getExhibitionProjectScrollY(4))
 		stack.suspendExhibitionTracking()
 		assert(stack.config.animation.paused())
 		stack.isProjectLayerMounted.value = true

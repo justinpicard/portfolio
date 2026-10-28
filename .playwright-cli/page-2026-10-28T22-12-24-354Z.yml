@@ -1,0 +1,276 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - link "Skip to main content" [ref=e2] [cursor=pointer]:
+      - /url: "#main-content"
+    - main:
+      - generic "Justin Picard" [ref=e3] [cursor=pointer]
+      - generic "Digital Product Designer" [ref=e16]
+      - navigation "Page sections" [ref=e39]:
+        - generic [ref=e40]:
+          - button "01 Welcome" [ref=e41] [cursor=pointer]:
+            - generic [ref=e43]:
+              - generic [ref=e44]: "01"
+              - generic [ref=e45]: Welcome
+          - list [aria-hidden]:
+            - listitem:
+              - link:
+                - /url: "#intro"
+                - generic:
+                  - generic:
+                    - generic [aria-hidden]: "0"
+                    - generic [aria-hidden]: "1"
+                  - generic:
+                    - generic [aria-hidden]: W
+                    - generic [aria-hidden]: e
+                    - generic [aria-hidden]: l
+                    - generic [aria-hidden]: c
+                    - generic [aria-hidden]: o
+                    - generic [aria-hidden]: m
+                    - generic [aria-hidden]: e
+            - listitem:
+              - link:
+                - /url: "#about"
+                - generic:
+                  - generic:
+                    - generic [aria-hidden]: "0"
+                    - generic [aria-hidden]: "2"
+                  - generic:
+                    - generic [aria-hidden]: A
+                    - generic [aria-hidden]: b
+                    - generic [aria-hidden]: o
+                    - generic [aria-hidden]: u
+                    - generic [aria-hidden]: t
+            - listitem:
+              - link:
+                - /url: "#work"
+                - generic:
+                  - generic:
+                    - generic [aria-hidden]: "0"
+                    - generic [aria-hidden]: "3"
+                  - generic:
+                    - generic [aria-hidden]: W
+                    - generic [aria-hidden]: o
+                    - generic [aria-hidden]: r
+                    - generic [aria-hidden]: k
+            - listitem:
+              - link:
+                - /url: "#life"
+                - generic:
+                  - generic:
+                    - generic [aria-hidden]: "0"
+                    - generic [aria-hidden]: "4"
+                  - generic:
+                    - generic [aria-hidden]: L
+                    - generic [aria-hidden]: i
+                    - generic [aria-hidden]: f
+                    - generic [aria-hidden]: e
+            - listitem:
+              - link:
+                - /url: "#say-hi"
+                - generic:
+                  - generic:
+                    - generic [aria-hidden]: "0"
+                    - generic [aria-hidden]: "5"
+                  - generic:
+                    - generic [aria-hidden]: S
+                    - generic [aria-hidden]: a
+                    - generic [aria-hidden]: "y"
+                    - generic [aria-hidden]: h
+                    - generic [aria-hidden]: i
+      - generic [aria-hidden]:
+        - generic:
+          - paragraph
+      - generic [ref=e48]:
+        - generic [ref=e50] [cursor=pointer]:
+          - generic [aria-hidden] [ref=e51]: E
+          - generic [aria-hidden] [ref=e52]: m
+          - generic [aria-hidden] [ref=e53]: a
+          - generic [aria-hidden] [ref=e54]: i
+          - generic [aria-hidden] [ref=e55]: l
+          - generic [aria-hidden] [ref=e56]: m
+          - generic [aria-hidden] [ref=e57]: e
+          - generic [aria-hidden] [ref=e58]: "!"
+        - generic [ref=e62]:
+          - heading "About" [level=2] [ref=e63]
+          - paragraph [ref=e64]:
+            - text: Hi.
+            - generic [ref=e65]: 👋🏼
+            - text: I’m Justin, a Digital Product Designer from Middelburg, The Netherlands. I’ve spent more than 10 years designing websites and digital products, and over time my curiosity naturally shifted from visual design towards product thinking, design systems and how products evolve as they grow.
+            - generic [ref=e66]: In my free time, I enjoy turning ideas into side projects to experiment and learn something new.
+        - generic [ref=e69]:
+          - generic:
+            - generic:
+              - heading "Work." [level=2]:
+                - generic:
+                  - generic [aria-hidden]: W
+                - generic:
+                  - generic [aria-hidden]: o
+                - generic:
+                  - generic [aria-hidden]: r
+                - generic:
+                  - generic [aria-hidden]: k
+                - generic:
+                  - generic [aria-hidden]: .
+          - generic "Selected work exhibition":
+            - navigation "Project navigation" [ref=e70]:
+              - 'button "Open project: MuziMatch" [ref=e71] [cursor=pointer]'
+              - 'button "Open project: SFVonline" [ref=e72] [cursor=pointer]'
+            - generic:
+              - article [aria-hidden]:
+                - generic:
+                  - generic:
+                    - generic:
+                      - paragraph: "2026"
+                    - heading [level=3]: MuziMatch
+                    - paragraph: Privacy-first musicians classifieds platform
+                    - generic:
+                      - generic: Side project
+                      - generic: Product Design
+                      - generic: Nuxt
+                      - generic: Redesign coming
+            - generic:
+              - article [aria-hidden]:
+                - generic:
+                  - generic: Coming soon
+                  - generic:
+                    - generic:
+                      - paragraph: 2023 - Current
+                    - heading [level=3]: Recranet Booking
+                    - paragraph: Design system & SaaS product design
+                    - generic:
+                      - generic: Enterprise SaaS
+                      - generic: Product Design
+                      - generic: Design System
+                      - generic: Online booking management
+            - generic:
+              - article [aria-hidden]:
+                - generic:
+                  - generic:
+                    - generic:
+                      - paragraph: "2020"
+                    - heading [level=3]: SFVonline
+                    - paragraph: SaaS for insolvency management
+                    - generic:
+                      - generic: Product Design
+                      - generic: UX/UI
+                      - generic: SaaS
+                      - generic: Early work
+        - region [ref=e73]:
+          - generic [ref=e75]:
+            - generic [ref=e76]:
+              - heading "Life." [level=2] [ref=e77]:
+                - generic [aria-hidden] [ref=e79]: Life.
+              - paragraph [ref=e80]:
+                - generic [aria-hidden] [ref=e82]: There’s a lot more to my life than
+                - generic [aria-hidden] [ref=e84]: work and side projects. Here’s a little
+                - generic [aria-hidden] [ref=e86]: glimpse into it.
+              - list [ref=e87]
+            - generic [ref=e89]:
+              - figure "This is me, spotted in the wild 👋🏼" [ref=e90]:
+                - img "Portrait of Justin Picard" [ref=e92]
+              - 'figure "Fun fact: in another life, I used to be a rockstar 🤘🏼" [ref=e94]':
+                - img "Justin Picard playing bass guitar" [ref=e96]
+              - figure "I’m quite easy to convince when good food, drinks or a plane ticket are involved 🥨🍺" [ref=e98]:
+                - img "Justin Picard eating a pretzel while holding two glasses of beer in Germany" [ref=e100]
+              - figure "Speaking of plane tickets, I love exploring new places. 🛫" [ref=e102]:
+                - img "View from the Empire State Building in New York" [ref=e104]
+              - 'figure "My latest challenge: Spanish 🇪🇸 Starting with the basics" [ref=e106]':
+                - img "A spanish childrens book" [ref=e108]
+              - figure "(secretly the real reason I'm learning spanish)" [ref=e110]:
+                - img "Pitxos in a bar in Bilbao" [ref=e112]
+              - figure "Just a random photo of my first ever basketball game at Madison Square Garden, NYC" [ref=e114]:
+                - img "Basketball game at the Madison Square Garden in New York" [ref=e116]
+              - figure "I have a thing for photographing buildings from weird angles" [ref=e118]:
+                - img "Photo of the Fernsehturm in Berlin, taken from a low perspective angle" [ref=e120]
+              - figure "Like I said… weird angles" [ref=e122]:
+                - img "Selfie from below in The Summit in New York" [ref=e124]
+              - figure "Middelburg is where the ❤️ is" [ref=e126]:
+                - img "Lange Jan church tower in Middelburg, Zeeland" [ref=e128]
+              - figure "These rascals run the place 🐈🐈‍⬛" [ref=e130]:
+                - img "Cats" [ref=e132]
+        - generic [ref=e136]:
+          - generic [ref=e138]:
+            - generic [ref=e139]:
+              - generic [ref=e140]:
+                - heading "Say hi." [level=2] [ref=e141]
+                - generic [aria-hidden] [ref=e142]: 👋🏼
+              - generic [aria-hidden] [ref=e143]:
+                - generic [ref=e144]: Say hi.
+                - generic [aria-hidden] [ref=e145]: 👋🏼
+              - generic [aria-hidden] [ref=e146]:
+                - generic [ref=e147]: Say hi.
+                - generic [aria-hidden] [ref=e148]: 👋🏼
+            - generic [aria-hidden] [ref=e149]:
+              - generic [aria-hidden] [ref=e150]:
+                - generic [ref=e151]: Say hi.
+                - generic [aria-hidden] [ref=e152]: 👋🏼
+              - generic [aria-hidden] [ref=e153]:
+                - generic [ref=e154]: Say hi.
+                - generic [aria-hidden] [ref=e155]: 👋🏼
+              - generic [aria-hidden] [ref=e156]:
+                - generic [ref=e157]: Say hi.
+                - generic [aria-hidden] [ref=e158]: 👋🏼
+          - generic [ref=e159]:
+            - paragraph [ref=e160]: Every great conversation starts with a simple 'hello'. Whether it’s about design, side projects, or something completely different, my inbox is always open.
+            - link [ref=e161] [cursor=pointer]:
+              - /url: mailto:hallo@justinpicard.nl
+              - generic "Send me an email" [ref=e162]:
+                - generic [aria-hidden] [ref=e163]: S
+                - generic [aria-hidden] [ref=e164]: e
+                - generic [aria-hidden] [ref=e165]: "n"
+                - generic [aria-hidden] [ref=e166]: d
+                - generic [aria-hidden] [ref=e167]: m
+                - generic [aria-hidden] [ref=e168]: e
+                - generic [aria-hidden] [ref=e169]: a
+                - generic [aria-hidden] [ref=e170]: "n"
+                - generic [aria-hidden] [ref=e171]: e
+                - generic [aria-hidden] [ref=e172]: m
+                - generic [aria-hidden] [ref=e173]: a
+                - generic [aria-hidden] [ref=e174]: i
+                - generic [aria-hidden] [ref=e175]: l
+          - generic [ref=e177]:
+            - navigation "Contact and social links" [ref=e178]:
+              - list [ref=e179]:
+                - listitem [ref=e180]:
+                  - link "LinkedIn ↗" [ref=e181] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/in/picardjustin/
+                    - generic "LinkedIn" [ref=e182]:
+                      - generic [aria-hidden] [ref=e183]: L
+                      - generic [aria-hidden] [ref=e184]: i
+                      - generic [aria-hidden] [ref=e185]: "n"
+                      - generic [aria-hidden] [ref=e186]: k
+                      - generic [aria-hidden] [ref=e187]: e
+                      - generic [aria-hidden] [ref=e188]: d
+                      - generic [aria-hidden] [ref=e189]: I
+                      - generic [aria-hidden] [ref=e190]: "n"
+                    - generic [ref=e191]: ↗
+                - listitem [ref=e192]:
+                  - link "Unsplash ↗" [ref=e193] [cursor=pointer]:
+                    - /url: https://unsplash.com/@justinpicard
+                    - generic "Unsplash" [ref=e194]:
+                      - generic [aria-hidden] [ref=e195]: U
+                      - generic [aria-hidden] [ref=e196]: "n"
+                      - generic [aria-hidden] [ref=e197]: s
+                      - generic [aria-hidden] [ref=e198]: p
+                      - generic [aria-hidden] [ref=e199]: l
+                      - generic [aria-hidden] [ref=e200]: a
+                      - generic [aria-hidden] [ref=e201]: s
+                      - generic [aria-hidden] [ref=e202]: h
+                    - generic [ref=e203]: ↗
+                - listitem [ref=e204]:
+                  - link "Resume ↓" [ref=e205] [cursor=pointer]:
+                    - /url: /justin-picard_resume.pdf
+                    - generic "Resume" [ref=e206]:
+                      - generic [aria-hidden] [ref=e207]: R
+                      - generic [aria-hidden] [ref=e208]: e
+                      - generic [aria-hidden] [ref=e209]: s
+                      - generic [aria-hidden] [ref=e210]: u
+                      - generic [aria-hidden] [ref=e211]: m
+                      - generic [aria-hidden] [ref=e212]: e
+                    - generic [ref=e213]: ↓
+            - generic [ref=e214]:
+              - paragraph [ref=e215]:
+                - text: Hero portrait by
+                - link "Percy's" [ref=e216] [cursor=pointer]:
+                  - /url: https://percys.nl
+              - paragraph [ref=e217]: © 2026 Justin Picard
