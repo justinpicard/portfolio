@@ -22,6 +22,14 @@ export default {
 		workExhibitionLabel: 'Tentoonstelling van geselecteerd werk',
 		lifeLabel: 'Leven.',
 		lifeIntro: 'There’s a lot more to life than work and side projects. Here’s a little glimpse into mine.',
+		lifeInterests: {
+			traveling: 'Traveling',
+			formula1: 'Formula 1',
+			plantDad: 'Plant dad',
+			music: 'Music',
+			catDad: 'Cat dad',
+			workingOut: 'Working out'
+		},
 		lifePhotoCaptions: {
 			nancyPortrait: 'This is me, spotted in the wild 👋🏼',
 			bassist: 'Fun fact: in another life, I used to be a rockstar 🤘🏼',

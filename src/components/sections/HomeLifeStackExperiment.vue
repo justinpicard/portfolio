@@ -14,6 +14,12 @@
 				<p ref="textRef" class="home-life-section__text">
 					{{ t('home.lifeIntro') }}
 				</p>
+				<ul class="home-life-section__interests" role="list">
+					<li v-for="interest in interests" :key="interest.labelKey" ref="interestRefs" class="home-life-section__interest">
+						<span aria-hidden="true">{{ interest.emoji }}</span>
+						{{ t(interest.labelKey) }}
+					</li>
+				</ul>
 			</div>
 
 			<div ref="stackTrack" class="home-life-section__stack-track">
@@ -51,6 +57,15 @@ import { useI18n } from 'vue-i18n'
 import { gsap, ScrollTrigger, SplitText, registerGsapPlugins } from '../../utils/animations/gsap'
 import { animationDurations, animationEases, animationStaggers } from '../../utils/animations/presets'
 import BaseImage from '../base/BaseImage.vue'
+
+const interests = [
+	{ emoji: '✈️', labelKey: 'home.lifeInterests.traveling' },
+	{ emoji: '🏎️', labelKey: 'home.lifeInterests.formula1' },
+	{ emoji: '🪴', labelKey: 'home.lifeInterests.plantDad' },
+	{ emoji: '🎵', labelKey: 'home.lifeInterests.music' },
+	{ emoji: '🐈', labelKey: 'home.lifeInterests.catDad' },
+	{ emoji: '🏋🏻‍♂️', labelKey: 'home.lifeInterests.workingOut' }
+]
 
 type PhotoRatio = 'portrait' | 'landscape' | 'square'
 
@@ -206,6 +221,7 @@ const introRef = ref<HTMLElement | null>(null)
 const titleRef = ref<HTMLHeadingElement | null>(null)
 const textRef = ref<HTMLParagraphElement | null>(null)
 const cardRefs = ref<HTMLElement[]>([])
+const interestRefs = ref<HTMLElement[]>([])
 let context: gsap.Context | undefined
 let mediaContext: gsap.MatchMedia | undefined
 let introSplit: SplitText | undefined
@@ -276,15 +292,11 @@ async function initAnimations() {
 							yPercent: 110,
 							opacity: 1
 						})
+						gsap.set(interestRefs.value, { autoAlpha: 0, y: 12 })
 						gsap.set(introRef.value, { visibility: 'visible' })
 
-						// SplitText restores the returned tween's progress after an automatic re-split.
-						return gsap.to(split.lines, {
-							yPercent: 0,
-							opacity: 1,
-							duration: animationDurations.reveal,
-							stagger: animationStaggers.lines,
-							ease: animationEases.strongOut,
+						// SplitText restores the whole sequence after an automatic re-split.
+						return gsap.timeline({
 							scrollTrigger: {
 								trigger: root.value,
 								// Reveal the copy as the stage reaches its pinned position.
@@ -295,7 +307,19 @@ async function initAnimations() {
 								toggleActions: 'play none none reverse',
 								invalidateOnRefresh: true
 							}
-						})
+						}).to(split.lines, {
+							yPercent: 0,
+							opacity: 1,
+							duration: animationDurations.reveal,
+							stagger: animationStaggers.lines,
+							ease: animationEases.strongOut
+						}).to(interestRefs.value, {
+							autoAlpha: 1,
+							y: 0,
+							duration: animationDurations.fast,
+							stagger: animationStaggers.lines,
+							ease: animationEases.backOut
+						}, split.lines.length * animationStaggers.lines)
 					}
 				})
 			}

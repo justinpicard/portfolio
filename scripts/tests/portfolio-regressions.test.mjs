@@ -1096,3 +1096,41 @@ test('open A, switch to B, then close: settle B under the fullscreen overlay bef
 	layer.resolveNext()
 	assert.equal(await closing, true)
 })
+
+test('Life interests continue the intro line stagger and reverse together', async () => {
+	const source = await readFile('src/components/sections/HomeLifeStackExperiment.vue', 'utf8')
+	const script = source.match(/<script setup[^>]*>([\s\S]*?)<\/script>/)[1]
+	const parsed = ts.createSourceFile('life.ts', script, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
+	let body
+	function visit(node) {
+		if (ts.isMethodDeclaration(node) && node.name.getText(parsed) === 'onSplit') {
+			body = node.body.getText(parsed).slice(1, -1)
+		}
+		ts.forEachChild(node, visit)
+	}
+	visit(parsed)
+	const lines = [{ yPercent: 0, opacity: 1 }, { yPercent: 0, opacity: 1 }]
+	const pills = Array.from({ length: 5 }, () => ({ autoAlpha: 1, y: 0 }))
+	const dependencies = {
+		gsap: { set: gsap.set, timeline: () => gsap.timeline({ paused: true }) },
+		wrapSplitLines() {}, introRef: { value: { visibility: 'hidden' } },
+		interestRefs: { value: pills }, root: { value: {} },
+		animationDurations: { reveal: 0.8, fast: 0.3 },
+		animationStaggers: { lines: 0.1 }, animationEases: { strongOut: 'power3.out', backOut: 'back.out(1.7)' }
+	}
+	const timeline = new Function('split', ...Object.keys(dependencies), ts.transpileModule(body, {
+		compilerOptions: { target: ts.ScriptTarget.ESNext }
+	}).outputText)({ lines }, ...Object.values(dependencies))
+	try {
+		timeline.time(0.2)
+		assert(lines.some(line => line.yPercent > 0))
+		assert(pills.every(pill => pill.autoAlpha === 0))
+		timeline.time(0.35)
+		assert(pills[0].autoAlpha > pills[1].autoAlpha)
+		assert.equal(pills[2].autoAlpha, 0)
+		timeline.progress(1)
+		assert(pills.every(pill => pill.autoAlpha === 1 && pill.y === 0))
+		timeline.time(0)
+		assert(pills.every(pill => pill.autoAlpha === 0 && pill.y === 12))
+	} finally { timeline.kill(); gsap.ticker.sleep() }
+})
