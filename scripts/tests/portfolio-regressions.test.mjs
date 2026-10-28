@@ -474,18 +474,37 @@ test('touch toolbar height changes leave Work timing and scroll track unchanged'
 	} finally { stack.cleanup(); gsap.ticker.sleep() }
 })
 
-test('phone title keeps its scroll-driven reveal without changing prototype card arrivals', () => {
-	const title = { yPercent: 110, opacity: 1 }
-	const stack = createWorkStackHarness(600, 0.84, false, [title])
-	try {
-		assert.equal(stack.config.animation.labels['project-0'], 780)
-		stack.seek(240)
-		assert(title.yPercent > 0 && title.yPercent < 110)
-		stack.seek(480)
-		assert.equal(title.yPercent, 0)
-		stack.seek(0)
-		assert.equal(title.yPercent, 110)
-	} finally { stack.cleanup(); gsap.ticker.sleep() }
+const workTitleCode = await componentCode('src/components/sections/SectionHomeWork.vue', ['setupTitleReveal'])
+
+test('phone Work uses desktop letter entrance geometry and timing with touch scrubbing', () => {
+	for (const mobile of [true, false]) {
+		let splitOptions, reveal, wrapped, initial
+		const chars = [{}, {}, {}, {}, {}]
+		const dependencies = {
+			titleRef: { value: {} }, root: { value: { dataset: {} } },
+			prefersReducedMotion: () => false,
+			window: { matchMedia: query => ({ matches: mobile && (query === 'mobile' || query === 'compact') }) },
+			MOBILE_LAYOUT_QUERY: 'mobile', COMPACT_LAYOUT_QUERY: 'compact',
+			TITLE_REVEAL_SCROLL_DISTANCE: 1.6,
+			SplitText: class { constructor(_target, options) { splitOptions = options; this.chars = chars } },
+			wrapSplitElements: elements => { wrapped = elements },
+			getWorkViewportHeight: () => 650, readCssNumber: (_property, fallback) => fallback,
+			gsap: { set(_target, options) { initial = options }, to(target, options) { reveal = { target, options }; return {} } }
+		}
+		new Function(...Object.keys(dependencies), `let splitTitle, titleRevealTween; ${workTitleCode}; setupTitleReveal();`)(...Object.values(dependencies))
+		assert.equal(splitOptions.type, 'chars')
+		assert.equal(splitOptions.aria, 'auto')
+		assert.equal(wrapped, chars)
+		assert.equal(reveal.target, chars)
+		assert.equal(reveal.options.stagger, 0.06)
+		assert.equal(reveal.options.ease, 'power2.inOut')
+		assert.equal(initial.y(), 650)
+		assert.equal(initial.yPercent, 0)
+		assert.equal(reveal.options.yPercent, 0)
+		assert.equal(reveal.options.scrollTrigger.start, 'top bottom')
+		assert.equal(reveal.options.scrollTrigger.end(), '+=1040')
+		assert.equal(reveal.options.scrollTrigger.scrub, mobile ? 0.8 : true)
+	}
 })
 
 test('reduced-motion Work stays static without a pin, timeline or resize observer', () => {

@@ -665,16 +665,16 @@ function getWorkViewportHeight() {
 function setupTitleReveal() {
 	if (!titleRef.value || prefersReducedMotion()) return
 
-	if (window.matchMedia(COMPACT_LAYOUT_QUERY).matches) {
+	const isMobile = window.matchMedia(MOBILE_LAYOUT_QUERY).matches
+	if (window.matchMedia(COMPACT_LAYOUT_QUERY).matches && !isMobile) {
 		splitTitle = new SplitText(titleRef.value, {
 			type: 'lines',
 			linesClass: 'split-line',
 			tag: 'span',
-			autoSplit: !window.matchMedia(MOBILE_LAYOUT_QUERY).matches,
+			autoSplit: true,
 			onSplit(split) {
 				wrapSplitElements(split.lines, 'split-line-wrapper')
 				gsap.set(split.lines, { yPercent: 110, opacity: 1 })
-				if (window.matchMedia(MOBILE_LAYOUT_QUERY).matches) return
 
 				titleRevealTween = gsap.to(split.lines, {
 					yPercent: 0,
@@ -721,13 +721,14 @@ function setupTitleReveal() {
 
 	titleRevealTween = gsap.to(splitTitle.chars, {
 		y: 0,
+		yPercent: 0,
 		stagger: 0.06,
 		ease: 'power2.inOut',
 		scrollTrigger: {
 			trigger: root.value,
 			start: 'top bottom',
 			end: () => `+=${getWorkViewportHeight() * TITLE_REVEAL_SCROLL_DISTANCE}`,
-			scrub: true,
+			scrub: isMobile ? 0.8 : true,
 			invalidateOnRefresh: true,
 			toggleClass: {
 				targets: root.value,
@@ -863,15 +864,7 @@ function setupExhibition() {
 			} : { y: (index: number) => positions[index] })
 		})
 		gsap.set(cards, { scale: 1, rotation: 0, rotationX: 0, transformOrigin: '50% 10%' })
-		if (window.matchMedia(MOBILE_LAYOUT_QUERY).matches && splitTitle?.lines.length) {
-			// Keep the existing phone title reveal in scroll units without changing card timing.
-			timeline.fromTo(splitTitle.lines, { yPercent: 110 }, {
-				yPercent: 0, opacity: 1,
-				duration: animationDurations.reveal * viewportHeight,
-				stagger: animationStaggers.lines * viewportHeight,
-				ease: animationEases.strongOut
-			}, 0)
-		}
+
 		layers.forEach((layer, index) => {
 			const distance = positions[index]!
 			const arrival = introDistance + distance

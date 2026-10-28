@@ -123,6 +123,7 @@ function scheduleSplitRefresh() {
 function createResponsiveLineSplit(element: HTMLElement) {
 	return new SplitText(element, {
 		type: 'lines,words,chars',
+		wordsClass: 'split-word',
 		linesClass: 'split-line',
 		charsClass: 'split-display-char',
 		tag: 'span',
@@ -400,12 +401,14 @@ onMounted(async () => {
 		titleSplit = new SplitText(finalTitle, { type: 'chars', charsClass: 'split-display-char' })
 		roleSplit = new SplitText(finalRole, {
 			type: 'lines,words,chars',
+			wordsClass: 'split-word',
 			linesClass: 'split-line',
 			charsClass: 'split-display-char',
 			tag: 'span'
 		})
 		introSplit = new SplitText(finalText, {
 			type: 'lines,words,chars',
+			wordsClass: 'split-word',
 			linesClass: 'split-line',
 			charsClass: 'split-display-char',
 			tag: 'span'

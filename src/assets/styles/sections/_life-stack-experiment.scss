@@ -197,6 +197,9 @@
 			@include respond(md, down) {
 				--home-life-scroll-step: 50svh;
 
+				// Advance copy and photos together as the final Work card leaves.
+				margin-block-start: -25svh;
+
 				// The track retains svh sizing; only the visible sticky stage follows chrome.
 				&__stack {
 					height: var(--viewport-height-dynamic);
@@ -221,7 +224,7 @@
 					display: flex;
 					flex-direction: column;
 					justify-content: center;
-					height: calc(var(--home-life-stage-height) * 0.75);
+					height: var(--viewport-height-dynamic);
 					padding-block: 0;
 				}
 
