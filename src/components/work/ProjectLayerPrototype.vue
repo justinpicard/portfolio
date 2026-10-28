@@ -12,19 +12,24 @@
 			aria-labelledby="project-layer-title"
 			:aria-busy="isOpening || isTransitioning"
 		>
+			<ProjectHeader
+				ref="projectHeader"
+				:title="displayedProject.title"
+				:project-index="displayedIndex"
+				@close="requestClose('button')"
+			/>
+
 			<article
 				ref="surface"
 				class="project-layer-prototype__surface"
 				:class="initialProjectClass"
 			>
-				<ProjectHeader
-					ref="projectHeader"
-					:title="displayedProject.title"
-					:project-index="displayedIndex"
-					@close="requestClose('button')"
-				/>
-
-				<div ref="content" class="project-layer-prototype__content">
+				<div
+					ref="content"
+					class="project-layer-prototype__content"
+					:class="{ 'project-layer-prototype__content--locked': isOpening || isClosing }"
+					:inert="isOpening || isClosing"
+				>
 					<ProjectHero
 						ref="projectHero"
 						:project="displayedProject"
@@ -94,6 +99,7 @@ import {
 	gsap,
 	prefersReducedMotion,
 	registerGsapPlugins,
+	observeReducedMotion,
 	SplitText
 } from '../../utils/animations/gsap'
 import {
@@ -300,11 +306,13 @@ let transitionSplits: SplitText[] = []
 let heroRevealTimeline: gsap.core.Timeline | undefined
 let heroRevealSplits: SplitText[] = []
 let heroRevealTargets: HTMLElement[] = []
-let cardRestoreSplits: SplitText[] = []
-let cardRestoreTargets: HTMLElement[] = []
 let contextTransitionRunId = 0
 let sharedRepresentations: SharedElementRepresentation[] = []
-let closeRequestedDuringOpen: CloseSource | undefined
+let pendingCloseRequest: CloseSource | undefined
+let openingRunId = 0
+let layerAlive = true
+let geometryInvalidated = false
+let stopObservingMotion: (() => void) | undefined
 let projectNavDividerTween: gsap.core.Tween | undefined
 const typographyFrameWidths = new WeakMap<
 	HTMLElement,
@@ -1545,17 +1553,59 @@ function continueTimeline(animation: gsap.core.Timeline) {
 }
 
 function requestClose(source: CloseSource) {
-	if (isClosing.value || isTransitioning.value) return
-
-	if (isOpening.value) {
-		closeRequestedDuringOpen = source
-		debugProjectClose('close requested during opening; queued', { source })
+	if (!layerAlive || isClosing.value) return
+	if (isTransitioning.value) {
+		pendingCloseRequest = source
 		return
 	}
-
-	debugProjectClose('close requested', { source })
+	if (isOpening.value) {
+		openingRunId += 1
+		timeline?.kill()
+		cleanupHeroReveal()
+		gsap.set(getProjectCardContents(props.sourceCard), { clearProps: 'opacity,visibility' })
+		if (!surface.value?.style.clipPath) {
+			setFullscreenGeometry()
+			gsap.set(surface.value, { clipPath: getInsetClipPath(getVisibleCardRect(props.sourceCard), props.origin.borderRadius) })
+		}
+		gsap.set(surface.value, { clearProps: 'backgroundColor' })
+		emit('source-ready')
+		isOpening.value = false
+		isOpeningVisibilityLocked.value = false
+		emit('opened')
+	}
 	emit('close', source)
 }
+
+function flushPendingClose() {
+	if (!pendingCloseRequest) return
+	const source = pendingCloseRequest
+	pendingCloseRequest = undefined
+	requestClose(source)
+}
+
+function completeOpening() {
+	if (!layerAlive || !isOpening.value) return
+	openingRunId += 1
+	timeline?.kill()
+	cleanupHeroReveal()
+	gsap.set(getProjectCardContents(props.sourceCard), { clearProps: 'opacity,visibility' })
+	emit('source-ready')
+	setFullscreenGeometry()
+	gsap.set(surface.value, { clearProps: 'clipPath,willChange,backgroundColor' })
+	gsap.set(content.value, { autoAlpha: 1, clearProps: 'width,height,transform' })
+	isOpeningVisibilityLocked.value = false
+	isOpening.value = false
+	emit('opened')
+	setupProjectNavDivider()
+}
+
+function handleTransitionGeometryChange() {
+	if (!layerAlive) return
+	geometryInvalidated = true
+	if (isOpening.value) completeOpening()
+	else if (isClosing.value) timeline?.kill()
+}
+
 
 function cancelClose() {
 	restoreClosePresentation()
@@ -1689,7 +1739,7 @@ async function navigateToProject(nextIndex: number, restoreFocus = false): Promi
 			gsap.set(content.value, {
 				clearProps: 'opacity,transform,visibility'
 			})
-			await continueTimeline(transitionTimeline)
+			if (!prefersReducedMotion()) await continueTimeline(transitionTimeline)
 		}
 		if (isStaleContextTransition(runId)) return false
 
@@ -1739,7 +1789,8 @@ function setFullscreenGeometry() {
 		left: 0,
 		width: '100vw',
 		height: '100dvh',
-		borderRadius: 0
+		borderRadius: 0,
+		'--project-card-color': getProjectBackground(displayedIndex.value)
 	})
 }
 
@@ -1766,56 +1817,14 @@ function getInsetClipPath(
 	return `inset(${top}px ${right}px ${bottom}px ${left}px round ${borderRadius})`
 }
 
-function getCompactSourceGeometry() {
-	// Scroll locking and dynamic viewport changes can invalidate the pre-mount snapshot.
-	const sourceRect = props.sourceCard.getBoundingClientRect()
-	const hasLiveGeometry = props.sourceCard.isConnected
-		&& sourceRect.width > 0
-		&& sourceRect.height > 0
-
-	if (hasLiveGeometry) {
-		return {
-			rect: sourceRect,
-			borderRadius: window.getComputedStyle(props.sourceCard).borderRadius
-		}
-	}
-
-	return {
-		rect: {
-			top: props.origin.top,
-			left: props.origin.left,
-			right: props.origin.left + props.origin.width,
-			bottom: props.origin.top + props.origin.height
-		},
-		borderRadius: props.origin.borderRadius
-	}
-}
-
-function debugCompactGeometry(
-	phase: 'open' | 'close',
-	targetRect: Pick<DOMRect, 'top' | 'left' | 'right' | 'bottom'>,
-	clipPath: string
-) {
-	if (!DEBUG_PROJECT_CLOSE) return
-
-	const visualViewport = window.visualViewport
-	debugProjectClose(`mobile ${phase} geometry`, {
-		homepageScrollY: window.scrollY,
-		layerScrollY: content.value?.scrollTop ?? 0,
-		windowViewport: {
-			width: window.innerWidth,
-			height: window.innerHeight
-		},
-		visualViewport: visualViewport ? {
-			width: visualViewport.width,
-			height: visualViewport.height,
-			offsetTop: visualViewport.offsetTop,
-			offsetLeft: visualViewport.offsetLeft
-		} : null,
-		surfaceRect: surface.value?.getBoundingClientRect(),
-		targetRect,
-		clipPath
-	})
+function getVisibleCardRect(card: HTMLElement) {
+	const rect = card.getBoundingClientRect()
+	const stage = card.closest('.work-section__stage')?.getBoundingClientRect()
+	const left = Math.max(0, rect.left, stage?.left ?? 0)
+	const top = Math.max(0, rect.top, stage?.top ?? 0)
+	const right = Math.min(window.innerWidth, rect.right, stage?.right ?? window.innerWidth)
+	const bottom = Math.min(window.innerHeight, rect.bottom, stage?.bottom ?? window.innerHeight)
+	return { left, top, right, bottom, width: right - left, height: bottom - top }
 }
 
 function getProjectCardContents(card: HTMLElement) {
@@ -1869,69 +1878,6 @@ function cleanupHeroReveal() {
 	}
 }
 
-function cleanupCardRestore() {
-	cardRestoreSplits.forEach((split) => split.revert())
-	cardRestoreSplits = []
-
-	if (cardRestoreTargets.length > 0) {
-		gsap.killTweensOf(cardRestoreTargets)
-		gsap.set(cardRestoreTargets, {
-			clearProps: 'opacity,transform,visibility'
-		})
-		cardRestoreTargets = []
-	}
-}
-
-function prepareCardRestore(targetCard: HTMLElement) {
-	const title = targetCard.querySelector<HTMLElement>('.project-card__title')
-	const description = targetCard.querySelector<HTMLElement>(
-		'.project-card__description'
-	)
-	const thumbnail = targetCard.querySelector<HTMLElement>('.project-card__visual')
-	const year = targetCard.querySelector<HTMLElement>('.project-card__year')
-	const tags = Array.from(
-		targetCard.querySelectorAll<HTMLElement>('.project-card__tags .tag')
-	)
-
-	if (!title || !description || !thumbnail || !year) return undefined
-
-	cleanupCardRestore()
-	const titleReveal = splitMaskedLines(title)
-	const descriptionReveal = splitMaskedLines(description)
-	cardRestoreSplits = [titleReveal.split, descriptionReveal.split]
-
-	const lineTargets = [
-		...titleReveal.lines,
-		...descriptionReveal.lines
-	]
-	const metadataTargets = [year, ...tags]
-	cardRestoreTargets = [
-		thumbnail,
-		...lineTargets,
-		...metadataTargets
-	]
-
-	gsap.set(thumbnail, {
-		autoAlpha: 0,
-		y: 5
-	})
-	gsap.set(lineTargets, {
-		autoAlpha: 1,
-		yPercent: 105
-	})
-	gsap.set(metadataTargets, {
-		autoAlpha: 0,
-		y: 6
-	})
-
-	return {
-		thumbnail,
-		titleLines: titleReveal.lines,
-		descriptionLines: descriptionReveal.lines,
-		metadataTargets
-	}
-}
-
 async function waitForHeroRevealLayout() {
 	if ('fonts' in document) {
 		await document.fonts.ready
@@ -1941,6 +1887,7 @@ async function waitForHeroRevealLayout() {
 }
 
 function createCaseHeroReveal(includeProjectHeader = true) {
+	if (prefersReducedMotion()) return undefined
 	const heroElements = getHeroElements()
 	if (!heroElements || !content.value) return undefined
 
@@ -2085,108 +2032,50 @@ function createCaseHeroReveal(includeProjectHeader = true) {
 }
 
 async function animateSimpleOpen() {
-	if (
-		!surface.value
-		|| !content.value
-	) return
-
-	const sourceCardContents = getProjectCardContents(props.sourceCard)
-	const destinationElements = [
-		content.value,
-		...getOverlayControls()
-	]
-
-	const useCompactTransition = usesCompactRendering()
-	if (useCompactTransition) {
-		setFullscreenGeometry()
-		const sourceGeometry = getCompactSourceGeometry()
-		const sourceClipPath = getInsetClipPath(
-			sourceGeometry.rect,
-			sourceGeometry.borderRadius
-		)
-		debugCompactGeometry('open', sourceGeometry.rect, sourceClipPath)
-		gsap.set(surface.value, {
-			clipPath: sourceClipPath,
-			willChange: 'clip-path',
-			'--project-card-color': getProjectBackground(displayedIndex.value)
-		})
-	} else {
-		setInitialGeometry()
-	}
-	gsap.set(surface.value, { backgroundColor: 'transparent' })
-	gsap.set(destinationElements, { autoAlpha: 0 })
-	// Lay out the hero at its final viewport width while the surface clips it.
-	// This prevents text from rewrapping as the card expands.
-	gsap.set(content.value, {
-		width: '100vw',
-		height: '100dvh'
+	if (!surface.value || !content.value || !layerAlive || !isOpening.value) return
+	const runId = ++openingRunId
+	const isCurrent = () => layerAlive && runId === openingRunId && isOpening.value
+	const sourceContents = getProjectCardContents(props.sourceCard)
+	setFullscreenGeometry()
+	const rect = getVisibleCardRect(props.sourceCard)
+	geometryInvalidated ||= rect.width <= 0 || rect.height <= 0
+	gsap.set(surface.value, {
+		clipPath: getInsetClipPath(rect, props.origin.borderRadius),
+		backgroundColor: 'transparent', willChange: 'clip-path'
 	})
-
-	if (prefersReducedMotion()) {
-		emit('source-ready')
-		await nextTick()
-		gsap.set(sourceCardContents, { clearProps: 'opacity,visibility' })
-		gsap.set(surface.value, { clearProps: 'backgroundColor' })
-		setFullscreenGeometry()
-		gsap.set(surface.value, { clearProps: 'clipPath,willChange' })
-		isOpeningVisibilityLocked.value = false
-		gsap.set(destinationElements, { autoAlpha: 1 })
-		gsap.set(content.value, { clearProps: 'width,height' })
-		projectHeader.value?.focusClose()
+	gsap.set(content.value, { autoAlpha: 0, width: '100vw', height: '100dvh' })
+	projectHeader.value?.focusClose()
+	if (prefersReducedMotion() || geometryInvalidated) {
+		completeOpening()
 		return
 	}
 
-	const heroRevealLayoutReady = waitForHeroRevealLayout()
-
-	timeline = gsap.timeline({ paused: true })
-		.to(sourceCardContents, {
-			autoAlpha: 0,
-			duration: 0.2,
-			ease: 'power2.out'
-		})
-
-	await playTimeline(timeline)
+	const layoutReady = waitForHeroRevealLayout()
+	timeline = gsap.timeline({ paused: true }).to(sourceContents, {
+		autoAlpha: 0, duration: 0.12, ease: 'power2.out'
+	})
+	const fadeStatus = await playTimeline(timeline)
+	if (!isCurrent()) return
+	if (fadeStatus !== 'complete') {
+		completeOpening()
+		return
+	}
 	emit('source-ready')
 	await nextTick()
-	gsap.set(sourceCardContents, { clearProps: 'opacity,visibility' })
+	if (!isCurrent()) return
+	gsap.set(sourceContents, { clearProps: 'opacity,visibility' })
 	gsap.set(surface.value, { clearProps: 'backgroundColor' })
-
-	await heroRevealLayoutReady
-	const caseHeroReveal = createCaseHeroReveal()
-
+	await layoutReady
+	if (!isCurrent()) return
+	const heroReveal = createCaseHeroReveal(false)
 	timeline = gsap.timeline({ paused: true })
-	timeline
-		.to(surface.value, useCompactTransition ? {
-			clipPath: FULLSCREEN_CLIP_PATH,
-			duration: OPEN_DURATION,
-			ease: animationEases.strongInOut
-		} : {
-			top: 0,
-			left: 0,
-			width: '100vw',
-			height: '100dvh',
-			borderRadius: 0,
-			duration: OPEN_DURATION,
-			ease: animationEases.strongInOut
-		})
-		.call(() => {
-			isOpeningVisibilityLocked.value = false
-		}, [], HERO_REVEAL_START)
-
-	if (caseHeroReveal) {
-		timeline.add(caseHeroReveal.paused(false), HERO_REVEAL_START)
-	} else {
-		timeline.set(destinationElements, { autoAlpha: 1 }, HERO_REVEAL_START)
-	}
-
+		.to(surface.value, { clipPath: FULLSCREEN_CLIP_PATH, duration: 0.55, ease: 'power2.inOut' })
+		.call(() => { isOpeningVisibilityLocked.value = false }, [], 0.4)
+	if (heroReveal) timeline.add(heroReveal.paused(false), 0.4)
+	else timeline.set(content.value, { autoAlpha: 1 }, 0.4)
 	await playTimeline(timeline)
-	gsap.set(surface.value, { clearProps: 'clipPath,willChange' })
-	setFullscreenGeometry()
-	isOpeningVisibilityLocked.value = false
-	cleanupHeroReveal()
-	gsap.set(content.value, { clearProps: 'width,height' })
-	projectHeader.value?.focusClose()
-
+	if (!isCurrent()) return
+	completeOpening()
 }
 
 async function animateOpen() {
@@ -2454,128 +2343,52 @@ async function hideCloseContent() {
 		})
 
 	const fadeStatus = await playTimeline(timeline, 'fade phase')
-	if (fadeStatus !== 'complete') {
+	if (fadeStatus !== 'complete' && !geometryInvalidated) {
 		restoreClosePresentation()
 		return false
 	}
+	if (!layerAlive) return false
+	gsap.set(destinationElements, { autoAlpha: 0 })
 	emit('content-hidden')
 	return true
 }
 
 async function finishClose(target: WorkCloseTarget) {
-	if (!surface.value) return false
-
-	const useCompactTransition = usesCompactRendering()
-	const { card: targetCard, rect, borderRadius: targetBorderRadius } = target
-
-	if (prefersReducedMotion()) {
-		gsap.set(surface.value, {
-			top: rect.top,
-			left: rect.left,
-			width: rect.width,
-			height: rect.height,
-			borderRadius: targetBorderRadius
+	if (!surface.value || !layerAlive) return false
+	const rect = getVisibleCardRect(target.card)
+	const fadeOnly = target.fadeOnly || geometryInvalidated || prefersReducedMotion()
+		|| rect.width <= 0 || rect.height <= 0
+	if (!fadeOnly) {
+		timeline = gsap.timeline({ paused: true }).to(surface.value, {
+			clipPath: getInsetClipPath(rect, target.borderRadius),
+			duration: 0.48, ease: 'power2.inOut'
 		})
-		debugProjectClose('surface collapse start', { reducedMotion: true })
-		debugProjectClose('collapse start', { reducedMotion: true })
-		debugProjectClose('surface collapse complete', { reducedMotion: true })
-		debugProjectClose('collapse end', { reducedMotion: true })
-		debugProjectClose('card restoration start', { reducedMotion: true })
-		emit('target-ready')
-		await nextTick()
-		debugProjectClose('card restoration complete', { reducedMotion: true })
-		emit('close-complete')
-		return true
+		const status = await playTimeline(timeline, 'surface collapse')
+		if (!layerAlive) return false
+		if (status !== 'complete' && !geometryInvalidated) {
+			restoreClosePresentation()
+			return false
+		}
 	}
-
-	debugProjectClose('surface collapse start')
-	debugProjectClose('collapse start')
-	if (useCompactTransition) {
-		setFullscreenGeometry()
-		const targetClipPath = getInsetClipPath(rect, targetBorderRadius)
-		debugCompactGeometry('close', rect, targetClipPath)
-		gsap.set(surface.value, {
-			clipPath: FULLSCREEN_CLIP_PATH,
-			willChange: 'clip-path'
+	if (fadeOnly || geometryInvalidated) {
+		timeline = gsap.timeline({ paused: true }).to(surface.value, {
+			autoAlpha: 0, duration: prefersReducedMotion() ? 0 : 0.12
 		})
-		timeline = gsap.timeline({ paused: true })
-			.to(surface.value, {
-				clipPath: targetClipPath,
-				duration: CLOSE_DURATION,
-				ease: animationEases.strongInOut
-			})
-	} else {
-		timeline = gsap.timeline({ paused: true })
-			.to(surface.value, {
-				top: rect.top,
-				left: rect.left,
-				width: rect.width,
-				height: rect.height,
-				borderRadius: targetBorderRadius,
-				duration: CLOSE_DURATION,
-				ease: animationEases.strongInOut
-			})
+		await playTimeline(timeline, 'geometry fallback')
+		if (!layerAlive) return false
 	}
-
-	const surfaceCollapseStatus = await playTimeline(
-		timeline,
-		'surface collapse phase'
-	)
-	if (surfaceCollapseStatus !== 'complete') {
-		gsap.set(surface.value, { clearProps: 'willChange' })
-		restoreClosePresentation()
-		return false
-	}
-	debugProjectClose('surface collapse complete')
-	debugProjectClose('collapse end')
-	gsap.set(surface.value, { clearProps: 'willChange' })
-	const cardRestore = prepareCardRestore(targetCard)
-	gsap.set(surface.value, { autoAlpha: 0 })
-	debugProjectClose('card restoration start')
+	const contents = getProjectCardContents(target.card)
+	gsap.set(contents, { autoAlpha: 0 })
+	gsap.set(surface.value, { autoAlpha: 0, clearProps: 'willChange' })
 	emit('target-ready')
 	await nextTick()
-
-	if (!cardRestore) {
-		debugProjectClose('card restoration complete', { skipped: true })
-		emit('close-complete')
-		return true
-	}
-
-	timeline = gsap.timeline({ paused: true })
-		.to(cardRestore.thumbnail, {
-			autoAlpha: 1,
-			y: 0,
-			duration: 0.28,
-			ease: animationEases.out
-		}, 0)
-		.to(cardRestore.titleLines, {
-			yPercent: 0,
-			duration: 0.42,
-			ease: animationEases.strongOut,
-			stagger: 0.04
-		}, 0.04)
-		.to(cardRestore.descriptionLines, {
-			yPercent: 0,
-			duration: 0.38,
-			ease: animationEases.strongOut,
-			stagger: 0.04
-		}, 0.08)
-		.to(cardRestore.metadataTargets, {
-			autoAlpha: 1,
-			y: 0,
-			duration: 0.26,
-			ease: animationEases.out,
-			stagger: 0.025
-		}, 0.1)
-
-	const cardRestoreStatus = await playTimeline(timeline, 'card restore phase')
-	if (cardRestoreStatus !== 'complete') {
-		cleanupCardRestore()
-		restoreClosePresentation()
-		return false
-	}
-	debugProjectClose('card restoration complete')
-	cleanupCardRestore()
+	if (!layerAlive) return false
+	timeline = gsap.timeline({ paused: true }).to(contents, {
+		autoAlpha: 1, duration: prefersReducedMotion() ? 0 : 0.16
+	})
+	await playTimeline(timeline, 'card restore')
+	gsap.set(contents, { clearProps: 'opacity,visibility' })
+	if (!layerAlive) return false
 	emit('close-complete')
 	return true
 }
@@ -2600,25 +2413,25 @@ let releaseDialogFocus: (() => void) | undefined
 onMounted(async () => {
 	if (dialog.value) releaseDialogFocus = containDialogFocus(dialog.value)
 	window.addEventListener('keydown', handleKeydown)
+	window.addEventListener('resize', handleTransitionGeometryChange, { passive: true })
+	stopObservingMotion = observeReducedMotion(() => {
+		handleTransitionGeometryChange()
+		transitionTimeline?.progress(1)
+	})
 	await nextTick()
+	if (!layerAlive || !isOpening.value) return
 	await animateOpen()
-	emit('opened')
-	isOpening.value = false
-	setupProjectNavDivider()
-
-	// The coordinator must enter `open` before a close queued during opening is emitted.
-	if (closeRequestedDuringOpen) {
-		const closeSource = closeRequestedDuringOpen
-		closeRequestedDuringOpen = undefined
-		requestClose(closeSource)
-	}
 })
 
 onBeforeUnmount(() => {
+	layerAlive = false
+	openingRunId += 1
+	stopObservingMotion?.()
+	window.removeEventListener('resize', handleTransitionGeometryChange)
+	gsap.set(getProjectCardContents(props.sourceCard), { clearProps: 'opacity,visibility' })
 	releaseDialogFocus?.()
 	timeline?.kill()
 	cleanupHeroReveal()
-	cleanupCardRestore()
 	killContextTransition()
 	cleanupProjectNavDivider()
 	window.removeEventListener('keydown', handleKeydown)
@@ -2627,6 +2440,7 @@ onBeforeUnmount(() => {
 })
 
 defineExpose({
+	flushPendingClose,
 	hideCloseContent,
 	finishClose,
 	cancelClose,

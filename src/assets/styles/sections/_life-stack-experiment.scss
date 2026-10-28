@@ -3,6 +3,7 @@
 .home-life-section {
 	--home-life-stage-height: var(--viewport-height-dynamic);
 	--home-life-flow-space: clamp(5em, 12vh, 12em);
+	--home-life-scroll-step: 75svh;
 
 	min-height: var(--home-life-stage-height);
 	padding-block: var(--home-life-flow-space);
@@ -84,8 +85,16 @@
 	}
 
 	@include respond(lg) {
-		margin-block-start: calc(var(--home-life-stage-height) * -1);
 		padding-block: 0;
+
+		@media (prefers-reduced-motion: no-preference) {
+			// Start Life's pin while 15% of the final Work card remains in view.
+			margin-block-start: calc(74svh * 0.85 - 100svh);
+
+			@media (max-height: 500px) {
+				margin-block-start: calc(90svh * 0.85 - 100svh);
+			}
+		}
 
 		&__layout {
 			grid-template-columns: minmax(0, 5fr) minmax(28rem, 7fr);
@@ -152,7 +161,7 @@
 				display: block;
 				height: calc(
 					var(--home-life-stage-height)
-					+ (var(--home-life-scroll-steps) * 75svh)
+					+ (var(--home-life-scroll-steps) * var(--home-life-scroll-step))
 				);
 			}
 
@@ -186,6 +195,8 @@
 			}
 
 			@include respond(md, down) {
+				--home-life-scroll-step: 50svh;
+
 				// The track retains svh sizing; only the visible sticky stage follows chrome.
 				&__stack {
 					height: var(--viewport-height-dynamic);
@@ -210,7 +221,7 @@
 					display: flex;
 					flex-direction: column;
 					justify-content: center;
-					height: var(--home-life-stage-height);
+					height: calc(var(--home-life-stage-height) * 0.75);
 					padding-block: 0;
 				}
 

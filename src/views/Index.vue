@@ -1,5 +1,5 @@
 <template>
-	<div class="page-surface__scrims" aria-hidden="true">
+	<div class="page-surface__scrims d-none" aria-hidden="true">
 		<div class="page-surface__scrim page-surface__scrim--top" />
 		<div class="page-surface__scrim page-surface__scrim--bottom" />
 	</div>

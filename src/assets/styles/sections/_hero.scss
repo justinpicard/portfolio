@@ -49,13 +49,13 @@
 	}
 
 	.hero-name {
-		--split-display-char-block-bleed: 0;
+		--split-display-char-block-bleed: 0.15em;
 		--split-display-char-offset-y: 0;
 
 		position: relative;
 		z-index: 2;
 		display: block;
-		overflow: hidden;
+		overflow: visible;
 		font-family: var(--heading-font);
 		font-size: clamp(5rem, 35vw, 8rem);
 		font-weight: var(--font-weight-bold);
@@ -167,6 +167,11 @@
 		grid-row: 5;
 		justify-self: start;
 		max-width: 28ch;
+
+		.split-display-char-wrapper {
+			// Clipped inline blocks otherwise add baseline descent during the character reveal.
+			vertical-align: top;
+		}
 	}
 
 	.hero-copy-layer {

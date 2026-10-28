@@ -401,30 +401,32 @@ onMounted(async () => {
 		gsap.set(availabilityDot, { opacity: 0 })
 		titleSplit = new SplitText(finalTitle, { type: 'chars', charsClass: 'split-display-char' })
 		roleSplit = new SplitText(finalRole, {
-			type: 'lines',
+			type: 'lines,words,chars',
 			linesClass: 'split-line',
+			charsClass: 'split-display-char',
 			tag: 'span'
 		})
 		introSplit = new SplitText(finalText, {
-			type: 'lines',
+			type: 'lines,words,chars',
 			linesClass: 'split-line',
+			charsClass: 'split-display-char',
 			tag: 'span'
 		})
 
 		wrapSplitElements(titleSplit.chars, 'split-display-char-wrapper')
-		wrapSplitElements(roleSplit.lines, 'split-line-wrapper')
-		wrapSplitElements(introSplit.lines, 'split-line-wrapper')
+		wrapSplitElements(roleSplit.chars, 'split-display-char-wrapper')
+		wrapSplitElements(introSplit.chars, 'split-display-char-wrapper')
 
-		const revealLines = [
-			...roleSplit.lines,
-			...introSplit.lines
+		const revealChars = [
+			...roleSplit.chars,
+			...introSplit.chars
 		]
 
 		gsap.set(titleSplit.chars, {
 			yPercent: 115
 		})
-		gsap.set(revealLines, {
-			y: 90,
+		gsap.set(revealChars, {
+			yPercent: 115,
 			opacity: 1
 		})
 		gsap.set(finalDivider, {
@@ -457,19 +459,19 @@ onMounted(async () => {
 				yPercent: 0,
 				duration: 0.9,
 				stagger: 0.06,
-				ease: 'power4.out'
+				ease: animationEases.backOut
 			}, 0)
 				.to(finalDivider, {
 					width: '100%',
 					duration: 0.9,
 					ease: 'power3.inOut'
 				}, 0)
-			.to(roleSplit.lines, {
-				y: 0,
+			.to(roleSplit.chars, {
+				yPercent: 0,
 				opacity: 1,
 				duration: animationDurations.reveal,
-				stagger: animationStaggers.lines,
-				ease: animationEases.strongOut
+				stagger: animationStaggers.chars,
+				ease: animationEases.backOut
 			}, 0.55)
 			.addLabel('availabilityIn', '<+=0.15')
 			.set(finalAvailability, { autoAlpha: 1 }, 'availabilityIn')
@@ -477,19 +479,19 @@ onMounted(async () => {
 				yPercent: 0,
 				duration: animationDurations.reveal,
 				stagger: animationStaggers.chars,
-				ease: animationEases.strongOut
+				ease: animationEases.backOut
 			}, 'availabilityIn')
 			.addLabel('introIn', '<+=0.15')
 			.to(availabilityDot, {
 				opacity: 1,
 				duration: animationDurations.fast
 			}, 'availabilityIn')
-			.to(introSplit.lines, {
-				y: 0,
+			.to(introSplit.chars, {
+				yPercent: 0,
 				opacity: 1,
 				duration: animationDurations.reveal,
-				stagger: animationStaggers.lines,
-				ease: animationEases.strongOut
+				stagger: animationStaggers.chars,
+				ease: animationEases.backOut
 			}, 'introIn')
 			.to(loadingScreenElement, {
 				clipPath: 'inset(0 0 100% 0)',

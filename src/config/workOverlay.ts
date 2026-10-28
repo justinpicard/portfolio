@@ -16,5 +16,6 @@ export type WorkCloseTarget = {
 		width: number
 		height: number
 	}
+	fadeOnly?: boolean
 	borderRadius: string
 }

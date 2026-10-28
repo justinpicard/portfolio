@@ -118,11 +118,12 @@ function createWorkHarness(navigate) {
 	] }
 	const route = { query: { case: 'sfvonline' } }
 	const selectedProjectIndex = { value: 0 }, overlayLifecycle = { value: 'open' }
-	const writes = [], attempts = [], closes = []
+	const writes = [], attempts = [], closes = [], flushes = []
 	const noop = () => {}
 	const layer = {
 		navigateToProject: async index => { attempts.push(index); return navigate(index, selectedProjectIndex) },
-		hideCloseContent: async () => { closes.push('hide'); return false }, cancelClose: noop
+		hideCloseContent: async () => { closes.push('hide'); return false }, cancelClose: noop,
+		flushPendingClose: () => flushes.push(overlayLifecycle.value)
 	}
 	const dependencies = {
 		props: { navigationReady: true }, route, projects, selectedProjectIndex, overlayLifecycle,
@@ -141,7 +142,7 @@ function createWorkHarness(navigate) {
 		${workCode}
 		return { synchronizeCaseRoute, handleProjectChangeRequest, stop: () => { isWorkMounted = false } };
 	`)(...Object.values(dependencies))
-	return { ...api, route, selectedProjectIndex, overlayLifecycle, writes, attempts, closes }
+	return { ...api, route, selectedProjectIndex, overlayLifecycle, writes, attempts, closes, flushes }
 }
 
 const settle = () => new Promise(resolve => setImmediate(resolve))
@@ -297,156 +298,162 @@ test('normal-motion linking preserves the existing loading overlap', async () =>
 })
 
 
-const mobileStackCode = await componentCode('src/components/sections/SectionHomeWork.vue', [
-	'setupMobileStack', 'updateVisualProjectActivation', 'getExhibitionProjectScrollY'
+const workStackCode = await componentCode('src/components/sections/SectionHomeWork.vue', [
+	'setupExhibition', 'updateVisualProjectActivation', 'getExhibitionProjectScrollY',
+	'suspendExhibitionTracking', 'synchronizeExhibitionScroll', 'focusKeyboardProject',
+	'updateReducedMotionActivation', 'refreshReducedMotionMeasurements'
 ])
 
-function createMobileStackHarness(height = 600, titleLines = []) {
-	const viewport = { height }
-	const mobileStackMode = { value: false }, activeProjectIndex = { value: 0 }
-	const interactiveProjectIndex = { value: null }, isProjectLayerMounted = { value: false }
-	const cards = Array.from({ length: 5 }, () => ({
-		x: 0, xPercent: 0, y: 0, yPercent: 0, rotationY: 0, scale: 1,
-		zIndex: 0, transformOrigin: '', '--work-card-entry': 1, '--work-card-scale': 1, '--work-card-depth': '0px'
+function createWorkStackHarness(height = 600, cardShare = 0.74, reduced = false, titleLines = []) {
+	const viewport = { width: 1200, height }
+	const stage = { get clientHeight() { return viewport.height }, get clientWidth() { return viewport.width },
+		getBoundingClientRect: () => ({ top: 0, bottom: viewport.height, left: 0, right: viewport.width }) }
+	const layers = Array.from({ length: 5 }, () => ({
+		y: 0, zIndex: 0, get offsetHeight() { return viewport.height * cardShare }
 	}))
-	let config, killed = false
+	const cards = layers.map(layer => ({
+		scale: 1, rotation: 0, rotationX: 0, transformOrigin: '',
+		getBoundingClientRect: () => ({ top: layer.y, bottom: layer.y + layer.offsetHeight, left: 0, right: viewport.width })
+	}))
+	const activeProjectIndex = { value: 0 }, interactiveProjectIndex = { value: null }
+	const isProjectLayerMounted = { value: false }
+	const events = []
+	let config, titleExit, titleExitKilled = false, killed = false, disconnected = false, observerCallback
 	const dependencies = {
-		document: { querySelector: () => null }, splitTitle: { lines: titleLines },
+		gsap: { ...gsap, utils: { ...gsap.utils, toArray: selector => selector === '[data-project-card]' ? cards : layers },
+			fromTo(target, from, to) { titleExit = { target, from, to }; return { scrollTrigger: { kill() {} }, kill() { titleExitKilled = true } } }
+		},
+		titleRef: { value: {} },
+		stage: { value: stage }, exhibition: { value: {} },
+		root: { value: { classList: { toggle() {}, remove() {} } } },
+		prefersReducedMotion: () => reduced, isScrollDiagnosticGroupEnabled: () => true,
+		getPortfolioScrollY: () => 0, readCssNumber: (_property, fallback) => fallback,
+		splitTitle: { lines: titleLines }, MOBILE_LAYOUT_QUERY: '(max-width: 47.999rem)',
 		animationDurations: { reveal: 0.8 }, animationStaggers: { lines: 0.1 }, animationEases: { strongOut: 'power3.out' },
-		gsap, mobileStackMode, activeProjectIndex, interactiveProjectIndex, isProjectLayerMounted,
-		getWorkViewportHeight: () => viewport.height, window: { innerWidth: 375 },
-		root: { value: { style: { removeProperty() {} }, classList: { remove() {} } } },
-		ScrollTrigger: { create(options) {
-			config = options
-			return { start: 100, end: 100 + options.animation.duration() * viewport.height, kill() { killed = true } }
-		} },
-		diagnosticStaticCards: { value: false }
+		diagnosticStaticCards: { value: false }, activeProjectIndex, interactiveProjectIndex, isProjectLayerMounted,
+		window: { matchMedia: () => ({ matches: titleLines.length > 0 }), addEventListener() {}, removeEventListener() {}, get innerHeight() { return viewport.height }, get innerWidth() { return viewport.width } },
+		ResizeObserver: class { constructor(callback) { observerCallback = callback } observe() {} disconnect() { disconnected = true } },
+		cancelAnimationFrame() {}, requestAnimationFrame: callback => { callback(); return 1 },
+		setPortfolioScrollY: value => events.push(value),
+		ScrollTrigger: {
+			create(options) { config = options; return { start: 100, get end() { return 100 + Number(options.end().slice(2)) }, kill() { killed = true } } },
+			refresh() { config.onRefreshInit() }, update() { events.push('update') }
+		}
 	}
-	const api = new Function(...Object.keys(dependencies), 'cards', `
-		let exhibitionTimeline, exhibitionTrigger, viewportHeight = 0, viewportWidth = 0;
-		let isRestoringProjectClose = false, reducedMotionActivationEnabled = false, openingProjectIndex = 0;
-		${mobileStackCode}
-		const cleanup = setupMobileStack(cards);
-		return {
-			cleanup, getExhibitionProjectScrollY,
-			getOpeningProjectIndex: () => openingProjectIndex,
-			seek: time => { exhibitionTimeline.time(time, false); },
-		};
-	`)(...Object.values(dependencies), cards)
-	return { ...api, cards, viewport, config, mobileStackMode, activeProjectIndex, interactiveProjectIndex, isProjectLayerMounted, killed: () => killed }
+	const api = new Function(...Object.keys(dependencies), `
+		let exhibitionTimeline, exhibitionTrigger, projectCards = [], viewportHeight = 0;
+		let isRestoringProjectClose = false, reducedMotionActivationEnabled = false, stackNeedsRefresh = false;
+		let exhibitionActiveRadius = 140, reducedMotionCardCenters = [], frozenStackProgress;
+		const overlayLifecycle = { value: 'closed' };
+		${workStackCode}
+		const cleanup = setupExhibition();
+		return { cleanup, getExhibitionProjectScrollY, suspendExhibitionTracking,
+			synchronizeExhibitionScroll, focusKeyboardProject,
+			needsRefresh: () => stackNeedsRefresh,
+			freeze: () => { frozenStackProgress = exhibitionTimeline.progress() },
+			seek: time => exhibitionTimeline.time(time, false) };
+	`)(...Object.values(dependencies))
+	return { ...api, cards, layers, viewport, config, events, activeProjectIndex, interactiveProjectIndex,
+		isProjectLayerMounted, titleExit, resize: () => observerCallback(), disposed: () => killed && disconnected,
+		titleExitDisposed: () => titleExitKilled }
 }
 
-test('phone stack overlaps vertically, reverses, and uses a pin without snap or scroll interception', () => {
-	const stack = createMobileStackHarness()
+for (const [height, share] of [[900, 0.74], [650, 0.84], [400, 0.9]]) {
+	test(`responsive Work stack preserves prototype distances, depth and reverse poses at ${height}px`, () => {
+		const stack = createWorkStackHarness(height, share)
+		try {
+			const timeline = stack.config.animation
+			const firstArrival = height * 1.3
+			const lastArrival = firstArrival + height * share * 4
+			assert.equal(stack.config.scrub, true)
+			assert.equal(stack.config.pinSpacing, true)
+			assert.equal(stack.config.snap, undefined)
+			assert.equal(timeline.duration(), lastArrival + height * 0.35)
+			assert.equal(stack.layers[0].y, height)
+			assert.equal(stack.interactiveProjectIndex.value, null)
+			stack.seek(height * 0.8)
+			assert.equal(stack.layers[0].y, height * 0.5)
+			assert.equal(stack.layers[1].y - stack.layers[0].y, height * share)
+			assert.equal(stack.interactiveProjectIndex.value, 0)
+			stack.seek(firstArrival + 0.25)
+			assert.equal(stack.interactiveProjectIndex.value, 0)
+			stack.seek(firstArrival + 1)
+			assert.equal(stack.interactiveProjectIndex.value, 1)
+			stack.seek(lastArrival)
+			for (let index = 0; index < 4; index++) {
+				assert.equal(stack.cards[index].scale, 0.7)
+				assert.equal(stack.cards[index].rotationX, 40)
+				assert.equal(stack.cards[index].rotation, [1.5, -3.5, 2, -2.5][index])
+			}
+			assert.equal(stack.cards[4].scale, 1)
+			assert.equal(stack.cards[4].rotationX, 0)
+			assert.equal(stack.interactiveProjectIndex.value, 4)
+			stack.seek(timeline.duration())
+			assert.equal(stack.cards[4].scale, 1)
+			assert.equal(stack.cards[4].rotationX, 0)
+			assert.equal(stack.cards[4].rotation, 0)
+			assert.equal(stack.interactiveProjectIndex.value, 4)
+			stack.seek(firstArrival + height * share * 0.5)
+			assert.equal(stack.interactiveProjectIndex.value, 1)
+			assert(stack.cards[0].scale < 1)
+			assert.equal(stack.cards[1].scale, 1)
+			stack.seek(0)
+			assert.equal(stack.cards[0].scale, 1)
+			assert.equal(stack.cards[0].rotationX, 0)
+			assert.equal(stack.layers[0].y, height)
+			assert.equal(stack.interactiveProjectIndex.value, null)
+		} finally { stack.cleanup(); assert(stack.disposed()); gsap.ticker.sleep() }
+	})
+}
+
+test('phone title keeps its scroll-driven reveal without changing prototype card arrivals', () => {
+	const title = { yPercent: 110, opacity: 1 }
+	const stack = createWorkStackHarness(600, 0.84, false, [title])
 	try {
-		assert.equal(stack.config.pinSpacing, true)
-		assert.equal(stack.config.scrub, 0.8)
-		assert.equal(stack.config.snap, undefined)
-		assert.equal(stack.cards[0]['--work-card-scale'], 1)
-		assert.equal(stack.cards[1]['--work-card-entry'], 1)
-		stack.seek(2.42)
-		assert.equal(stack.cards[0]['--work-card-scale'], 0.95)
-		assert.equal(stack.cards[1]['--work-card-entry'], 0.5)
-		assert.equal(stack.interactiveProjectIndex.value, null)
-		stack.seek(2.92)
-		assert.equal(stack.cards[0]['--work-card-scale'], 0.9)
-		assert.equal(stack.cards[0]['--work-card-depth'], '3%')
-		assert.equal(stack.cards[1].y, 0)
-		assert.equal(stack.interactiveProjectIndex.value, 1)
-		assert(stack.cards[1].zIndex > stack.cards[0].zIndex)
+		assert.equal(stack.config.animation.labels['project-0'], 780)
+		stack.seek(240)
+		assert(title.yPercent > 0 && title.yPercent < 110)
+		stack.seek(480)
+		assert.equal(title.yPercent, 0)
 		stack.seek(0)
-		assert.equal(stack.cards[0]['--work-card-scale'], 1)
-		assert.equal(stack.cards[0].y, 0)
-		assert.equal(stack.cards[1]['--work-card-entry'], 1)
-		assert.equal(stack.cards[0]['--work-card-entry'], 1)
-		assert.equal(stack.interactiveProjectIndex.value, null)
-	} finally {
-		stack.cleanup()
-		assert.equal(stack.killed(), true)
-		assert.equal(stack.mobileStackMode.value, false)
-		gsap.ticker.sleep()
-	}
+		assert.equal(title.yPercent, 110)
+	} finally { stack.cleanup(); gsap.ticker.sleep() }
 })
 
-test('phone project labels resolve case/keyboard targets, freeze activation under overlays, and refresh height', () => {
-	const stack = createMobileStackHarness(500)
+test('reduced-motion Work stays static without a pin, timeline or resize observer', () => {
+	const stack = createWorkStackHarness(600, 0.74, true)
+	assert.equal(stack.config, undefined)
+	assert(stack.layers.every(layer => layer.y === 0))
+	assert(stack.cards.every(card => card.scale === 1 && card.rotationX === 0))
+	stack.cleanup()
+})
+
+test('Work labels serve routing/keyboard targets and resize rebuilds defer while overlay is mounted', () => {
+	const stack = createWorkStackHarness()
 	try {
 		for (let index = 0; index < 5; index++) {
 			const label = stack.config.animation.labels[`project-${index}`]
 			stack.seek(label)
 			assert.equal(stack.interactiveProjectIndex.value, index)
-			assert.equal(stack.getExhibitionProjectScrollY(index), 100 + label * 500)
+			assert(Math.abs(stack.getExhibitionProjectScrollY(index) - 100 - label) < 0.000001)
 		}
+		stack.suspendExhibitionTracking()
+		assert(stack.config.animation.paused())
 		stack.isProjectLayerMounted.value = true
 		stack.seek(0)
 		assert.equal(stack.activeProjectIndex.value, 4)
+		const duration = stack.config.animation.duration()
 		stack.viewport.height = 400
+		stack.resize()
+		assert(stack.needsRefresh())
+		assert.equal(stack.config.animation.duration(), duration)
+		stack.isProjectLayerMounted.value = false
 		stack.config.onRefreshInit()
-		assert.equal(stack.getOpeningProjectIndex(), undefined)
-		assert.equal(stack.config.end(), `+=${stack.config.animation.duration() * 400}`)
-	} finally {
-		stack.cleanup()
-		gsap.ticker.sleep()
-	}
-})
-
-
-test('phone title precedes every card and reversing hides the first card below the viewport', () => {
-	const title = { yPercent: 110, opacity: 1 }
-	const stack = createMobileStackHarness(600, [title])
-	try {
-		stack.seek(0.4)
-		assert(title.yPercent > 0 && title.yPercent < 110)
-		assert(stack.cards.every(card => card['--work-card-entry'] === 1))
-		assert.equal(stack.interactiveProjectIndex.value, null)
-		stack.seek(1.3)
-		assert.equal(title.yPercent, 0)
-		assert.equal(stack.cards[0]['--work-card-entry'], 0.5)
-		assert.equal(stack.cards[1]['--work-card-entry'], 1)
-		stack.seek(stack.config.animation.labels['project-0'])
-		assert.equal(stack.cards[0]['--work-card-entry'], 0)
-		assert.equal(stack.interactiveProjectIndex.value, 0)
-		stack.seek(0)
-		assert.equal(title.yPercent, 110)
-		assert(stack.cards.every(card => card['--work-card-entry'] === 1))
-		assert.equal(stack.interactiveProjectIndex.value, null)
-	} finally {
-		stack.cleanup()
-		gsap.ticker.sleep()
-	}
-})
-
-const mobileScrollCode = await componentCode('src/components/sections/SectionHomeWork.vue', [
-	'suspendExhibitionTracking', 'resumeExhibitionTracking', 'synchronizeExhibitionScroll', 'focusKeyboardProject'
-])
-
-test('phone scrub freezes displayed geometry for overlays and settles explicit restoration and keyboard navigation', () => {
-	const events = []
-	const scrub = { pause: () => events.push('pause'), progress: value => events.push(`settle:${value}`) }
-	const dependencies = {
-		exhibitionTrigger: { pin: {}, getTween: snap => snap ? undefined : scrub },
-		mobileStackMode: { value: true }, overlayLifecycle: { value: 'closed' },
-		activeProjectIndex: { value: 0 }, interactiveProjectIndex: { value: null },
-		getExhibitionProjectScrollY: () => 250,
-		setPortfolioScrollY: value => events.push(`scroll:${value}`),
-		ScrollTrigger: { update: () => events.push('update') },
-		cancelExhibitionSnap() {}, debugProjectClose() {}
-	}
-	const api = new Function(...Object.keys(dependencies), `
-		let exhibitionSnapResumeScrollY;
-		${mobileScrollCode}
-		return { suspendExhibitionTracking, synchronizeExhibitionScroll, focusKeyboardProject };
-	`)(...Object.values(dependencies))
-	api.suspendExhibitionTracking()
-	assert.deepEqual(events.splice(0), ['pause'])
-	api.synchronizeExhibitionScroll(500)
-	assert.deepEqual(events.splice(0), ['scroll:500', 'update', 'settle:1', 'pause'])
-	api.focusKeyboardProject(2)
-	assert.deepEqual(events.splice(0), ['scroll:250', 'update', 'settle:1'])
-	assert.equal(dependencies.interactiveProjectIndex.value, 2)
-	dependencies.mobileStackMode.value = false
-	api.focusKeyboardProject(3)
-	assert.deepEqual(events, ['scroll:250', 'update'])
+		assert.equal(stack.config.animation.labels['project-0'], 520)
+		stack.focusKeyboardProject(2)
+		assert.equal(stack.interactiveProjectIndex.value, 2)
+		assert.deepEqual(stack.events.slice(-2), [stack.getExhibitionProjectScrollY(2), 'update'])
+	} finally { stack.cleanup(); gsap.ticker.sleep() }
 })
 
 const lifeStackCode = await componentCode('src/components/sections/HomeLifeStackExperiment.vue', ['initAnimations'])
@@ -536,49 +543,6 @@ test('Life desktop and tablet retain pixel transforms and reduced motion creates
 	const reduced = await createLifeStackHarness({ motion: false })
 	assert.equal(reduced.timeline, undefined)
 	assert.equal(reduced.refreshes, 0)
-})
-
-const workSnapSource = await readFile('src/components/sections/SectionHomeWork.vue', 'utf8')
-const workSnapScript = workSnapSource.match(/<script setup[^>]*>([\s\S]*?)<\/script>/)[1]
-const workSnapAst = ts.createSourceFile('SectionHomeWork.ts', workSnapScript, ts.ScriptTarget.Latest, true)
-let workSnapObject
-function findWorkSnap(node) {
-	if (ts.isPropertyAssignment(node) && node.name.getText(workSnapAst) === 'snap'
-		&& ts.isObjectLiteralExpression(node.initializer)) workSnapObject = node.initializer
-	ts.forEachChild(node, findWorkSnap)
-}
-findWorkSnap(workSnapAst)
-assert(workSnapObject)
-const workSnapCode = ts.transpileModule(`return ${workSnapObject.getText(workSnapAst)};`, {
-	compilerOptions: { target: ts.ScriptTarget.ESNext }
-}).outputText
-
-function createWorkSnapHarness(compact = false, suppressed = false) {
-	return new Function('useNativeSticky', 'snapPoints', 'snapThreshold', 'isExhibitionSnapSuppressed', 'cancelExhibitionSnap', workSnapCode)(
-		compact, [0.2, 0.4, 0.6, 0.8, 0.95], 0.03, () => suppressed, () => {}
-	)
-}
-
-test('desktop snaps near actual project positions and preserves off-target scroll despite predicted progress', () => {
-	const snap = createWorkSnapHarness()
-	const trigger = progress => ({ start: 100, end: 1100, scroll: () => 100 + progress * 1000 })
-	assert.equal(snap.inertia, false)
-	assert.equal(snap.snapTo(0.8, trigger(0.42)), 0.4)
-	assert.equal(snap.snapTo(0.2, trigger(0.58)), 0.6)
-	assert.equal(snap.snapTo(0.6, trigger(0.5)), 0.5)
-	assert.equal(snap.snapTo(0.2, trigger(0.73)), 0.73)
-	for (const point of [0.2, 0.4, 0.6, 0.8, 0.95]) assert.equal(snap.snapTo(point, trigger(point)), point)
-	assert.equal(snap.delay, 0.04)
-	assert.deepEqual(snap.duration, { min: 0.1, max: 0.22 })
-	assert.equal(snap.ease, 'power1.inOut')
-	assert.equal(createWorkSnapHarness(false, true).snapTo(0.8, trigger(0.42)), 0.42)
-})
-
-test('compact coverflow keeps its original inertia and predicted-progress snapping', () => {
-	const snap = createWorkSnapHarness(true)
-	assert.equal(snap.inertia, undefined)
-	assert.equal(snap.snapTo(0.79, { start: 0, end: 1000, scroll: () => 500 }), 0.8)
-	assert.equal(snap.snapTo(0.5, { start: 0, end: 1000, scroll: () => 800 }), 0.5)
 })
 
 const sectionScrollCode = await componentCode('src/components/navigation/SectionNavigation.vue', [
@@ -695,26 +659,353 @@ test('navigation replacements and unmount clean listeners; overlay lock prevents
 	gsap.ticker.sleep()
 })
 
+const transitionCode = await componentCode('src/components/work/ProjectLayerPrototype.vue', [
+	'getVisibleCardRect', 'animateSimpleOpen', 'completeOpening', 'requestClose',
+	'flushPendingClose', 'handleTransitionGeometryChange', 'finishClose'
+])
 
-test('phone rear cards become progressively smaller and lower while reverse scroll restores their poses', () => {
-	const stack = createMobileStackHarness(400)
-	try {
-		const timeline = stack.config.animation
-		const duration = timeline.duration()
-		stack.seek(timeline.labels['project-4'])
-		for (let index = 0; index < 4; index++) {
-			assert.equal(stack.cards[index]['--work-card-depth'], `${(4 - index) * 3}%`)
-			assert(stack.cards[index]['--work-card-scale'] < stack.cards[index + 1]['--work-card-scale'])
+function createTransitionHarness({ top = 650, reduced = false } = {}) {
+	const events = [], animations = [], waiting = [], contents = [{ opacity: 1 }]
+	const fonts = deferred()
+	const viewport = { innerWidth: 1200, innerHeight: 900 }
+	const stage = { getBoundingClientRect: () => ({ top: 0, left: 0, right: 1200, bottom: 900 }) }
+	const card = { isConnected: true, closest: () => stage, getBoundingClientRect: () => {
+		const cardTop = typeof top === 'function' ? top() : top
+		return { top: cardTop, left: 0, right: 1200, bottom: cardTop + 666, width: 1200, height: 666 }
+	} }
+	const surface = { value: { style: {} } }, content = { value: {} }
+	const isOpening = { value: true }, isClosing = { value: false }, isTransitioning = { value: false }
+	const set = (targets, values) => {
+		for (const target of Array.isArray(targets) ? targets : [targets]) {
+			if (!target) continue
+			Object.assign(target, values)
+			if (target.style && values.clipPath) target.style.clipPath = values.clipPath
 		}
-		assert.equal(stack.cards[3]['--work-card-scale'], 0.9)
-		assert.equal(stack.cards[4]['--work-card-scale'], 1)
-		assert.equal(stack.interactiveProjectIndex.value, 4)
-		stack.seek(timeline.labels['project-1'])
-		assert.equal(stack.cards[0]['--work-card-scale'], 0.9)
-		assert.equal(stack.cards[0]['--work-card-depth'], '3%')
-		assert.equal(stack.cards[1]['--work-card-scale'], 1)
-		assert.equal(stack.cards[1]['--work-card-depth'], '0px')
-		assert.equal(stack.interactiveProjectIndex.value, 1)
-		assert.equal(timeline.duration(), duration)
+	}
+	const dependencies = {
+		surface, content, isOpening, isClosing, isTransitioning, isOpeningVisibilityLocked: { value: true },
+		props: { sourceCard: card, origin: { borderRadius: '0px' } }, window: viewport,
+		getProjectCardContents: () => contents, gsap: { set, timeline() {
+			const animation = { steps: [], callbacks: [], to(target, values) { this.steps.push([target, values]); return this },
+				set(target, values) { this.steps.push([target, values]); return this },
+				call(callback) { this.callbacks.push(callback); return this }, add() { return this },
+				kill() { this.pending?.resolve('interrupted') } }
+			animations.push(animation)
+			return animation
+		} },
+		playTimeline: animation => { const pending = deferred(); animation.pending = pending; waiting.push(animation); return pending.promise },
+		getInsetClipPath: rect => `inset(${Math.max(0, rect.top)}px 0px ${Math.max(0, viewport.innerHeight - rect.bottom)}px 0px)`,
+		setFullscreenGeometry: () => events.push('fullscreen'),
+		prefersReducedMotion: () => reduced, cleanupHeroReveal: () => {},
+		projectHeader: { value: { focusClose: () => events.push('focus-close') } },
+		emit: name => events.push(name), nextTick: async () => {},
+		waitForHeroRevealLayout: () => fonts.promise, createCaseHeroReveal: () => undefined,
+		setupProjectNavDivider: () => {}, restoreClosePresentation: () => events.push('rollback'),
+		FULLSCREEN_CLIP_PATH: 'inset(0px 0px 0px 0px)'
+	}
+	const api = new Function(...Object.keys(dependencies), `
+		let layerAlive = true, openingRunId = 0, geometryInvalidated = false, timeline, pendingCloseRequest;
+		${transitionCode}
+		return { open: animateSimpleOpen, close: finishClose, requestClose, flushPendingClose,
+			resize: handleTransitionGeometryChange,
+			invalidate: () => { layerAlive = false; openingRunId++; timeline?.kill() },
+		};
+	`)(...Object.values(dependencies))
+	return { ...api, events, fonts, surface, contents, card, isOpening, isClosing, isTransitioning, animations,
+		resolveNext(status = 'complete') {
+			const animation = waiting.shift()
+			assert(animation, 'expected an active transition')
+			if (status === 'complete') {
+				animation.steps.forEach(([target, values]) => set(target, values))
+				animation.callbacks.forEach(callback => callback())
+			}
+			animation.pending.resolve(status)
+		},
+		clearFinished: () => { waiting.length = 0 },
+		reduce: () => { reduced = true; api.resize() }
+	}
+}
+
+for (const top of [0, 650]) {
+	test(`opening uses the clipped foreground at y=${top} and retains the case reveal hook`, async () => {
+		const layer = createTransitionHarness({ top })
+		const opening = layer.open()
+		assert.equal(layer.surface.value.style.clipPath, `inset(${top}px 0px ${top === 0 ? 234 : 0}px 0px)`)
+		assert(layer.events.includes('focus-close'))
+		assert.equal(layer.animations[0].steps[0][1].duration, 0.12)
+		layer.resolveNext()
+		layer.fonts.resolve()
+		await settle()
+		assert.equal(layer.animations[1].steps[0][1].duration, 0.55)
+		layer.resolveNext()
+		await opening
+		assert.equal(layer.isOpening.value, false)
+		assert.equal(layer.events.filter(event => event === 'opened').length, 1)
+	})
+}
+
+for (const source of ['button', 'escape']) {
+	test(`immediate ${source} interrupts opening without waiting for fonts or starting stale work`, async () => {
+		const layer = createTransitionHarness()
+		const opening = layer.open()
+		layer.requestClose(source)
+		layer.fonts.resolve()
+		await opening
+		assert.equal(layer.animations.length, 1)
+		assert.equal(layer.isOpening.value, false)
+		assert.deepEqual(layer.events.slice(-2), ['opened', 'close'])
+	})
+}
+
+test('a queued switch close is emitted once after the switching transaction settles', () => {
+	const layer = createTransitionHarness()
+	layer.isOpening.value = false
+	layer.isTransitioning.value = true
+	layer.requestClose('escape')
+	layer.requestClose('button')
+	assert(!layer.events.includes('close'))
+	layer.isTransitioning.value = false
+	layer.flushPendingClose()
+	layer.flushPendingClose()
+	assert.equal(layer.events.filter(event => event === 'close').length, 1)
+})
+
+for (const action of ['resize', 'reduce', 'invalidate']) {
+	test(`${action} during the font wait prevents stale opening work`, async () => {
+		const layer = createTransitionHarness()
+		const opening = layer.open()
+		layer.resolveNext()
+		await settle()
+		layer[action]()
+		layer.fonts.resolve()
+		await opening
+		assert.equal(layer.animations.length, 1)
+		assert.equal(layer.events.filter(event => event === 'opened').length, action === 'invalidate' ? 0 : 1)
+	})
+}
+
+for (const fallback of [false, true]) {
+	test(`closing ${fallback ? 'after resize uses a fade' : 'collapses to the clipped original card'}`, async () => {
+		const layer = createTransitionHarness()
+		layer.isOpening.value = false
+		layer.isClosing.value = true
+		const closing = layer.close({ card: layer.card, borderRadius: '0px', fadeOnly: fallback })
+		if (!fallback) assert.equal(layer.animations[0].steps[0][1].clipPath, 'inset(650px 0px 0px 0px)')
+		else assert.equal(layer.animations[0].steps[0][1].autoAlpha, 0)
+		layer.resolveNext()
+		await settle()
+		assert(layer.events.includes('target-ready'))
+		layer.resolveNext()
+		assert.equal(await closing, true)
+	})
+}
+
+test('resize interrupts a collapsing surface and finishes through the fade fallback', async () => {
+	const layer = createTransitionHarness()
+	layer.isOpening.value = false
+	layer.isClosing.value = true
+	const closing = layer.close({ card: layer.card, borderRadius: '0px' })
+	layer.resize()
+	layer.clearFinished()
+	await settle()
+	assert.equal(layer.animations[1].steps[0][1].autoAlpha, 0)
+	layer.resolveNext()
+	await settle()
+	layer.resolveNext()
+	assert.equal(await closing, true)
+})
+
+const closeTargetCode = await componentCode('src/components/sections/SectionHomeWork.vue', [
+	'reconcileAndResolveCloseTarget', 'getExhibitionProjectScrollY'
+])
+
+for (const [name, resized, selected, expected] of [
+	['same project', false, 0, 350],
+	['same project after resize', true, 0, 700],
+	['selected project after switching', false, 1, 800],
+	['selected project after switching and resize', true, 1, 1600]
+]) {
+	test(`closing ${name} restores ${selected === 0 ? 'saved progress' : 'the arrival label'}`, async () => {
+		let scrollY
+		const trigger = { start: 100, end: 1100 }
+		const card = { isConnected: true, getBoundingClientRect: () => ({ top: 200, left: 0, right: 1200, bottom: 866, width: 1200, height: 666 }) }
+		const dependencies = {
+			window: { innerWidth: 1200, innerHeight: resized ? 700 : 900, getComputedStyle: () => ({ borderRadius: '0px' }) },
+			openingViewport: { width: 1200, height: 900 }, openingProjectIndex: 0, openingStackProgress: 0.25,
+			openingHomepageScrollY: 350, reducedMotionMode: { value: false }, prefersReducedMotion: () => false,
+			exhibitionTrigger: trigger, exhibitionTimeline: { duration: () => 1000, labels: { 'project-1': 700 } },
+			setupWorkAnimations: () => { trigger.start = 200; trigger.end = 2200 },
+			ScrollTrigger: { refresh() {} }, synchronizeExhibitionScroll: value => { scrollY = value },
+			projectCards: [card, card], waitForAnimationFrame: async () => {},
+			updateVisualProjectActivation() {}, updateReducedMotionActivation() {},
+			DEBUG_PROJECT_CLOSE: false, debugProjectClose() {}, getPortfolioScrollY: () => scrollY,
+			activeProjectIndex: { value: selected }, interactiveProjectIndex: { value: selected }, hiddenProjectIndex: { value: null }
+		}
+		const resolve = new Function(...Object.keys(dependencies), `
+			let stackNeedsRefresh = ${resized}, isRestoringProjectClose = false, reducedMotionActivationEnabled = false;
+			${closeTargetCode}
+			return reconcileAndResolveCloseTarget;
+		`)(...Object.values(dependencies))
+		const result = await resolve(selected)
+		assert.equal(result.homepageScrollY, expected)
+		assert.equal(scrollY, expected)
+		assert.equal(result.fadeOnly, resized)
+	})
+}
+
+test('global refresh and scroll updates preserve frozen stack poses while retaining the Work pin', () => {
+	const stack = createWorkStackHarness()
+	try {
+		stack.seek(stack.config.animation.labels['project-2'])
+		stack.freeze()
+		const transforms = stack.cards.map(card => [card.scale, card.rotation, card.rotationX])
+		stack.isProjectLayerMounted.value = true
+		stack.seek(0)
+		stack.config.onUpdate()
+		assert.deepEqual(stack.cards.map(card => [card.scale, card.rotation, card.rotationX]), transforms)
+		stack.seek(100)
+		stack.config.onRefresh()
+		assert.deepEqual(stack.cards.map(card => [card.scale, card.rotation, card.rotationX]), transforms)
+		assert.equal(stack.config.pinSpacing, true)
+		assert(stack.config.pin)
 	} finally { stack.cleanup(); gsap.ticker.sleep() }
+})
+
+test('reduced motion opens immediately without an expansion timeline', async () => {
+	const layer = createTransitionHarness({ reduced: true })
+	await layer.open()
+	assert.equal(layer.animations.length, 0)
+	assert.equal(layer.isOpening.value, false)
+	assert(layer.events.includes('opened'))
+})
+
+test('an unexpected opening interruption settles fullscreen rather than leaving the dialog locked', async () => {
+	const layer = createTransitionHarness()
+	const opening = layer.open()
+	layer.resolveNext('interrupted')
+	await opening
+	assert.equal(layer.isOpening.value, false)
+	assert(layer.events.includes('opened'))
+})
+
+test('switching to reduced motion returns to the static card instead of an obsolete pinned scroll offset', async () => {
+	let restored
+	const card = { isConnected: true, getBoundingClientRect: () => ({ top: 200, left: 0, right: 1200, bottom: 800, width: 1200, height: 600 }) }
+	const dependencies = {
+		window: { innerWidth: 1200, innerHeight: 900, getComputedStyle: () => ({ borderRadius: '0px' }) },
+		openingViewport: { width: 1200, height: 900 }, openingProjectIndex: 0, openingStackProgress: 0.25,
+		openingHomepageScrollY: 5000, prefersReducedMotion: () => true,
+		ScrollTrigger: { refresh() {} }, synchronizeExhibitionScroll: value => { restored = value },
+		projectCards: [card], waitForAnimationFrame: async () => {},
+		updateVisualProjectActivation() {}, updateReducedMotionActivation() {},
+		DEBUG_PROJECT_CLOSE: false, debugProjectClose() {}, getPortfolioScrollY: () => 1000,
+		activeProjectIndex: { value: 0 }, interactiveProjectIndex: { value: 0 }, hiddenProjectIndex: { value: null }
+	}
+	const resolve = new Function(...Object.keys(dependencies), `
+		let stackNeedsRefresh = false, isRestoringProjectClose = false, reducedMotionActivationEnabled = false;
+		let reducedMotionMode = { value: false }, exhibitionTrigger = { start: 100, end: 1100 }, exhibitionTimeline;
+		function setupWorkAnimations() { reducedMotionMode.value = true; exhibitionTrigger = undefined; reducedMotionActivationEnabled = true }
+		${closeTargetCode}
+		return reconcileAndResolveCloseTarget;
+	`)(...Object.values(dependencies))
+	const target = await resolve(0)
+	assert.equal(restored, 1050)
+	assert.equal(target.fadeOnly, true)
+})
+
+test('resize during expansion completes fullscreen and cancels the superseded opening run', async () => {
+	const layer = createTransitionHarness()
+	const opening = layer.open()
+	layer.resolveNext()
+	layer.fonts.resolve()
+	await settle()
+	assert.equal(layer.animations.length, 2)
+	layer.resize()
+	await opening
+	assert.equal(layer.isOpening.value, false)
+	assert.equal(layer.events.filter(event => event === 'opened').length, 1)
+})
+
+test('the switch coordinator flushes a pending close only after restoring its open lifecycle', async () => {
+	const work = createWorkHarness(async (index, selected) => { selected.value = index; return true })
+	assert.equal(await work.handleProjectChangeRequest(1), true)
+	assert.deepEqual(work.flushes, ['open'])
+})
+
+
+test('Work title scales down throughout the entire pinned card sequence', () => {
+	const stack = createWorkStackHarness()
+	const exit = stack.titleExit
+	assert.equal(exit.from.scale, 1)
+	assert.equal(exit.to.scale, 0.5)
+	assert.equal(exit.to.scrollTrigger.start(), 100)
+	assert.equal(exit.to.scrollTrigger.end() - exit.to.scrollTrigger.start(), stack.config.animation.duration())
+	assert.equal(exit.to.scrollTrigger.scrub, true)
+	stack.cleanup()
+	assert(stack.titleExitDisposed())
+	gsap.ticker.sleep()
+})
+
+
+const switchedCloseCode = await componentCode('src/components/sections/SectionHomeWork.vue', [
+	'handleProjectChangeRequest', 'reconcileAndResolveCloseTarget',
+	'getExhibitionProjectScrollY', 'synchronizeExhibitionScroll'
+])
+
+test('open A, switch to B, then close: settle B under the fullscreen overlay before measuring and collapsing', async () => {
+	let progress = 0.2, scrollY = 300
+	const events = []
+	const layer = createTransitionHarness({ top: () => progress === 0.7 ? 0 : 1200 })
+	layer.isOpening.value = false
+	const selectedProjectIndex = { value: 0 }, overlayLifecycle = { value: 'open' }
+	const route = { query: { case: 'a' } }
+	const projects = { value: [{ slug: 'a', caseStatus: 'published' }, { slug: 'b', caseStatus: 'published' }] }
+	const overlay = { navigateToProject: async index => { selectedProjectIndex.value = index; return true } }
+	const dependencies = {
+		selectedProjectIndex, overlayLifecycle, route, projects, projectCount: 2,
+		projectLayer: { value: overlay }, isProjectPublished: () => true,
+		setOverlayLifecycle: value => { overlayLifecycle.value = value },
+		writeCaseUrl: async index => { route.query.case = projects.value[index].slug },
+		window: { innerWidth: 1200, innerHeight: 900, getComputedStyle: () => ({ borderRadius: '0px' }) },
+		openingViewport: { width: 1200, height: 900 }, openingProjectIndex: 0, openingStackProgress: 0.2,
+		openingHomepageScrollY: 300, reducedMotionMode: { value: false }, prefersReducedMotion: () => false,
+		exhibitionTrigger: { start: 100, end: 1100 },
+		exhibitionTimeline: { duration: () => 1000, labels: { 'project-1': 700 }, progress(value) {
+			if (value !== undefined) { progress = value; events.push('pose') }
+			return progress
+		} },
+		setPortfolioScrollY: value => { scrollY = value; events.push('scroll') },
+		projectCards: [null, layer.card], hiddenProjectIndex: { value: 0 },
+		waitForAnimationFrame: async () => { assert(!layer.events.includes('target-ready')); events.push('frame') },
+		updateVisualProjectActivation() {}, updateReducedMotionActivation() {},
+		DEBUG_PROJECT_CLOSE: false, debugProjectClose() {}, validateFrozenHomepageScroll() {},
+		getPortfolioScrollY: () => scrollY, activeProjectIndex: { value: 0 }, interactiveProjectIndex: { value: 0 },
+		events
+	}
+	const api = new Function(...Object.keys(dependencies), `
+		let stackNeedsRefresh = false, isRestoringProjectClose = false, reducedMotionActivationEnabled = false;
+		let isWorkMounted = true, lastSynchronizedCase, frozenStackProgress = 0.2;
+		// A scroll update can still report A while ScrollSmoother settles its new position.
+		const ScrollTrigger = { update() { events.push('update'); exhibitionTimeline.progress(frozenStackProgress) } };
+		${switchedCloseCode}
+		return { switchProject: handleProjectChangeRequest, resolve: reconcileAndResolveCloseTarget };
+	`)(...Object.values(dependencies))
+	assert.equal(await api.switchProject(1), true)
+	assert.equal(route.query.case, 'b')
+	assert.equal(progress, 0.2, 'switching inside the overlay must leave the background frozen at A')
+	const target = await api.resolve(selectedProjectIndex.value)
+	assert.equal(target.card, layer.card)
+	assert.equal(target.homepageScrollY, 800)
+	assert.equal(target.rect.top, 0, 'measure B only after its arrival pose is rendered')
+	assert.equal(target.fadeOnly, false)
+	assert(events.indexOf('scroll') < events.indexOf('frame'))
+	assert(events.indexOf('update') < events.indexOf('frame'))
+	layer.isClosing.value = true
+	const closing = layer.close(target)
+	assert.equal(layer.animations[0].steps[0][1].clipPath, 'inset(0px 0px 234px 0px)')
+	assert.equal(layer.animations[0].steps[0][1].duration, 0.48)
+	layer.resolveNext()
+	await settle()
+	layer.resolveNext()
+	assert.equal(await closing, true)
 })

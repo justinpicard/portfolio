@@ -12,7 +12,9 @@ export function usePortfolioContent() {
 		hero: computed(() => portfolio.value.home.hero),
 		about: computed(() => portfolio.value.home.about),
 		footer: computed(() => portfolio.value.home.footer),
-		projects: computed(() => portfolio.value.projects),
+		projects: computed(() => portfolio.value.projects.filter(
+			(project) => project.slug !== 'undrift' && project.slug !== 'charlie'
+		)),
 		seo: computed(() => portfolio.value.seo),
 		getProjectBySlug: (slug: string) => getProjectBySlug(activeLocale.value, slug)
 	}

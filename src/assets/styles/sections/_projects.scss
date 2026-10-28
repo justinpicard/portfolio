@@ -7,48 +7,29 @@ $mobile-project-card-radius: 1.5rem;
 $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 
 .work-section {
-	--work-stage-height: var(--viewport-height-dynamic);
-
-	// Exhibition composition controls.
-	--exhibition-card-width: min(42vw, 620px, calc(74svh * 0.72));
-	--exhibition-card-height: min(74svh, 820px);
-	--exhibition-card-spacing: 100;
-	--exhibition-card-rotation: 24;
-	--exhibition-rotation-scale: 0.93;
-	--exhibition-perspective: 1200px;
-	--exhibition-shadow-opacity: 0.52;
+	--work-stage-height: 100svh;
+	--exhibition-card-height: 74svh;
 	--exhibition-title-entry-offset: 100;
 
-	// Exhibition rhythm controls. Distances are relative timeline units;
-	// scroll-per-project converts the full sequence to viewport height.
-	--exhibition-title-reveal-distance: 0.42;
-	--exhibition-title-rest-distance: 0.22;
-	--exhibition-entry-distance: 1.45;
-	--exhibition-transition-distance: 1;
-	--exhibition-rest-distance: 0.62;
-	--exhibition-exit-distance: 0.92;
-	--exhibition-scroll-per-project: 69;
-	--exhibition-snap-range: 240px;
-	--exhibition-active-radius: 140;
-
 	position: relative;
-	height: var(--work-stage-height);
-	overflow: clip;
 
 	&__stage {
 		position: relative;
 		width: 100%;
-		height: var(--work-stage-height);
-		overflow: hidden;
 		isolation: isolate;
 	}
 
+	&__card-layer {
+		position: relative;
+		min-width: 0;
+	}
+
 	&__title-wrapper {
-		position: absolute;
+		position: relative;
 		inset: 0;
 		z-index: 1;
 		width: 100%;
-		height: 100%;
+		height: var(--work-stage-height);
 		overflow: hidden;
 		pointer-events: none;
 	}
@@ -116,19 +97,65 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 	}
 
 	&__exhibition {
-		position: absolute;
-		inset: 0;
+		position: relative;
 		z-index: 2;
-		perspective: var(--exhibition-perspective);
-		perspective-origin: center center;
+		display: grid;
 		pointer-events: none;
+	}
+
+	&--stack {
+		height: var(--work-stage-height);
+
+		.work-section__stage {
+			height: var(--work-stage-height);
+			// Clipping must not create a scroller that keyboard focus can move.
+			overflow: clip;
+		}
+
+		.work-section__title-wrapper {
+			position: absolute;
+		}
+
+		.work-section__exhibition {
+			position: absolute;
+			inset: 0;
+			display: block;
+		}
+
+		.work-section__card-layer {
+			position: absolute;
+			inset: 0 0 auto;
+			height: var(--exhibition-card-height);
+			perspective: 250vw;
+			perspective-origin: 50% 50%;
+			pointer-events: none;
+		}
+
+		.project-card {
+			height: 100%;
+			min-height: 0;
+			transform-origin: 50% 10%;
+		}
+	}
+
+	@include respond(lg, down) {
+		&__title {
+			font-size: 38cqw;
+		}
+	}
+
+	@include respond(md, down) {
+		--exhibition-card-height: 84svh;
+
+		&__title {
+			font-size: 42cqw;
+		}
 	}
 
 }
 
 .project-card {
 	--project-card-color: var(--color-secondary);
-	--project-card-media-start: #{$project-card-content-share};
 	--project-card-accent: color-mix(
 		in srgb,
 		var(--project-card-color) 28%,
@@ -136,12 +163,10 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 	);
 	--project-card-corner-label: #e32636;
 
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	width: var(--exhibition-card-width);
-	height: var(--exhibition-card-height);
-	border-radius: clamp(1.5rem, 2.5vw, 2.75rem);
+	position: relative;
+	width: 100%;
+	min-height: 560px;
+	border-radius: 0;
 	overflow: visible;
 	background: transparent;
 	color: var(--color-primary);
@@ -158,7 +183,8 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 
 	&:focus-visible {
 		outline: 2px solid var(--color-white);
-		outline-offset: 4px;
+		outline-offset: -6px;
+		z-index: 1;
 	}
 
 	&--transition-hidden {
@@ -168,10 +194,12 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 	&__hover-surface {
 		position: absolute;
 		inset: 0;
+		display: grid;
+		grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+		grid-template-areas: "content media";
 		border-radius: inherit;
 		overflow: hidden;
 		background: var(--project-card-color);
-		transform-origin: center;
 	}
 
 	&__corner-label {
@@ -226,12 +254,11 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 	}
 
 	&__content {
-		// Stable top and bottom anchors preserve the authored card composition
-		// while the card itself is transformed by the Cover Flow.
-		position: absolute;
-		right: clamp(1rem, 3vw, 2rem);
-		top: clamp(1rem, 3vw, 2rem);
-		left: clamp(1rem, 3vw, 2rem);
+		position: relative;
+		grid-area: content;
+		align-self: end;
+		min-width: 0;
+		padding: clamp(24px, 4vw, 72px);
 		z-index: 2;
 		color: var(--color-primary);
 	}
@@ -256,10 +283,11 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 	}
 
 	&__title {
-		@include type-role(heading-small);
-
-		margin-block-start: var(--space-1);
+		margin-block-start: var(--space-2);
 		font-family: var(--heading-font);
+		font-size: clamp(2rem, 5vw, 6rem);
+		line-height: 1;
+		overflow-wrap: anywhere;
 	}
 
 	&__description {
@@ -280,8 +308,9 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 	}
 
 	&__visual {
-		position: absolute;
-		inset: var(--project-card-media-start) 0 0;
+		position: relative;
+		grid-area: media;
+		min-height: 0;
 		z-index: 0;
 		border-radius: 0;
 		overflow: hidden;
@@ -321,30 +350,6 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 		}
 	}
 
-	&__shadow {
-		position: absolute;
-		inset: 0;
-		z-index: 3;
-		display: block;
-		opacity: 0;
-		pointer-events: none;
-
-		&--from-left {
-			background-image: linear-gradient(
-				to right,
-				rgba(0, 0, 0, .5),
-				rgba(0, 0, 0, 0)
-			);
-		}
-
-		&--from-right {
-			background-image: linear-gradient(
-				to left,
-				rgba(0, 0, 0, .5),
-				rgba(0, 0, 0, 0)
-			);
-		}
-	}
 }
 
 .work-section {
@@ -357,7 +362,6 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 // character and large 3D card is counterproductive on compact touch devices,
 // where the browser already composites the transformed elements as needed.
 @media (min-width: 64rem) and (hover: hover) and (pointer: fine) {
-	.work-section--active .project-card,
 	.work-section--title-active .split-display-char {
 		will-change: transform;
 	}
@@ -372,7 +376,6 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 
 	&--opening {
 		.project-layer-prototype__content,
-		.project-header,
 		.project-layer-prototype__nav {
 			visibility: hidden;
 		}
@@ -401,6 +404,11 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 	}
 
 	&__content {
+		&.project-layer-prototype__content--locked {
+			overflow-y: hidden;
+			pointer-events: none;
+		}
+
 		position: absolute;
 		inset: 0;
 		z-index: 4;
@@ -763,85 +771,6 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 	}
 }
 
-.work-section {
-	@include respond(lg, down) {
-		// Browser chrome must not move the sticky stage or following sections mid-scroll.
-		--work-stage-height: 100vh;
-
-		@supports (height: 100svh) {
-			--work-stage-height: 100svh;
-		}
-
-		--exhibition-card-width: min(52vw, 560px, calc(70svh * 0.72));
-		--exhibition-card-height: min(70svh, 720px);
-		--exhibition-card-spacing: 94;
-		--exhibition-card-rotation: 20;
-		--exhibition-rotation-scale: 0.94;
-		--exhibition-perspective: 1100px;
-		--exhibition-shadow-opacity: 0.48;
-		--exhibition-scroll-per-project: 86;
-
-		&__title {
-			font-size: 38cqw;
-		}
-	}
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.work-section {
-		@include respond(lg, down) {
-			height: calc(var(--work-stage-height) + var(--work-scroll-distance, 0px));
-			overflow: visible;
-
-			&__stage {
-				position: sticky;
-				top: 0;
-			}
-
-			&__exhibition {
-				perspective: none;
-			}
-		}
-	}
-}
-
-.work-section {
-	@include respond(md, down) {
-		--exhibition-card-width: #{$mobile-project-card-width};
-		--exhibition-card-height: #{$mobile-project-card-height};
-		--exhibition-card-spacing: 102;
-		--exhibition-card-rotation: 14;
-		--exhibition-rotation-scale: 0.97;
-		--exhibition-perspective: 950px;
-		--exhibition-shadow-opacity: 0.42;
-		--exhibition-rest-distance: 0.5;
-		--exhibition-scroll-per-project: 78;
-
-		&__title {
-			font-size: 42cqw;
-		}
-
-	}
-}
-
-.project-card {
-	@include respond(md, down) {
-		border-radius: $mobile-project-card-radius;
-
-		&__content {
-			top: $mobile-project-card-inset;
-			right: $mobile-project-card-inset;
-			left: $mobile-project-card-inset;
-		}
-
-		&__number {
-			top: var(--space-6);
-			left: var(--space-6);
-			font-size: clamp(3.5rem, 20vw, 6rem);
-		}
-	}
-}
-
 .project-stack-navigator {
 	@include respond(md, down) {
 		--project-stack-card-height: #{$mobile-project-card-height};
@@ -903,51 +832,8 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.work-section {
-		&__keyboard-nav {
-			// The static exhibition is taller than the viewport; keep focused controls visible.
-			position: fixed;
-		}
-		height: auto;
-		min-height: var(--work-stage-height);
-		overflow: visible;
-
-		&__stage {
-			height: auto;
-			min-height: var(--work-stage-height);
-			overflow: visible;
-		}
-
-		&__title-wrapper {
-			position: sticky;
-			top: 0;
-			height: var(--work-stage-height);
-		}
-
-		&__exhibition {
-			position: relative;
-			display: flex;
-			flex-direction: column;
-			gap: 20svh;
-			padding-block: 20svh;
-			margin-top: calc(var(--work-stage-height) * -1);
-			perspective: none;
-		}
-
-		&__title {
-			opacity: 1;
-		}
-
-	}
-
-	.project-card {
+	.work-section__keyboard-nav {
 		position: relative;
-		top: auto;
-		left: auto;
-		flex: 0 0 auto;
-		margin-inline: auto;
-		opacity: 1;
-		transform: none;
 	}
 }
 
@@ -957,63 +843,57 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 }
 
 
-// The phone stack uses ScrollTrigger pin spacing; tablet retains native sticky coverflow.
 .work-section {
 	@include respond(md, down) {
-		--exhibition-card-width: min(88vw, 24rem);
-		--exhibition-card-height: min(82svh, 760px);
+		.project-card {
+			min-height: 640px;
+		}
 
-		&__keyboard-nav {
-			z-index: 100;
+		&--stack .project-card {
+			min-height: 0;
 		}
 
 		.project-card__hover-surface {
-			display: grid;
+			grid-template-columns: minmax(0, 1fr);
 			grid-template-rows: auto minmax(0, 1fr);
 			grid-template-areas: "content" "media";
 		}
 
 		.project-card__content {
-			position: relative;
-			inset: auto;
-			grid-area: content;
-			padding: $mobile-project-card-inset;
+			padding: clamp(20px, 4vw, 32px);
 		}
 
-		.project-card__visual {
-			position: relative;
-			inset: auto;
-			grid-area: media;
-			min-height: 0;
+		.project-card__title {
+			font-size: clamp(2rem, 8vw, 3.5rem);
 		}
 	}
 }
 
-@media (prefers-reduced-motion: no-preference) {
+@media (max-height: 500px) {
 	.work-section {
-		@include respond(md, down) {
-			height: var(--work-stage-height);
+		--exhibition-card-height: 90svh;
 
-			// Keep pin geometry stable; only the visible composition follows browser chrome.
-			// Reserve three 18px depth offsets above the front card.
-			--work-stack-top: calc(var(--work-header-bottom, 0px) + max(var(--space-4), env(safe-area-inset-top, 0px)) + 3 * 18px);
-			--exhibition-card-height: min(82svh, 760px, calc(var(--viewport-height-dynamic) - var(--work-stack-top) - max(var(--space-4), env(safe-area-inset-bottom, 0px))));
+		.project-card__hover-surface {
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+			grid-template-rows: minmax(0, 1fr);
+			grid-template-areas: "content media";
+		}
 
-			&__stage {
-				position: relative;
-				height: var(--viewport-height-dynamic);
-			}
+		.project-card__content {
+			padding: 16px 24px;
+		}
 
-			.project-card {
-				--work-card-entry: 1;
-				--work-card-scale: 1;
-				--work-card-depth: 0px;
-				top: calc(var(--work-stack-top) + var(--exhibition-card-height) / 2 - var(--space-6));
-				transform-origin: center top;
-				transform: translate(-50%, -50%)
-					translateY(calc(var(--work-card-entry) * (var(--viewport-height-dynamic) - var(--work-stack-top) + var(--space-6)) + var(--work-card-depth)))
-					scale(var(--work-card-scale));
-			}
+		.project-card__title {
+			font-size: clamp(1.5rem, 4vw, 2.5rem);
+		}
+
+		.project-card__description {
+			font-size: var(--font-size-sm);
+		}
+
+		.project-card__tags {
+			gap: var(--space-1);
+			margin-block-start: var(--space-2);
 		}
 	}
 }

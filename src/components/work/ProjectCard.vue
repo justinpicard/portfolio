@@ -1,4 +1,4 @@
-x<template>
+<template>
 	<article
 		ref="card"
 		class="project-card"
@@ -19,8 +19,6 @@ x<template>
 		:style="cardStyles"
 		data-project-card
 		@click="handleOpen"
-		@pointerenter="animateHover(true)"
-		@pointerleave="animateHover(false)"
 		@keydown.enter.prevent="handleOpen"
 		@keydown.space.prevent="handleOpen"
 	>
@@ -30,7 +28,7 @@ x<template>
 					:src="`/images/${project.thumbnailImage}`"
 					alt=""
 					:fallback-format="project.thumbnailImageFormat"
-					sizes="(max-width: 47.999rem) min(88vw, 24rem), min(42vw, 620px, calc(74svh * 0.72))"
+					sizes="(max-height: 500px) 50vw, (max-width: 47.999rem) 100vw, 58vw"
 					:position="project.thumbnailImagePosition ?? 'center center'"
 				/>
 			</div>
@@ -67,17 +65,6 @@ x<template>
 				:show-icon="false"
 				aria-hidden="true"
 			/>
-
-			<span
-				class="project-card__shadow project-card__shadow--from-left"
-				data-project-shadow-from-left
-				aria-hidden="true"
-			/>
-			<span
-				class="project-card__shadow project-card__shadow--from-right"
-				data-project-shadow-from-right
-				aria-hidden="true"
-			/>
 		</div>
 	</article>
 </template>
@@ -96,8 +83,7 @@ import {
 import { useI18n } from 'vue-i18n'
 import { useCursorFollowIndicator } from '../../composables/useCursorFollowIndicator'
 import { isProjectPublished, type Project } from '../../content'
-import { gsap, prefersReducedMotion, observeReducedMotion } from '../../utils/animations/gsap'
-import { animationEases } from '../../utils/animations/presets'
+import { gsap, observeReducedMotion } from '../../utils/animations/gsap'
 import {
 	playUnavailableCardShake,
 	resetUnavailableCardShake
@@ -200,26 +186,9 @@ function clearUnavailableCardShake() {
 	unavailableShakeTimeline = undefined
 }
 
-function animateHover(isHovered: boolean) {
-	if (!hoverSurface.value || (!props.interactive && isHovered)) return
-	if (prefersReducedMotion()) {
-		gsap.killTweensOf(hoverSurface.value)
-		gsap.set(hoverSurface.value, { scale: 1 })
-		return
-	}
-
-	gsap.to(hoverSurface.value, {
-		scale: isHovered ? 1.1 : 1,
-		duration: isHovered ? 0.45 : 0.3,
-		ease: isHovered ? animationEases.backOut : animationEases.out,
-		overwrite: 'auto'
-	})
-}
-
 onMounted(() => {
 	stopObservingMotion = observeReducedMotion(() => {
 		clearUnavailableCardShake()
-		animateHover(false)
 	})
 	if (!isScrollDiagnosticGroupEnabled('projectCards')) return
 	if (!projectIndicatorWrapper.value || !projectIndicatorVisual.value) return
@@ -243,7 +212,6 @@ watch(() => props.interactive, (interactive) => {
 
 	cursorFollowIndicator?.disable()
 	clearUnavailableCardShake()
-	animateHover(false)
 	if (document.activeElement === card.value) emit('inactive-focus')
 })
 
