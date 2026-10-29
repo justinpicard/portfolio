@@ -59,11 +59,13 @@ import { animationDurations, animationEases, animationStaggers } from '../../uti
 import BaseImage from '../base/BaseImage.vue'
 
 const interests = [
-	{ emoji: '✈️', labelKey: 'home.lifeInterests.traveling' },
+	{ emoji: '😌', labelKey: 'home.lifeInterests.downToEarth' },
 	{ emoji: '🏎️', labelKey: 'home.lifeInterests.formula1' },
 	{ emoji: '🪴', labelKey: 'home.lifeInterests.plantDad' },
 	{ emoji: '🎵', labelKey: 'home.lifeInterests.music' },
+	{ emoji: '😏', labelKey: 'home.lifeInterests.dryHumor' },
 	{ emoji: '🐈', labelKey: 'home.lifeInterests.catDad' },
+	{ emoji: '💭', labelKey: 'home.lifeInterests.overthinker' },
 	{ emoji: '🏋🏻‍♂️', labelKey: 'home.lifeInterests.workingOut' }
 ]
 

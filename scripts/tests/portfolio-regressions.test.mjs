@@ -457,6 +457,16 @@ test('touch toolbar height changes leave Work timing and scroll track unchanged'
 			assert.equal(first.y + first['--work-card-entry'] * (visibleHeight - 650), visibleHeight)
 		}
 		const labels = { ...stack.config.animation.labels }
+		for (const time of [300, 500, 900, 1200]) {
+			stack.seek(time)
+			for (const visibleHeight of [650, 750]) {
+				const positions = stack.layers.map(layer => layer.y + layer['--work-card-entry'] * (visibleHeight - 650))
+				for (let index = 1; index < positions.length; index++) {
+					assert(Math.abs((positions[index] - positions[index - 1])
+						- (stack.layers[index].y - stack.layers[index - 1].y)) < 0.000001)
+				}
+			}
+		}
 		stack.seek(500)
 		const entry = stack.layers[0]['--work-card-entry']
 		assert(entry > 0 && entry < 1)
@@ -1134,4 +1144,28 @@ test('Life interests continue the intro line stagger and reverse together', asyn
 		timeline.time(0)
 		assert(pills.every(pill => pill.autoAlpha === 0 && pill.y === 12))
 	} finally { timeline.kill(); gsap.ticker.sleep() }
+})
+
+const heroResponsiveSplitCode = await componentCode('src/components/sections/SectionHomeHero.vue', ['createResponsiveLineSplit'])
+
+test('mobile hero introduction waits for viewport entry and returns its tween to SplitText for cleanup', () => {
+	const element = {}, chars = [{}]
+	const reveals = []
+	const tween = {}
+	let splitOptions
+	const createSplit = new Function('SplitText', 'gsap', 'wrapSplitElements', 'scheduleSplitRefresh',
+		'animationDurations', 'animationStaggers', 'animationEases', `${heroResponsiveSplitCode}; return createResponsiveLineSplit`)(
+		class { constructor(_element, options) { splitOptions = options } },
+		{ set() {}, fromTo(target, from, to) { reveals.push({ target, from, to }); return tween } },
+		() => {}, () => {}, { reveal: 0.8 }, { chars: 0.015 }, { backOut: 'back.out' }
+	)
+	createSplit(element)
+	assert.equal(splitOptions.onSplit({ chars }), undefined)
+	assert.equal(reveals.length, 0)
+	createSplit(element, true)
+	assert.equal(splitOptions.onSplit({ chars }), tween)
+	assert.equal(reveals[0].target, chars)
+	assert.equal(reveals[0].from.yPercent, 115)
+	assert.equal(reveals[0].to.yPercent, 0)
+	assert.deepEqual(reveals[0].to.scrollTrigger, { trigger: element, start: 'top 90%', once: true })
 })

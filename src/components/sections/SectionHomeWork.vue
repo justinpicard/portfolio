@@ -866,15 +866,19 @@ function setupExhibition() {
 			} : { y: (index: number) => positions[index] })
 		})
 		gsap.set(cards, { scale: 1, rotation: 0, rotationX: 0, transformOrigin: '50% 10%' })
+		if (useNativeSticky) {
+			// Apply the same toolbar offset to every card so their spacing stays intact.
+			timeline.to(layers, { '--work-card-entry': 0, duration: viewportHeight }, introDistance)
+		}
 
 		layers.forEach((layer, index) => {
 			const distance = positions[index]!
 			const arrival = introDistance + distance
 			timeline.fromTo(layer, useNativeSticky
-				? { '--work-card-y': `${distance}px`, '--work-card-entry': 1 }
+				? { '--work-card-y': `${distance}px` }
 				: { y: distance }, {
 				duration: distance, immediateRender: false,
-				...(useNativeSticky ? { '--work-card-y': '0px', '--work-card-entry': 0 } : { y: 0 })
+				...(useNativeSticky ? { '--work-card-y': '0px' } : { y: 0 })
 			}, introDistance)
 			timeline.addLabel(`project-${index}`, arrival)
 			if (index === cards.length - 1) return

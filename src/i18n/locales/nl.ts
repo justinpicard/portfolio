@@ -23,10 +23,12 @@ export default {
 		lifeLabel: 'Leven.',
 		lifeIntro: 'There’s a lot more to life than work and side projects. Here’s a little glimpse into mine.',
 		lifeInterests: {
-			traveling: 'Traveling',
+			downToEarth: 'Down to earth',
 			formula1: 'Formula 1',
 			plantDad: 'Plant dad',
 			music: 'Music',
+			dryHumor: 'Dry humor',
+			overthinker: 'Overthinker',
 			catDad: 'Cat dad',
 			workingOut: 'Working out'
 		},

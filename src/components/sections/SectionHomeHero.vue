@@ -120,7 +120,7 @@ function scheduleSplitRefresh() {
 	})
 }
 
-function createResponsiveLineSplit(element: HTMLElement) {
+function createResponsiveLineSplit(element: HTMLElement, revealOnScroll = false) {
 	return new SplitText(element, {
 		type: 'lines,words,chars',
 		wordsClass: 'split-word',
@@ -138,6 +138,19 @@ function createResponsiveLineSplit(element: HTMLElement) {
 				visibility: 'visible'
 			})
 			scheduleSplitRefresh()
+			if (revealOnScroll) {
+				return gsap.fromTo(split.chars, { yPercent: 115 }, {
+					yPercent: 0,
+					duration: animationDurations.reveal,
+					stagger: animationStaggers.chars,
+					ease: animationEases.backOut,
+					scrollTrigger: {
+						trigger: element,
+						start: 'top 90%',
+						once: true
+					}
+				})
+			}
 		}
 	})
 }
@@ -147,7 +160,8 @@ function enableResponsiveLineSplits(finalRole: HTMLElement, finalText: HTMLEleme
 	roleSplit?.revert()
 	introSplit?.revert()
 	roleSplit = createResponsiveLineSplit(finalRole)
-	introSplit = createResponsiveLineSplit(finalText)
+	introSplit = createResponsiveLineSplit(finalText,
+		!prefersReducedMotion() && window.matchMedia('(max-width: 47.999rem)').matches)
 }
 
 async function refreshHeroCopySplits() {
@@ -487,13 +501,6 @@ onMounted(async () => {
 				opacity: 1,
 				duration: animationDurations.fast
 			}, 'availabilityIn')
-			.to(introSplit.chars, {
-				yPercent: 0,
-				opacity: 1,
-				duration: animationDurations.reveal,
-				stagger: animationStaggers.chars,
-				ease: animationEases.backOut
-			}, 'copyIn')
 			.to(loadingScreenElement, {
 				clipPath: 'inset(0 0 100% 0)',
 				duration: 1.1,
@@ -508,6 +515,16 @@ onMounted(async () => {
 				ease: 'power4.out'
 			}, 'photoIn')
 			.call(restoreScroll, [], '>')
+
+		if (!window.matchMedia('(max-width: 47.999rem)').matches) {
+			heroTimeline.to(introSplit.chars, {
+				yPercent: 0,
+				opacity: 1,
+				duration: animationDurations.reveal,
+				stagger: animationStaggers.chars,
+				ease: animationEases.backOut
+			}, 'copyIn')
+		}
 
 		if (!useCursorScrollIndicator) {
 			heroTimeline.fromTo(scrollIndicatorVisualElement, {
