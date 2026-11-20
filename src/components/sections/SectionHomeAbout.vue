@@ -52,7 +52,7 @@ let stopObservingMotion: (() => void) | undefined
 let revealRequestId = 0
 const ABOUT_NAVIGATION_TEXT_VIEWPORT_POSITION = 0.2
 // Keep dimmed text readable against the primary background, including the small label.
-const ABOUT_CHARACTER_INITIAL_OPACITY = 0.5
+const ABOUT_CHARACTER_INITIAL_OPACITY = 0.1
 const ABOUT_EYEBROW_INITIAL_OPACITY = 0.75
 const ABOUT_CHARACTER_REVEAL_DURATION = 1
 const ABOUT_CHARACTER_REVEAL_STAGGER = 1

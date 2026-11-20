@@ -17,6 +17,13 @@
 					</div>
 				</div>
 			</div>
+			<div
+				v-if="renderedSections.length > 0 && !renderedSections[0].isMedia"
+				class="project-case-study__section-divider"
+				aria-hidden="true"
+			>
+				✦
+			</div>
 		</section>
 
 		<component

@@ -1904,15 +1904,19 @@ function createCaseHeroReveal(includeProjectHeader = true) {
 	const dividerTargets = divider ? [divider] : []
 	const metadata = getHeroMetadataElements(heroElements)
 		.filter((element) => element !== eyebrow)
-	// Nested SplitText instances must be removed before the reveal replaces link markup.
-	projectHero.value?.cleanupLiveLinkAnimation()
 	const metadataReveals = metadata.flatMap((element) => (
 		Array.from(element.children)
 			.filter((child): child is HTMLElement => child instanceof HTMLElement)
-			.map((line) => splitMaskedLines(line))
+			.map((line) => {
+				// Preserve the link's flex layout and character split throughout the reveal.
+				const link = line.querySelector<HTMLElement>('[data-stagger-link]')
+				return link ? { split: null, lines: [link] } : splitMaskedLines(line)
+			})
 	))
 	const metadataLines = metadataReveals.flatMap(({ lines }) => lines)
-	heroRevealSplits.push(...metadataReveals.map(({ split }) => split))
+	metadataReveals.forEach(({ split }) => {
+		if (split) heroRevealSplits.push(split)
+	})
 	const image = heroElements.media.querySelector<HTMLElement>('img')
 	const controls = getOverlayControls(includeProjectHeader)
 	const useCompactReveal = usesCompactRendering()

@@ -881,6 +881,7 @@ $mobile-project-card-inset: clamp(1rem, 3vw, 2rem);
 
 		.project-card__content {
 			padding: clamp(20px, 4vw, 32px);
+			padding-block-start: clamp(48px, 8vw, 72px);
 		}
 
 		.project-card__title {

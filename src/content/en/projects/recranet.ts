@@ -10,7 +10,7 @@ const recranet = {
 		'Design System',
 		'Online booking management'
 	],
-	year: '2023 - Current',
+	year: '2023 - 2026',
 	job: 'Recranet',
 	role: 'Product designer',
 	type: 'Design system & SaaS product design',
@@ -19,17 +19,6 @@ const recranet = {
 			'Recranet Booking is a reservation management platform for leisure businesses. It handles online bookings, availability, payments and guest communication, while giving businesses the tools to manage their day-to-day operations.'
 		],
 		sections: [
-			{
-				id: 'introvisual',
-				type: 'media',
-				width: 'full',
-				src: 'projects/muzimatch/muzimatch-redesign-opening-visual@2x',
-				format: 'jpg',
-				alt: 'MuziMatch interface',
-				presentation: 'wide',
-				spacing: 'spacious',
-				caption: 'A glimpse of the Muzimatch redesign, which is currently in progress.',
-			},
 			{
 				id: 'role',
 				eyebrow: 'My role',
@@ -41,41 +30,9 @@ const recranet = {
 						width: 'narrow',
 						paragraphs: [
 							'I worked on Recranet Booking as a Product Designer, designing new features and improving existing parts of the platform. I worked closely with developers from early ideas through to implementation.',
-							'I created Verano, Recranet’s design system, and continued to maintain and evolve it as the product grew. Alongside the product, I designed and optimized websites for Recranet’s customers, balancing usability with their commercial goals.',
+							'I created Verano, Recranet’s design system, and continued to develop and maintain it. Alongside the product, I designed and optimized websites for Recranet’s customers, balancing usability with their commercial goals.',
 						]
 					},
-					{
-						type: 'text',
-						width: 'narrow',
-						paragraphs: [
-							'(visuals of Verano design system, Recranet Booking interface, and Recranet customer websites)',
-						]
-					},
-					// { // Images
-					// 	type: 'columns',
-					// 	width: 'full',
-					// 	caption: 'The first version of MuziMatch focused on the core experience: discovering relevant listings and making it easy to get in touch.',
-					// 	columns: [
-					// 		{
-					// 			emphasis: 'equal',
-					// 			blocks: [{
-					// 				type: 'media',
-					// 				src: 'projects/muzimatch/muzimatch-listings-overview-early-version@2x',
-					// 				alt: 'MuziMatch portrait project artwork',
-					// 				presentation: 'landscape'
-					// 			}]
-					// 		},
-					// 		{
-					// 			emphasis: 'equal',
-					// 			blocks: [{
-					// 				type: 'media',
-					// 				src: 'projects/muzimatch/muzimatch-listing-detail-early-version@2x',
-					// 				alt: 'MuziMatch landscape project artwork',
-					// 				presentation: 'landscape'
-					// 			}]
-					// 		}
-					// 	]
-					// },
 				]
 			},
 			{
@@ -99,7 +56,7 @@ const recranet = {
 						src: 'projects/muzimatch/muzimatch_oproepen-demos@2x',
 						format: 'jpg',
 						alt: 'MuziMatch interface',
-						//caption: 'MuziMatch',
+						caption: 'Screenshot of cockpit interface showing a summary of bookings, tasks and messages.',
 						presentation: 'natural'
 					},
 				]

@@ -73,18 +73,20 @@
 							data-project-metadata
 						>
 							<span class="eyebrow project-hero__metadata-label">{{ t('project.live') }}</span>
-							<a
-								:key="project.live"
-								ref="liveLink"
-								class="text-md text-primary d-flex items-center"
-								:href="project.live"
-								target="_blank"
-								rel="noopener noreferrer"
-								data-stagger-link
-							>
-								<span data-stagger-link-container>{{ displayLiveUrl }}</span>
-								<span aria-hidden="true" class="ml-1 mt-1">↗</span>
-							</a>
+							<span class="split-line-wrapper">
+								<a
+									:key="project.live"
+									ref="liveLink"
+									class="text-md text-primary d-flex items-center"
+									:href="project.live"
+									target="_blank"
+									rel="noopener noreferrer"
+									data-stagger-link
+								>
+									<span data-stagger-link-container>{{ displayLiveUrl }}</span>
+									<span aria-hidden="true" class="ml-1">↗</span>
+								</a>
+							</span>
 						</div>
 					</div>
 				</div>
