@@ -100,6 +100,13 @@ export default {
 			cats: 'Cats'
 		}
 	},
+	mediaCarousel: {
+		carousel: 'carousel',
+		slide: 'slide',
+		previous: 'Previous slide',
+		next: 'Next slide',
+		position: 'Slide {current} of {total}'
+	},
 	errors: {
 		notFoundTitle: '404 — Page not found',
 		notFoundHeading: 'Page not found',

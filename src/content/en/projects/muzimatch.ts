@@ -21,14 +21,33 @@ const muzimatch = {
 		sections: [
 			{
 				id: 'introvisual',
-				type: 'media',
-				width: 'full',
-				src: 'projects/muzimatch/muzimatch-redesign-opening-visual@2x',
-				format: 'jpg',
-				alt: 'MuziMatch interface',
-				presentation: 'natural',
+				type: 'media-group',
+				width: 'content',
+				layout: 'overlap',
+				verticalAlign: 'center',
 				spacing: 'spacious',
 				caption: 'A glimpse of the Muzimatch redesign, which is currently in progress.',
+				items: [
+					{
+						type: 'media',
+						src: 'projects/muzimatch/muzimatch-home-desktop@2x',
+						format: 'png',
+						alt: 'MuziMatch redesign homepage on desktop',
+						width: 84,
+						align: 'start',
+						appearance: { radius: 'none' }
+					},
+					{
+						type: 'media',
+						src: 'projects/muzimatch/muzimatch-listings-mobile@2x',
+						format: 'png',
+						alt: 'MuziMatch redesign listings on mobile',
+						width: 26,
+						align: 'end',
+						appearance: { radius: 'none', maxWidth: '24rem' },
+						belowMd: { width: 100, align: 'center' }
+					}
+				]
 			},
 			{
 				id: 'context',
@@ -126,12 +145,41 @@ const muzimatch = {
 						]
 					},
 					{
-						type: 'media',
+						type: 'media-group',
 						width: 'content',
-						src: 'projects/muzimatch/muzimatch_statistics@2x',
-						format: 'jpg',
-						alt: 'MuziMatch usage statistics',
-						presentation: 'natural'
+						layout: 'grid',
+						gap: 'small',
+						appearance: { padding: 'medium', belowMd: { padding: 'none' } },
+						items: [
+							{
+								type: 'media',
+								src: 'projects/muzimatch/muzimatch-statistic-listings-posted@2x',
+								format: 'png',
+								alt: '141 listings posted, shown by month from March to October 2026',
+								appearance: { radius: 'none' }
+							},
+							{
+								type: 'media',
+								src: 'projects/muzimatch/muzimatch-statistic-listings-provinces@2x',
+								format: 'png',
+								alt: 'Listings across all 12 Dutch provinces, led by Zuid-Holland with 35',
+								appearance: { radius: 'none' }
+							},
+							{
+								type: 'media',
+								src: 'projects/muzimatch/muzimatch statistics-create-flow-completion@2x',
+								format: 'png',
+								alt: '54.8% create flow completion, up from 21.2% after simplifying the flow',
+								appearance: { radius: 'none' }
+							},
+							{
+								type: 'media',
+								src: 'projects/muzimatch/muzimatch statistics-responses@2x',
+								format: 'png',
+								alt: '37.6% of listings received a response: 53 of 141 listings',
+								appearance: { radius: 'none' }
+							}
+						]
 					},
 					{
 						type: 'text',

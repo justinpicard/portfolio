@@ -100,6 +100,13 @@ export default {
 			cats: 'Cats'
 		}
 	},
+	mediaCarousel: {
+		carousel: 'carrousel',
+		slide: 'dia',
+		previous: 'Vorige dia',
+		next: 'Volgende dia',
+		position: 'Dia {current} van {total}'
+	},
 	errors: {
 		notFoundTitle: '404 — Pagina niet gevonden',
 		notFoundHeading: 'Pagina niet gevonden',

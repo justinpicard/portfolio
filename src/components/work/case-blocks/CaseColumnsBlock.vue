@@ -26,13 +26,16 @@
 				</template>
 			</div>
 		</div>
-		<figcaption v-if="block.caption" class="case-columns-block__caption case-media-caption">
-			{{ block.caption }}
-		</figcaption>
+		<CaseMediaCaption
+			v-if="block.caption"
+			:caption="block.caption"
+			class="case-columns-block__caption"
+		/>
 	</component>
 </template>
 
 <script setup lang="ts">
+import CaseMediaCaption from './CaseMediaCaption.vue'
 import { computed } from 'vue'
 import { caseImageSizes } from '../../../utils/images/caseImageSizes'
 import type { CaseColumnsBlock } from '../../../content'

@@ -37,7 +37,6 @@ const recranet = {
 			},
 			{
 				id: 'product',
-				//eyebrow: 'The product',
 				title: 'Product work',
 				spacing: 'spacious',
 				blocks: [
@@ -53,93 +52,266 @@ const recranet = {
 					{
 						type: 'media',
 						width: 'content',
-						src: 'projects/muzimatch/muzimatch_oproepen-demos@2x',
-						format: 'jpg',
-						alt: 'MuziMatch interface',
-						caption: 'Screenshot of cockpit interface showing a summary of bookings, tasks and messages.',
+						src: 'projects/recranet/recranet-pms-cockpit@2x',
+						format: 'png',
+						alt: 'Recranet PMS cockpit interface',
+						//caption: 'Screenshot of cockpit interface showing a summary of bookings, tasks and messages.',
+						presentation: 'natural'
+					},
+					{
+						type: 'text',
+						width: 'narrow',
+						eyebrow: 'Book on map',
+						title: 'Finding the right accommodation with a map-based search',
+						paragraphs: [
+							'I worked on improving Book on Map, a feature that lets guests choose their preferred accommodation or pitch directly from a map. The interface helps guests explore available options and select a location that suits their preferences.',
+						]
+					},
+					{
+						type: 'media-group',
+						width: 'content',
+						layout: 'overlap',
+						verticalAlign: 'center',
+						items: [
+							{
+								type: 'media',
+								src: 'projects/recranet/recranet-book-on-map-desktop@2x',
+								format: 'png',
+								alt: 'Book on Map booking interface on desktop',
+								width: 84,
+								align: 'start',
+								appearance: { radius: 'none' }
+							},
+							{
+								type: 'media',
+								src: 'projects/recranet/recranet-book-on-map-mobile@2x',
+								format: 'png',
+								alt: 'Book on Map booking interface on mobile',
+								width: 26,
+								align: 'end',
+								appearance: { radius: 'none', maxWidth: '24rem' },
+								belowMd: { width: 100, align: 'center' }
+							}
+						]
+					},
+					{
+						type: 'text',
+						width: 'narrow',
+						eyebrow: 'Kiosk',
+						title: 'Checking in without a staffed reception',
+						paragraphs: [
+							'I designed a self-service check-in flow for guests arriving at locations without a staffed reception. The interface guides them through the check-in process, allowing them to complete their arrival independently.',
+						]
+					},
+					{ // Images
+						type: 'columns',
+						width: 'full',
+						caption: 'Self-service check-in kiosk in a holiday park reception.',
+						columns: [
+							{
+								emphasis: 'equal',
+								blocks: [{
+									type: 'media',
+									src: 'projects/recranet/recranet-kiosk-1',
+									format: 'png',
+									alt: 'Self-service check-in kiosk in a holiday park reception',
+									presentation: 'landscape'
+								}]
+							},
+							{
+								emphasis: 'equal',
+								blocks: [{
+									type: 'media',
+									src: 'projects/recranet/recranet-kiosk-2',
+									format: 'png',
+									alt: 'Self-service check-in kiosk in a holiday park reception',
+									presentation: 'landscape'
+								}]
+							}
+						]
+					},
+				]
+			},
+			{
+				id: 'designsystem',
+				title: 'Verano Design System',
+				spacing: 'spacious',
+				blocks: [
+					{
+						type: 'text',
+						width: 'narrow',
+						paragraphs: [
+							'Verano brings together reusable components, design tokens and interaction patterns for Recranet Booking. It provides a consistent foundation for designing new features and helps bridge the gap between design and development.',
+						]
+					},
+					{
+						type: 'media',
+						width: 'full',
+						src: 'projects/recranet/recranet-verano-design-system@2x',
+						//format: 'png',
+						alt: 'Verano Design System components and patterns for Recranet Booking',
+						caption: 'Verano Design System components and patterns for Recranet Booking.',
 						presentation: 'natural'
 					},
 				]
 			},
 			{
-				id: 'iteration',
-				eyebrow: 'The evidence',
-				title: 'Learning from real usage',
+				id: 'websites',
+				title: 'Client websites',
 				spacing: 'spacious',
 				blocks: [
 					{
 						type: 'text',
 						width: 'narrow',
 						paragraphs: [
-							'I built a small analytics dashboard to understand how MuziMatch was being used and where people dropped out. Combined with feedback from users, it helps me decide what to simplify or improve next.',
+							'Alongside Recranet Booking, I designed and improved websites for leisure businesses, focusing on usability, clear navigation and making it easier for visitors to find and book their ideal stay. Below is a selection of my work.',
 						]
 					},
 					{
-						type: 'text',
+						type: 'media-carousel',
 						width: 'narrow',
-						title: 'Simplifying the create flow',
-						paragraphs: [
-							'The original three-step flow felt more complicated than it needed to be, so I reduced it to a single page.',
-						]
-					},
-					{
-						type: 'text',
-						width: 'narrow',
-						paragraphs: [
-							'(visuals of the old and new create flow and showing the results precentages of people completing the flow)',
-						]
-					},
-					{
-						type: 'text',
-						width: 'narrow',
-						title: 'Keeping listings relevant',
-						paragraphs: [
-							'As MuziMatch grew, older listings made it harder to know who was still looking. I introduced status reminders that let musicians confirm their listing is still relevant or take it offline.',
-						]
-					},
-					{
-						type: 'text',
-						width: 'narrow',
-						paragraphs: [
-							'(visuals of reminder email)',
-						]
-					},
-					{
-						type: 'text',
-						width: 'narrow',
-						title: 'Understanding what happens after contact',
-						paragraphs: [
-							'MuziMatch can track when musicians get in touch, but not whether that contact actually leads to a match. While I know the platform has resulted in at least one successful match, there’s currently no reliable way to measure what happens after that first contact.',
-						]
-					},
-				]
-			},
-			{
-				id: 'outcome',
-				eyebrow: 'The outcome',
-				title: 'From side project to a product people use',
-				spacing: 'spacious',
-				blocks: [
-					{
-						type: 'text',
-						width: 'narrow',
-						paragraphs: [
-							'MuziMatch started as a way to learn Nuxt, but grew into a live product used by musicians across the Netherlands. It continues to evolve as more people post, respond and show me where the product can improve.',
-						]
-					},
-					{
-						type: 'text',
-						width: 'narrow',
-						paragraphs: [
-							'(visuals of metrics (listings posted, responses sent, matches made, active in X provinces)',
-						]
-					},
-					{
-						type: 'text',
-						width: 'narrow',
-						title: 'Still evolving',
-						paragraphs: [
-							'MuziMatch isn’t finished. The next challenge is understanding what happens after musicians connect, while continuing to simplify the experience and build features people actually use.',
+						label: 'Client websites',
+						slides: [
+							{
+								type: 'media-group',
+								width: 'narrow',
+								layout: 'overlap',
+								verticalAlign: 'center',
+								items: [
+									{
+										type: 'media',
+										src: 'projects/recranet/recranet-vodatent-desktop@2x',
+										format: 'png',
+										alt: 'Vodatent website interface on desktop',
+										width: 84,
+										align: 'start',
+										appearance: { radius: 'none' }
+									},
+									{
+										type: 'media',
+										src: 'projects/recranet/recranet-vodatent-mobile@2x',
+										format: 'png',
+										alt: 'Vodatent website interface on mobile',
+										width: 26,
+										align: 'end',
+										appearance: { radius: 'none', maxWidth: '24rem' },
+										belowMd: { width: 100, align: 'center' }
+									}
+								],
+								caption: {
+									link: {
+										label: 'Vodatent',
+										href: 'https://vodatent.com',
+										rel: 'noopener noreferrer',
+										target: '_blank'
+									}
+								}
+							},
+							{
+								type: 'media-group',
+								width: 'narrow',
+								layout: 'overlap',
+								verticalAlign: 'center',
+								items: [
+									{
+										type: 'media',
+										src: 'projects/recranet/recranet-beaujean-vacances-desktop@2x',
+										format: 'png',
+										alt: 'Beaujean Vacances website interface on desktop',
+										width: 84,
+										align: 'start',
+										appearance: { radius: 'none' }
+									},
+									{
+										type: 'media',
+										src: 'projects/recranet/recranet-beaujean-vacances-mobile@2x',
+										format: 'png',
+										alt: 'Beaujean Vacances website interface on mobile',
+										width: 26,
+										align: 'end',
+										appearance: { radius: 'none', maxWidth: '24rem' },
+										belowMd: { width: 100, align: 'center' }
+									}
+								],
+								caption: {
+									link: {
+										label: 'Beaujean Vacances',
+										href: 'https://www.beaujean-vacances.com/en/',
+										rel: 'noopener noreferrer',
+										target: '_blank'
+									}
+								}
+							},
+							{
+								type: 'media-group',
+								width: 'narrow',
+								layout: 'overlap',
+								verticalAlign: 'center',
+								items: [
+									{
+										type: 'media',
+										src: 'projects/recranet/recranet-buitenleven-vakanties-desktop@2x',
+										format: 'png',
+										alt: 'Buiteleven Vakanties website interface on desktop',
+										width: 84,
+										align: 'start',
+										appearance: { radius: 'none' }
+									},
+									{
+										type: 'media',
+										src: 'projects/recranet/recranet-buitenleven-vakanties-mobile@2x',
+										format: 'png',
+										alt: 'Buiteleven Vakanties website interface on mobile',
+										width: 26,
+										align: 'end',
+										appearance: { radius: 'none', maxWidth: '24rem' },
+										belowMd: { width: 100, align: 'center' }
+									}
+								],
+								caption: {
+									link: {
+										label: 'Buiteleven Vakanties',
+										href: 'https://buitenlevenvakanties.nl/',
+										rel: 'noopener noreferrer',
+										target: '_blank'
+									}
+								}
+							},
+							{
+								type: 'media-group',
+								width: 'narrow',
+								layout: 'overlap',
+								verticalAlign: 'center',
+								items: [
+									{
+										type: 'media',
+										src: 'projects/recranet/recranet-de-paardekreek-desktop@2x',
+										format: 'png',
+										alt: 'De Paardekreek website interface on desktop',
+										width: 84,
+										align: 'start',
+										appearance: { radius: 'none' }
+									},
+									{
+										type: 'media',
+										src: 'projects/recranet/recranet-de-paardekreek-mobile@2x',
+										format: 'png',
+										alt: 'De Paardekreek website interface on mobile',
+										width: 26,
+										align: 'end',
+										appearance: { radius: 'none', maxWidth: '24rem' },
+										belowMd: { width: 100, align: 'center' }
+									}
+								],
+								caption: {
+									link: {
+										label: 'De Paardekreek',
+										href: 'https://www.depaardekreek.nl/en/',
+										rel: 'noopener noreferrer',
+										target: '_blank'
+									}
+								}
+							}
 						]
 					},
 				]

@@ -62,7 +62,7 @@
 									data-stagger-link
 									class="d-flex items-center"
 								>
-									<span data-stagger-link-container>LinkedIn</span><span class="ml-1 mt-1">↗</span>
+									<span data-stagger-link-container>LinkedIn</span><span aria-hidden="true" class="stagger-link-icon ml-1">↗</span>
 								</a>
 							</li>
 							<li>
@@ -73,7 +73,7 @@
 									data-stagger-link
 									class="d-flex items-center"
 								>
-									<span data-stagger-link-container>Unsplash</span><span class="ml-1 mt-1">↗</span>
+									<span data-stagger-link-container>Unsplash</span><span aria-hidden="true" class="stagger-link-icon ml-1">↗</span>
 								</a>
 							</li>
 							<li>
@@ -84,7 +84,7 @@
 									class="d-flex items-center"
 									target="_blank"
 								>
-									<span data-stagger-link-container>{{ t('footer.resume') }}</span><span class="ml-1 mt-1">↓</span>
+									<span data-stagger-link-container>{{ t('footer.resume') }}</span><span aria-hidden="true" class="stagger-link-icon ml-1">↓</span>
 								</a>
 							</li>
 						</ul>

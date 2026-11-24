@@ -14,6 +14,16 @@
 		:block="block"
 		:class="layoutClasses"
 	/>
+	<CaseMediaGroupBlock
+		v-else-if="block.type === 'media-group'"
+		:block="block"
+		:class="layoutClasses"
+	/>
+	<CaseMediaCarouselBlock
+		v-else-if="block.type === 'media-carousel'"
+		:block="block"
+		:class="layoutClasses"
+	/>
 	<CaseColumnsBlock
 		v-else
 		:block="block"
@@ -24,6 +34,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { CaseBlock } from '../../../content'
+import CaseMediaCarouselBlock from './CaseMediaCarouselBlock.vue'
+import CaseMediaGroupBlock from './CaseMediaGroupBlock.vue'
 import CaseColumnsBlock from './CaseColumnsBlock.vue'
 import CaseFeatureBlock from './CaseFeatureBlock.vue'
 import CaseMediaBlock from './CaseMediaBlock.vue'

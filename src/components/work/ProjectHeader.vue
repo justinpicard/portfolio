@@ -9,7 +9,10 @@
 				@click="emit('close')"
 				data-stagger-link
 			>
-				<span class="project-header__close-icon" aria-hidden="true">✕</span>
+				<span class="btn btn-primary project-header__close-icon" aria-hidden="true">
+					<span class="project-header__close-glyph">✕</span>
+					<span class="btn-bg rounded-pill"></span>
+				</span>
 				<span
 					class="project-header__close-label d-none sm:d-flex"
 					data-stagger-link-container

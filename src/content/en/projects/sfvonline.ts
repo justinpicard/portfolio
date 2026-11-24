@@ -21,13 +21,34 @@ const sfvonline = {
 		sections: [
 			{
 				id: 'introvisual',
-				type: 'media',
-				width: 'full',
-				fullBleed: true,
-				src: 'projects/sfvonline/sfvonline_screens@2x',
-				format: 'jpg',
-				alt: 'SFVonline interface',
-				presentation: 'natural',
+				type: 'media-group',
+				width: 'narrow',
+				layout: 'three-up',
+				gap: 'none',
+				verticalAlign: 'start',
+				items: [
+					{
+						type: 'media',
+						src: 'projects/sfvonline/sfv-online-desktop-2@2x-1',
+						format: 'png',
+						alt: 'SFVonline distribution overview with financial report export options',
+						appearance: { radius: 'none' }
+					},
+					{
+						type: 'media',
+						src: 'projects/sfvonline/sfv-online-desktop-2@2x',
+						format: 'png',
+						alt: 'SFVonline financial overview showing assets and their values',
+						appearance: { radius: 'none' }
+					},
+					{
+						type: 'media',
+						src: 'projects/sfvonline/sfv-online-desktop-3@2x',
+						format: 'png',
+						alt: 'SFVonline form for adding a creditor and correspondence details',
+						appearance: { radius: 'none' }
+					}
+				],
 				spacing: 'spacious',
 				caption: 'Complex financial workflows, organised into a clear and consistent interface.',
 			},

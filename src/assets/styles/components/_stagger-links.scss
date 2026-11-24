@@ -15,3 +15,11 @@
 	white-space: pre;
 	will-change: transform;
 }
+
+.stagger-link-icon {
+	display: inline-block;
+	flex-shrink: 0;
+	line-height: 1;
+	// The font draws arrow glyphs high; align their visible centre without changing layout.
+	transform: translateY(0.12em);
+}

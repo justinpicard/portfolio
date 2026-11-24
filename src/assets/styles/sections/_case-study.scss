@@ -52,6 +52,8 @@
 
 	.section-layout--case-spacious .case-text-block:where(:has(
 		+ .case-media-block,
+		+ .case-media-group,
+		+ .case-media-carousel,
 		+ .case-columns-block .case-media-block
 	)) {
 		margin-block-end: var(--section-space-case-default);
@@ -136,48 +138,70 @@
 }
 
 .case-media-block {
-	&__image,
+	--case-media-preset-ratio: auto;
+	--case-media-preset-radius: clamp(1rem, 2.5vw, 2rem);
+	--case-media-preset-height: auto;
+
+	&--wide { --case-media-preset-ratio: 16 / 7; }
+	&--landscape { --case-media-preset-ratio: 6 / 5; }
+	&--portrait { --case-media-preset-ratio: 4 / 5; }
+	&--square { --case-media-preset-ratio: 1; }
+
+	&--wide, &--landscape, &--portrait, &--square {
+		--case-media-preset-height: 100%;
+	}
+
+	&--full-bleed {
+		--case-media-preset-radius: 0;
+	}
+
+	&__frame {
+		padding: var(--case-media-padding, 0);
+		background: var(--case-media-background, transparent);
+		border-radius: var(--case-media-radius, var(--case-media-preset-radius));
+	}
+
+	&__image {
+		width: 100%;
+		max-width: var(--case-media-max, none);
+		margin-inline: var(--case-media-align, auto);
+		height: auto;
+		aspect-ratio: var(--case-media-ratio, var(--case-media-preset-ratio));
+		border-radius: var(--case-media-radius, var(--case-media-preset-radius));
+		overflow: visible;
+	}
+
 	&__image img {
 		width: 100%;
-		border-radius: clamp(1rem, 2.5vw, 2rem);
-	}
-
-	&--wide &__image,
-	&--landscape &__image,
-	&--portrait &__image,
-	&--square &__image {
-		// The ratio sizes the image; the figure must also include its caption.
-		height: auto;
-	}
-
-	&--wide &__image {
-		aspect-ratio: 16 / 7;
-	}
-
-	&--landscape &__image {
-		aspect-ratio: 6 / 5;
-	}
-
-	&--portrait &__image {
-		aspect-ratio: 4 / 5;
-	}
-
-	&--square &__image {
-		aspect-ratio: 1;
-	}
-
-	&--natural &__image,
-	&--natural &__image img {
-		height: auto;
-	}
-
-	&--full-bleed &__image,
-	&--full-bleed &__image img {
-		border-radius: 0;
+		height: var(--case-media-height, var(--case-media-preset-height));
+		object-fit: var(--case-media-fit, var(--base-image-fit, cover));
+		object-position: var(--case-media-position, var(--base-image-position, center));
+		border-radius: inherit;
 	}
 
 	&--full-bleed &__caption {
 		padding-inline: var(--page-gutter);
+	}
+}
+
+@include respond(md, down) {
+	.case-media-block__frame {
+		border-radius: var(--case-media-radius-mobile, var(--case-media-radius, var(--case-media-preset-radius)));
+		padding: var(--case-media-padding-mobile, var(--case-media-padding, 0));
+		background: var(--case-media-background-mobile, var(--case-media-background, transparent));
+
+		.case-media-block__image {
+			border-radius: var(--case-media-radius-mobile, var(--case-media-radius, var(--case-media-preset-radius)));
+			max-width: var(--case-media-max-mobile, var(--case-media-max, none));
+			margin-inline: var(--case-media-align-mobile, var(--case-media-align, auto));
+			aspect-ratio: var(--case-media-ratio-mobile, var(--case-media-ratio, var(--case-media-preset-ratio)));
+		}
+
+		.case-media-block__image img {
+			height: var(--case-media-height-mobile, var(--case-media-height, var(--case-media-preset-height)));
+			object-fit: var(--case-media-fit-mobile, var(--case-media-fit, cover));
+			object-position: var(--case-media-position-mobile, var(--case-media-position, var(--base-image-position, center)));
+		}
 	}
 }
 
@@ -188,6 +212,14 @@
 	display: block;
 	margin-block-start: var(--space-6);
 	text-align: center;
+
+	&__link {
+		display: inline-flex;
+		align-items: center;
+		vertical-align: bottom;
+		color: inherit;
+		text-decoration: none;
+	}
 }
 
 .case-columns-block {
@@ -247,6 +279,18 @@
 			margin-inline-start: 33.3333%;
 		}
 
+		:is(.case-media-block, .case-media-group, .case-media-carousel, .case-columns-block).case-block--width-content {
+			flex-basis: 75%;
+
+			&.case-block--align-center {
+				margin-inline-start: 12.5%;
+			}
+
+			&.case-block--align-end {
+				margin-inline-start: 25%;
+			}
+		}
+
 		.case-block--width-narrow {
 			flex-basis: 50%;
 		}
@@ -263,5 +307,199 @@
 			flex-basis: 100%;
 			margin-inline-start: 0;
 		}
+	}
+}
+
+.case-media-group {
+	&__composition {
+		display: flex;
+		flex-direction: column;
+		gap: var(--case-group-gap);
+		padding: var(--case-group-padding-mobile, var(--case-group-padding, 0));
+		background: var(--case-group-background-mobile, var(--case-group-background, transparent));
+		border-radius: var(--case-group-radius-mobile, var(--case-group-radius, 0));
+	}
+
+	&__item {
+		min-width: 0;
+		width: var(--case-group-item-mobile-width);
+		align-self: var(--case-group-item-mobile-align);
+		margin-block-start: var(--case-group-item-mobile-offset);
+
+		.case-media-block { margin: 0; }
+	}
+
+	@include respond(md) {
+		&__composition {
+			padding: var(--case-group-padding, 0);
+			background: var(--case-group-background, transparent);
+			border-radius: var(--case-group-radius, 0);
+		}
+
+		&__item {
+			width: var(--case-group-item-width);
+			align-self: var(--case-group-item-align);
+			margin-block-start: var(--case-group-item-offset);
+		}
+
+		&__composition--row {
+			flex-direction: row;
+			align-items: var(--case-group-vertical-align);
+
+			.case-media-group__item {
+				flex: var(--case-group-item-weight) 1 0;
+				align-self: auto;
+			}
+		}
+
+		&__composition--grid {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			align-items: var(--case-group-vertical-align);
+
+			.case-media-group__item {
+				align-self: auto;
+				justify-self: var(--case-group-item-align);
+			}
+		}
+
+		&__composition--three-up {
+			display: grid;
+			grid-template-columns: repeat(3, var(--case-group-three-up-width));
+			justify-content: center;
+			align-items: var(--case-group-vertical-align);
+			overflow: clip;
+
+			.case-media-group__item {
+				width: 100%;
+				align-self: auto;
+				margin-block-start: 0;
+			}
+		}
+
+		&__composition--overlap {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr);
+			align-items: var(--case-group-vertical-align);
+			isolation: isolate;
+
+			.case-media-group__item {
+				grid-area: 1 / 1;
+				align-self: auto;
+				justify-self: var(--case-group-item-align);
+			}
+		}
+	}
+}
+
+@include respond(md) {
+	.project-case-study .case-media-group--three-up.case-block {
+		flex-basis: 100%;
+		padding-inline: 0;
+
+		&.case-block--align-center,
+		&.case-block--align-end { margin-inline-start: 0; }
+
+		> .case-media-caption { padding-inline: var(--page-gutter); }
+	}
+}
+
+.project-case-study .case-media-carousel.case-block {
+	flex-basis: 100%;
+	padding-inline: 0;
+
+	&.case-block--align-center,
+	&.case-block--align-end { margin-inline-start: 0; }
+}
+
+.case-media-carousel {
+	&__viewport {
+		overflow: clip;
+		touch-action: pan-y pinch-zoom;
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		&__viewport.is-draggable { cursor: grab; }
+		&__viewport.is-dragging { cursor: grabbing; }
+	}
+
+	&__window {
+		width: 100%;
+		margin-inline: auto;
+	}
+
+	&__track {
+		// The shared grid row reserves the tallest slide, including captions.
+		display: grid;
+		grid-auto-flow: column;
+		grid-auto-columns: 100%;
+		align-items: start;
+		transform: translateX(var(--case-carousel-offset));
+	}
+
+	&__slide {
+		min-width: 0;
+		padding-inline: var(--page-gutter);
+		opacity: 0.5;
+
+		&.is-active { opacity: 1; }
+	}
+
+	&__navigation {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-6);
+		margin-block-start: var(--space-16);
+	}
+
+	&__button {
+		display: grid;
+		place-items: center;
+		flex: 0 0 48px;
+		width: 48px;
+		height: 48px;
+		padding: 0;
+		border-radius: 50%;
+		color: inherit;
+		cursor: pointer;
+		font-size: 1.25rem;
+		line-height: 1;
+	}
+
+	&__button-icon {
+		position: relative;
+		z-index: 3;
+	}
+
+	&__button:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
+
+
+	&__counter {
+		@include type-role(ui);
+
+		font-variant-numeric: tabular-nums;
+	}
+
+	&__counter-window {
+		display: inline-grid;
+	}
+
+	&__counter-number {
+		grid-area: 1 / 1;
+		white-space: nowrap;
+	}
+
+	&__counter-character {
+		display: inline-block;
+		padding-block-end: var(--stagger-link-descender-space);
+	}
+
+	@include respond(lg) {
+		&--width-content &__window { width: 75%; }
+		&--width-narrow &__window { width: 50%; }
 	}
 }

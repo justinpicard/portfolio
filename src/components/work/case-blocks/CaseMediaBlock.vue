@@ -7,24 +7,30 @@
 			{ 'case-media-block--full-bleed': block.fullBleed }
 		]"
 	>
-		<BaseImage
-			class-name="case-media-block__image"
-			:src="`/images/${block.src}`"
-			:alt="block.alt"
-			:fallback-format="block.format"
-			:position="mediaPosition"
-			:sizes="sizes ?? (block.fullBleed ? '100vw' : caseImageSizes(block.width))"
+		<div class="case-media-block__frame" :style="appearanceStyles">
+			<BaseImage
+				class-name="case-media-block__image"
+				:src="`/images/${block.src}`"
+				:alt="block.alt"
+				:fallback-format="block.format"
+				:position="mediaPosition"
+				:sizes="imageSizes"
+			/>
+		</div>
+		<CaseMediaCaption
+			v-if="block.caption"
+			:caption="block.caption"
+			class="case-media-block__caption"
 		/>
-		<figcaption v-if="block.caption" class="case-media-block__caption case-media-caption">
-			{{ block.caption }}
-		</figcaption>
 	</component>
 </template>
 
 <script setup lang="ts">
+import CaseMediaCaption from './CaseMediaCaption.vue'
 import { computed } from 'vue'
 import type { CaseMediaBlock } from '../../../content'
 import BaseImage from '../../base/BaseImage.vue'
+import { mediaAppearanceStyles, mediaImageSizes } from '../../../utils/media/caseMedia'
 import { caseImageSizes } from '../../../utils/images/caseImageSizes'
 
 const props = defineProps<{
@@ -32,6 +38,12 @@ const props = defineProps<{
 	insideSharedFigure?: boolean
 	sizes?: string
 }>()
+
+const appearanceStyles = computed(() => mediaAppearanceStyles(props.block.appearance))
+const imageSizes = computed(() => mediaImageSizes(
+	props.sizes ?? (props.block.fullBleed ? '100vw' : caseImageSizes(props.block.width)),
+	props.block.appearance
+))
 
 const rootElement = computed(() => (
 	props.insideSharedFigure && !props.block.caption ? 'div' : 'figure'

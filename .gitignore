@@ -16,6 +16,7 @@ src/generated/
 
 # Editor directories and files
 .vscode/*
+.playwright-cli/*
 !.vscode/extensions.json
 .idea
 .DS_Store

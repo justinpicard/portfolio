@@ -84,7 +84,7 @@
 									data-stagger-link
 								>
 									<span data-stagger-link-container>{{ displayLiveUrl }}</span>
-									<span aria-hidden="true" class="ml-1">↗</span>
+									<span aria-hidden="true" class="stagger-link-icon ml-1">↗</span>
 								</a>
 							</span>
 						</div>
