@@ -24,14 +24,16 @@
 						Justin Picard
 					</span>
 					<span class="role site-nav__reveal-copy d-block sm:d-none type-label">
-						{{ t('navigation.role') }}
+						<span class="sr-only">{{ t('navigation.role') }}</span>
+				<span data-role-visual aria-hidden="true">{{ t('navigation.role') }}</span>
 					</span>
 				</span>
 			</router-link>
 		</div>
 		<div class="site-role position-fixed top-0 horizontal-center mt-8">
 			<span class="role site-nav__reveal-copy type-body-small d-none sm:d-block">
-				{{ t('navigation.role') }}
+				<span class="sr-only">{{ t('navigation.role') }}</span>
+				<span data-role-visual aria-hidden="true">{{ t('navigation.role') }}</span>
 			</span>
 		</div>
 		<div
@@ -212,6 +214,7 @@ function setupHeaderCopyReveal() {
 		}
 
 		nameSplit = new SplitText(name.value, {
+			aria: 'none',
 			type: 'chars',
 			charsClass: 'site-nav__name-char'
 		})
@@ -219,7 +222,8 @@ function setupHeaderCopyReveal() {
 			wrapSplitChar(char, 'site-nav__name-char-mask')
 		})
 
-		roleSplits = roles.map((role) => new SplitText(role, {
+		roleSplits = roles.map((role) => new SplitText(role.querySelector('[data-role-visual]'), {
+			aria: 'none',
 			type: 'chars',
 			charsClass: 'site-nav__role-char'
 		}))

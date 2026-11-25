@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/generate-images.mjs && vite-ssg build && node scripts/verify-images.mjs && node scripts/verify-static-seo.mjs",
+    "build": "node scripts/generate-images.mjs && vite-ssg build && node scripts/finalize-hosting.mjs && node scripts/verify-images.mjs && node scripts/verify-static-seo.mjs",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit",
     "verify:seo": "node scripts/verify-static-seo.mjs",

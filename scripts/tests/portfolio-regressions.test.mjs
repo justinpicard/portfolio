@@ -1169,3 +1169,28 @@ test('mobile hero introduction waits for viewport entry and returns its tween to
 	assert.equal(reveals[0].to.yPercent, 0)
 	assert.deepEqual(reveals[0].to.scrollTrigger, { trigger: element, start: 'top 90%', once: true })
 })
+
+const playTimelineCode = await componentCode('src/components/work/ProjectLayerPrototype.vue', ['playTimeline'])
+const playActualTimeline = new Function('DEBUG_PROJECT_CLOSE', `${playTimelineCode}; return playTimeline`)(false)
+
+test('zero-duration close timelines render and settle without waiting for a missing GSAP callback', async () => {
+	const target = { value: 0 }
+	const animation = gsap.timeline({ paused: true }).to(target, { value: 1, duration: 0 })
+	try {
+		const result = await Promise.race([playActualTimeline(animation), new Promise(resolve => setTimeout(() => resolve('timeout'), 100))])
+		assert.equal(result, 'complete')
+		assert.equal(target.value, 1)
+	} finally { animation.kill() }
+})
+
+test('normal close timelines still wait for completion and report interruption', async () => {
+	const animation = gsap.timeline({ paused: true }).to({ value: 0 }, { value: 1, duration: 1 })
+	const completion = playActualTimeline(animation)
+	animation.totalProgress(1)
+	assert.equal(await completion, 'complete')
+	const interrupted = gsap.timeline({ paused: true }).to({ value: 0 }, { value: 1, duration: 1 })
+	const result = playActualTimeline(interrupted)
+	interrupted.totalTime(0.2)
+	interrupted.kill()
+	assert.equal(await result, 'interrupted')
+})

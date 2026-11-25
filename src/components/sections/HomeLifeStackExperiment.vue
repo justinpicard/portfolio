@@ -11,9 +11,10 @@
 				<h2 id="home-life-title" ref="titleRef" class="home-life-section__title">
 					{{ t('home.lifeLabel') }}
 				</h2>
-				<p ref="textRef" class="home-life-section__text">
+				<p ref="textRef" aria-hidden="true" class="home-life-section__text">
 					{{ t('home.lifeIntro') }}
 				</p>
+				<p class="sr-only">{{ t('home.lifeIntro') }}</p>
 				<ul class="home-life-section__interests" role="list">
 					<li v-for="interest in interests" :key="interest.labelKey" ref="interestRefs" class="home-life-section__interest">
 						<span aria-hidden="true">{{ interest.emoji }}</span>
@@ -284,6 +285,7 @@ async function initAnimations() {
 				if (!introRef.value || !titleRef.value || !textRef.value) return
 
 				introSplit = new SplitText([titleRef.value, textRef.value], {
+					aria: 'none',
 					type: 'lines',
 					linesClass: 'split-line',
 					tag: 'span',

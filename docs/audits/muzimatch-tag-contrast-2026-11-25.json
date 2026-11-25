@@ -1,0 +1,150 @@
+{
+  "date": "2026-11-25",
+  "fill": "15% white",
+  "foreground": "#0a15df",
+  "projectBackground": "#b0b0fe",
+  "requiredContrast": 4.5,
+  "minimumMeasuredContrast": 5.370979203344859,
+  "measurements": [
+    {
+      "context": "homepage",
+      "width": 390,
+      "reduced": true,
+      "otherTagsUnchanged": true,
+      "tagsPerState": 4,
+      "states": {
+        "default": 5.370979203344859,
+        "hover": 5.370979203344859,
+        "focus": 5.370979203344859,
+        "pressed": 5.370979203344859
+      }
+    },
+    {
+      "context": "homepage",
+      "width": 412,
+      "reduced": true,
+      "otherTagsUnchanged": true,
+      "tagsPerState": 4,
+      "states": {
+        "default": 5.370979203344859,
+        "hover": 5.370979203344859,
+        "focus": 5.370979203344859,
+        "pressed": 5.370979203344859
+      }
+    },
+    {
+      "context": "homepage",
+      "width": 767,
+      "reduced": true,
+      "otherTagsUnchanged": true,
+      "tagsPerState": 4,
+      "states": {
+        "default": 5.370979203344859,
+        "hover": 5.370979203344859,
+        "focus": 5.370979203344859,
+        "pressed": 5.370979203344859
+      }
+    },
+    {
+      "context": "homepage",
+      "width": 768,
+      "reduced": true,
+      "otherTagsUnchanged": true,
+      "tagsPerState": 4,
+      "states": {
+        "default": 5.370979203344859,
+        "hover": 5.370979203344859,
+        "focus": 5.370979203344859,
+        "pressed": 5.370979203344859
+      }
+    },
+    {
+      "context": "homepage",
+      "width": 1024,
+      "reduced": true,
+      "otherTagsUnchanged": true,
+      "tagsPerState": 4,
+      "states": {
+        "default": 5.370979203344859,
+        "hover": 5.370979203344859,
+        "focus": 5.370979203344859,
+        "pressed": 5.370979203344859
+      }
+    },
+    {
+      "context": "homepage",
+      "width": 1440,
+      "reduced": true,
+      "otherTagsUnchanged": true,
+      "tagsPerState": 4,
+      "states": {
+        "default": 5.370979203344859,
+        "hover": 5.370979203344859,
+        "focus": 5.370979203344859,
+        "pressed": 5.370979203344859
+      }
+    },
+    {
+      "context": "homepage",
+      "width": 390,
+      "reduced": false,
+      "otherTagsUnchanged": true,
+      "tagsPerState": 4,
+      "states": {
+        "default": 5.370979203344859,
+        "hover": 5.370979203344859,
+        "focus": 5.370979203344859,
+        "pressed": 5.370979203344859
+      }
+    },
+    {
+      "context": "homepage",
+      "width": 1440,
+      "reduced": false,
+      "otherTagsUnchanged": true,
+      "tagsPerState": 4,
+      "states": {
+        "default": 5.370979203344859,
+        "hover": 5.370979203344859,
+        "focus": 5.370979203344859,
+        "pressed": 5.370979203344859
+      }
+    },
+    {
+      "context": "navigator",
+      "width": 390,
+      "tagsPerState": 4,
+      "states": {
+        "default": 5.370979203344859,
+        "hover": 5.370979203344859,
+        "focus": 5.370979203344859
+      }
+    },
+    {
+      "context": "navigator",
+      "width": 1440,
+      "tagsPerState": 4,
+      "states": {
+        "default": 5.370979203344859,
+        "hover": 5.370979203344859,
+        "focus": 5.370979203344859
+      }
+    }
+  ],
+  "lighthouse": {
+    "desktop": {
+      "lighthouseVersion": "13.6.0",
+      "fetchTime": "2026-11-25T17:53:40.998Z",
+      "accessibility": 100,
+      "colorContrastScore": 1,
+      "contrastViolations": 0
+    },
+    "mobile": {
+      "lighthouseVersion": "13.6.0",
+      "fetchTime": "2026-11-25T17:53:50.879Z",
+      "accessibility": 100,
+      "colorContrastScore": 1,
+      "contrastViolations": 0
+    }
+  }
+}

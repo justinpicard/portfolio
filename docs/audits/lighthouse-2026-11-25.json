@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-25",
+  "lighthouseVersion": "13.6.0",
+  "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36",
+  "url": "http://127.0.0.1:8181/",
+  "desktop": {
+    "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100,
+      "agentic-browsing": 100
+    },
+    "fcp": 447.9541,
+    "lcp": 447.9541,
+    "tbt": 0,
+    "cls": 0.00005285822169687418,
+    "bytes": 405227,
+    "requests": 10
+  },
+  "mobile": {
+    "scores": {
+      "performance": 91,
+      "accessibility": 97,
+      "best-practices": 100,
+      "seo": 100,
+      "agentic-browsing": 100
+    },
+    "fcp": 910.0453,
+    "lcp": 3494.0452999999998,
+    "tbt": 28,
+    "cls": 0,
+    "bytes": 470544,
+    "requests": 11
+  }
+}

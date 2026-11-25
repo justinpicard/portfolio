@@ -72,6 +72,7 @@
 						<Tag
 							v-for="tag in projects[projectIndex].tags"
 							:key="tag"
+							:class="{ 'tag--light': projects[projectIndex].slug === 'muzimatch' }"
 						>
 							{{ tag }}
 						</Tag>

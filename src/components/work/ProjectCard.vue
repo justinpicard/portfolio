@@ -50,6 +50,7 @@
 					<Tag
 						v-for="tag in project.tags"
 						:key="tag"
+						:class="{ 'tag--light': project.slug === 'muzimatch' }"
 					>
 						{{ tag }}
 					</Tag>

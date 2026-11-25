@@ -8,7 +8,7 @@
 					ref="aboutText"
 				>
 					<h2 class="about-section__eyebrow eyebrow font-body mb-8 text-secondary" ref="aboutLabel">{{ t('home.aboutLabel') }}</h2>
-					<p class="about-section__title heading-font mb-8 md:mb-16" ref="aboutIntro">
+					<p aria-hidden="true" class="about-section__title heading-font mb-8 md:mb-16" ref="aboutIntro">
 						{{ about.greeting }}.
 						<span class="wave">👋🏼</span>
 						{{ about.introduction }}
@@ -20,6 +20,7 @@
 							{{ paragraph }}
 						</span>
 					</p>
+					<p class="sr-only">{{ about.greeting }}. 👋🏼 {{ about.introduction }} {{ about.paragraphs.join(' ') }}</p>
 				</div>
 			</div>
 		</div>
@@ -116,6 +117,7 @@ async function initAboutReveal() {
 			charsClass: 'about-section__char'
 		})
 		const introSplit = new SplitText(aboutIntro.value, {
+			aria: 'none',
 			type: 'words,chars',
 			wordsClass: 'about-section__word',
 			charsClass: 'about-section__char'

@@ -1420,7 +1420,13 @@ function playTimeline(
 
 		animation.eventCallback('onComplete', () => finish('complete'))
 		animation.eventCallback('onInterrupt', () => finish('interrupted'))
-		animation.play(0)
+		// A zero-duration GSAP timeline can render without dispatching onComplete.
+		if (animation.totalDuration() === 0) {
+			animation.totalProgress(1)
+			finish('complete')
+		} else {
+			animation.play(0)
+		}
 	})
 }
 
