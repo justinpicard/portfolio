@@ -2,14 +2,23 @@ import { readdir, readFile, mkdir, writeFile, rm } from 'node:fs/promises'
 import { join, relative, extname } from 'node:path'
 import { createHash } from 'node:crypto'
 import sharp from 'sharp'
+import { validateImageReferences } from './image-references.mjs'
 
-const sourceRoot = 'public/images'
+const sourceRoot = 'assets/source-images'
 const outputRoot = 'public/generated/images'
 const manifestRoot = 'src/generated'
 const dimensionsOnly = process.argv.includes('--dimensions-only')
 const dimensions = {}
 const manifest = {}
 const report = []
+const unoptimized = {}
+const exclusions = JSON.parse(await readFile('scripts/image-exclusions.json', 'utf8'))
+const sourceFiles = (await collect('src')).filter(path => !path.startsWith('src/generated/') && /\.(vue|ts|js|scss)$/.test(path))
+const sourceText = (await Promise.all(sourceFiles.map(path => readFile(path, 'utf8')))).join('\n') + await readFile('index.html', 'utf8')
+validateImageReferences(sourceText, [
+	...(await collect(sourceRoot)).map(path => relative(sourceRoot, path)),
+	...(await collect('public/images')).map(path => relative('public/images', path))
+], exclusions, (await collect('public')).map(path => relative('public', path)))
 
 async function collect(directory) {
 	const entries = await readdir(directory, { withFileTypes: true })
@@ -27,12 +36,19 @@ await mkdir(manifestRoot, { recursive: true })
 for (const path of (await collect(sourceRoot)).sort()) {
 	if (!/\.(jpe?g|png)$/i.test(path)) continue
 	const input = await readFile(path)
-	const url = '/' + relative('public', path).split('\\').join('/')
+	const url = '/images/' + relative(sourceRoot, path).split('\\').join('/')
 	const metadata = await sharp(input).metadata()
 	const rotated = metadata.orientation >= 5 && metadata.orientation <= 8
 	dimensions[url] = { width: rotated ? metadata.height : metadata.width, height: rotated ? metadata.width : metadata.height }
 	if (dimensionsOnly) continue
+	if (exclusions.includes(relative(sourceRoot, path).split('\\').join('/'))) continue
+	async function keepOriginal(reason) {
+		const filename = `${createHash('sha256').update(input).digest('hex').slice(0, 16)}${extname(path)}`
+		await writeFile(join(outputRoot, filename), input)
+		unoptimized[url] = { url: `/generated/images/${filename}`, ...dimensions[url], bytes: input.length, reason }
+	}
 	if (input.length < 32 * 1024) {
+		await keepOriginal('under 32 KiB')
 		report.push({ url, originalBytes: input.length, skipped: 'under 32 KiB' })
 		continue
 	}
@@ -42,6 +58,7 @@ for (const path of (await collect(sourceRoot)).sort()) {
 		: { quality: path.includes('/projects/') ? 90 : 85, alphaQuality: 100, effort: 6 }
 	const full = await sharp(input).rotate().webp(options).toBuffer({ resolveWithObject: true })
 	if (full.data.length > input.length * 0.9 || input.length - full.data.length < 8192) {
+		await keepOriginal('less than 10% / 8 KiB saving')
 		report.push({ url, originalBytes: input.length, skipped: 'less than 10% / 8 KiB saving' })
 		continue
 	}
@@ -69,6 +86,7 @@ await writeFile(join(manifestRoot, 'image-dimensions.json'), JSON.stringify(dime
 if (dimensionsOnly) {
 	console.log(`Image dimensions: ${Object.keys(dimensions).length} originals.`)
 } else {
+	await writeFile(join(manifestRoot, 'image-unoptimized.json'), JSON.stringify(unoptimized, null, 2) + '\n')
 	await writeFile(join(manifestRoot, 'image-manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
 	await writeFile(join(manifestRoot, 'image-report.json'), JSON.stringify(report, null, 2) + '\n')
 	console.log(`Images: ${Object.keys(manifest).length} optimized, ${report.filter(item => item.skipped).length} skipped. See src/generated/image-report.json.`)

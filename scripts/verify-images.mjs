@@ -1,25 +1,67 @@
 import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
+import { readFile, readdir, access } from 'node:fs/promises'
 import sharp from 'sharp'
+
+async function readDistribution(file) {
+	try {
+		return await readFile(file)
+	} catch (error) {
+		throw new Error(`Missing required distribution asset: ${file}. Run npm run build and check image generation or public assets.`, { cause: error })
+	}
+}
 
 const manifest = JSON.parse(await readFile('src/generated/image-manifest.json', 'utf8'))
 const dimensions = JSON.parse(await readFile('src/generated/image-dimensions.json', 'utf8'))
 for (const [original, image] of Object.entries(dimensions)) {
-	const metadata = await sharp(`public${original}`).metadata()
+	const metadata = await sharp(`assets/source-images/${original.slice('/images/'.length)}`).metadata()
 	const rotated = metadata.orientation >= 5 && metadata.orientation <= 8
 	assert.equal(image.width, rotated ? metadata.height : metadata.width, `Intrinsic width: ${original}`)
 	assert.equal(image.height, rotated ? metadata.width : metadata.height, `Intrinsic height: ${original}`)
 }
+const unoptimized = JSON.parse(await readFile('src/generated/image-unoptimized.json', 'utf8'))
+const distributed = new Set([...Object.values(manifest).flatMap(image => [image, ...image.variants]), ...Object.values(unoptimized)].map(image => `dist${image.url}`))
+const exclusions = JSON.parse(await readFile('scripts/image-exclusions.json', 'utf8'))
+for (const original of Object.keys(dimensions)) {
+	if (exclusions.includes(original.slice('/images/'.length))) continue
+	assert(manifest[original] || unoptimized[original], `Missing distribution manifest entry: ${original}. Run image generation.`)
+}
+for (const [original, image] of Object.entries(unoptimized)) {
+	assert(image.reason, `Missing intentional skip reason: ${original}`)
+	const source = await readFile(`assets/source-images/${original.slice('/images/'.length)}`)
+	assert(source.equals(await readDistribution(`dist${image.url}`)), `Unoptimized distribution changed: ${original}`)
+}
+async function inspect(directory) {
+	for (const entry of await readdir(directory, { withFileTypes: true })) {
+		const file = `${directory}/${entry.name}`
+		assert(entry.name !== '.DS_Store', `OS metadata published: ${file}`)
+		if (entry.isDirectory()) await inspect(file)
+		else if (file.startsWith('dist/generated/images/')) assert(distributed.has(file), `Unreferenced generated image published: ${file}`)
+		else if (/^dist\/images\/.*\.(png|jpe?g)$/i.test(file)) assert.equal(file, 'dist/images/dot-pattern.png', `Source image published: ${file}`)
+	}
+}
+async function verifyPublic(directory) {
+	for (const entry of await readdir(directory, { withFileTypes: true })) {
+		const file = `${directory}/${entry.name}`
+		if (entry.name === '.DS_Store') continue
+		if (entry.isDirectory()) await verifyPublic(file)
+		else {
+			const output = file.replace(/^public\//, 'dist/')
+			assert((await readFile(file)).equals(await readDistribution(output)), `Required distribution asset missing or changed: ${output}`)
+		}
+	}
+}
+await verifyPublic('public')
+await inspect('dist')
 for (const [original, image] of Object.entries(manifest)) {
-	const source = await readFile(`public${original}`)
-	assert(source.equals(await readFile(`dist${original}`)), `Fallback changed: ${original}`)
+	const source = await readFile(`assets/source-images/${original.slice('/images/'.length)}`)
+	await assert.rejects(access(`dist${original}`), `Original unexpectedly published: ${original}`)
 	assert(image.bytes <= source.length * 0.9, `Insufficient savings: ${original}`)
 	const sourceMetadata = await sharp(source).rotate().toBuffer({ resolveWithObject: true })
 	assert.equal(image.width, sourceMetadata.info.width)
 	assert.equal(image.height, sourceMetadata.info.height)
 	assert.deepEqual(dimensions[original], { width: image.width, height: image.height })
 	for (const variant of [...image.variants, image]) {
-		const output = await readFile(`dist${variant.url}`)
+		const output = await readDistribution(`dist${variant.url}`)
 		const metadata = await sharp(output).metadata()
 		assert.equal(metadata.format, 'webp')
 		assert.equal(metadata.width, variant.width)

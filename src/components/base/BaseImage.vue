@@ -9,7 +9,7 @@
 	>
 		<source v-if="optimizedImage" type="image/webp" :srcset="webpSrcset" :sizes="sizes" />
 		<img
-			:src="fallbackSource"
+			:src="getImageSource(fallbackSource)"
 			:alt="alt"
 			:width="width ?? imageDimensions?.width"
 			:height="height ?? imageDimensions?.height"
@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { CSSProperties } from 'vue'
-import { getImageDimensions, getOptimizedImage } from '../../utils/images/optimizedImages'
+import { getImageDimensions, getOptimizedImage, getImageSource } from '../../utils/images/optimizedImages'
 
 const props = withDefaults(defineProps<{
 	src: string

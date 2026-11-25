@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { imageDistribution } from './scripts/image-distribution.mjs'
 import {
 	getAbsoluteUrl,
 	indexableRoutePaths,
@@ -79,7 +80,7 @@ function staticSeoFiles() {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), staticSeoFiles()],
+  plugins: [vue(), staticSeoFiles(), imageDistribution()],
   css: {
     preprocessorOptions: {
       scss: {

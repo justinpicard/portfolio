@@ -13,7 +13,7 @@
 			>
 				<figure ref="avatar" class="avatar">
 					<BaseImage
-						src="/images/justin-picard-avatar-3"
+						src="/images/justin-picard-avatar"
 						sizes="48px"
 						loading="eager"
 						:alt="t('accessibility.avatarAlt')"

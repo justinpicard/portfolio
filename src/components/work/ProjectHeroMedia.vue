@@ -39,6 +39,7 @@
 import { computed, onMounted, onUnmounted, ref, watch, type CSSProperties } from 'vue'
 import type { Project } from '../../content'
 import BaseImage from '../base/BaseImage.vue'
+import { getImageSource } from '../../utils/images/optimizedImages'
 import MotionControl from '../ui/MotionControl.vue'
 
 const props = withDefaults(defineProps<{
@@ -62,7 +63,7 @@ const imageFormat = computed(() => (
 	props.project.heroPosterImageFormat ?? props.project.heroImageFormat
 ))
 const mediaPosition = computed(() => props.project.heroImagePosition ?? 'center center')
-const posterSource = computed(() => `${imageSource.value}.${imageFormat.value ?? 'jpg'}`)
+const posterSource = computed(() => getImageSource(`${imageSource.value}.${imageFormat.value ?? 'jpg'}`))
 const videoStyles = computed<CSSProperties>(() => ({
 	'--project-hero-media-position': mediaPosition.value
 } as CSSProperties))
