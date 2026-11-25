@@ -207,6 +207,7 @@ export type ProjectContent = {
 	tags: string[]
 	year: string
 	job: string
+	jobLabel?: string
 	role: string
 	type: string
 	caseStudy: ProjectCaseStudy

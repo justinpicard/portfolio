@@ -12,6 +12,7 @@ const recranet = {
 	],
 	year: '2023 - 2026',
 	job: 'Recranet',
+	jobLabel: 'Employer',
 	role: 'Product designer',
 	type: 'Design system & SaaS product design',
 	caseStudy: {
@@ -29,8 +30,8 @@ const recranet = {
 						type: 'text',
 						width: 'narrow',
 						paragraphs: [
-							'I worked on Recranet Booking as a Product Designer, designing new features and improving existing parts of the platform. I worked closely with developers from early ideas through to implementation.',
-							'I created Verano, Recranet’s design system, and continued to develop and maintain it. Alongside the product, I designed and optimized websites for Recranet’s customers, balancing usability with their commercial goals.',
+							'As a Product Designer at Recranet, I contributed to the development of Recranet Booking by designing new features and improving existing parts of the platform.',
+							'My responsibilities also included establishing, developing and maintaining Verano, Recranet’s design system. Alongside my product design work, I worked on the design and optimization of websites for Recranet’s customers, balancing usability with their commercial goals.',
 						]
 					},
 				]
@@ -55,7 +56,6 @@ const recranet = {
 						src: 'projects/recranet/recranet-pms-cockpit@2x',
 						format: 'png',
 						alt: 'Recranet PMS cockpit interface',
-						//caption: 'Screenshot of cockpit interface showing a summary of bookings, tasks and messages.',
 						presentation: 'natural'
 					},
 					{
@@ -164,7 +164,7 @@ const recranet = {
 						type: 'text',
 						width: 'narrow',
 						paragraphs: [
-							'Alongside Recranet Booking, I designed and improved websites for leisure businesses, focusing on usability, clear navigation and making it easier for visitors to find and book their ideal stay. Below is a selection of my work.',
+							'Alongside Recranet Booking, I designed and improved websites for leisure businesses, focusing on usability, clear navigation and making it easier for visitors to find and book their ideal stay. Below is a selection of websites I worked on during my time at Recranet.',
 						]
 					},
 					{

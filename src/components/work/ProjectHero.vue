@@ -50,7 +50,7 @@
 							data-project-metadata
 							class="d-flex gap-1 flex-column"
 						>
-							<span class="eyebrow project-hero__metadata-label">{{ t('project.job') }}</span>
+							<span class="eyebrow project-hero__metadata-label">{{ project.jobLabel ?? t('project.job') }}</span>
 							<span class="text-md">{{ project.job }}</span>
 						</div>
 						<div 
