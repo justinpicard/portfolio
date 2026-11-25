@@ -11,6 +11,7 @@ export function usePortfolioContent() {
 	return {
 		hero: computed(() => portfolio.value.home.hero),
 		about: computed(() => portfolio.value.home.about),
+		faq: computed(() => portfolio.value.home.faq),
 		footer: computed(() => portfolio.value.home.footer),
 		projects: computed(() => portfolio.value.projects.filter(
 			(project) => project.slug !== 'undrift' && project.slug !== 'charlie'

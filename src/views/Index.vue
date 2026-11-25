@@ -26,6 +26,7 @@
 					@overlay-lifecycle-change="workOverlayLifecycle = $event"
 				/>
 				<HomeLifeStackExperiment />
+				<SectionHomeFaq />
 				<AppFooter />
 			</div>
 		</div>
@@ -38,6 +39,7 @@ import AppHeader from "../components/AppHeader.vue"
 import LoadingScreen from "../components/LoadingScreen.vue"
 import HomeLifeStackExperiment from "../components/sections/HomeLifeStackExperiment.vue"
 import SectionHomeHero from "../components/sections/SectionHomeHero.vue";
+import SectionHomeFaq from "../components/sections/SectionHomeFaq.vue";
 import SectionHomeAbout from "../components/sections/SectionHomeAbout.vue";
 import SectionHomeWork from "../components/sections/SectionHomeWork.vue";
 import AppFooter from "../components/AppFooter.vue"

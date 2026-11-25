@@ -14,6 +14,7 @@ export default {
 		about: 'Over mij',
 		work: 'Werk',
 		life: 'Leven',
+		questions: 'Questions',
 		sayHi: 'Zeg hallo'
 	},
 	home: {

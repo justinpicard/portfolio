@@ -17,6 +17,16 @@ export type AboutContent = {
 	paragraphs: string[]
 }
 
+export type FaqContent = {
+	heading: string
+	introduction: string
+	items: {
+		id: string
+		question: string
+		answer: string | string[]
+	}[]
+}
+
 export type HeroContent = {
 	name: string
 	role: string
@@ -42,6 +52,7 @@ export type SeoContent = {
 export type HomeContent = {
 	hero: HeroContent
 	about: AboutContent
+	faq: FaqContent
 	footer: FooterContent
 }
 
@@ -256,6 +267,7 @@ export type PortfolioContentOverrides = {
 	home?: {
 		hero?: Partial<HeroContent>
 		about?: Partial<AboutContent>
+		faq?: Partial<FaqContent>
 		footer?: Partial<FooterContent>
 	}
 	projects?: ProjectContentOverride[]

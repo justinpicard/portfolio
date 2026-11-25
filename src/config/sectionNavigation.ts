@@ -3,7 +3,8 @@ export const SECTION_NAVIGATION_ITEMS = [
 	{ id: 'about', number: '02', labelKey: 'sectionNavigation.about' },
 	{ id: 'work', number: '03', labelKey: 'sectionNavigation.work' },
 	{ id: 'life', number: '04', labelKey: 'sectionNavigation.life' },
-	{ id: 'say-hi', number: '05', labelKey: 'sectionNavigation.sayHi' }
+	{ id: 'faq', number: '05', labelKey: 'sectionNavigation.questions' },
+	{ id: 'say-hi', number: '06', labelKey: 'sectionNavigation.sayHi' }
 ] as const
 
 export type SectionNavigationItem = typeof SECTION_NAVIGATION_ITEMS[number]

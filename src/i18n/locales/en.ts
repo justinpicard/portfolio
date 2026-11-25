@@ -14,6 +14,7 @@ export default {
 		about: 'About',
 		work: 'Work',
 		life: 'Life',
+		questions: 'Questions',
 		sayHi: 'Say hi'
 	},
 	home: {

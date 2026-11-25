@@ -1194,3 +1194,29 @@ test('normal close timelines still wait for completion and report interruption',
 	interrupted.kill()
 	assert.equal(await result, 'interrupted')
 })
+
+const faqCode = await componentCode('src/components/sections/SectionHomeFaq.vue', ['toggle', 'cancel', 'animate'])
+
+test('FAQ toggles independent answers without closing other items', () => {
+	const openItems = { value: new Set() }
+	const toggle = new Function('openItems', `${faqCode}; return toggle`)(openItems)
+	toggle('role')
+	toggle('location')
+	assert.deepEqual([...openItems.value], ['role', 'location'])
+	toggle('role')
+	assert.deepEqual([...openItems.value], ['location'])
+})
+
+test('FAQ reduced motion completes immediately and refreshes measurements after reflow', async () => {
+	let completed = 0, refreshed = 0, cancelled = 0
+	const panel = { style: {}, scrollHeight: 200 }
+	const animate = new Function('gsap', 'prefersReducedMotion', 'nextTick', 'root', 'ScrollTrigger', `${faqCode}; return animate`)(
+		{ killTweensOf: () => cancelled++, set: () => {}, to: () => assert.fail('Reduced motion must not start a tween') },
+		() => true, callback => Promise.resolve().then(callback), { value: {} }, { refresh: () => refreshed++ }
+	)
+	animate(panel, () => completed++, true)
+	assert.equal(completed, 1)
+	await Promise.resolve()
+	assert.equal(refreshed, 1)
+	assert.equal(cancelled, 1)
+})

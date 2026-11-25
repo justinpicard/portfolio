@@ -1,6 +1,7 @@
 import { resolveLocale } from '../i18n'
 import aboutEn from './en/about'
 import footerEn from './en/footer'
+import faqEn from './en/faq'
 import heroEn from './en/hero'
 import { projects as projectsEn } from './en/projects'
 import seoEn from './en/seo'
@@ -21,6 +22,7 @@ import type {
 const englishHome = {
 	hero: heroEn,
 	about: aboutEn,
+	faq: faqEn,
 	footer: footerEn
 }
 
@@ -60,6 +62,10 @@ function buildContent(
 			about: {
 				...englishHome.about,
 				...overrides.home?.about
+			},
+			faq: {
+				...englishHome.faq,
+				...overrides.home?.faq
 			},
 			footer: {
 				...englishHome.footer,

@@ -1,0 +1,111 @@
+@use "../abstracts" as *;
+
+.faq-section {
+	color: var(--color-white);
+
+	&__header {
+		width: 100%;
+		text-align: center;
+		margin-block-end: var(--space-16);
+	}
+
+	&__title {
+		font-size: clamp(4.5rem, 18vw, 8rem);
+		line-height: 1;
+		letter-spacing: var(--letter-spacing-tight);
+
+		@include respond(lg) {
+			font-size: clamp(6rem, 10vw, 10rem);
+		}
+		hyphens: auto;
+		overflow-wrap: anywhere;
+		max-width: 15ch;
+		margin: 0 auto var(--space-10);
+	}
+
+	&__intro {
+		@include type-role(lead);
+
+		margin: 0 auto;
+	}
+
+	&__intro,
+	&__items {
+		width: 100%;
+		margin-inline: auto;
+
+		@include respond(lg) { width: 66.666667%; }
+	}
+
+	&__items {
+		--faq-number-width: var(--space-8);
+		--faq-column-gap: var(--space-6);
+	}
+
+	&__item {
+		border-block-start: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+		&:last-child { border-block-end: 1px solid color-mix(in srgb, currentColor 25%, transparent); }
+	}
+
+	&__question { margin: 0; }
+
+	&__toggle {
+		@include type-role(lead);
+		display: grid;
+		grid-template-columns: var(--faq-number-width) minmax(0, 1fr) 1rem;
+		align-items: center;
+		gap: var(--faq-column-gap);
+		width: 100%;
+		min-height: 3rem;
+		padding: var(--space-6) 0;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+		color: inherit;
+		font-family: inherit;
+		text-align: left;
+		cursor: pointer;
+
+		&:hover { color: var(--color-secondary); }
+		&:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+	}
+
+	&__number { font-variant-numeric: tabular-nums; }
+
+	&__icon {
+		position: relative;
+		width: 1rem;
+		height: 1rem;
+		&::before, &::after {
+			content: '';
+			position: absolute;
+			inset: calc(50% - 1px) 0 auto;
+			height: 2px;
+			background: currentColor;
+		}
+		&::after { transform: rotate(90deg); transition: transform 250ms ease; }
+	}
+
+	&__toggle[aria-expanded="true"] &__icon::after { transform: rotate(0deg); }
+
+	&__answer {
+		font-size: var(--font-size-body);
+		margin: 0;
+		padding: 0 calc(1rem + var(--faq-column-gap)) var(--space-6) calc(var(--faq-number-width) + var(--faq-column-gap));
+		line-height: var(--line-height-normal);
+	}
+
+	&__paragraph {
+		margin: 0;
+
+		& + & { margin-block-start: var(--space-4); }
+	}
+
+	@include respond(md, down) {
+		&__items { --faq-column-gap: var(--space-4); }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		&__icon::after { transition: none; }
+	}
+}
