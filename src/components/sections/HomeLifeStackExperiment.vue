@@ -231,12 +231,12 @@ let introSplit: SplitText | undefined
 let isMounted = false
 let animationRequestId = 0
 
-function wrapSplitLines(lines: Element[]) {
-	lines.forEach((line) => {
+function wrapSplitCharacters(chars: Element[]) {
+	chars.forEach((char) => {
 		const wrapper = document.createElement('span')
-		wrapper.classList.add('split-line-wrapper')
-		line.parentNode?.insertBefore(wrapper, line)
-		wrapper.appendChild(line)
+		wrapper.classList.add('split-display-char-wrapper')
+		char.parentNode?.insertBefore(wrapper, char)
+		wrapper.appendChild(char)
 	})
 }
 
@@ -286,21 +286,23 @@ async function initAnimations() {
 
 				introSplit = new SplitText([titleRef.value, textRef.value], {
 					aria: 'none',
-					type: 'lines',
+					type: 'lines,words,chars',
 					linesClass: 'split-line',
+					wordsClass: 'split-word',
+					charsClass: 'split-display-char',
 					tag: 'span',
 					autoSplit: true,
 					onSplit(split) {
-						wrapSplitLines(split.lines)
-						gsap.set(split.lines, {
-							yPercent: 110,
+						wrapSplitCharacters(split.chars)
+						gsap.set(split.chars, {
+							yPercent: 140,
 							opacity: 1
 						})
 						gsap.set(interestRefs.value, { autoAlpha: 0, y: 12 })
 						gsap.set(introRef.value, { visibility: 'visible' })
 
 						// SplitText restores the whole sequence after an automatic re-split.
-						return gsap.timeline({
+						const timeline = gsap.timeline({
 							scrollTrigger: {
 								trigger: root.value,
 								// Reveal the copy as the stage reaches its pinned position.
@@ -311,19 +313,27 @@ async function initAnimations() {
 								toggleActions: 'play none none reverse',
 								invalidateOnRefresh: true
 							}
-						}).to(split.lines, {
-							yPercent: 0,
-							opacity: 1,
-							duration: animationDurations.reveal,
-							stagger: animationStaggers.lines,
-							ease: animationEases.strongOut
-						}).to(interestRefs.value, {
+						})
+						const subtitleStart = split.chars.filter(char => titleRef.value?.contains(char)).length * 0.03
+						split.lines.forEach(line => {
+							const chars = split.chars.filter(char => line.contains(char))
+							const isSubtitle = textRef.value?.contains(line)
+							timeline.to(chars, {
+								yPercent: 0,
+								opacity: 1,
+								duration: isSubtitle ? animationDurations.base : animationDurations.reveal,
+								stagger: isSubtitle ? animationStaggers.charsLoose : 0.03,
+								ease: animationEases.backOut
+							}, isSubtitle ? subtitleStart : 0)
+						})
+						timeline.to(interestRefs.value, {
 							autoAlpha: 1,
 							y: 0,
 							duration: animationDurations.fast,
 							stagger: animationStaggers.lines,
 							ease: animationEases.backOut
 						}, split.lines.length * animationStaggers.lines)
+						return timeline
 					}
 				})
 			}

@@ -1108,7 +1108,7 @@ test('open A, switch to B, then close: settle B under the fullscreen overlay bef
 	assert.equal(await closing, true)
 })
 
-test('Life interests continue the intro line stagger and reverse together', async () => {
+test('Life subtitle lines start together with staggered characters and reverse with the interests', async () => {
 	const source = await readFile('src/components/sections/HomeLifeStackExperiment.vue', 'utf8')
 	const script = source.match(/<script setup[^>]*>([\s\S]*?)<\/script>/)[1]
 	const parsed = ts.createSourceFile('life.ts', script, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
@@ -1120,21 +1120,33 @@ test('Life interests continue the intro line stagger and reverse together', asyn
 		ts.forEachChild(node, visit)
 	}
 	visit(parsed)
-	const lines = [{ yPercent: 0, opacity: 1 }, { yPercent: 0, opacity: 1 }]
+	const chars = Array.from({ length: 6 }, () => ({ yPercent: 0, opacity: 1 }))
+	const lines = [0, 2, 4].map(start => ({ contains: char => chars.slice(start, start + 2).includes(char) }))
 	const pills = Array.from({ length: 5 }, () => ({ autoAlpha: 1, y: 0 }))
 	const dependencies = {
 		gsap: { set: gsap.set, timeline: () => gsap.timeline({ paused: true }) },
-		wrapSplitLines() {}, introRef: { value: { visibility: 'hidden' } },
+		titleRef: { value: { contains: char => chars.slice(0, 2).includes(char) } },
+		textRef: { value: { contains: line => lines.slice(1).includes(line) } },
+		wrapSplitCharacters() {}, introRef: { value: { visibility: 'hidden' } },
 		interestRefs: { value: pills }, root: { value: {} },
-		animationDurations: { reveal: 0.8, fast: 0.3 },
-		animationStaggers: { lines: 0.1 }, animationEases: { strongOut: 'power3.out', backOut: 'back.out(1.7)' }
+		animationDurations: { reveal: 0.8, base: 0.7, fast: 0.3 },
+		animationStaggers: { lines: 0.1, chars: 0.015, charsLoose: 0.02 }, animationEases: { backOut: 'back.out(1.7)' }
 	}
 	const timeline = new Function('split', ...Object.keys(dependencies), ts.transpileModule(body, {
 		compilerOptions: { target: ts.ScriptTarget.ESNext }
-	}).outputText)({ lines }, ...Object.values(dependencies))
+	}).outputText)({ lines, chars }, ...Object.values(dependencies))
 	try {
+		assert.equal(timeline.getChildren()[0].vars.ease, 'back.out(1.7)')
+		assert.equal(timeline.getChildren()[0].vars.stagger, 0.03)
+		const subtitleTweens = timeline.getChildren().filter(tween => tween.vars.stagger === 0.02)
+		assert.equal(subtitleTweens.length, 2)
+		assert(subtitleTweens.every(tween => tween.vars.duration === 0.7))
+		assert.equal(subtitleTweens[0].startTime(), subtitleTweens[1].startTime())
 		timeline.time(0.2)
-		assert(lines.some(line => line.yPercent > 0))
+		assert(chars.some(char => char.yPercent > 0))
+		assert.equal(chars[2].yPercent, chars[4].yPercent)
+		assert.equal(chars[3].yPercent, chars[5].yPercent)
+		assert(chars[2].yPercent < chars[3].yPercent)
 		assert(pills.every(pill => pill.autoAlpha === 0))
 		timeline.time(0.35)
 		assert(pills[0].autoAlpha > pills[1].autoAlpha)
@@ -1146,28 +1158,33 @@ test('Life interests continue the intro line stagger and reverse together', asyn
 	} finally { timeline.kill(); gsap.ticker.sleep() }
 })
 
-const heroResponsiveSplitCode = await componentCode('src/components/sections/SectionHomeHero.vue', ['createResponsiveLineSplit'])
+const heroResponsiveSplitCode = await componentCode('src/components/sections/SectionHomeHero.vue', ['createResponsiveLineSplit', 'revealIntroLines'])
 
 test('mobile hero introduction waits for viewport entry and returns its tween to SplitText for cleanup', () => {
-	const element = {}, chars = [{}]
+	const element = {}, chars = [{}, {}, {}, {}]
+	const lines = [0, 2].map(start => ({ contains: char => chars.slice(start, start + 2).includes(char) }))
 	const reveals = []
-	const tween = {}
+	let timelineOptions
+	const tween = { fromTo(target, from, to, position) { reveals.push({ target, from, to, position }); return this } }
 	let splitOptions
 	const createSplit = new Function('SplitText', 'gsap', 'wrapSplitElements', 'scheduleSplitRefresh',
 		'animationDurations', 'animationStaggers', 'animationEases', `${heroResponsiveSplitCode}; return createResponsiveLineSplit`)(
 		class { constructor(_element, options) { splitOptions = options } },
-		{ set() {}, fromTo(target, from, to) { reveals.push({ target, from, to }); return tween } },
+		{ set() {}, timeline(options) { timelineOptions = options; return tween } },
 		() => {}, () => {}, { reveal: 0.8 }, { chars: 0.015 }, { backOut: 'back.out' }
 	)
 	createSplit(element)
-	assert.equal(splitOptions.onSplit({ chars }), undefined)
+	assert.equal(splitOptions.onSplit({ chars, lines }), undefined)
 	assert.equal(reveals.length, 0)
 	createSplit(element, true)
-	assert.equal(splitOptions.onSplit({ chars }), tween)
-	assert.equal(reveals[0].target, chars)
+	assert.equal(splitOptions.onSplit({ chars, lines }), tween)
+	assert.deepEqual(reveals[0].target, chars.slice(0, 2))
+	assert.deepEqual(reveals[1].target, chars.slice(2))
+	assert.equal(reveals[0].position, 0)
+	assert.equal(reveals[1].position, 0)
 	assert.equal(reveals[0].from.yPercent, 115)
 	assert.equal(reveals[0].to.yPercent, 0)
-	assert.deepEqual(reveals[0].to.scrollTrigger, { trigger: element, start: 'top 90%', once: true })
+	assert.deepEqual(timelineOptions.scrollTrigger, { trigger: element, start: 'top 90%', once: true })
 })
 
 const playTimelineCode = await componentCode('src/components/work/ProjectLayerPrototype.vue', ['playTimeline'])
@@ -1219,4 +1236,63 @@ test('FAQ reduced motion completes immediately and refreshes measurements after 
 	await Promise.resolve()
 	assert.equal(refreshed, 1)
 	assert.equal(cancelled, 1)
+})
+
+const faqIntroCode = await componentCode('src/components/sections/SectionHomeFaq.vue', ['initIntroReveal', 'cleanupIntroReveal'])
+
+test('FAQ introduction uses the shared reveal and does not replay when SplitText resizes after entry', () => {
+	let options
+	const reveals = []
+	const tween = {}
+	const init = new Function('intro', 'prefersReducedMotion', 'context', 'SplitText', 'document', 'nextTick', 'gsap',
+		'animationDurations', 'animationStaggers', 'animationEases', `
+		let introSplit, introContext, introRevealed = false;
+		${faqIntroCode}
+		return initIntroReveal;
+	`)(
+		{ value: {} }, () => false, { add: callback => callback() },
+		class { constructor(_element, vars) { options = vars } },
+		{ createElement: () => ({ classList: { add() {} }, appendChild() {} }) }, () => {},
+		{ context: () => ({ add: callback => callback(), revert() {} }),
+			fromTo: (_chars, from, to) => { reveals.push({ from, to }); return tween } },
+		{ reveal: 0.8 }, { chars: 0.015 }, { backOut: 'back.out(1.7)' }
+	)
+	init()
+	assert.equal(options.aria, 'none')
+	const split = { chars: [{ parentNode: { insertBefore() {} } }] }
+	assert.equal(options.onSplit(split), tween)
+	assert.equal(reveals[0].from.yPercent, 115)
+	assert.equal(reveals[0].to.ease, 'back.out(1.7)')
+	reveals[0].to.onStart()
+	assert.equal(options.onSplit(split), undefined)
+	assert.equal(reveals.length, 1)
+})
+
+test('FAQ intro restores readable text when onSplit throws before constructor assignment', () => {
+	const element = { textContent: 'Original FAQ introduction' }
+	let contextReverted = 0, splitReverted = 0
+	const init = new Function('intro', 'prefersReducedMotion', 'context', 'SplitText', 'document', 'nextTick', 'gsap',
+		'animationDurations', 'animationStaggers', 'animationEases', 'console', `
+		let introSplit, introContext, introRevealed = false;
+		${faqIntroCode}
+		return initIntroReveal;
+	`)(
+		{ value: element }, () => false, {},
+		class {
+			constructor(_element, options) {
+				element.textContent = 'Partially split text'
+				this.chars = [{ parentNode: { insertBefore() {} } }]
+				options.onSplit(this)
+			}
+			revert() { splitReverted++ }
+		},
+		{ createElement: () => ({ classList: { add() {} }, appendChild() {} }) }, () => {},
+		{ context: () => ({ add: callback => callback(), revert: () => contextReverted++ }),
+			fromTo: () => { throw new Error('Animation initialization failed') } },
+		{ reveal: 0.8 }, { chars: 0.015 }, { backOut: 'back.out(1.7)' }, { warn() {} }
+	)
+	init()
+	assert.equal(element.textContent, 'Original FAQ introduction')
+	assert.equal(contextReverted, 1)
+	assert.equal(splitReverted, 1)
 })

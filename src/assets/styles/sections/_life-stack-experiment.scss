@@ -15,7 +15,16 @@
 	}
 
 	&__intro {
+		--split-display-char-block-bleed: 0.25em;
+
 		max-width: 34rem;
+
+		.split-word {
+			display: inline-block;
+			white-space: nowrap;
+		}
+
+		.split-display-char-wrapper { vertical-align: top; }
 	}
 
 	&__title {

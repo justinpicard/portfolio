@@ -1,9 +1,8 @@
 @use "../abstracts" as *;
 
 .site-footer {
+	--section-space-start: 0;
 	--section-space-end: var(--space-16);
-
-	min-height: var(--viewport-height-dynamic);
 
 	&__container {
 		display: block;

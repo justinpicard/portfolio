@@ -120,6 +120,20 @@ function scheduleSplitRefresh() {
 	})
 }
 
+function revealIntroLines(timeline: gsap.core.Timeline, split: SplitText, position: number | string) {
+	split.lines.forEach(line => {
+		const chars = split.chars.filter(char => line.contains(char))
+		timeline.fromTo(chars, { yPercent: 115 }, {
+			yPercent: 0,
+			opacity: 1,
+			duration: animationDurations.reveal,
+			stagger: animationStaggers.chars,
+			ease: animationEases.backOut
+		}, position)
+	})
+	return timeline
+}
+
 function createResponsiveLineSplit(element: HTMLElement, revealOnScroll = false) {
 	return new SplitText(element, {
 		type: 'lines,words,chars',
@@ -139,17 +153,13 @@ function createResponsiveLineSplit(element: HTMLElement, revealOnScroll = false)
 			})
 			scheduleSplitRefresh()
 			if (revealOnScroll) {
-				return gsap.fromTo(split.chars, { yPercent: 115 }, {
-					yPercent: 0,
-					duration: animationDurations.reveal,
-					stagger: animationStaggers.chars,
-					ease: animationEases.backOut,
+				return revealIntroLines(gsap.timeline({
 					scrollTrigger: {
 						trigger: element,
 						start: 'top 90%',
 						once: true
 					}
-				})
+				}), split, 0)
 			}
 		}
 	})
@@ -517,13 +527,8 @@ onMounted(async () => {
 			.call(restoreScroll, [], '>')
 
 		if (!window.matchMedia('(max-width: 47.999rem)').matches) {
-			heroTimeline.to(introSplit.chars, {
-				yPercent: 0,
-				opacity: 1,
-				duration: animationDurations.reveal,
-				stagger: animationStaggers.chars,
-				ease: animationEases.backOut
-			}, 'copyIn')
+			const introTimeline = revealIntroLines(gsap.timeline(), introSplit, 0)
+			heroTimeline.add(introTimeline, 'copyIn')
 		}
 
 		if (!useCursorScrollIndicator) {

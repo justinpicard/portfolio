@@ -23,23 +23,75 @@
 		margin: 0 auto var(--space-10);
 	}
 
+	&__heading-perspective {
+		display: block;
+		perspective: 990px;
+		perspective-origin: 50% 50%;
+		transform-style: preserve-3d;
+	}
+
+	&__heading-word {
+		display: inline-block;
+		position: relative;
+		max-inline-size: 100%;
+		white-space: normal;
+		transform-origin: center center;
+		transform-style: preserve-3d;
+		backface-visibility: hidden;
+	}
+
+	&__heading-char {
+		display: inline-block;
+		position: relative;
+		transform-origin: center bottom;
+		backface-visibility: hidden;
+	}
+
 	&__intro {
 		@include type-role(lead);
 
 		margin: 0 auto;
+
+		.split-word {
+			display: inline-block;
+			white-space: nowrap;
+		}
+
+		.split-display-char-wrapper { vertical-align: top; }
 	}
 
+	&__intro-visual { display: block; }
+
 	&__intro,
-	&__items {
+	&__items,
+	&__fallback {
 		width: 100%;
 		margin-inline: auto;
 
 		@include respond(lg) { width: 66.666667%; }
 	}
 
-	&__items {
+	&__items,
+	&__fallback {
 		--faq-number-width: var(--space-8);
 		--faq-column-gap: var(--space-6);
+
+		container-type: inline-size;
+	}
+
+	&__items { display: none; }
+
+	// Select before first paint; both SSR and hydration use the same markup.
+	@media (scripting: enabled) {
+		&__items { display: block; }
+		&__fallback { display: none; }
+	}
+
+	&__fallback-question {
+		@include type-role(lead);
+
+		margin: 0;
+		padding-block: var(--space-6);
 	}
 
 	&__item {
@@ -64,13 +116,19 @@
 		color: inherit;
 		font-family: inherit;
 		text-align: left;
+		overflow-wrap: anywhere;
 		cursor: pointer;
 
 		&:hover { color: var(--color-secondary); }
 		&:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
 	}
 
-	&__number { font-variant-numeric: tabular-nums; }
+	&__number {
+		align-self: start;
+		color: var(--color-secondary);
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
 
 	&__icon {
 		position: relative;
@@ -93,6 +151,11 @@
 		margin: 0;
 		padding: 0 calc(1rem + var(--faq-column-gap)) var(--space-6) calc(var(--faq-number-width) + var(--faq-column-gap));
 		line-height: var(--line-height-normal);
+		overflow-wrap: anywhere;
+	}
+
+	@container (max-width: 16rem) {
+		&__answer { padding-inline: 0; }
 	}
 
 	&__paragraph {
@@ -102,7 +165,10 @@
 	}
 
 	@include respond(md, down) {
-		&__items { --faq-column-gap: var(--space-4); }
+		&__answer { padding-inline: 0; }
+
+		&__items,
+		&__fallback { --faq-column-gap: var(--space-4); }
 	}
 
 	@media (prefers-reduced-motion: reduce) {
